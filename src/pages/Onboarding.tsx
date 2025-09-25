@@ -25,8 +25,99 @@ import {
   Users,
   BarChart,
   Globe,
-  Smartphone
+  Smartphone,
+  Apple,
+  Stethoscope,
+  TrendingUp,
+  Briefcase,
+  Home,
+  Gavel,
+  Car,
+  Utensils,
+  Scissors,
+  Calculator,
+  Wrench,
+  Camera
 } from "lucide-react";
+
+// Configuração dos tipos de negócios
+const businessTypes = {
+  saude: {
+    name: "Saúde & Bem-Estar",
+    icon: Stethoscope,
+    color: "bg-blue-500",
+    subcategories: [
+      { id: "nutricionista", name: "Nutricionista", icon: Apple, questions: ["Você atende qual faixa etária?", "Qual sua especialização (emagrecimento, ganho de massa, etc.)?", "Quantos pacientes você atende por mês?"] },
+      { id: "psicologo", name: "Psicólogo", icon: Brain, questions: ["Qual sua abordagem terapêutica?", "Atende crianças, adolescentes ou adultos?", "Oferece terapia online?"] },
+      { id: "fisioterapeuta", name: "Fisioterapeuta", icon: TrendingUp, questions: ["Qual sua especialidade (ortopedia, neurologia, etc.)?", "Atende em domicílio?", "Trabalha com RPG, pilates?"] },
+      { id: "medico", name: "Médico", icon: Stethoscope, questions: ["Qual sua especialidade médica?", "Trabalha em clínica própria ou hospital?", "Atende convênios?"] },
+      { id: "dentista", name: "Dentista", icon: Sparkles, questions: ["Oferece quais tratamentos?", "Trabalha com estética dental?", "Atende emergências?"] },
+    ]
+  },
+  servicos: {
+    name: "Serviços Profissionais",
+    icon: Briefcase,
+    color: "bg-purple-500",
+    subcategories: [
+      { id: "advocacia", name: "Advocacia", icon: Gavel, questions: ["Qual sua área de atuação (civil, criminal, trabalhista)?", "Atende pessoa física ou jurídica?", "Oferece consulta online?"] },
+      { id: "contabilidade", name: "Contabilidade", icon: Calculator, questions: ["Atende qual porte de empresas?", "Oferece serviços de abertura de empresa?", "Trabalha com planejamento tributário?"] },
+      { id: "arquitetura", name: "Arquitetura", icon: Building2, questions: ["Projeta residencial ou comercial?", "Oferece acompanhamento de obra?", "Trabalha com interiores?"] },
+    ]
+  },
+  comercio: {
+    name: "Comércio & Varejo",
+    icon: Building2,
+    color: "bg-green-500",
+    subcategories: [
+      { id: "autopecas", name: "Loja de Autopeças", icon: Car, questions: ["Trabalha com quais marcas de veículos?", "Oferece instalação das peças?", "Atende oficinas ou público geral?"] },
+      { id: "loja-roupas", name: "Loja de Roupas", icon: Sparkles, questions: ["Qual seu público-alvo?", "Trabalha com qual estilo (casual, formal, infantil)?", "Oferece delivery?"] },
+    ]
+  },
+  alimentacao: {
+    name: "Alimentação",
+    icon: Utensils,
+    color: "bg-orange-500",
+    subcategories: [
+      { id: "restaurante", name: "Restaurante", icon: Utensils, questions: ["Qual tipo de culinária?", "Oferece delivery?", "Atende eventos?"] },
+      { id: "lanchonete", name: "Lanchonete", icon: Utensils, questions: ["Qual horário de funcionamento?", "Oferece opções veganas/vegetarianas?", "Trabalha com delivery?"] },
+    ]
+  },
+  beleza: {
+    name: "Beleza & Estética",
+    icon: Scissors,
+    color: "bg-pink-500",
+    subcategories: [
+      { id: "salao", name: "Salão de Beleza", icon: Scissors, questions: ["Oferece quais serviços?", "Atende homens e mulheres?", "Trabalha com produtos específicos?"] },
+      { id: "estetica", name: "Clínica de Estética", icon: Sparkles, questions: ["Oferece quais procedimentos?", "Trabalha com qual tecnologia?", "Atende qual faixa etária?"] },
+    ]
+  },
+  fitness: {
+    name: "Fitness & Esportes",
+    icon: TrendingUp,
+    color: "bg-red-500",
+    subcategories: [
+      { id: "academia", name: "Academia", icon: TrendingUp, questions: ["Qual modalidades oferece?", "Tem personal trainer?", "Oferece aulas em grupo?"] },
+      { id: "personal", name: "Personal Trainer", icon: Users, questions: ["Treina em domicílio ou academia?", "Qual sua especialidade?", "Atende grupos ou individual?"] },
+    ]
+  },
+  imoveis: {
+    name: "Imóveis",
+    icon: Home,
+    color: "bg-teal-500",
+    subcategories: [
+      { id: "imobiliaria", name: "Imobiliária", icon: Home, questions: ["Trabalha com venda ou locação?", "Qual região de atuação?", "Atende residencial ou comercial?"] },
+    ]
+  },
+  tecnicos: {
+    name: "Serviços Técnicos",
+    icon: Wrench,
+    color: "bg-gray-500",
+    subcategories: [
+      { id: "eletricista", name: "Eletricista", icon: Wrench, questions: ["Atende residencial ou industrial?", "Oferece serviço 24h?", "Trabalha com qual voltagem?"] },
+      { id: "fotografo", name: "Fotógrafo", icon: Camera, questions: ["Qual tipo de fotografia (casamento, produto, social)?", "Oferece edição das fotos?", "Trabalha em estúdio ou external?"] },
+    ]
+  }
+};
 
 const Onboarding = () => {
   const navigate = useNavigate();
@@ -34,16 +125,17 @@ const Onboarding = () => {
   const totalSteps = 5;
   
   const [formData, setFormData] = useState({
-    // Step 1 - Informações Pessoais
+    // Step 1 - Informações Pessoais & Tipo de Negócio
     name: "",
     email: "",
     phone: "",
-    speciality: "",
+    businessCategory: "",
+    businessType: "",
     
-    // Step 2 - Tipo de Plataforma
-    platformType: "",
+    // Step 2 - Detalhes do Negócio (dinâmico baseado no tipo)
     businessName: "",
     description: "",
+    specificAnswers: {},
     
     // Step 3 - Personalização
     primaryColor: "#2563eb",
@@ -60,51 +152,10 @@ const Onboarding = () => {
     whatsappNumber: ""
   });
 
-  const specialities = [
-    "Nutricionista",
-    "Psicólogo",
-    "Fisioterapeuta", 
-    "Médico Clínico",
-    "Dentista",
-    "Enfermeiro",
-    "Outro"
-  ];
-
-  const platformTypes = [
-    {
-      id: "nutrition",
-      name: "Plataforma Nutricional",
-      description: "Para nutricionistas e profissionais da alimentação",
-      icon: "🥗",
-      features: ["Planos alimentares", "Cálculos nutricionais", "Acompanhamento de peso"]
-    },
-    {
-      id: "psychology", 
-      name: "Plataforma Psicológica",
-      description: "Para psicólogos e terapeutas",
-      icon: "🧠",
-      features: ["Sessões online", "Análise de humor", "Acompanhamento emocional"]
-    },
-    {
-      id: "medical",
-      name: "Plataforma Médica",
-      description: "Para clínicas e consultórios médicos",
-      icon: "⚕️",
-      features: ["Prontuários eletrônicos", "Prescrições", "Exames"]
-    },
-    {
-      id: "fitness",
-      name: "Plataforma Fitness", 
-      description: "Para personal trainers e academias",
-      icon: "💪",
-      features: ["Treinos personalizados", "Evolução física", "Medidas corporais"]
-    }
-  ];
-
   const availableFeatures = [
     { id: "chat", name: "Chat IA & WhatsApp", icon: MessageSquare },
     { id: "scheduling", name: "Agendamento Inteligente", icon: Calendar },
-    { id: "patients", name: "Gestão de Pacientes", icon: Users },
+    { id: "customers", name: "Gestão de Clientes", icon: Users },
     { id: "analytics", name: "Relatórios & Analytics", icon: BarChart },
     { id: "website", name: "Site Responsivo", icon: Globe },
     { id: "app", name: "App Mobile (PWA)", icon: Smartphone }
@@ -136,11 +187,20 @@ const Onboarding = () => {
     console.log("Generating platform with data:", formData);
     
     // Redirecionar baseado no tipo de plataforma
-    if (formData.platformType === "nutrition") {
+    if (formData.businessType === "nutricionista") {
       navigate('/nutricionista');
     } else {
       navigate('/clinic');
     }
+  };
+
+  const getSelectedBusinessData = () => {
+    if (!formData.businessCategory || !formData.businessType) return null;
+    
+    const category = businessTypes[formData.businessCategory];
+    if (!category) return null;
+    
+    return category.subcategories.find(sub => sub.id === formData.businessType);
   };
 
   const renderStep = () => {
@@ -151,29 +211,32 @@ const Onboarding = () => {
             <div className="text-center mb-8">
               <User className="h-12 w-12 text-primary mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-2">Vamos nos conhecer!</h2>
-              <p className="text-muted-foreground">Conte-nos um pouco sobre você e sua profissão</p>
+              <p className="text-muted-foreground">Conte-nos sobre você e que tipo de negócio você tem</p>
             </div>
             
-            <div className="space-y-4 max-w-md mx-auto">
-              <div>
-                <Label htmlFor="name">Nome Completo</Label>
-                <Input 
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  placeholder="Dr. João Silva"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="email">E-mail Profissional</Label>
-                <Input 
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  placeholder="joao@clinica.com"
-                />
+            <div className="space-y-6 max-w-2xl mx-auto">
+              {/* Informações Pessoais */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="name">Nome Completo</Label>
+                  <Input 
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    placeholder="João Silva"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="email">E-mail</Label>
+                  <Input 
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    placeholder="joao@exemplo.com"
+                  />
+                </div>
               </div>
               
               <div>
@@ -186,84 +249,124 @@ const Onboarding = () => {
                 />
               </div>
               
-              <div>
-                <Label htmlFor="speciality">Especialidade</Label>
-                <Select value={formData.speciality} onValueChange={(value) => setFormData({...formData, speciality: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione sua especialidade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {specialities.map((spec) => (
-                      <SelectItem key={spec} value={spec.toLowerCase()}>{spec}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {/* Categoria de Negócio */}
+              <div className="pt-4">
+                <Label className="text-base font-semibold mb-4 block">Qual o tipo do seu negócio?</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {Object.entries(businessTypes).map(([key, category]) => {
+                    const IconComponent = category.icon;
+                    return (
+                      <Card 
+                        key={key}
+                        className={`cursor-pointer transition-all hover:shadow-md ${
+                          formData.businessCategory === key ? 'border-2 border-primary bg-primary/5' : ''
+                        }`}
+                        onClick={() => setFormData({...formData, businessCategory: key, businessType: ""})}
+                      >
+                        <CardContent className="p-4 flex items-center gap-3">
+                          <div className={`w-10 h-10 ${category.color} rounded-lg flex items-center justify-center`}>
+                            <IconComponent className="h-5 w-5 text-white" />
+                          </div>
+                          <span className="font-medium">{category.name}</span>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
               </div>
+              
+              {/* Subcategoria específica */}
+              {formData.businessCategory && (
+                <div className="pt-4">
+                  <Label className="text-base font-semibold mb-4 block">
+                    Especificamente, qual o seu negócio em {businessTypes[formData.businessCategory]?.name}?
+                  </Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {businessTypes[formData.businessCategory]?.subcategories.map((subcat) => {
+                      const IconComponent = subcat.icon;
+                      return (
+                        <Card 
+                          key={subcat.id}
+                          className={`cursor-pointer transition-all hover:shadow-md ${
+                            formData.businessType === subcat.id ? 'border-2 border-primary bg-primary/5' : ''
+                          }`}
+                          onClick={() => setFormData({...formData, businessType: subcat.id})}
+                        >
+                          <CardContent className="p-4 flex items-center gap-3">
+                            <IconComponent className="h-5 w-5 text-primary" />
+                            <span className="font-medium">{subcat.name}</span>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );
 
       case 2:
+        const selectedBusiness = getSelectedBusinessData();
+        
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
               <Building2 className="h-12 w-12 text-primary mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-2">Que tipo de plataforma você quer?</h2>
-              <p className="text-muted-foreground">Escolha o modelo que melhor se adapta ao seu negócio</p>
+              <h2 className="text-2xl font-bold mb-2">Detalhes do seu {selectedBusiness?.name}</h2>
+              <p className="text-muted-foreground">Vamos personalizar sua plataforma para suas necessidades específicas</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
-              {platformTypes.map((type) => (
-                <Card 
-                  key={type.id}
-                  className={`cursor-pointer transition-all hover:shadow-lg ${
-                    formData.platformType === type.id ? 'border-2 border-primary bg-primary/5' : ''
-                  }`}
-                  onClick={() => setFormData({...formData, platformType: type.id})}
-                >
-                  <CardHeader className="text-center">
-                    <div className="text-4xl mb-2">{type.icon}</div>
-                    <CardTitle className="text-lg">{type.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{type.description}</p>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="text-sm space-y-1">
-                      {type.features.map((feature, index) => (
-                        <li key={index} className="flex items-center gap-2">
-                          <CheckCircle className="h-3 w-3 text-green-500" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            
-            {formData.platformType && (
-              <div className="space-y-4 max-w-md mx-auto mt-8">
-                <div>
-                  <Label htmlFor="businessName">Nome do Seu Negócio</Label>
-                  <Input 
-                    id="businessName"
-                    value={formData.businessName}
-                    onChange={(e) => setFormData({...formData, businessName: e.target.value})}
-                    placeholder="Clínica Bem-Estar"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="description">Descrição (Opcional)</Label>
-                  <Textarea 
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    placeholder="Conte um pouco sobre seu negócio..."
-                    rows={3}
-                  />
-                </div>
+            <div className="space-y-6 max-w-2xl mx-auto">
+              <div>
+                <Label htmlFor="businessName">Nome do Seu Negócio</Label>
+                <Input 
+                  id="businessName"
+                  value={formData.businessName}
+                  onChange={(e) => setFormData({...formData, businessName: e.target.value})}
+                  placeholder={`Ex: ${selectedBusiness?.name === "Nutricionista" ? "Clínica Nutrir Bem" : "Meu Negócio"}`}
+                />
               </div>
-            )}
+              
+              <div>
+                <Label htmlFor="description">Descrição do Negócio</Label>
+                <Textarea 
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  placeholder="Conte um pouco sobre seu negócio, diferenciais, público-alvo..."
+                  rows={3}
+                />
+              </div>
+              
+              {/* Perguntas específicas do tipo de negócio */}
+              {selectedBusiness?.questions && (
+                <div className="pt-4">
+                  <Label className="text-base font-semibold mb-4 block">
+                    Algumas perguntas específicas para {selectedBusiness.name}:
+                  </Label>
+                  <div className="space-y-4">
+                    {selectedBusiness.questions.map((question, index) => (
+                      <div key={index}>
+                        <Label className="text-sm font-medium">{question}</Label>
+                        <Textarea 
+                          value={formData.specificAnswers[index] || ""}
+                          onChange={(e) => setFormData({
+                            ...formData, 
+                            specificAnswers: {
+                              ...formData.specificAnswers,
+                              [index]: e.target.value
+                            }
+                          })}
+                          placeholder="Sua resposta..."
+                          rows={2}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         );
 
@@ -329,17 +432,17 @@ const Onboarding = () => {
             <div className="text-center mb-8">
               <Bot className="h-12 w-12 text-primary mx-auto mb-4" />
               <h2 className="text-2xl font-bold mb-2">Configure seu AI Agent</h2>
-              <p className="text-muted-foreground">Defina a personalidade e especialidades do seu assistente de IA</p>
+              <p className="text-muted-foreground">Defina como seu assistente virtual especializado vai atender seus clientes</p>
             </div>
             
             <div className="space-y-6 max-w-2xl mx-auto">
               <div>
-                <Label htmlFor="aiPersonality">Personalidade do Agent</Label>
+                <Label htmlFor="aiPersonality">Personalidade e Especialização do Agent</Label>
                 <Textarea 
                   id="aiPersonality"
                   value={formData.aiPersonality}
                   onChange={(e) => setFormData({...formData, aiPersonality: e.target.value})}
-                  placeholder="Ex: Profissional, empático, sempre disposto a ajudar. Especialista em nutrição com foco em resultados saudáveis..."
+                  placeholder={`Ex: Sou um assistente especializado em ${getSelectedBusinessData()?.name || "seu negócio"}. Sou profissional, empático e sempre busco ajudar da melhor forma. Tenho conhecimento específico sobre ${formData.businessType === "nutricionista" ? "nutrição, dietas e hábitos saudáveis" : "a área do negócio"}...`}
                   rows={4}
                 />
               </div>
@@ -447,7 +550,7 @@ const Onboarding = () => {
                   </h4>
                   <div className="space-y-2 text-sm">
                     <div><strong>Nome:</strong> {formData.businessName}</div>
-                    <div><strong>Tipo:</strong> {platformTypes.find(p => p.id === formData.platformType)?.name}</div>
+                    <div><strong>Tipo:</strong> {getSelectedBusinessData()?.name || "Não definido"}</div>
                     <div><strong>Funcionalidades:</strong> {formData.features.length} selecionadas</div>
                     <div><strong>IA:</strong> Nível {formData.automationLevel === 'low' ? 'Básico' : formData.automationLevel === 'medium' ? 'Avançado' : 'Completo'}</div>
                   </div>
@@ -511,8 +614,8 @@ const Onboarding = () => {
               className="action-primary"
               onClick={handleNext}
               disabled={
-                (currentStep === 1 && (!formData.name || !formData.email || !formData.speciality)) ||
-                (currentStep === 2 && (!formData.platformType || !formData.businessName)) ||
+                (currentStep === 1 && (!formData.name || !formData.email || !formData.businessType)) ||
+                (currentStep === 2 && (!formData.businessName)) ||
                 (currentStep === 3 && formData.features.length === 0)
               }
             >
