@@ -289,6 +289,8 @@ const CreatePlatform = () => {
     // Redirecionar baseado no tipo de negócio
     if (formData.businessType === 'restaurante') {
       navigate('/restaurant-platform');
+    } else if (formData.businessType === 'autopecas') {
+      navigate('/autopeças-platform');
     } else {
       navigate('/platform/1');
     }
