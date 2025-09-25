@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ClinicDashboard from "./pages/ClinicDashboard";
 import ClinicLogin from "./pages/ClinicLogin";
+import NutricionistaDashboard from "./pages/NutricionistaDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -17,7 +18,8 @@ const App = () => (
       <BrowserRouter>
         <div className="min-h-screen bg-background">
           <Routes>
-            <Route path="/" element={<ClinicDashboard />} />
+            <Route path="/" element={<NutricionistaDashboard />} />
+            <Route path="/clinic" element={<ClinicDashboard />} />
             <Route path="/login" element={<ClinicLogin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
