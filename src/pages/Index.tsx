@@ -59,11 +59,11 @@ const Index = () => {
             IA Generativa para Plataformas
           </Badge>
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Crie sua Plataforma de Saúde com IA
+            Transforme seu Negócio Local com IA
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Plataforma no-code que gera sistemas completos para profissionais da saúde com IA conversacional, 
-            automação de agendamentos e gestão inteligente de pacientes.
+            Plataforma no-code que gera sistemas completos para pequenas empresas com IA conversacional, 
+            automação de atendimento e gestão inteligente de clientes. Para qualquer nicho de negócio.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -112,7 +112,7 @@ const Index = () => {
             </Badge>
             <h2 className="text-4xl font-bold mb-4">Plataformas Criadas com PlataformAI</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Veja exemplos de plataformas completas geradas automaticamente para diferentes especialidades
+              Veja exemplos de plataformas completas geradas automaticamente para diferentes nichos de negócio
             </p>
           </div>
 
@@ -255,6 +255,122 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Nichos Atendidos */}
+      <section className="py-16 px-4 bg-gradient-to-r from-blue-50 to-purple-50">
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <Badge className="mb-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-none">
+              <Target className="h-3 w-3 mr-1" />
+              Diversos Nichos Atendidos
+            </Badge>
+            <h2 className="text-3xl font-bold mb-4">Para Qualquer Tipo de Negócio Local</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Nossa IA se adapta a qualquer setor, criando plataformas personalizadas para sua área de atuação
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 max-w-5xl mx-auto">
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Apple className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-sm font-medium">Nutrição & Saúde</span>
+            </div>
+
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Stethoscope className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-sm font-medium">Clínicas & Consultórios</span>
+            </div>
+
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Building2 className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-sm font-medium">Imobiliárias</span>
+            </div>
+
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-gradient-to-r from-red-400 to-red-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Sparkles className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-sm font-medium">Salões de Beleza</span>
+            </div>
+
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <TrendingUp className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-sm font-medium">Academias</span>
+            </div>
+
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-gradient-to-r from-teal-400 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Globe className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-sm font-medium">Delivery & Restaurantes</span>
+            </div>
+
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <CheckCircle className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-sm font-medium">Advocacia</span>
+            </div>
+
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Zap className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-sm font-medium">Autopeças</span>
+            </div>
+
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-gradient-to-r from-pink-400 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Star className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-sm font-medium">Estética</span>
+            </div>
+
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Building2 className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-sm font-medium">Arquitetura</span>
+            </div>
+
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                <UserCheck className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-sm font-medium">Contabilidade</span>
+            </div>
+
+            <div className="text-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-gradient-to-r from-cyan-400 to-cyan-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Globe className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-sm font-medium">E muitos outros...</span>
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <p className="text-muted-foreground mb-6">
+              Não encontrou seu nicho? Não tem problema! Nossa IA se adapta a qualquer tipo de negócio local.
+            </p>
+            <Button 
+              size="lg" 
+              className="action-primary"
+              onClick={() => navigate('/onboarding')}
+            >
+              Criar Plataforma para Meu Negócio
+              <ArrowRight className="h-5 w-5 ml-2" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section id="recursos" className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto">
@@ -275,8 +391,8 @@ const Index = () => {
               </div>
               <h3 className="text-xl font-semibold mb-3">AI Agent Especializado</h3>
               <p className="text-muted-foreground mb-4">
-                Agente de IA treinado especificamente para sua área, capaz de atender pacientes, 
-                agendar consultas e converter leads automaticamente.
+                Agente de IA treinado especificamente para sua área de negócio, capaz de atender clientes, 
+                agendar serviços e converter leads automaticamente.
               </p>
               <ul className="text-sm space-y-1">
                 <li className="flex items-center gap-2">
@@ -323,10 +439,10 @@ const Index = () => {
               <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Gestão de Pacientes</h3>
+              <h3 className="text-xl font-semibold mb-3">Gestão de Clientes</h3>
               <p className="text-muted-foreground mb-4">
                 CRM completo para gerenciar histórico, evolução e comunicação 
-                com todos os seus pacientes em um só lugar.
+                com todos os seus clientes em um só lugar.
               </p>
               <ul className="text-sm space-y-1">
                 <li className="flex items-center gap-2">
@@ -376,7 +492,7 @@ const Index = () => {
               <h3 className="text-xl font-semibold mb-3">Analytics & Relatórios</h3>
               <p className="text-muted-foreground mb-4">
                 Dashboards completos com métricas de conversão, satisfação 
-                e performance da sua prática médica.
+                e performance do seu negócio.
               </p>
               <ul className="text-sm space-y-1">
                 <li className="flex items-center gap-2">
