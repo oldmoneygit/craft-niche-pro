@@ -287,7 +287,7 @@ const ChatAI = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Tempo Médio</span>
-                <span className="font-medium">< 1 min</span>
+                <span className="font-medium">&lt; 1 min</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Satisfação</span>

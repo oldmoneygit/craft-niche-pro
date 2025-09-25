@@ -111,9 +111,9 @@ const MealPlansManager = () => {
                 className="h-20"
               />
               <div className="grid grid-cols-3 gap-2 mt-2">
-                <Input placeholder="Calorias" size="sm" />
-                <Input placeholder="Proteínas (g)" size="sm" />
-                <Input placeholder="Carbs (g)" size="sm" />
+                <Input placeholder="Calorias" />
+                <Input placeholder="Proteínas (g)" />
+                <Input placeholder="Carbs (g)" />
               </div>
             </Card>
           ))}
