@@ -85,27 +85,188 @@ const CreatePlatform = () => {
     },
   ];
 
-  const specialties = [
-    'Terapia Cognitivo-Comportamental (TCC)',
-    'Psicanálise',
-    'Terapia Familiar',
-    'Terapia de Casal',
-    'Neuropsicologia',
-    'Psicologia Infantil',
-    'Ansiedade e Depressão',
-    'Transtornos Alimentares',
-    'Trauma e PTSD',
-    'Orientação Vocacional',
-  ];
+  // Configurações específicas por tipo de negócio
+  const businessConfigs = {
+    'clinica-psicologica': {
+      professionalIdLabel: 'CRP/Registro Profissional',
+      professionalIdPlaceholder: 'Ex: CRP 06/123456',
+      specialtiesLabel: 'Suas Especialidades',
+      sessionTypesLabel: 'Tipos de Atendimento Oferecidos',
+      descriptionPlaceholder: 'Descreva brevemente sua abordagem terapêutica e diferencial...',
+      specialties: [
+        'Terapia Cognitivo-Comportamental (TCC)',
+        'Psicanálise',
+        'Terapia Familiar',
+        'Terapia de Casal',
+        'Neuropsicologia',
+        'Psicologia Infantil',
+        'Ansiedade e Depressão',
+        'Transtornos Alimentares',
+        'Trauma e PTSD',
+        'Orientação Vocacional',
+      ],
+      sessionTypes: [
+        'Consulta Inicial (60-90 min)',
+        'Terapia Individual (50 min)',
+        'Terapia de Casal (60 min)',
+        'Terapia Familiar (60-90 min)',
+        'Avaliação Psicológica (90-120 min)',
+        'Orientação Vocacional (60 min)',
+      ],
+      insurances: ['Unimed', 'Bradesco Saúde', 'SulAmérica', 'Amil', 'Golden Cross', 'Porto Seguro'],
+      workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
+    },
+    'clinica-medica': {
+      professionalIdLabel: 'CRM/Registro Profissional',
+      professionalIdPlaceholder: 'Ex: CRM 123456',
+      specialtiesLabel: 'Especialidades Médicas',
+      sessionTypesLabel: 'Tipos de Consulta Oferecidos',
+      descriptionPlaceholder: 'Descreva os serviços médicos e diferencial da clínica...',
+      specialties: [
+        'Clínica Geral',
+        'Cardiologia',
+        'Dermatologia',
+        'Ginecologia',
+        'Pediatria',
+        'Ortopedia',
+        'Oftalmologia',
+        'Neurologia',
+        'Psiquiatria',
+        'Endocrinologia',
+      ],
+      sessionTypes: [
+        'Consulta de Retorno (30 min)',
+        'Consulta Inicial (45 min)',
+        'Consulta de Urgência (20 min)',
+        'Exame Preventivo (30 min)',
+        'Procedimento Ambulatorial (60 min)',
+        'Teleconsulta (30 min)',
+      ],
+      insurances: ['Unimed', 'Bradesco Saúde', 'SulAmérica', 'Amil', 'Golden Cross', 'Porto Seguro'],
+      workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
+    },
+    'restaurante': {
+      professionalIdLabel: 'CNPJ/CPF',
+      professionalIdPlaceholder: 'Ex: 12.345.678/0001-90',
+      specialtiesLabel: 'Tipos de Culinária',
+      sessionTypesLabel: 'Modalidades de Atendimento',
+      descriptionPlaceholder: 'Descreva o conceito do seu restaurante, especialidades do chef...',
+      specialties: [
+        'Brasileira',
+        'Italiana',
+        'Japonesa',
+        'Árabe',
+        'Vegetariana/Vegana',
+        'Churrasco',
+        'Pizzaria',
+        'Hamburgeria',
+        'Comida Caseira',
+        'Fast Food',
+      ],
+      sessionTypes: [
+        'Delivery',
+        'Balcão (Retirada)',
+        'Salão (Mesa)',
+        'Drive-thru',
+        'Eventos/Catering',
+        'Encomendas',
+      ],
+      insurances: ['Cartão de Crédito', 'Cartão de Débito', 'PIX', 'Dinheiro', 'Vale Refeição', 'Vale Alimentação'],
+      workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
+    },
+    'autopecas': {
+      professionalIdLabel: 'CNPJ/CPF',
+      professionalIdPlaceholder: 'Ex: 12.345.678/0001-90',
+      specialtiesLabel: 'Marcas que Trabalha',
+      sessionTypesLabel: 'Tipos de Atendimento',
+      descriptionPlaceholder: 'Descreva o foco da loja, especialidades em determinadas marcas...',
+      specialties: [
+        'Chevrolet',
+        'Ford',
+        'Volkswagen',
+        'Fiat',
+        'Honda',
+        'Toyota',
+        'Hyundai',
+        'Renault',
+        'Nissan',
+        'Peugeot',
+      ],
+      sessionTypes: [
+        'Balcão Presencial',
+        'Consulta por WhatsApp',
+        'Orçamento por Foto',
+        'Entrega no Local',
+        'Retirada na Loja',
+        'Instalação/Montagem',
+      ],
+      insurances: ['Cartão de Crédito', 'Cartão de Débito', 'PIX', 'Dinheiro', 'Boleto', 'Parcelamento'],
+      workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
+    },
+    'salao': {
+      professionalIdLabel: 'CNPJ/CPF',
+      professionalIdPlaceholder: 'Ex: 12.345.678/0001-90',
+      specialtiesLabel: 'Serviços Oferecidos',
+      sessionTypesLabel: 'Tipos de Atendimento',
+      descriptionPlaceholder: 'Descreva o conceito do salão, especialidades e diferencial...',
+      specialties: [
+        'Corte Feminino',
+        'Corte Masculino',
+        'Coloração',
+        'Mechas/Luzes',
+        'Escova/Prancha',
+        'Penteados',
+        'Manicure/Pedicure',
+        'Depilação',
+        'Sobrancelha',
+        'Maquiagem',
+      ],
+      sessionTypes: [
+        'Agendamento Individual',
+        'Agendamento por Profissional',
+        'Day Beauty',
+        'Pacotes de Noiva',
+        'Domicílio',
+        'Eventos',
+      ],
+      insurances: ['Cartão de Crédito', 'Cartão de Débito', 'PIX', 'Dinheiro', 'Parcelamento'],
+      workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
+    },
+    'outro': {
+      professionalIdLabel: 'CNPJ/CPF/Registro',
+      professionalIdPlaceholder: 'Ex: CNPJ, CPF ou registro profissional',
+      specialtiesLabel: 'Áreas de Atuação',
+      sessionTypesLabel: 'Tipos de Atendimento',
+      descriptionPlaceholder: 'Descreva seu negócio, serviços oferecidos e diferencial...',
+      specialties: [
+        'Consultoria',
+        'Assessoria',
+        'Treinamentos',
+        'Palestras',
+        'Coaching',
+        'Mentoria',
+        'Auditoria',
+        'Planejamento',
+        'Análise',
+        'Desenvolvimento',
+      ],
+      sessionTypes: [
+        'Presencial',
+        'Online',
+        'Híbrido',
+        'Domicílio',
+        'Corporativo',
+        'Individual',
+      ],
+      insurances: ['Cartão de Crédito', 'Cartão de Débito', 'PIX', 'Dinheiro', 'Boleto', 'Transferência'],
+      workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
+    }
+  };
 
-  const sessionTypes = [
-    'Consulta Inicial (60-90 min)',
-    'Terapia Individual (50 min)',
-    'Terapia de Casal (60 min)',
-    'Terapia Familiar (60-90 min)',
-    'Avaliação Psicológica (90-120 min)',
-    'Orientação Vocacional (60 min)',
-  ];
+  // Função para obter configuração do tipo de negócio atual
+  const getCurrentConfig = () => {
+    return businessConfigs[formData.businessType] || businessConfigs['outro'];
+  };
 
   const handleNext = () => {
     if (currentStep < 4) {
@@ -180,182 +341,192 @@ const CreatePlatform = () => {
     </Card>
   );
 
-  const renderStep2 = () => (
-    <Card className="max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl">Informações do seu negócio</CardTitle>
-        <p className="text-muted-foreground">
-          Conte-nos mais sobre sua {businessTypes.find(t => t.id === formData.businessType)?.name.toLowerCase()}
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="businessName">Nome da Clínica/Negócio</Label>
-            <Input
-              id="businessName"
-              value={formData.businessName}
-              onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-              placeholder="Ex: Clínica Mente Sã"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="ownerName">Seu Nome Completo</Label>
-            <Input
-              id="ownerName"
-              value={formData.ownerName}
-              onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
-              placeholder="Ex: Dra. Maria Silva"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="professionalId">CRP/Registro Profissional</Label>
-          <Input
-            id="professionalId"
-            value={formData.professionalId}
-            onChange={(e) => setFormData({ ...formData, professionalId: e.target.value })}
-            placeholder="Ex: CRP 06/123456"
-          />
-        </div>
-
-        <div className="space-y-3">
-          <Label>Suas Especialidades</Label>
-          <div className="grid md:grid-cols-2 gap-2">
-            {specialties.map((specialty) => (
-              <div key={specialty} className="flex items-center space-x-2">
-                <Checkbox
-                  id={specialty}
-                  checked={formData.specialties.includes(specialty)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setFormData({
-                        ...formData,
-                        specialties: [...formData.specialties, specialty]
-                      });
-                    } else {
-                      setFormData({
-                        ...formData,
-                        specialties: formData.specialties.filter(s => s !== specialty)
-                      });
-                    }
-                  }}
-                />
-                <Label htmlFor={specialty} className="text-sm">{specialty}</Label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="description">Descrição da Clínica (opcional)</Label>
-          <Textarea
-            id="description"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Descreva brevemente sua abordagem terapêutica e diferencial..."
-            rows={3}
-          />
-        </div>
-      </CardContent>
-    </Card>
-  );
-
-  const renderStep3 = () => (
-    <Card className="max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl">Configurações operacionais</CardTitle>
-        <p className="text-muted-foreground">
-          Configure como sua clínica funciona para personalizarmos a IA
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-3">
-          <Label>Tipos de Atendimento Oferecidos</Label>
-          <div className="space-y-2">
-            {sessionTypes.map((type) => (
-              <div key={type} className="flex items-center space-x-2">
-                <Checkbox
-                  id={type}
-                  checked={formData.sessionTypes.includes(type)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setFormData({
-                        ...formData,
-                        sessionTypes: [...formData.sessionTypes, type]
-                      });
-                    } else {
-                      setFormData({
-                        ...formData,
-                        sessionTypes: formData.sessionTypes.filter(s => s !== type)
-                      });
-                    }
-                  }}
-                />
-                <Label htmlFor={type} className="text-sm">{type}</Label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <Label>Horários de Funcionamento</Label>
-          <div className="grid gap-3">
-            {['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'].map((day) => (
-              <div key={day} className="flex items-center space-x-4">
-                <div className="w-20 text-sm">{day}</div>
-                <Input placeholder="08:00" className="w-24" />
-                <span className="text-muted-foreground">às</span>
-                <Input placeholder="18:00" className="w-24" />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <Label>Convênios Aceitos (opcional)</Label>
-          <div className="flex flex-wrap gap-2">
-            {['Unimed', 'Bradesco Saúde', 'SulAmérica', 'Amil', 'Golden Cross', 'Porto Seguro'].map((insurance) => (
-              <Badge
-                key={insurance}
-                variant={formData.insurances.includes(insurance) ? 'default' : 'outline'}
-                className="cursor-pointer"
-                onClick={() => {
-                  if (formData.insurances.includes(insurance)) {
-                    setFormData({
-                      ...formData,
-                      insurances: formData.insurances.filter(i => i !== insurance)
-                    });
-                  } else {
-                    setFormData({
-                      ...formData,
-                      insurances: [...formData.insurances, insurance]
-                    });
-                  }
-                }}
-              >
-                {insurance}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="emergencyContact">Contato de Emergência</Label>
-          <Input
-            id="emergencyContact"
-            value={formData.emergencyContact}
-            onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
-            placeholder="(11) 99999-9999"
-          />
-          <p className="text-xs text-muted-foreground">
-            Para casos de crise que a IA identificar
+  const renderStep2 = () => {
+    const config = getCurrentConfig();
+    
+    return (
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle className="text-2xl">Informações do seu negócio</CardTitle>
+          <p className="text-muted-foreground">
+            Conte-nos mais sobre sua {businessTypes.find(t => t.id === formData.businessType)?.name.toLowerCase()}
           </p>
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="businessName">Nome da {formData.businessType === 'clinica-psicologica' || formData.businessType === 'clinica-medica' ? 'Clínica' : 'Empresa'}</Label>
+              <Input
+                id="businessName"
+                value={formData.businessName}
+                onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                placeholder={formData.businessType === 'clinica-psicologica' ? "Ex: Clínica Mente Sã" : formData.businessType === 'restaurante' ? "Ex: Restaurante Sabor & Arte" : "Ex: Nome da Empresa"}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ownerName">Seu Nome Completo</Label>
+              <Input
+                id="ownerName"
+                value={formData.ownerName}
+                onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
+                placeholder={formData.businessType === 'clinica-psicologica' ? "Ex: Dra. Maria Silva" : formData.businessType === 'clinica-medica' ? "Ex: Dr. João Santos" : "Ex: Maria Silva"}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="professionalId">{config.professionalIdLabel}</Label>
+            <Input
+              id="professionalId"
+              value={formData.professionalId}
+              onChange={(e) => setFormData({ ...formData, professionalId: e.target.value })}
+              placeholder={config.professionalIdPlaceholder}
+            />
+          </div>
+
+          <div className="space-y-3">
+            <Label>{config.specialtiesLabel}</Label>
+            <div className="grid md:grid-cols-2 gap-2">
+              {config.specialties.map((specialty) => (
+                <div key={specialty} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={specialty}
+                    checked={formData.specialties.includes(specialty)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setFormData({
+                          ...formData,
+                          specialties: [...formData.specialties, specialty]
+                        });
+                      } else {
+                        setFormData({
+                          ...formData,
+                          specialties: formData.specialties.filter(s => s !== specialty)
+                        });
+                      }
+                    }}
+                  />
+                  <Label htmlFor={specialty} className="text-sm">{specialty}</Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Descrição {formData.businessType === 'clinica-psicologica' || formData.businessType === 'clinica-medica' ? 'da Clínica' : 'do Negócio'} (opcional)</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder={config.descriptionPlaceholder}
+              rows={3}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderStep3 = () => {
+    const config = getCurrentConfig();
+    
+    return (
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle className="text-2xl">Configurações operacionais</CardTitle>
+          <p className="text-muted-foreground">
+            Configure como sua {businessTypes.find(t => t.id === formData.businessType)?.name.toLowerCase()} funciona para personalizarmos a IA
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <Label>{config.sessionTypesLabel}</Label>
+            <div className="space-y-2">
+              {config.sessionTypes.map((type) => (
+                <div key={type} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={type}
+                    checked={formData.sessionTypes.includes(type)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setFormData({
+                          ...formData,
+                          sessionTypes: [...formData.sessionTypes, type]
+                        });
+                      } else {
+                        setFormData({
+                          ...formData,
+                          sessionTypes: formData.sessionTypes.filter(s => s !== type)
+                        });
+                      }
+                    }}
+                  />
+                  <Label htmlFor={type} className="text-sm">{type}</Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Horários de Funcionamento</Label>
+            <div className="grid gap-3">
+              {config.workingDays.map((day) => (
+                <div key={day} className="flex items-center space-x-4">
+                  <div className="w-20 text-sm">{day}</div>
+                  <Input placeholder="08:00" className="w-24" />
+                  <span className="text-muted-foreground">às</span>
+                  <Input placeholder="18:00" className="w-24" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>{formData.businessType === 'clinica-psicologica' || formData.businessType === 'clinica-medica' ? 'Convênios Aceitos' : 'Formas de Pagamento'} (opcional)</Label>
+            <div className="flex flex-wrap gap-2">
+              {config.insurances.map((insurance) => (
+                <Badge
+                  key={insurance}
+                  variant={formData.insurances.includes(insurance) ? 'default' : 'outline'}
+                  className="cursor-pointer"
+                  onClick={() => {
+                    if (formData.insurances.includes(insurance)) {
+                      setFormData({
+                        ...formData,
+                        insurances: formData.insurances.filter(i => i !== insurance)
+                      });
+                    } else {
+                      setFormData({
+                        ...formData,
+                        insurances: [...formData.insurances, insurance]
+                      });
+                    }
+                  }}
+                >
+                  {insurance}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {(formData.businessType === 'clinica-psicologica' || formData.businessType === 'clinica-medica') && (
+            <div className="space-y-2">
+              <Label htmlFor="emergencyContact">Contato de Emergência</Label>
+              <Input
+                id="emergencyContact"
+                value={formData.emergencyContact}
+                onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
+                placeholder="(11) 99999-9999"
+              />
+              <p className="text-xs text-muted-foreground">
+                Para casos de crise que a IA identificar
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
 
   const renderStep4 = () => (
     <Card className="max-w-2xl mx-auto">
