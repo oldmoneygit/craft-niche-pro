@@ -8,48 +8,56 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 220 13% 18%;
+    /* Academia Theme - Energetic & Dynamic Colors */
+    --background: 220 15% 8%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 13% 18%;
+    --card: 220 15% 12%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 13% 18%;
+    --popover: 220 15% 12%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 262 83% 58%;
+    /* Vibrant Orange Primary */
+    --primary: 25 95% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 262 30% 96%;
-    --secondary-foreground: 262 83% 58%;
+    /* Electric Purple Secondary */
+    --secondary: 260 85% 60%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 262 30% 96%;
-    --muted-foreground: 220 13% 46%;
+    --muted: 220 15% 20%;
+    --muted-foreground: 220 10% 70%;
 
-    --accent: 142 76% 36%;
+    /* Electric Blue Accent */
+    --accent: 195 100% 50%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 142 76% 36%;
+    --success: 142 76% 46%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
+    --warning: 38 92% 60%;
     --warning-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 262 83% 58%;
+    --border: 220 15% 25%;
+    --input: 220 15% 18%;
+    --ring: 25 95% 55%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%), hsl(262 83% 68%));
-    --gradient-secondary: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 76% 46%));
-    --gradient-hero: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(142 76% 36%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(262 30% 98%) 100%);
+    /* Energetic Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(25 95% 55%) 0%, hsl(260 85% 60%) 50%, hsl(195 100% 50%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(260 85% 60%) 0%, hsl(195 100% 50%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(25 95% 55%) 0%, hsl(260 85% 60%) 35%, hsl(195 100% 50%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(220 15% 12%) 0%, hsl(220 15% 18%) 100%);
+    --gradient-neon: linear-gradient(90deg, hsl(25 95% 55%) 0%, hsl(195 100% 50%) 100%);
 
-    --shadow-card: 0 4px 12px hsl(262 83% 58% / 0.1);
-    --shadow-hover: 0 8px 25px hsl(262 83% 58% / 0.15);
-    --shadow-glow: 0 0 40px hsl(262 83% 58% / 0.3);
+    /* Neon Shadows */
+    --shadow-card: 0 4px 12px hsl(25 95% 55% / 0.1), 0 0 0 1px hsl(220 15% 25%);
+    --shadow-hover: 0 8px 25px hsl(25 95% 55% / 0.2), 0 0 20px hsl(195 100% 50% / 0.1);
+    --shadow-glow: 0 0 40px hsl(25 95% 55% / 0.4), 0 0 80px hsl(195 100% 50% / 0.2);
+    --shadow-neon: 0 0 20px hsl(195 100% 50% / 0.6), inset 0 0 20px hsl(195 100% 50% / 0.1);
 
     --radius: 0.5rem;
 
@@ -71,47 +79,48 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Academia Dark Theme - Even more intense */
+    --background: 220 25% 4%;
+    --foreground: 0 0% 98%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 25% 8%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 25% 8%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 262 83% 68%;
-    --primary-foreground: 0 0% 9%;
+    --primary: 25 95% 65%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 260 85% 70%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 220 25% 15%;
+    --muted-foreground: 220 10% 75%;
 
-    --accent: 142 76% 46%;
-    --accent-foreground: 0 0% 9%;
+    --accent: 195 100% 60%;
+    --accent-foreground: 0 0% 100%;
 
-    --success: 142 76% 46%;
-    --success-foreground: 0 0% 9%;
+    --success: 142 76% 56%;
+    --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 60%;
-    --warning-foreground: 0 0% 9%;
+    --warning: 38 92% 70%;
+    --warning-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 70%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --border: 220 25% 20%;
+    --input: 220 25% 12%;
+    --ring: 25 95% 65%;
+    --sidebar-background: 220 25% 6%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 25 95% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 220 25% 12%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 220 25% 18%;
+    --sidebar-ring: 195 100% 50%;
   }
 }
 
@@ -121,6 +130,41 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-roboto;
+    background-image: 
+      radial-gradient(circle at 20% 80%, hsl(25 95% 55% / 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, hsl(195 100% 50% / 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, hsl(260 85% 60% / 0.05) 0%, transparent 50%);
+  }
+}
+
+@layer components {
+  .fitness-card {
+    @apply bg-gradient-card border border-border/50 backdrop-blur-sm;
+    @apply hover:shadow-hover transition-all duration-300;
+    @apply hover:border-primary/30 hover:bg-gradient-to-br hover:from-card hover:to-primary/5;
+  }
+  
+  .neon-border {
+    @apply border border-accent/50 shadow-neon;
+  }
+  
+  .energy-button {
+    @apply bg-gradient-primary text-white font-montserrat font-bold;
+    @apply hover:shadow-glow transition-all duration-300 transform hover:scale-105;
+    @apply active:scale-95;
+  }
+  
+  .metric-card {
+    @apply fitness-card p-6 text-center;
+    @apply hover:animate-scale-bounce;
+  }
+  
+  .geometric-bg {
+    background-image: 
+      linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px),
+      linear-gradient(hsl(var(--border)) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.1;
   }
 }
