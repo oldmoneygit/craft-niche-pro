@@ -291,6 +291,8 @@ const CreatePlatform = () => {
       navigate('/restaurant-platform');
     } else if (formData.businessType === 'autopecas') {
       navigate('/autopeças-platform');
+    } else if (formData.businessType === 'salao') {
+      navigate('/salao-platform');
     } else {
       navigate('/platform/1');
     }
