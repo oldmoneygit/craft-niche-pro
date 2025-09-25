@@ -31,8 +31,12 @@ import {
   MessageCircle,
   Calendar,
   Heart,
-  ThumbsUp
+  ThumbsUp,
+  Brain,
+  Lightbulb,
+  Target
 } from "lucide-react";
+import AIAgent from "./AIAgent";
 import { mockNutriData } from "@/lib/mockDataNutricionista";
 
 const ChatAI = () => {
@@ -370,28 +374,40 @@ const ChatAI = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <Tabs defaultValue="chat" className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold">Chat IA & WhatsApp</h2>
-          <p className="text-muted-foreground">Central de atendimento integrada com automação inteligente</p>
+          <h2 className="text-3xl font-bold">Chat IA & Automação</h2>
+          <p className="text-muted-foreground">Central de atendimento integrada com AI Agent especializado</p>
         </div>
-        <div className="flex gap-2">
-          <Dialog open={showAutomationSettings} onOpenChange={setShowAutomationSettings}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Settings className="h-4 w-4 mr-2" />
-                Configurações
-              </Button>
-            </DialogTrigger>
-            <AutomationSettingsModal />
-          </Dialog>
-          <Button className="action-primary">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Nova Conversa
-          </Button>
-        </div>
+        <TabsList className="grid w-[400px] grid-cols-2">
+          <TabsTrigger value="chat">Chat & WhatsApp</TabsTrigger>
+          <TabsTrigger value="agent">AI Agent</TabsTrigger>
+        </TabsList>
       </div>
+
+      <TabsContent value="chat" className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-2xl font-semibold">Central de Atendimento</h3>
+            <p className="text-muted-foreground">Gerencie conversas do WhatsApp e mensagens automáticas</p>
+          </div>
+          <div className="flex gap-2">
+            <Dialog open={showAutomationSettings} onOpenChange={setShowAutomationSettings}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Configurações
+                </Button>
+              </DialogTrigger>
+              <AutomationSettingsModal />
+            </Dialog>
+            <Button className="action-primary">
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Nova Conversa
+            </Button>
+          </div>
+        </div>
 
       {/* Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -595,7 +611,12 @@ const ChatAI = () => {
           )}
         </Card>
       </div>
-    </div>
+      </TabsContent>
+
+      <TabsContent value="agent">
+        <AIAgent />
+      </TabsContent>
+    </Tabs>
   );
 };
 
