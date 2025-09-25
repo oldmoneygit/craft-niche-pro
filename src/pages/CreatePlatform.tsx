@@ -18,6 +18,7 @@ import {
   Scissors,
   Briefcase,
   Loader2,
+  Dumbbell,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -75,6 +76,13 @@ const CreatePlatform = () => {
       icon: Scissors,
       description: 'Cabeleireiros, estética, manicure',
       features: ['Agendamento por profissional', 'Galeria de trabalhos', 'Programa fidelidade'],
+    },
+    {
+      id: 'academia',
+      name: 'Academia',
+      icon: Dumbbell,
+      description: 'Academias, studios fitness, crossfit',
+      features: ['Gestão de membros e planos', 'Agendamento de aulas e treinos', 'IA para suporte e motivação'],
     },
     {
       id: 'outro',
@@ -232,6 +240,35 @@ const CreatePlatform = () => {
       insurances: ['Cartão de Crédito', 'Cartão de Débito', 'PIX', 'Dinheiro', 'Parcelamento'],
       workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
     },
+    'academia': {
+      professionalIdLabel: 'CREF/CNPJ',
+      professionalIdPlaceholder: 'Ex: CREF 012345-G/RJ ou CNPJ',
+      specialtiesLabel: 'Modalidades Oferecidas',
+      sessionTypesLabel: 'Tipos de Planos e Aulas',
+      descriptionPlaceholder: 'Descreva a filosofia da sua academia, seus diferenciais...',
+      specialties: [
+        'Musculação',
+        'Crossfit',
+        'Pilates',
+        'Yoga',
+        'Dança (Zumba, FitDance)',
+        'Artes Marciais (Jiu-Jitsu, Muay Thai)',
+        'Treinamento Funcional',
+        'Natação',
+        'Spinning',
+        'Personal Trainer',
+      ],
+      sessionTypes: [
+        'Plano Mensal (acesso livre)',
+        'Plano Anual',
+        'Pacote de Aulas (ex: 10 aulas)',
+        'Aula Avulsa',
+        'Treino com Personal Trainer',
+        'Day Use',
+      ],
+      insurances: ['Cartão de Crédito', 'Cartão de Débito', 'PIX', 'Dinheiro', 'Gympass', 'TotalPass'],
+      workingDays: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'],
+    },
     'outro': {
       professionalIdLabel: 'CNPJ/CPF/Registro',
       professionalIdPlaceholder: 'Ex: CNPJ, CPF ou registro profissional',
@@ -290,9 +327,11 @@ const CreatePlatform = () => {
     if (formData.businessType === 'restaurante') {
       navigate('/restaurant-platform');
     } else if (formData.businessType === 'autopecas') {
-      navigate('/autopeças-platform');
+      navigate('/autopecas-platform');
     } else if (formData.businessType === 'salao') {
       navigate('/salao-platform');
+    } else if (formData.businessType === 'academia') {
+      navigate('/academia-platform');
     } else {
       navigate('/platform/1');
     }

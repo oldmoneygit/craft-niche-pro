@@ -11,6 +11,7 @@ import PlatformView from "./pages/PlatformView";
 import RestaurantPlatform from "./pages/RestaurantPlatform";
 import AutopecasPlatform from "./pages/AutopecasPlatform";
 import SalaoPlatform from "./pages/SalaoPlatform";
+import AcademiaPlatform from "./pages/AcademiaPlatform";
 import LiveClinicDemo from "./components/platform/LiveClinicDemo";
 import NotFound from "./pages/NotFound";
 
@@ -54,7 +55,8 @@ const App = () => (
             />
           <Route path="/restaurant-platform" element={<RestaurantPlatform />} />
           <Route path="/autopeças-platform" element={<AutopecasPlatform />} />
-          <Route path="/salao-platform" element={<SalaoPlatform />} />
+        <Route path="/salao-platform" element={<SalaoPlatform />} />
+        <Route path="/academia-platform" element={<AcademiaPlatform />} />
             <Route 
               path="/platforms" 
               element={
