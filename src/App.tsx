@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import ClinicDashboard from "./pages/ClinicDashboard";
 import ClinicLogin from "./pages/ClinicLogin";
 import NutricionistaDashboard from "./pages/NutricionistaDashboard";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ const App = () => (
         <div className="min-h-screen bg-background">
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/nutricionista" element={<NutricionistaDashboard />} />
             <Route path="/clinic" element={<ClinicDashboard />} />
             <Route path="/login" element={<ClinicLogin />} />
