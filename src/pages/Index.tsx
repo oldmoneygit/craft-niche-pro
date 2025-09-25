@@ -130,7 +130,7 @@ const Index = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-green-600 rounded-xl flex items-center justify-center mb-4">
                   <Apple className="h-8 w-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl">Dr. Gabriel Santos</CardTitle>
+                <CardTitle className="text-2xl">Dr Gabriel Grandin - Nutricionista</CardTitle>
                 <p className="text-muted-foreground">
                   Plataforma completa para nutricionistas com IA especializada
                 </p>
