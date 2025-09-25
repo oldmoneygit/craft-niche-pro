@@ -77,38 +77,38 @@ export default function ClinicDashboard() {
       <main className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           {/* Navigation Tabs */}
-          <TabsList className="grid w-full grid-cols-5 bg-white/80 backdrop-blur-sm shadow-soft rounded-2xl p-2 h-auto">
+          <TabsList className="grid w-full grid-cols-5 bg-white/90 backdrop-blur-sm shadow-card rounded-2xl p-2 h-auto border border-border">
             <TabsTrigger 
               value="dashboard" 
-              className="flex flex-col items-center gap-2 py-4 px-6 rounded-xl data-[state=active]:bg-gradient-therapeutic data-[state=active]:text-white data-[state=active]:shadow-glow transition-all duration-300"
+              className="flex flex-col items-center gap-2 py-4 px-6 rounded-xl text-muted-foreground hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"
             >
               <BarChart3 className="h-5 w-5" />
               <span className="text-sm font-medium">Início</span>
             </TabsTrigger>
             <TabsTrigger 
               value="patients" 
-              className="flex flex-col items-center gap-2 py-4 px-6 rounded-xl data-[state=active]:bg-gradient-therapeutic data-[state=active]:text-white data-[state=active]:shadow-glow transition-all duration-300"
+              className="flex flex-col items-center gap-2 py-4 px-6 rounded-xl text-muted-foreground hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"
             >
               <Users className="h-5 w-5" />
               <span className="text-sm font-medium">Pacientes</span>
             </TabsTrigger>
             <TabsTrigger 
               value="appointments" 
-              className="flex flex-col items-center gap-2 py-4 px-6 rounded-xl data-[state=active]:bg-gradient-therapeutic data-[state=active]:text-white data-[state=active]:shadow-glow transition-all duration-300"
+              className="flex flex-col items-center gap-2 py-4 px-6 rounded-xl text-muted-foreground hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"
             >
               <Calendar className="h-5 w-5" />
               <span className="text-sm font-medium">Agenda</span>
             </TabsTrigger>
             <TabsTrigger 
               value="chat" 
-              className="flex flex-col items-center gap-2 py-4 px-6 rounded-xl data-[state=active]:bg-gradient-therapeutic data-[state=active]:text-white data-[state=active]:shadow-glow transition-all duration-300"
+              className="flex flex-col items-center gap-2 py-4 px-6 rounded-xl text-muted-foreground hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"
             >
               <MessageCircle className="h-5 w-5" />
               <span className="text-sm font-medium">IA Terapêutica</span>
             </TabsTrigger>
             <TabsTrigger 
               value="analytics" 
-              className="flex flex-col items-center gap-2 py-4 px-6 rounded-xl data-[state=active]:bg-gradient-therapeutic data-[state=active]:text-white data-[state=active]:shadow-glow transition-all duration-300"
+              className="flex flex-col items-center gap-2 py-4 px-6 rounded-xl text-muted-foreground hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"
             >
               <BarChart3 className="h-5 w-5" />
               <span className="text-sm font-medium">Relatórios</span>
