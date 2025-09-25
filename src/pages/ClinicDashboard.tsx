@@ -25,6 +25,10 @@ import {
   Timer,
   DollarSign
 } from "lucide-react";
+import PatientsManagement from "@/components/clinic/PatientsManagement";
+import AppointmentScheduler from "@/components/clinic/AppointmentScheduler";
+import AITherapist from "@/components/clinic/AITherapist";
+import AnalyticsReports from "@/components/clinic/AnalyticsReports";
 
 export default function ClinicDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -329,35 +333,19 @@ export default function ClinicDashboard() {
           </TabsContent>
 
           <TabsContent value="patients">
-            <div className="text-center py-12">
-              <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">Gestão de Pacientes</h3>
-              <p className="text-muted-foreground">Visualização completa em desenvolvimento</p>
-            </div>
+            <PatientsManagement />
           </TabsContent>
 
           <TabsContent value="appointments">
-            <div className="text-center py-12">
-              <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">Agenda Completa</h3>
-              <p className="text-muted-foreground">Sistema de agendamento em desenvolvimento</p>
-            </div>
+            <AppointmentScheduler />
           </TabsContent>
 
           <TabsContent value="chat">
-            <div className="text-center py-12">
-              <MessageCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">IA Terapêutica</h3>
-              <p className="text-muted-foreground">Assistente inteligente em desenvolvimento</p>
-            </div>
+            <AITherapist />
           </TabsContent>
 
           <TabsContent value="analytics">
-            <div className="text-center py-12">
-              <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">Relatórios e Analytics</h3>
-              <p className="text-muted-foreground">Dashboard completo em desenvolvimento</p>
-            </div>
+            <AnalyticsReports />
           </TabsContent>
         </Tabs>
       </main>
