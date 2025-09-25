@@ -20,11 +20,11 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { mockAutopecasAnalytics, mockAutopecasData } from '@/lib/autopecasMockData';
-import { ProductsView } from '@/components/autopeças/ProductsView';
-import { AutopecasOrdersView } from '@/components/autopeças/AutopecasOrdersView';
-import { AutopecasCustomersView } from '@/components/autopeças/AutopecasCustomersView';
-import { AutopecasChatView } from '@/components/autopeças/AutopecasChatView';
-import { AutopecasAnalytics } from '@/components/autopeças/AutopecasAnalytics';
+import { ProductsView } from '@/components/autopecas/ProductsView';
+import { AutopecasOrdersView } from '@/components/autopecas/AutopecasOrdersView';
+import { AutopecasCustomersView } from '@/components/autopecas/AutopecasCustomersView';
+import { AutopecasChatView } from '@/components/autopecas/AutopecasChatView';
+import { AutopecasAnalytics } from '@/components/autopecas/AutopecasAnalytics';
 
 const AutopecasPlatform = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
