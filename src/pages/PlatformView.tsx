@@ -113,23 +113,23 @@ const PlatformView = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-muted/20">
+    <div className="min-h-screen bg-background therapeutic-bg">
       {/* Platform Header */}
-      <div className="bg-white border-b shadow-card">
+      <div className="bg-card border-b shadow-soft">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <Brain className="h-6 w-6 text-white" />
+              <div className="w-14 h-14 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-glow">
+                <Heart className="h-7 w-7 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">{platform.name}</h1>
+                <h1 className="text-2xl font-poppins font-semibold text-foreground">{platform.name}</h1>
                 <div className="flex items-center space-x-4 mt-1">
-                  <Badge variant="secondary" className="bg-success/10 text-success">
+                  <Badge variant="secondary" className="bg-success/15 text-success border-success/20 rounded-full">
                     <Activity className="h-3 w-3 mr-1" />
                     Online
                   </Badge>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm text-muted-foreground font-inter">
                     {platform.url}
                   </span>
                 </div>
@@ -137,13 +137,13 @@ const PlatformView = () => {
             </div>
             <div className="flex items-center space-x-3">
               <NotificationCenter />
-              <Button variant="outline" asChild>
+              <Button variant="outline" className="rounded-xl font-inter" asChild>
                 <a href={platform.url} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Ver Site
                 </a>
               </Button>
-              <Button variant="outline" asChild>
+              <Button variant="outline" className="rounded-xl font-inter" asChild>
                 <Link to={`/platform/${platform.id}/settings`}>
                   <Settings className="h-4 w-4 mr-2" />
                   Configurações
@@ -156,12 +156,12 @@ const PlatformView = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="appointments">Agendamentos</TabsTrigger>
-            <TabsTrigger value="patients">Pacientes</TabsTrigger>
-            <TabsTrigger value="chat">Chat IA</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 bg-card shadow-soft rounded-2xl p-2 font-poppins">
+            <TabsTrigger value="overview" className="rounded-xl font-medium">Visão Geral</TabsTrigger>
+            <TabsTrigger value="appointments" className="rounded-xl font-medium">Agendamentos</TabsTrigger>
+            <TabsTrigger value="patients" className="rounded-xl font-medium">Pacientes</TabsTrigger>
+            <TabsTrigger value="chat" className="rounded-xl font-medium">Chat IA</TabsTrigger>
+            <TabsTrigger value="analytics" className="rounded-xl font-medium">Analytics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6 mt-6">
@@ -170,16 +170,18 @@ const PlatformView = () => {
               {stats.map((stat, index) => {
                 const Icon = stat.icon;
                 return (
-                  <Card key={index} className="hover:shadow-hover transition-shadow">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                  <Card key={index} className="therapy-card hover:animate-slide-up">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                      <CardTitle className="text-sm font-poppins font-medium text-muted-foreground">
                         {stat.title}
                       </CardTitle>
-                      <Icon className={`h-4 w-4 ${stat.color}`} />
+                      <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                        <Icon className={`h-5 w-5 ${stat.color}`} />
+                      </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{stat.value}</div>
-                      <p className="text-xs text-muted-foreground">
+                      <div className="text-3xl font-poppins font-semibold text-foreground">{stat.value}</div>
+                      <p className="text-sm text-muted-foreground font-inter mt-1">
                         {stat.description}
                       </p>
                     </CardContent>
@@ -190,14 +192,16 @@ const PlatformView = () => {
 
             <div className="grid lg:grid-cols-3 gap-6">
               {/* Today's Schedule */}
-              <Card className="lg:col-span-2">
+              <Card className="lg:col-span-2 therapy-card">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <Calendar className="h-5 w-5 mr-2" />
-                      Agenda de Hoje
+                      <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mr-3">
+                        <Calendar className="h-4 w-4 text-primary" />
+                      </div>
+                      <span className="font-poppins font-semibold">Agenda de Hoje</span>
                     </div>
-                    <Badge variant="outline">{todayAppointments.length} sessões</Badge>
+                    <Badge variant="outline" className="rounded-full border-primary/30 text-primary">{todayAppointments.length} sessões</Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -211,7 +215,7 @@ const PlatformView = () => {
                       todayAppointments.slice(0, 4).map((appointment) => (
                         <div
                           key={appointment.id}
-                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                          className="flex items-center justify-between p-4 border border-border/50 rounded-xl hover:bg-primary/5 hover:border-primary/30 transition-all duration-200"
                         >
                           <div className="flex items-center space-x-3">
                             <div className="flex flex-col items-center text-sm">
@@ -247,18 +251,20 @@ const PlatformView = () => {
                       ))
                     )}
                   </div>
-                  <Button variant="outline" className="w-full mt-4" onClick={() => setActiveTab('appointments')}>
+                  <Button variant="outline" className="w-full mt-4 rounded-xl font-poppins hover:bg-primary/5" onClick={() => setActiveTab('appointments')}>
                     Ver Agenda Completa
                   </Button>
                 </CardContent>
               </Card>
 
               {/* Recent Activity */}
-              <Card>
+              <Card className="therapy-card">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Activity className="h-5 w-5 mr-2" />
-                    Atividade Recente
+                    <div className="w-8 h-8 bg-secondary/10 rounded-lg flex items-center justify-center mr-3">
+                      <Activity className="h-4 w-4 text-secondary" />
+                    </div>
+                    <span className="font-poppins font-semibold">Atividade Recente</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -266,13 +272,13 @@ const PlatformView = () => {
                     {recentActivity.map((activity, index) => {
                       const Icon = activity.icon;
                       return (
-                        <div key={index} className="flex items-start space-x-3">
-                          <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
-                            <Icon className="h-4 w-4 text-muted-foreground" />
+                        <div key={index} className="flex items-start space-x-3 p-3 rounded-xl hover:bg-muted/30 transition-colors">
+                          <div className="w-9 h-9 bg-accent/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <Icon className="h-4 w-4 text-accent" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium">{activity.message}</p>
-                            <p className="text-xs text-muted-foreground">{activity.time}</p>
+                            <p className="text-sm font-poppins font-medium text-foreground">{activity.message}</p>
+                            <p className="text-xs text-muted-foreground font-inter">{activity.time}</p>
                           </div>
                         </div>
                       );
@@ -283,58 +289,58 @@ const PlatformView = () => {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid md:grid-cols-4 gap-4">
-              <Card className="hover:shadow-hover transition-shadow cursor-pointer" onClick={() => setActiveTab('appointments')}>
+            <div className="grid md:grid-cols-4 gap-6">
+              <Card className="therapy-card hover:shadow-glow transition-all duration-300 cursor-pointer group" onClick={() => setActiveTab('appointments')}>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <Calendar className="h-6 w-6 text-primary" />
+                    <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <Calendar className="h-7 w-7 text-primary" />
                     </div>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Nova Sessão</h3>
-                  <p className="text-muted-foreground text-sm">
+                  <h3 className="text-lg font-poppins font-semibold mb-2 text-foreground">Nova Sessão</h3>
+                  <p className="text-muted-foreground text-sm font-inter">
                     Agendar consulta manualmente
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-hover transition-shadow cursor-pointer">
+              <Card className="therapy-card hover:shadow-glow transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
-                      <FileText className="h-6 w-6 text-accent" />
+                    <div className="w-14 h-14 bg-secondary/10 rounded-2xl flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
+                      <FileText className="h-7 w-7 text-secondary" />
                     </div>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Abrir Prontuário</h3>
-                  <p className="text-muted-foreground text-sm">
+                  <h3 className="text-lg font-poppins font-semibold mb-2 text-foreground">Abrir Prontuário</h3>
+                  <p className="text-muted-foreground text-sm font-inter">
                     Acessar dados do paciente
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-hover transition-shadow cursor-pointer">
+              <Card className="therapy-card hover:shadow-glow transition-all duration-300 cursor-pointer group">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center">
-                      <MessageCircle className="h-6 w-6 text-green-500" />
+                    <div className="w-14 h-14 bg-success/10 rounded-2xl flex items-center justify-center group-hover:bg-success/20 transition-colors">
+                      <MessageCircle className="h-7 w-7 text-success" />
                     </div>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Enviar Lembrete</h3>
-                  <p className="text-muted-foreground text-sm">
+                  <h3 className="text-lg font-poppins font-semibold mb-2 text-foreground">Enviar Lembrete</h3>
+                  <p className="text-muted-foreground text-sm font-inter">
                     WhatsApp para sessões
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-hover transition-shadow cursor-pointer" onClick={() => setActiveTab('chat')}>
+              <Card className="therapy-card hover:shadow-glow transition-all duration-300 cursor-pointer group" onClick={() => setActiveTab('chat')}>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-warning/10 rounded-lg flex items-center justify-center">
-                      <Brain className="h-6 w-6 text-warning" />
+                    <div className="w-14 h-14 bg-accent/10 rounded-2xl flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                      <Brain className="h-7 w-7 text-accent" />
                     </div>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Treinar IA</h3>
-                  <p className="text-muted-foreground text-sm">
+                  <h3 className="text-lg font-poppins font-semibold mb-2 text-foreground">Treinar IA</h3>
+                  <p className="text-muted-foreground text-sm font-inter">
                     Base de conhecimento
                   </p>
                 </CardContent>

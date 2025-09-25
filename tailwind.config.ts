@@ -14,6 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
+        'inter': ['Inter', 'sans-serif'],
+        'poppins': ['Poppins', 'sans-serif'],
         'montserrat': ['Montserrat', 'sans-serif'],
         'roboto': ['Roboto', 'sans-serif'],
       },
@@ -142,6 +144,10 @@ export default {
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
         "slide-up": "slide-up 0.5s ease-out",
         "scale-bounce": "scale-bounce 0.3s ease-in-out",
+      },
+      scale: {
+        '102': '1.02',
+        '98': '0.98',
       },
     },
   },
