@@ -389,23 +389,32 @@ const Index = () => {
               <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-4">
                 <Bot className="h-6 w-6 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">AI Agent Especializado</h3>
+              <h3 className="text-xl font-semibold mb-3">Seu Funcionário Virtual Exclusivo</h3>
               <p className="text-muted-foreground mb-4">
-                Agente de IA treinado especificamente para sua área de negócio, capaz de atender clientes, 
-                agendar serviços e converter leads automaticamente.
+                Cada negócio recebe seu próprio AI Agent exclusivo, treinado especificamente para sua área. 
+                Funciona como um funcionário dedicado que trabalha 24/7 sem parar, atendendo no WhatsApp 
+                de forma natural como se fosse uma pessoa real.
               </p>
               <ul className="text-sm space-y-1">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-3 w-3 text-green-500" />
-                  Treinamento personalizado
+                  <span className="font-medium">Agente 100% exclusivo</span> - só seu negócio tem acesso
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-3 w-3 text-green-500" />
-                  Atendimento 24/7
+                  <span className="font-medium">WhatsApp automático</span> - atende naturalmente como pessoa
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-3 w-3 text-green-500" />
-                  Integração WhatsApp
+                  <span className="font-medium">Agenda via WhatsApp</span> - marca consultas/serviços
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-3 w-3 text-green-500" />
+                  <span className="font-medium">Lembretes automáticos</span> - reativa clientes inativos
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-3 w-3 text-green-500" />
+                  <span className="font-medium">Trabalha 24/7</span> - nunca para, nunca tira férias
                 </li>
               </ul>
             </Card>
