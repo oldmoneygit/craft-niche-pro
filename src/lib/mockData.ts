@@ -2,28 +2,29 @@
 
 export const mockUser = {
   id: '1',
-  name: 'Dr. Maria Silva',
-  email: 'maria.silva@email.com',
+  name: 'Dra. Sofia Sorriso',
+  email: 'admin@clinicasorriso.com',
   avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&h=150&fit=crop&crop=face',
-  plan: 'Profissional',
+  crp: 'CRP 06/123456',
+  specialties: ['Terapia Cognitivo-Comportamental', 'Ansiedade', 'Depressão', 'Terapia de Casal'],
   createdAt: '2024-01-15',
 };
 
-export const mockPlatforms = [
-  {
-    id: '1',
-    name: 'Clínica Mente Sã',
-    type: 'clinica-psicologica',
-    status: 'active',
-    url: 'https://clinicamentesa.com.br',
-    createdAt: '2024-03-15',
-    monthlyVisits: 1250,
-    totalPatients: 45,
-    monthlyRevenue: 12500,
-    aiInteractions: 340,
-    description: 'Clínica especializada em terapia cognitivo-comportamental e atendimento psicológico.',
-  },
-];
+export const clinicInfo = {
+  name: 'Clínica Sorriso',
+  subtitle: 'Psicologia & Bem-estar',
+  description: 'Especializada em terapia cognitivo-comportamental, oferecemos um ambiente acolhedor e profissional para o seu bem-estar mental.',
+  address: 'Rua das Flores, 123 - Centro, São Paulo - SP',
+  phone: '(11) 99999-0000',
+  email: 'contato@clinicasorriso.com',
+  website: 'clinicasorriso.minhaplatafoma.com',
+  founded: '2024',
+  totalPatients: 52,
+  activePatients: 45,
+  monthlyRevenue: 18500,
+  rating: 4.9,
+  reviews: 127,
+};
 
 export const mockAnalytics = {
   totalVisits: 1250,
@@ -288,12 +289,12 @@ export const mockChatMessages = [
   },
 ];
 
-export const mockQuestionnaireData = {
+export const clinicSettings = {
   businessType: 'clinica-psicologica',
-  businessName: 'Clínica Mente Sã',
-  ownerName: 'Dra. Maria Silva',
+  businessName: 'Clínica Sorriso',
+  ownerName: 'Dra. Sofia Sorriso',
   crp: 'CRP 06/123456',
-  specialties: ['Terapia Cognitivo-Comportamental', 'Ansiedade', 'Depressão'],
+  specialties: ['Terapia Cognitivo-Comportamental', 'Ansiedade', 'Depressão', 'Terapia de Casal'],
   sessionTypes: ['Consulta Individual', 'Terapia de Casal', 'Avaliação Psicológica'],
   workingHours: {
     monday: '08:00-18:00',
@@ -308,11 +309,11 @@ export const mockQuestionnaireData = {
     evaluation: 90,
   },
   pricing: {
-    individual: 120,
-    couple: 180,
-    evaluation: 250,
+    individual: 140,
+    couple: 200,
+    evaluation: 280,
   },
-  insurances: ['Unimed', 'Bradesco Saúde', 'SulAmérica'],
+  insurances: ['Unimed', 'Bradesco Saúde', 'SulAmérica', 'Amil', 'NotreDame'],
   communicationPreference: 'WhatsApp',
-  emergencyContact: '(11) 99999-9999',
+  emergencyContact: '(11) 99999-0000',
 };

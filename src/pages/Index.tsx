@@ -1,9 +1,7 @@
-// Update this page (the content is just a fallback if you fail to update the page)
-
-import Landing from './Landing';
+import ClinicDashboard from './ClinicDashboard';
 
 const Index = () => {
-  return <Landing />;
+  return <ClinicDashboard />;
 };
 
 export default Index;
