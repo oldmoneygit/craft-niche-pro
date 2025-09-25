@@ -8,6 +8,7 @@ import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import CreatePlatform from "./pages/CreatePlatform";
 import PlatformView from "./pages/PlatformView";
+import RestaurantPlatform from "./pages/RestaurantPlatform";
 import LiveClinicDemo from "./components/platform/LiveClinicDemo";
 import NotFound from "./pages/NotFound";
 
@@ -49,6 +50,7 @@ const App = () => (
                 </div>
               } 
             />
+            <Route path="/restaurant-platform" element={<RestaurantPlatform />} />
             <Route 
               path="/platforms" 
               element={

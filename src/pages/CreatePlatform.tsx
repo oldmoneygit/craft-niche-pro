@@ -124,7 +124,13 @@ const CreatePlatform = () => {
     // Simular criação da plataforma
     await new Promise(resolve => setTimeout(resolve, 3000));
     setIsCreating(false);
-    navigate('/platform/1');
+    
+    // Redirecionar baseado no tipo de negócio
+    if (formData.businessType === 'restaurante') {
+      navigate('/restaurant-platform');
+    } else {
+      navigate('/platform/1');
+    }
   };
 
   const renderStep1 = () => (
