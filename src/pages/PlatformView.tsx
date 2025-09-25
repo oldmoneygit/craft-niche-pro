@@ -17,46 +17,71 @@ import {
   ExternalLink,
   Brain,
   Activity,
+  DollarSign,
+  UserPlus,
+  Heart,
+  FileText,
+  MessageCircle,
+  Stethoscope,
 } from 'lucide-react';
-import { mockPlatforms, mockAppointments, mockPatients } from '@/lib/mockData';
+import { mockPlatforms, mockAppointments, mockPatients, mockAnalytics } from '@/lib/mockData';
 import { Link } from 'react-router-dom';
 import AppointmentsView from '@/components/platform/AppointmentsView';
 import PatientsView from '@/components/platform/PatientsView';
 import ChatView from '@/components/platform/ChatView';
 import AnalyticsView from '@/components/platform/AnalyticsView';
+import NotificationCenter from '@/components/platform/NotificationCenter';
 
 const PlatformView = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const platform = mockPlatforms[0];
 
+  const todayAppointments = mockAppointments.filter(apt => 
+    new Date(apt.date).toDateString() === new Date().toDateString()
+  );
+
   const stats = [
     {
-      title: 'Consultas Hoje',
-      value: '8',
-      description: '3 restantes',
+      title: 'Sessões Hoje',
+      value: todayAppointments.length.toString(),
+      description: `${todayAppointments.filter(a => a.status === 'pending').length} pendentes`,
       icon: Calendar,
       color: 'text-primary',
     },
     {
       title: 'Pacientes Ativos',
-      value: mockPatients.length,
+      value: mockPatients.length.toString(),
       description: '+3 este mês',
       icon: Users,
       color: 'text-success',
     },
     {
-      title: 'Mensagens IA',
-      value: '12',
-      description: 'Hoje',
-      icon: MessageSquare,
+      title: 'Novos Pacientes',
+      value: '4',
+      description: 'Este mês',
+      icon: UserPlus,
       color: 'text-accent',
     },
     {
-      title: 'Taxa Ocupação',
-      value: '85%',
-      description: 'Esta semana',
-      icon: BarChart3,
+      title: 'Faturamento Previsto',
+      value: 'R$ 8.400',
+      description: 'Este mês',
+      icon: DollarSign,
       color: 'text-warning',
+    },
+    {
+      title: 'Sessões Recorrentes',
+      value: mockAnalytics.recurringPatients.toString(),
+      description: '95% dos pacientes',
+      icon: Heart,
+      color: 'text-rose-500',
+    },
+    {
+      title: 'Taxa Comparecimento',
+      value: '92%',
+      description: 'Esta semana',
+      icon: CheckCircle,
+      color: 'text-emerald-500',
     },
   ];
 
@@ -111,6 +136,7 @@ const PlatformView = () => {
               </div>
             </div>
             <div className="flex items-center space-x-3">
+              <NotificationCenter />
               <Button variant="outline" asChild>
                 <a href={platform.url} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-4 w-4 mr-2" />
@@ -140,7 +166,7 @@ const PlatformView = () => {
 
           <TabsContent value="overview" className="space-y-6 mt-6">
             {/* Stats Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {stats.map((stat, index) => {
                 const Icon = stat.icon;
                 return (
@@ -166,47 +192,63 @@ const PlatformView = () => {
               {/* Today's Schedule */}
               <Card className="lg:col-span-2">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Calendar className="h-5 w-5 mr-2" />
-                    Agenda de Hoje
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Calendar className="h-5 w-5 mr-2" />
+                      Agenda de Hoje
+                    </div>
+                    <Badge variant="outline">{todayAppointments.length} sessões</Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockAppointments.slice(0, 3).map((appointment) => (
-                      <div
-                        key={appointment.id}
-                        className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="flex flex-col items-center text-sm">
-                            <span className="font-medium">{appointment.time}</span>
+                    {todayAppointments.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground">Nenhuma sessão agendada para hoje</p>
+                      </div>
+                    ) : (
+                      todayAppointments.slice(0, 4).map((appointment) => (
+                        <div
+                          key={appointment.id}
+                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="flex flex-col items-center text-sm">
+                              <span className="font-medium">{appointment.time}</span>
+                            </div>
+                            <div>
+                              <p className="font-medium">{appointment.patientName}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {appointment.type} • {appointment.duration} min • Sessão #{appointment.sessionNumber}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium">{appointment.patientName}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {appointment.type} • {appointment.duration} min
-                            </p>
+                          <div className="flex items-center space-x-2">
+                            <Badge
+                              variant="outline"
+                              className={appointment.paymentStatus === 'paid' ? 'text-success border-success/20 bg-success/10' : 'text-warning border-warning/20 bg-warning/10'}
+                            >
+                              {appointment.paymentStatus === 'paid' ? 'Pago' : 'Pendente'}
+                            </Badge>
+                            <Badge
+                              variant={
+                                appointment.status === 'confirmed'
+                                  ? 'secondary'
+                                  : appointment.status === 'pending'
+                                  ? 'outline'
+                                  : 'default'
+                              }
+                            >
+                              {appointment.status === 'confirmed' ? 'Confirmado' : 'Pendente'}
+                            </Badge>
                           </div>
                         </div>
-                        <Badge
-                          variant={
-                            appointment.status === 'confirmed'
-                              ? 'secondary'
-                              : appointment.status === 'pending'
-                              ? 'outline'
-                              : 'default'
-                          }
-                        >
-                          {appointment.status === 'confirmed' ? 'Confirmado' : 'Pendente'}
-                        </Badge>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
-                  <Button variant="outline" className="w-full mt-4" asChild>
-                    <Link to="#" onClick={() => setActiveTab('appointments')}>
-                      Ver Agenda Completa
-                    </Link>
+                  <Button variant="outline" className="w-full mt-4" onClick={() => setActiveTab('appointments')}>
+                    Ver Agenda Completa
                   </Button>
                 </CardContent>
               </Card>
@@ -241,16 +283,15 @@ const PlatformView = () => {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card className="hover:shadow-hover transition-shadow cursor-pointer">
+            <div className="grid md:grid-cols-4 gap-4">
+              <Card className="hover:shadow-hover transition-shadow cursor-pointer" onClick={() => setActiveTab('appointments')}>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                       <Calendar className="h-6 w-6 text-primary" />
                     </div>
-                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Novo Agendamento</h3>
+                  <h3 className="text-lg font-semibold mb-2">Nova Sessão</h3>
                   <p className="text-muted-foreground text-sm">
                     Agendar consulta manualmente
                   </p>
@@ -261,13 +302,12 @@ const PlatformView = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
-                      <MessageSquare className="h-6 w-6 text-accent" />
+                      <FileText className="h-6 w-6 text-accent" />
                     </div>
-                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Treinar IA</h3>
+                  <h3 className="text-lg font-semibold mb-2">Abrir Prontuário</h3>
                   <p className="text-muted-foreground text-sm">
-                    Adicionar novas informações
+                    Acessar dados do paciente
                   </p>
                 </CardContent>
               </Card>
@@ -275,14 +315,27 @@ const PlatformView = () => {
               <Card className="hover:shadow-hover transition-shadow cursor-pointer">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-warning/10 rounded-lg flex items-center justify-center">
-                      <BarChart3 className="h-6 w-6 text-warning" />
+                    <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center">
+                      <MessageCircle className="h-6 w-6 text-green-500" />
                     </div>
-                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Relatórios</h3>
+                  <h3 className="text-lg font-semibold mb-2">Enviar Lembrete</h3>
                   <p className="text-muted-foreground text-sm">
-                    Análises detalhadas
+                    WhatsApp para sessões
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-hover transition-shadow cursor-pointer" onClick={() => setActiveTab('chat')}>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 bg-warning/10 rounded-lg flex items-center justify-center">
+                      <Brain className="h-6 w-6 text-warning" />
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">Treinar IA</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Base de conhecimento
                   </p>
                 </CardContent>
               </Card>

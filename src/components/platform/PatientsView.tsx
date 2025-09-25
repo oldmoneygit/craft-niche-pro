@@ -3,28 +3,33 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
-  User,
+  Calendar,
   Phone,
   Mail,
-  Calendar,
-  FileText,
-  Plus,
+  User,
+  UserPlus,
   Search,
   MoreHorizontal,
   Edit,
   MessageSquare,
+  FileText,
+  Clock,
+  Heart,
+  Shield,
 } from 'lucide-react';
 import { mockPatients } from '@/lib/mockData';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import PatientModal from './PatientModal';
 
 const PatientsView = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
 
   const filteredPatients = mockPatients.filter(patient =>
     patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.email.toLowerCase().includes(searchTerm.toLowerCase())
+    patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.diagnosis.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getInitials = (name: string) => {
@@ -60,7 +65,7 @@ const PatientsView = () => {
           </p>
         </div>
         <Button className="bg-gradient-primary hover:shadow-hover">
-          <Plus className="h-4 w-4 mr-2" />
+          <UserPlus className="h-4 w-4 mr-2" />
           Novo Paciente
         </Button>
       </div>
@@ -83,116 +88,101 @@ const PatientsView = () => {
       {/* Patients Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPatients.map((patient) => (
-          <Card key={patient.id} className="hover:shadow-hover transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
+          <Card key={patient.id} className="hover:shadow-hover transition-shadow cursor-pointer" onClick={() => setSelectedPatientId(patient.id)}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-gradient-primary text-white">
+                  <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center">
+                    <span className="text-white font-medium">
                       {getInitials(patient.name)}
-                    </AvatarFallback>
-                  </Avatar>
+                    </span>
+                  </div>
                   <div>
-                    <CardTitle className="text-lg">{patient.name}</CardTitle>
+                    <h3 className="font-semibold">{patient.name}</h3>
                     <p className="text-sm text-muted-foreground">
                       {calculateAge(patient.birthDate)} anos
                     </p>
                   </div>
                 </div>
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                     <Button variant="ghost" size="sm">
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setSelectedPatientId(patient.id)}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Ver Prontuário
+                    </DropdownMenuItem>
                     <DropdownMenuItem>
                       <Edit className="h-4 w-4 mr-2" />
                       Editar
                     </DropdownMenuItem>
                     <DropdownMenuItem>
                       <Calendar className="h-4 w-4 mr-2" />
-                      Agendar Consulta
+                      Agendar
                     </DropdownMenuItem>
                     <DropdownMenuItem>
                       <MessageSquare className="h-4 w-4 mr-2" />
-                      Enviar Mensagem
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <FileText className="h-4 w-4 mr-2" />
-                      Ver Prontuário
+                      Mensagem
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center text-sm">
-                  <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-muted-foreground">{patient.email}</span>
+
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2 text-sm">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span className="truncate">{patient.email}</span>
                 </div>
-                <div className="flex items-center text-sm">
-                  <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-muted-foreground">{patient.phone}</span>
+                <div className="flex items-center space-x-2 text-sm">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <span>{patient.phone}</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm">
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                  <span>Convênio: {patient.insurance}</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sm">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span>Última: {new Date(patient.lastSession).toLocaleDateString('pt-BR')}</span>
                 </div>
               </div>
 
-              <div className="pt-2 border-t">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium">Status</span>
-                  <Badge
-                    variant={patient.status === 'active' ? 'secondary' : 'outline'}
-                    className={patient.status === 'active' ? 'bg-success/10 text-success' : ''}
-                  >
-                    {patient.status === 'active' ? 'Ativo' : 'Inativo'}
-                  </Badge>
-                </div>
-                
-                <div className="space-y-1 text-sm text-muted-foreground">
-                  <div className="flex justify-between">
-                    <span>Última sessão:</span>
-                    <span>{new Date(patient.lastSession).toLocaleDateString('pt-BR')}</span>
+              <div className="mt-4 pt-4 border-t">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <Badge 
+                      variant="outline"
+                      className={patient.status === 'active' ? 'border-success text-success bg-success/10' : 'border-muted text-muted-foreground'}
+                    >
+                      {patient.status === 'active' ? 'Ativo' : 'Inativo'}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {patient.sessionFrequency === 'weekly' ? 'Semanal' : 'Quinzenal'}
+                    </Badge>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Total sessões:</span>
-                    <span>{patient.totalSessions}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Cadastrado:</span>
-                    <span>{new Date(patient.registeredAt).toLocaleDateString('pt-BR')}</span>
+                  <div className="flex items-center space-x-1">
+                    <Heart className="h-4 w-4 text-rose-500" />
+                    <span className="text-sm font-medium">{patient.totalSessions}</span>
                   </div>
                 </div>
-              </div>
-
-              <div className="pt-2 border-t">
-                <p className="text-sm font-medium mb-1">Diagnóstico</p>
-                <p className="text-sm text-muted-foreground">{patient.diagnosis}</p>
-              </div>
-
-              {patient.notes && (
-                <div className="pt-2 border-t">
-                  <p className="text-sm font-medium mb-1">Observações</p>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {patient.notes}
-                  </p>
-                </div>
-              )}
-
-              <div className="pt-2 border-t flex space-x-2">
-                <Button variant="outline" size="sm" className="flex-1">
-                  <Calendar className="h-4 w-4 mr-1" />
-                  Agendar
-                </Button>
-                <Button variant="outline" size="sm" className="flex-1">
-                  <FileText className="h-4 w-4 mr-1" />
-                  Prontuário
-                </Button>
+                <p className="text-sm">
+                  <span className="font-medium text-muted-foreground">Diagnóstico:</span>
+                </p>
+                <p className="text-sm mt-1">{patient.diagnosis}</p>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      <PatientModal 
+        patientId={selectedPatientId || ''} 
+        isOpen={!!selectedPatientId} 
+        onClose={() => setSelectedPatientId(null)} 
+      />
 
       {filteredPatients.length === 0 && (
         <Card>
@@ -203,7 +193,7 @@ const PatientsView = () => {
               {searchTerm ? 'Não há pacientes com esse termo de busca.' : 'Você ainda não tem pacientes cadastrados.'}
             </p>
             <Button className="bg-gradient-primary">
-              <Plus className="h-4 w-4 mr-2" />
+              <UserPlus className="h-4 w-4 mr-2" />
               Cadastrar Primeiro Paciente
             </Button>
           </CardContent>
