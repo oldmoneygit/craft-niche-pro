@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
 import ClinicDashboard from "./pages/ClinicDashboard";
 import ClinicLogin from "./pages/ClinicLogin";
 import NutricionistaDashboard from "./pages/NutricionistaDashboard";
@@ -18,7 +19,8 @@ const App = () => (
       <BrowserRouter>
         <div className="min-h-screen bg-background">
           <Routes>
-            <Route path="/" element={<NutricionistaDashboard />} />
+            <Route path="/" element={<Index />} />
+            <Route path="/nutricionista" element={<NutricionistaDashboard />} />
             <Route path="/clinic" element={<ClinicDashboard />} />
             <Route path="/login" element={<ClinicLogin />} />
             <Route path="*" element={<NotFound />} />
