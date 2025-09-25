@@ -385,38 +385,81 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-4">
-                <Bot className="h-6 w-6 text-white" />
+            <Card className="p-6 hover:shadow-lg transition-shadow relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 opacity-50"></div>
+              <div className="relative">
+                <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-6 shadow-lg">
+                  <Bot className="h-7 w-7 text-white" />
+                </div>
+                
+                <div className="mb-4">
+                  <Badge className="mb-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white border-none text-xs font-medium">
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    100% EXCLUSIVO PARA VOCÊ
+                  </Badge>
+                  <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Seu Funcionário Virtual Exclusivo
+                  </h3>
+                </div>
+                
+                <p className="text-muted-foreground mb-6 leading-relaxed">
+                  Cada negócio recebe seu próprio AI Agent exclusivo, treinado especificamente para sua área. 
+                  Funciona como um funcionário dedicado que trabalha <span className="font-semibold text-purple-600">24/7 sem parar</span>, 
+                  atendendo no WhatsApp de forma natural como se fosse uma pessoa real.
+                </p>
+                
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-blue-100">
+                    <div className="w-5 h-5 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <CheckCircle className="h-3 w-3 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-800">Agente 100% exclusivo</span>
+                      <p className="text-sm text-gray-600 mt-0.5">Só seu negócio tem acesso ao seu assistente</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-green-100">
+                    <div className="w-5 h-5 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <CheckCircle className="h-3 w-3 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-800">WhatsApp automático</span>
+                      <p className="text-sm text-gray-600 mt-0.5">Atende naturalmente como uma pessoa real</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-purple-100">
+                    <div className="w-5 h-5 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <CheckCircle className="h-3 w-3 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-800">Agenda via WhatsApp</span>
+                      <p className="text-sm text-gray-600 mt-0.5">Marca consultas e serviços automaticamente</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-orange-100">
+                    <div className="w-5 h-5 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <CheckCircle className="h-3 w-3 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-800">Lembretes automáticos</span>
+                      <p className="text-sm text-gray-600 mt-0.5">Reativa clientes inativos e fideliza</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-blue-100">
+                    <div className="w-5 h-5 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <CheckCircle className="h-3 w-3 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-800">Trabalha 24/7</span>
+                      <p className="text-sm text-gray-600 mt-0.5">Nunca para, nunca tira férias, sempre disponível</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold mb-3">Seu Funcionário Virtual Exclusivo</h3>
-              <p className="text-muted-foreground mb-4">
-                Cada negócio recebe seu próprio AI Agent exclusivo, treinado especificamente para sua área. 
-                Funciona como um funcionário dedicado que trabalha 24/7 sem parar, atendendo no WhatsApp 
-                de forma natural como se fosse uma pessoa real.
-              </p>
-              <ul className="text-sm space-y-1">
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-3 w-3 text-green-500" />
-                  <span className="font-medium">Agente 100% exclusivo</span> - só seu negócio tem acesso
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-3 w-3 text-green-500" />
-                  <span className="font-medium">WhatsApp automático</span> - atende naturalmente como pessoa
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-3 w-3 text-green-500" />
-                  <span className="font-medium">Agenda via WhatsApp</span> - marca consultas/serviços
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-3 w-3 text-green-500" />
-                  <span className="font-medium">Lembretes automáticos</span> - reativa clientes inativos
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-3 w-3 text-green-500" />
-                  <span className="font-medium">Trabalha 24/7</span> - nunca para, nunca tira férias
-                </li>
-              </ul>
             </Card>
 
             <Card className="p-6 hover:shadow-lg transition-shadow">
