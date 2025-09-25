@@ -80,6 +80,7 @@ export default {
         'card': 'var(--shadow-card)',
         'hover': 'var(--shadow-hover)',
         'glow': 'var(--shadow-glow)',
+        'neon': 'var(--shadow-neon)',
       },
       borderRadius: {
         lg: "var(--radius)",
