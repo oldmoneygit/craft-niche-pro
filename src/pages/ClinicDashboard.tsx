@@ -193,32 +193,32 @@ export default function ClinicDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <Button className="calm-button h-auto p-4 flex flex-col items-center gap-3">
+                  <Button className="action-primary h-auto p-4 flex flex-col items-center gap-3 rounded-xl shadow-card">
                     <UserPlus className="h-6 w-6" />
                     <div className="text-center">
                       <div className="font-medium">Novo Paciente</div>
-                      <div className="text-xs opacity-70">Cadastrar paciente</div>
+                      <div className="text-xs opacity-90">Cadastrar paciente</div>
                     </div>
                   </Button>
-                  <Button className="calm-button h-auto p-4 flex flex-col items-center gap-3">
+                  <Button className="action-secondary h-auto p-4 flex flex-col items-center gap-3 rounded-xl shadow-card">
                     <CalendarPlus className="h-6 w-6" />
                     <div className="text-center">
                       <div className="font-medium">Agendar Consulta</div>
-                      <div className="text-xs opacity-70">Nova consulta</div>
+                      <div className="text-xs opacity-90">Nova consulta</div>
                     </div>
                   </Button>
-                  <Button className="calm-button h-auto p-4 flex flex-col items-center gap-3">
+                  <Button className="action-accent h-auto p-4 flex flex-col items-center gap-3 rounded-xl shadow-card">
                     <FileText className="h-6 w-6" />
                     <div className="text-center">
                       <div className="font-medium">Relatório</div>
-                      <div className="text-xs opacity-70">Gerar relatório</div>
+                      <div className="text-xs opacity-90">Gerar relatório</div>
                     </div>
                   </Button>
-                  <Button className="calm-button h-auto p-4 flex flex-col items-center gap-3">
+                  <Button className="action-success h-auto p-4 flex flex-col items-center gap-3 rounded-xl shadow-card">
                     <MessageCircle className="h-6 w-6" />
                     <div className="text-center">
                       <div className="font-medium">IA Terapêutica</div>
-                      <div className="text-xs opacity-70">Assistente virtual</div>
+                      <div className="text-xs opacity-90">Assistente virtual</div>
                     </div>
                   </Button>
                 </div>

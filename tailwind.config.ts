@@ -82,6 +82,7 @@ export default {
         'card': 'var(--shadow-card)',
         'hover': 'var(--shadow-hover)',
         'glow': 'var(--shadow-glow)',
+        'soft': 'var(--shadow-soft)',
         'neon': 'var(--shadow-neon)',
       },
       borderRadius: {
