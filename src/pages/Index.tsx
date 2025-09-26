@@ -43,7 +43,7 @@ const Index = () => {
             <a href="#exemplos" className="text-muted-foreground hover:text-foreground transition-colors">Exemplos</a>
             <a href="#recursos" className="text-muted-foreground hover:text-foreground transition-colors">Recursos</a>
             <a href="#precos" className="text-muted-foreground hover:text-foreground transition-colors">Preços</a>
-            <Button variant="outline" onClick={() => navigate('/login')}>Login</Button>
+            <Button variant="outline" onClick={() => navigate('/admin')}>Admin</Button>
             <Button className="action-primary" onClick={() => navigate('/onboarding')}>
               Criar Plataforma
             </Button>
@@ -171,7 +171,7 @@ const Index = () => {
 
                 <Button 
                   className="w-full bg-green-600 hover:bg-green-700 text-white group"
-                  onClick={() => navigate('/nutricionista')}
+                  onClick={() => navigate('/platform/gabriel-gandin')}
                 >
                   Ver Plataforma em Ação
                   <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -233,7 +233,7 @@ const Index = () => {
 
                 <Button 
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white group"
-                  onClick={() => navigate('/clinic')}
+                  onClick={() => navigate('/platform/clinica-exemplo')}
                 >
                   Ver Plataforma em Ação
                   <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />

@@ -186,12 +186,15 @@ const Onboarding = () => {
     // Simular criação da plataforma
     console.log("Generating platform with data:", formData);
     
-    // Redirecionar baseado no tipo de plataforma
-    if (formData.businessType === "nutricionista") {
-      navigate('/nutricionista');
-    } else {
-      navigate('/clinic');
-    }
+    // Gerar ID único baseado no nome do negócio
+    const clientId = formData.businessName
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '-')
+      .replace(/--+/g, '-')
+      .replace(/^-|-$/g, '');
+    
+    // Redirecionar para a nova plataforma criada
+    navigate(`/platform/${clientId}`);
   };
 
   const getSelectedBusinessData = () => {
