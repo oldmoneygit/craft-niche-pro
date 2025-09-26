@@ -5,9 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ClientConfigProvider } from "@/core/contexts/ClientConfigContext";
 import Index from "./pages/Index";
-import ClinicDashboard from "./pages/ClinicDashboard";
-import ClinicLogin from "./pages/ClinicLogin";
-import NutricionistaDashboard from "./pages/NutricionistaDashboard";
+import RedirectToGabrielGandin from "./components/redirects/RedirectToGabrielGandin";
+import RedirectToClinicaExemplo from "./components/redirects/RedirectToClinicaExemplo";
+import RedirectToAdmin from "./components/redirects/RedirectToAdmin";
 import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -39,10 +39,10 @@ const App = () => (
             <Route path="/platform/:clientId/clients" element={<PlatformClients />} />
             <Route path="/platform/:clientId/chat" element={<PlatformChat />} />
             
-            {/* Rotas antigas (manter por compatibilidade) */}
-            <Route path="/nutricionista" element={<NutricionistaDashboard />} />
-            <Route path="/clinic" element={<ClinicDashboard />} />
-            <Route path="/login" element={<ClinicLogin />} />
+            {/* Redirecionamentos das rotas antigas para as novas */}
+            <Route path="/nutricionista" element={<RedirectToGabrielGandin />} />
+            <Route path="/clinic" element={<RedirectToClinicaExemplo />} />
+            <Route path="/login" element={<RedirectToAdmin />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>
