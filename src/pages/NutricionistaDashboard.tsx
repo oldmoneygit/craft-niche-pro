@@ -17,7 +17,8 @@ import {
   Settings,
   Heart,
   Leaf,
-  Activity
+  Activity,
+  ClipboardList
 } from "lucide-react";
 import { mockNutriData } from "@/lib/mockDataNutricionista";
 import PatientsManagement from "@/components/nutricionista/PatientsManagement";
@@ -26,6 +27,7 @@ import MealPlansManager from "@/components/nutricionista/MealPlansManager";
 import FinancialDashboard from "@/components/nutricionista/FinancialDashboard";
 import ChatAI from "@/components/nutricionista/ChatAI";
 import AnalyticsReports from "@/components/nutricionista/AnalyticsReports";
+import QuestionnaireManager from "@/components/nutricionista/QuestionnaireManager";
 
 const NutricionistaDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -96,6 +98,7 @@ const NutricionistaDashboard = () => {
               { id: "patients", label: "Pacientes", icon: Users },
               { id: "appointments", label: "Agenda", icon: Calendar },
               { id: "meal-plans", label: "Planos Alimentares", icon: Apple },
+              { id: "questionnaires", label: "Questionários", icon: ClipboardList },
               { id: "financial", label: "Financeiro", icon: DollarSign },
               { id: "chat-ai", label: "Chat IA", icon: MessageSquare },
               { id: "analytics", label: "Relatórios", icon: FileText }
@@ -266,6 +269,7 @@ const NutricionistaDashboard = () => {
           {activeTab === "patients" && <PatientsManagement />}
           {activeTab === "appointments" && <AppointmentScheduler />}
           {activeTab === "meal-plans" && <MealPlansManager />}
+          {activeTab === "questionnaires" && <QuestionnaireManager />}
           {activeTab === "financial" && <FinancialDashboard />}
           {activeTab === "chat-ai" && <ChatAI />}
           {activeTab === "analytics" && <AnalyticsReports />}
