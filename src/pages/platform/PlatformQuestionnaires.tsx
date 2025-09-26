@@ -2,9 +2,9 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 import DashboardTemplate from '@/core/layouts/DashboardTemplate';
-import ChatAI from '@/components/nutricionista/ChatAI';
+import QuestionnaireManager from '@/components/nutricionista/QuestionnaireManager';
 
-export default function PlatformChat() {
+export default function PlatformQuestionnaires() {
   const { clientId } = useParams<{ clientId: string }>();
   const { setClientId, clientConfig, loading } = useClientConfig();
 
@@ -15,7 +15,7 @@ export default function PlatformChat() {
   }, [clientId, setClientId]);
 
   return (
-    <DashboardTemplate title="Chat & WhatsApp">
+    <DashboardTemplate title="Questionários">
       {loading ? (
         <div className="flex items-center justify-center h-full">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
@@ -28,7 +28,7 @@ export default function PlatformChat() {
           </div>
         </div>
       ) : (
-        <ChatAI />
+        <QuestionnaireManager />
       )}
     </DashboardTemplate>
   );

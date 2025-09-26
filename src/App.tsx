@@ -15,6 +15,13 @@ import PlatformDashboard from "./pages/platform/PlatformDashboard";
 import PlatformLogin from "./pages/platform/PlatformLogin";
 import PlatformClients from "./pages/platform/PlatformClients";
 import PlatformChat from "./pages/platform/PlatformChat";
+import PlatformQuestionnaires from "./pages/platform/PlatformQuestionnaires";
+import PlatformMealPlans from "./pages/platform/PlatformMealPlans";
+import PlatformFinancial from "./pages/platform/PlatformFinancial";
+import PlatformScheduling from "./pages/platform/PlatformScheduling";
+import PlatformAIAgent from "./pages/platform/PlatformAIAgent";
+import PlatformAnalytics from "./pages/platform/PlatformAnalytics";
+import PlatformSettings from "./pages/platform/PlatformSettings";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +45,13 @@ const App = () => (
             <Route path="/platform/:clientId/login" element={<PlatformLogin />} />
             <Route path="/platform/:clientId/clients" element={<PlatformClients />} />
             <Route path="/platform/:clientId/chat" element={<PlatformChat />} />
+            <Route path="/platform/:clientId/ai-agent" element={<PlatformAIAgent />} />
+            <Route path="/platform/:clientId/scheduling" element={<PlatformScheduling />} />
+            <Route path="/platform/:clientId/analytics" element={<PlatformAnalytics />} />
+            <Route path="/platform/:clientId/questionnaires" element={<PlatformQuestionnaires />} />
+            <Route path="/platform/:clientId/meal-plans" element={<PlatformMealPlans />} />
+            <Route path="/platform/:clientId/financial" element={<PlatformFinancial />} />
+            <Route path="/platform/:clientId/settings" element={<PlatformSettings />} />
             
             {/* Redirecionamentos das rotas antigas para as novas */}
             <Route path="/nutricionista" element={<RedirectToGabrielGandin />} />
