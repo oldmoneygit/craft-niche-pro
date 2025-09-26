@@ -16,10 +16,13 @@ export function ClientConfigProvider({ children }: { children: React.ReactNode }
   const [loading, setLoading] = useState(false);
 
   const setClientId = (clientId: string) => {
+    console.log('ClientConfigContext - setClientId called with:', clientId);
     setLoading(true);
     // Simula carregamento async - no futuro será uma chamada real ao backend
     setTimeout(() => {
+      console.log('ClientConfigContext - getting config for:', clientId);
       const config = getClientConfig(clientId);
+      console.log('ClientConfigContext - config found:', config);
       setClientConfig(config);
       setLoading(false);
     }, 100);

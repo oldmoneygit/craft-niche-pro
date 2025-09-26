@@ -10,10 +10,18 @@ export default function PlatformDashboard() {
   const { setClientId, clientConfig, loading } = useClientConfig();
 
   React.useEffect(() => {
+    console.log('PlatformDashboard - clientId:', clientId);
     if (clientId) {
+      console.log('PlatformDashboard - setting clientId:', clientId);
       setClientId(clientId);
     }
   }, [clientId, setClientId]);
+
+  console.log('PlatformDashboard - render state:', {
+    loading,
+    clientConfig: clientConfig?.id,
+    clientId
+  });
 
   return (
     <DashboardTemplate title="Dashboard">
