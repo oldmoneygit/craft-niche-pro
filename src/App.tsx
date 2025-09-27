@@ -22,6 +22,7 @@ import PlatformScheduling from "./pages/platform/PlatformScheduling";
 import PlatformAIAgent from "./pages/platform/PlatformAIAgent";
 import PlatformAnalytics from "./pages/platform/PlatformAnalytics";
 import PlatformSettings from "./pages/platform/PlatformSettings";
+import QuestionnairePublic from "./pages/QuestionnairePublic";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,9 @@ const App = () => (
             <Route path="/platform/:clientId/meal-plans" element={<PlatformMealPlans />} />
             <Route path="/platform/:clientId/financial" element={<PlatformFinancial />} />
             <Route path="/platform/:clientId/settings" element={<PlatformSettings />} />
+            
+            {/* Questionários Públicos */}
+            <Route path="/questionnaire/:questionnaireId" element={<QuestionnairePublic />} />
             
             {/* Redirecionamentos das rotas antigas para as novas */}
             <Route path="/nutricionista" element={<RedirectToGabrielGandin />} />

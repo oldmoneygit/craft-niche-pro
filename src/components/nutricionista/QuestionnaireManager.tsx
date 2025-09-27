@@ -18,81 +18,118 @@ import {
   FileText,
   Clock,
   CheckCircle,
-  Circle
+  Circle,
+  Settings,
+  Eye,
+  Link
 } from "lucide-react";
 
-interface Question {
-  id: string;
-  type: "multiple-choice" | "text" | "number" | "scale" | "yes-no";
-  title: string;
-  options?: string[];
-  required: boolean;
-}
-
-interface Questionnaire {
-  id: string;
-  title: string;
-  description: string;
-  questions: Question[];
-  active: boolean;
-  frequency: "weekly" | "biweekly" | "monthly";
-  responses: number;
-  createdAt: string;
-}
+// Import new types and components
+import { Questionnaire, Question, FeedbackRange, QuestionOption } from "@/components/questionnaires/types/questionnaire";
+import { QuestionEditor } from "@/components/questionnaires/QuestionEditor";
+import { FeedbackRangeEditor } from "@/components/questionnaires/FeedbackRangeEditor";
 
 const QuestionnaireManager = () => {
   const [activeTab, setActiveTab] = useState("questionnaires");
   const [questionnaires, setQuestionnaires] = useState<Questionnaire[]>([
     {
       id: "1",
-      title: "Avaliação Semanal de Rotina",
-      description: "Questionário para acompanhar hábitos alimentares e de sono",
+      title: "Avaliação Nutricional Rápida",
+      description: "Questionário para avaliar hábitos alimentares e receber feedback personalizado",
       questions: [
         {
           id: "q1",
-          type: "number",
-          title: "Quantas porções de frutas você consumiu por dia em média?",
+          type: "single_select",
+          title: "Quantas porções de frutas você consumiu por dia nos últimos dias?",
+          options: [
+            { id: "o1", text: "Três ou mais porções", score: 3 },
+            { id: "o2", text: "Uma a duas porções", score: 1 },
+            { id: "o3", text: "Nenhuma porção", score: 0 }
+          ],
           required: true
         },
         {
           id: "q2",
-          type: "number",
-          title: "Quantas horas de sono você teve por noite em média?",
+          type: "single_select",
+          title: "Com que frequência você consome vegetais?",
+          options: [
+            { id: "o4", text: "Diariamente", score: 5 },
+            { id: "o5", text: "Algumas vezes por semana", score: 3 },
+            { id: "o6", text: "Raramente", score: 1 }
+          ],
           required: true
         },
         {
           id: "q3",
           type: "scale",
-          title: "Como você avalia sua disposição durante a semana? (1-10)",
-          required: true
+          title: "Como você avalia sua disposição? (1-10)",
+          required: true,
+          minScore: 1,
+          maxScore: 10
         },
         {
           id: "q4",
-          type: "yes-no",
-          title: "Você conseguiu seguir o plano alimentar na maior parte da semana?",
+          type: "single_select",
+          title: "Você pratica exercícios regularmente?",
+          options: [
+            { id: "o7", text: "Sim, mais de 3 vezes por semana", score: 4 },
+            { id: "o8", text: "Sim, 1-2 vezes por semana", score: 2 },
+            { id: "o9", text: "Não pratico exercícios", score: 0 }
+          ],
           required: true
+        }
+      ],
+      feedbackRanges: [
+        {
+          id: "f1",
+          minScore: 0,
+          maxScore: 5,
+          message: "Seus hábitos precisam de atenção. Considere consultar um nutricionista para melhorar sua alimentação e saúde.",
+          type: "text"
         },
         {
-          id: "q5",
-          type: "text",
-          title: "Descreva como se sentiu durante a semana:",
-          required: false
+          id: "f2",
+          minScore: 6,
+          maxScore: 12,
+          message: "Você está no caminho certo! Continue se alimentando de forma saudável e mantendo uma rotina de exercícios.",
+          type: "text"
+        },
+        {
+          id: "f3",
+          minScore: 13,
+          maxScore: 22,
+          message: "Parabéns! Seus hábitos alimentares e de vida são excelentes. Continue assim!",
+          type: "text"
         }
       ],
       active: true,
       frequency: "weekly",
       responses: 24,
-      createdAt: "2024-01-15"
+      createdAt: "2024-01-15",
+      maxPossibleScore: 22
     }
   ]);
 
   const [isCreating, setIsCreating] = useState(false);
   const [editingQuestionnaire, setEditingQuestionnaire] = useState<Questionnaire | null>(null);
-  const [newQuestion, setNewQuestion] = useState<Partial<Question>>({
-    type: "text",
-    title: "",
-    required: true
-  });
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+  const [showQuestionEditor, setShowQuestionEditor] = useState(false);
+
+  const calculateMaxScore = (questions: Question[]): number => {
+    return questions.reduce((total, question) => {
+      switch (question.type) {
+        case "single_select":
+          return total + Math.max(...(question.options?.map(opt => opt.score) || [0]));
+        case "multi_select":
+          return total + (question.options?.reduce((sum, opt) => sum + Math.max(0, opt.score), 0) || 0);
+        case "scale":
+        case "number":
+          return total + (question.maxScore || 10);
+        default:
+          return total;
+      }
+    }, 0);
+  };
 
   const handleCreateQuestionnaire = () => {
     const newQuestionnaire: Questionnaire = {
@@ -100,10 +137,12 @@ const QuestionnaireManager = () => {
       title: "Novo Questionário",
       description: "",
       questions: [],
+      feedbackRanges: [],
       active: false,
       frequency: "weekly",
       responses: 0,
-      createdAt: new Date().toISOString().split('T')[0]
+      createdAt: new Date().toISOString().split('T')[0],
+      maxPossibleScore: 0
     };
     setEditingQuestionnaire(newQuestionnaire);
     setIsCreating(true);
@@ -111,11 +150,16 @@ const QuestionnaireManager = () => {
 
   const handleSaveQuestionnaire = () => {
     if (editingQuestionnaire) {
+      const updatedQuestionnaire = {
+        ...editingQuestionnaire,
+        maxPossibleScore: calculateMaxScore(editingQuestionnaire.questions)
+      };
+      
       if (isCreating) {
-        setQuestionnaires([...questionnaires, editingQuestionnaire]);
+        setQuestionnaires([...questionnaires, updatedQuestionnaire]);
       } else {
         setQuestionnaires(questionnaires.map(q => 
-          q.id === editingQuestionnaire.id ? editingQuestionnaire : q
+          q.id === updatedQuestionnaire.id ? updatedQuestionnaire : q
         ));
       }
       setEditingQuestionnaire(null);
@@ -123,25 +167,48 @@ const QuestionnaireManager = () => {
     }
   };
 
-  const handleAddQuestion = () => {
-    if (editingQuestionnaire && newQuestion.title) {
-      const question: Question = {
-        id: Date.now().toString(),
-        type: newQuestion.type as Question["type"],
-        title: newQuestion.title,
-        options: newQuestion.options,
-        required: newQuestion.required || false
-      };
+  const handleSaveQuestion = (question: Question) => {
+    if (editingQuestionnaire) {
+      let updatedQuestions;
+      if (editingQuestion) {
+        // Update existing question
+        updatedQuestions = editingQuestionnaire.questions.map(q => 
+          q.id === question.id ? question : q
+        );
+      } else {
+        // Add new question
+        updatedQuestions = [...editingQuestionnaire.questions, question];
+      }
       
       setEditingQuestionnaire({
         ...editingQuestionnaire,
-        questions: [...editingQuestionnaire.questions, question]
+        questions: updatedQuestions
       });
-      
-      setNewQuestion({
-        type: "text",
-        title: "",
-        required: true
+    }
+    
+    setShowQuestionEditor(false);
+    setEditingQuestion(null);
+  };
+
+  const handleEditQuestion = (question: Question) => {
+    setEditingQuestion(question);
+    setShowQuestionEditor(true);
+  };
+
+  const handleDeleteQuestion = (questionId: string) => {
+    if (editingQuestionnaire) {
+      setEditingQuestionnaire({
+        ...editingQuestionnaire,
+        questions: editingQuestionnaire.questions.filter(q => q.id !== questionId)
+      });
+    }
+  };
+
+  const handleUpdateFeedbackRanges = (feedbackRanges: FeedbackRange[]) => {
+    if (editingQuestionnaire) {
+      setEditingQuestionnaire({
+        ...editingQuestionnaire,
+        feedbackRanges
       });
     }
   };
@@ -173,6 +240,21 @@ const QuestionnaireManager = () => {
     }
   ];
 
+  if (showQuestionEditor) {
+    return (
+      <div className="space-y-6">
+        <QuestionEditor
+          question={editingQuestion || undefined}
+          onSave={handleSaveQuestion}
+          onCancel={() => {
+            setShowQuestionEditor(false);
+            setEditingQuestion(null);
+          }}
+        />
+      </div>
+    );
+  }
+
   if (editingQuestionnaire) {
     return (
       <div className="space-y-6">
@@ -181,7 +263,10 @@ const QuestionnaireManager = () => {
             {isCreating ? "Criar Questionário" : "Editar Questionário"}
           </h2>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setEditingQuestionnaire(null)}>
+            <Button variant="outline" onClick={() => {
+              setEditingQuestionnaire(null);
+              setIsCreating(false);
+            }}>
               Cancelar
             </Button>
             <Button onClick={handleSaveQuestionnaire}>
@@ -247,7 +332,12 @@ const QuestionnaireManager = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Perguntas ({editingQuestionnaire.questions.length})</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Perguntas ({editingQuestionnaire.questions.length})</CardTitle>
+              <Badge variant="outline">
+                Pontuação Máxima: {calculateMaxScore(editingQuestionnaire.questions)}
+              </Badge>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {editingQuestionnaire.questions.map((question, index) => (
@@ -255,88 +345,63 @@ const QuestionnaireManager = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">#{index + 1}</span>
-                    <Badge variant="secondary">{question.type}</Badge>
+                    <Badge variant="secondary">{question.type.replace('_', ' ')}</Badge>
                     {question.required && <Badge variant="destructive" className="text-xs">Obrigatória</Badge>}
+                    {question.options && (
+                      <Badge variant="outline">{question.options.length} opções</Badge>
+                    )}
                   </div>
                   <p className="font-medium mt-1">{question.title}</p>
+                  {question.options && (
+                    <div className="flex gap-1 mt-2">
+                      {question.options.slice(0, 3).map(option => (
+                        <Badge key={option.id} variant="outline" className="text-xs">
+                          {option.text}: +{option.score}
+                        </Badge>
+                      ))}
+                      {question.options.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{question.options.length - 3} mais
+                        </Badge>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setEditingQuestionnaire({
-                      ...editingQuestionnaire,
-                      questions: editingQuestionnaire.questions.filter(q => q.id !== question.id)
-                    });
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEditQuestion(question)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteQuestion(question.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ))}
 
-            <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 space-y-4">
-              <h4 className="font-medium">Adicionar Nova Pergunta</h4>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Tipo da Pergunta</Label>
-                  <Select
-                    value={newQuestion.type}
-                    onValueChange={(value: Question["type"]) =>
-                      setNewQuestion({ ...newQuestion, type: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="text">Texto Livre</SelectItem>
-                      <SelectItem value="number">Número</SelectItem>
-                      <SelectItem value="scale">Escala (1-10)</SelectItem>
-                      <SelectItem value="yes-no">Sim/Não</SelectItem>
-                      <SelectItem value="multiple-choice">Múltipla Escolha</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Obrigatória?</Label>
-                  <RadioGroup
-                    value={newQuestion.required ? "yes" : "no"}
-                    onValueChange={(value) =>
-                      setNewQuestion({ ...newQuestion, required: value === "yes" })
-                    }
-                    className="flex gap-4"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="yes" id="required-yes" />
-                      <Label htmlFor="required-yes">Sim</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="no" id="required-no" />
-                      <Label htmlFor="required-no">Não</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Pergunta</Label>
-                <Input
-                  value={newQuestion.title || ""}
-                  onChange={(e) => setNewQuestion({ ...newQuestion, title: e.target.value })}
-                  placeholder="Digite sua pergunta aqui..."
-                />
-              </div>
-
-              <Button onClick={handleAddQuestion} disabled={!newQuestion.title}>
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar Pergunta
-              </Button>
-            </div>
+            <Button
+              onClick={() => setShowQuestionEditor(true)}
+              variant="outline"
+              className="w-full"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar Nova Pergunta
+            </Button>
           </CardContent>
         </Card>
+
+        <FeedbackRangeEditor
+          feedbackRanges={editingQuestionnaire.feedbackRanges}
+          maxPossibleScore={calculateMaxScore(editingQuestionnaire.questions)}
+          onChange={handleUpdateFeedbackRanges}
+        />
       </div>
     );
   }
@@ -381,6 +446,26 @@ const QuestionnaireManager = () => {
                       <Button
                         variant="outline"
                         size="sm"
+                        onClick={() => {
+                          window.open(`/questionnaire/${questionnaire.id}`, '_blank');
+                        }}
+                        title="Visualizar questionário público"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/questionnaire/${questionnaire.id}`);
+                        }}
+                        title="Copiar link público"
+                      >
+                        <Link className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => setEditingQuestionnaire(questionnaire)}
                       >
                         <Edit className="h-4 w-4" />
@@ -414,6 +499,14 @@ const QuestionnaireManager = () => {
                     <div className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
                       {questionnaire.frequency === "weekly" ? "Semanal" : questionnaire.frequency === "biweekly" ? "Quinzenal" : "Mensal"}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <BarChart3 className="h-4 w-4" />
+                      {questionnaire.maxPossibleScore} pts máx
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Settings className="h-4 w-4" />
+                      {questionnaire.feedbackRanges.length} feedbacks
                     </div>
                   </div>
                 </CardContent>
