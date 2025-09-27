@@ -10,7 +10,7 @@ import { Eye, EyeOff } from 'lucide-react';
 
 export default function PlatformLogin() {
   const { clientId } = useParams<{ clientId: string }>();
-  const { setClientId, clientConfig } = useClientConfig();
+  const { setClientId, clientConfig, loading, error, clearError } = useClientConfig();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [credentials, setCredentials] = useState({
@@ -19,7 +19,7 @@ export default function PlatformLogin() {
   });
 
   React.useEffect(() => {
-    if (clientId) {
+    if (clientId && clientId.trim()) {
       setClientId(clientId);
     }
   }, [clientId, setClientId]);
@@ -30,13 +30,35 @@ export default function PlatformLogin() {
     navigate(`/platform/${clientId}`);
   };
 
-  if (!clientConfig) {
+  if (loading) {
     return (
       <BaseTemplate>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground mb-4">Plataforma não encontrada</h1>
-            <p className="text-muted-foreground">A plataforma solicitada não existe ou não está disponível.</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Carregando plataforma...</p>
+          </div>
+        </div>
+      </BaseTemplate>
+    );
+  }
+
+  if (error || !clientConfig) {
+    return (
+      <BaseTemplate>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-foreground mb-4">
+              {error ? 'Erro ao carregar plataforma' : 'Plataforma não encontrada'}
+            </h1>
+            <p className="text-muted-foreground mb-4">
+              {error || 'A plataforma solicitada não existe ou não está disponível.'}
+            </p>
+            {error && (
+              <Button onClick={() => { clearError(); if (clientId) setClientId(clientId); }}>
+                Tentar novamente
+              </Button>
+            )}
           </div>
         </div>
       </BaseTemplate>

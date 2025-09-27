@@ -6,10 +6,10 @@ import FinancialDashboard from '@/components/nutricionista/FinancialDashboard';
 
 export default function PlatformFinancial() {
   const { clientId } = useParams<{ clientId: string }>();
-  const { setClientId, clientConfig, loading } = useClientConfig();
+  const { setClientId, clientConfig, loading, error, clearError } = useClientConfig();
 
   React.useEffect(() => {
-    if (clientId) {
+    if (clientId && clientId.trim()) {
       setClientId(clientId);
     }
   }, [clientId, setClientId]);
