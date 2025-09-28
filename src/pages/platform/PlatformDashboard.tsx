@@ -35,22 +35,33 @@ export default function PlatformDashboard() {
     }
   }, [clientId, setClientId]);
 
-  const MetricCard = ({ title, value, icon: Icon, trend, color = "primary" }: any) => (
-    <Card className="metric-card hover:shadow-md transition-shadow">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{title}</CardTitle>
-        <Icon className={`h-5 w-5 text-${color}`} />
-      </CardHeader>
-      <CardContent>
-        <div className="text-xl lg:text-2xl font-bold text-foreground whitespace-nowrap">{value}</div>
-        {trend && (
-          <p className="text-xs text-muted-foreground mt-1">
-            <span className="text-success font-medium">+{trend}%</span> vs mês anterior
-          </p>
-        )}
-      </CardContent>
-    </Card>
-  );
+  const MetricCard = ({ title, value, icon: Icon, trend, color = "blue" }: any) => {
+    const colorClasses = {
+      blue: "bg-metric-blue text-white",
+      green: "bg-metric-green text-white", 
+      orange: "bg-metric-orange text-white",
+      purple: "bg-metric-purple text-white"
+    };
+
+    return (
+      <Card className="metric-card hover:shadow-md transition-shadow overflow-hidden">
+        <CardContent className="p-0">
+          <div className={`${colorClasses[color]} p-4`}>
+            <div className="flex items-center justify-between mb-2">
+              <Icon className="h-8 w-8 text-white/90" />
+              {trend && (
+                <span className="text-xs bg-white/20 px-2 py-1 rounded-full font-medium">
+                  +{trend}
+                </span>
+              )}
+            </div>
+            <div className="text-sm font-medium text-white/90 mb-1">{title}</div>
+            <div className="text-2xl font-bold text-white">{value}</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   const QuickActionButton = ({ icon: Icon, label, onClick, bgColor, hoverColor, textColor }: any) => (
     <Button 
@@ -76,150 +87,148 @@ export default function PlatformDashboard() {
           </div>
         </div>
       ) : (
-        <div className="flex-1 space-y-8 p-6">
+        <div className="flex-1 space-y-6">
+          {/* Welcome Header */}
+          <div className="bg-primary p-6 text-white rounded-2xl mx-6 mt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold mb-2">
+                  Bem-vindo, {clientConfig?.branding.companyName.split(' ')[0]}! 👋
+                </h1>
+                <p className="text-primary-foreground/80">
+                  Hoje você tem {dashboardMetrics.consultationsToday} consultas agendadas e {dashboardMetrics.pendingTasks} novos questionários respondidos
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-primary-foreground/80">Hoje</div>
+                <div className="text-lg font-semibold">{new Date().toLocaleDateString('pt-BR')}</div>
+              </div>
+            </div>
+          </div>
+
           {/* Metrics Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-6">
             <MetricCard
               title="Pacientes Ativos"
-              value={dashboardMetrics.patientsActive}
+              value="127"
               icon={Users}
-              trend={8}
-              color="primary"
+              trend="+8%"
+              color="blue"
+            />
+            <MetricCard
+              title="Receita Mensal"
+              value="R$ 28.500"
+              icon={DollarSign}
+              trend="+12%"
+              color="green"
             />
             <MetricCard
               title="Consultas Hoje"
-              value={dashboardMetrics.consultationsToday}
+              value="8"
               icon={Calendar}
-              color="info"
+              trend="+2"
+              color="orange"
             />
             <MetricCard
-              title="Próximas Consultas"
-              value={`${dashboardMetrics.nextWeekConsultations}`}
-              icon={Activity}
-              color="warning"
-            />
-            <MetricCard
-              title="Faturamento Mensal"
-              value={`R$ ${dashboardMetrics.monthlyRevenue.toLocaleString()}`}
-              icon={DollarSign}
-              trend={12}
-              color="success"
-            />
-            <MetricCard
-              title="Taxa de Renovação"
-              value={`${dashboardMetrics.renovationRate}%`}
+              title="Taxa de Adesão"
+              value="89%"
               icon={TrendingUp}
-              trend={5}
-              color="primary"
+              trend="+5%"
+              color="purple"
             />
           </div>
 
-          {/* Alerts */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="border-orange-200 bg-orange-50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-orange-700 flex items-center gap-2 text-base">
-                  <Bell className="h-5 w-5" />
-                  Planos a Vencer
-                </CardTitle>
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 px-6">
+
+            {/* Consultas de Hoje */}
+            <Card className="shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between pb-4">
+                <CardTitle className="text-lg font-semibold">Consultas de Hoje</CardTitle>
+                <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
+                  Ver agenda completa
+                </Button>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-orange-800">{dashboardMetrics.plansExpiring}</div>
-                <p className="text-sm text-orange-600">Próximos 7 dias</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-red-200 bg-red-50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-red-700 flex items-center gap-2 text-base">
-                  <Users className="h-5 w-5" />
-                  Pacientes Inativos
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-800">{dashboardMetrics.inactivePatients}</div>
-                <p className="text-sm text-red-600">Há mais de 30 dias</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-blue-200 bg-blue-50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-blue-700 flex items-center gap-2 text-base">
-                  <FileText className="h-5 w-5" />
-                  Tarefas Pendentes
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-blue-800">{dashboardMetrics.pendingTasks}</div>
-                <p className="text-sm text-blue-600">Planos para revisar</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Quick Actions */}
-          <Card className="shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold">Ações Rápidas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <QuickActionButton
-                  icon={Plus}
-                  label="Nova Consulta"
-                  onClick={() => window.location.href = `/platform/${clientId}/scheduling`}
-                  bgColor="bg-green-500"
-                  hoverColor="hover:bg-green-600"
-                  textColor="text-white"
-                />
-                <QuickActionButton
-                  icon={MessageSquare}
-                  label="Enviar Mensagem"
-                  onClick={() => window.location.href = `/platform/${clientId}/chat`}
-                  bgColor="bg-blue-500"
-                  hoverColor="hover:bg-blue-600"
-                  textColor="text-white"
-                />
-                <QuickActionButton
-                  icon={Utensils}
-                  label="Criar Plano"
-                  onClick={() => window.location.href = `/platform/${clientId}/meal-plans`}
-                  bgColor="bg-orange-500"
-                  hoverColor="hover:bg-orange-600"
-                  textColor="text-white"
-                />
-                <QuickActionButton
-                  icon={DollarSign}
-                  label="Registrar Pagamento"
-                  onClick={() => window.location.href = `/platform/${clientId}/financial`}
-                  bgColor="bg-purple-500"
-                  hoverColor="hover:bg-purple-600"
-                  textColor="text-white"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recent Activity */}
-          <Card className="shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold">Atividade Recente</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Heart className="h-5 w-5 text-primary" />
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 p-3 rounded-lg border">
+                    <div className="text-sm font-medium text-muted-foreground w-16">09:00</div>
+                    <div className="flex-1">
+                      <div className="font-medium">Ana Silva</div>
+                      <div className="text-sm text-muted-foreground">Consulta</div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-foreground leading-relaxed">{activity.message}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
+                    <Badge className="bg-primary/10 text-primary hover:bg-primary/20">
+                      Confirmado
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-4 p-3 rounded-lg border">
+                    <div className="text-sm font-medium text-muted-foreground w-16">10:00</div>
+                    <div className="flex-1">
+                      <div className="font-medium">João Santos</div>
+                      <div className="text-sm text-muted-foreground">Retorno</div>
+                    </div>
+                    <Badge className="bg-primary/10 text-primary hover:bg-primary/20">
+                      Confirmado
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-4 p-3 rounded-lg border">
+                    <div className="text-sm font-medium text-muted-foreground w-16">11:00</div>
+                    <div className="flex-1">
+                      <div className="font-medium">Maria Costa</div>
+                      <div className="text-sm text-muted-foreground">Avaliação</div>
+                    </div>
+                    <Badge variant="outline" className="border-warning text-warning">
+                      Pendente
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Atividades Recentes */}
+            <Card className="shadow-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                  Atividades Recentes
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Utensils className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">Ana Silva</div>
+                      <div className="text-xs text-muted-foreground">Novo plano alimentar criado</div>
+                      <div className="text-xs text-muted-foreground">5 min atrás</div>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                      <FileText className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">João Santos</div>
+                      <div className="text-xs text-muted-foreground">Questionário respondido</div>
+                      <div className="text-xs text-muted-foreground">12 min atrás</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
+                      <Calendar className="h-5 w-5 text-orange-600" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">Maria Costa</div>
+                      <div className="text-xs text-muted-foreground">Consulta agendada para amanhã</div>
+                      <div className="text-xs text-muted-foreground">25 min atrás</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
     </DashboardTemplate>

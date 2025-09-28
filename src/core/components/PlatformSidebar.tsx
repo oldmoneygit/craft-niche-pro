@@ -128,16 +128,32 @@ export function PlatformSidebar() {
   const getNavClassName = (path: string) => {
     const active = isActive(path);
     return active 
-      ? "bg-primary/10 text-primary font-medium border-r-2 border-primary" 
-      : "hover:bg-accent hover:text-accent-foreground";
+      ? "bg-white/20 text-sidebar-foreground font-medium rounded-lg" 
+      : "hover:bg-white/10 text-sidebar-foreground/80 hover:text-sidebar-foreground rounded-lg";
   };
 
   return (
     <Sidebar className={state === "collapsed" ? "w-14" : "w-64"} collapsible="icon">
-      <SidebarContent>
+      <SidebarContent className="bg-sidebar text-sidebar-foreground">
+        {/* Brand Header */}
+        <div className="p-6 border-b border-sidebar-border/20">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-sidebar-foreground font-bold text-lg">
+              {clientConfig.branding.companyName.charAt(0)}
+            </div>
+            {state !== "collapsed" && (
+              <div>
+                <h2 className="font-bold text-lg text-sidebar-foreground">
+                  {clientConfig.branding.companyName}
+                </h2>
+                <p className="text-xs text-sidebar-foreground/80">Nutrição</p>
+              </div>
+            )}
+          </div>
+        </div>
         {/* Core Features */}
         <SidebarGroup>
-          <SidebarGroupLabel>Principal</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/70 font-medium">Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {coreMenuItems.filter(item => item.enabled).map((item) => (
@@ -157,7 +173,7 @@ export function PlatformSidebar() {
         {/* Business Specific Features */}
         {businessSpecificItems.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel>Específico do Negócio</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-sidebar-foreground/70 font-medium">Específico do Negócio</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {businessSpecificItems.map((item) => (
@@ -177,7 +193,7 @@ export function PlatformSidebar() {
 
         {/* Settings */}
         <SidebarGroup>
-          <SidebarGroupLabel>Configurações</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/70 font-medium">Configurações</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {settingsItems.filter(item => item.enabled).map((item) => (

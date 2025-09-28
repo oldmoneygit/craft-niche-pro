@@ -53,6 +53,12 @@ export default {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
         },
+        metric: {
+          blue: "hsl(var(--metric-blue))",
+          green: "hsl(var(--metric-green))",
+          orange: "hsl(var(--metric-orange))",
+          purple: "hsl(var(--metric-purple))",
+        },
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
