@@ -94,16 +94,16 @@ export default function PlatformDashboard() {
             
             <div className="relative z-10 flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold mb-3">
+                <h1 className="text-3xl font-bold mb-3 text-white">
                   Bem-vindo, {clientConfig?.branding.companyName.split(' ')[0]}! 👋
                 </h1>
-                <p className="text-primary-foreground/90 text-lg">
-                  Hoje você tem <span className="font-semibold">8</span> consultas agendadas e <span className="font-semibold">3</span> novos questionários respondidos
+                <p className="text-white/90 text-lg">
+                  Hoje você tem <span className="font-semibold text-white">8</span> consultas agendadas e <span className="font-semibold text-white">3</span> novos questionários respondidos
                 </p>
               </div>
               <div className="text-right">
-                <div className="text-sm text-primary-foreground/80 mb-1">Hoje</div>
-                <div className="text-xl font-bold">{new Date().toLocaleDateString('pt-BR')}</div>
+                <div className="text-sm text-white/80 mb-1">Hoje</div>
+                <div className="text-xl font-bold text-white">{new Date().toLocaleDateString('pt-BR')}</div>
               </div>
             </div>
           </div>
