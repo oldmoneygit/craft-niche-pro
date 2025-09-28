@@ -37,41 +37,39 @@ export default function PlatformDashboard() {
 
   const MetricCard = ({ title, value, icon: Icon, trend, color = "blue" }: any) => {
     const colorClasses = {
-      blue: "bg-metric-blue text-white",
-      green: "bg-metric-green text-white", 
-      orange: "bg-metric-orange text-white",
-      purple: "bg-metric-purple text-white"
+      blue: "bg-gradient-to-br from-metric-blue to-metric-blue/90",
+      green: "bg-gradient-to-br from-metric-green to-metric-green/90", 
+      orange: "bg-gradient-to-br from-metric-orange to-metric-orange/90",
+      purple: "bg-gradient-to-br from-metric-purple to-metric-purple/90"
     };
 
     return (
-      <Card className="metric-card hover:shadow-md transition-shadow overflow-hidden">
+      <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 rounded-2xl">
         <CardContent className="p-0">
-          <div className={`${colorClasses[color]} p-4`}>
-            <div className="flex items-center justify-between mb-2">
-              <Icon className="h-8 w-8 text-white/90" />
-              {trend && (
-                <span className="text-xs bg-white/20 px-2 py-1 rounded-full font-medium">
-                  +{trend}
-                </span>
-              )}
+          <div className={`${colorClasses[color]} text-white p-6 relative`}>
+            {/* Background pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-20 h-20 rounded-full bg-white/20 -translate-y-10 translate-x-10"></div>
+              <div className="absolute bottom-0 left-0 w-16 h-16 rounded-full bg-white/10 translate-y-8 -translate-x-8"></div>
             </div>
-            <div className="text-sm font-medium text-white/90 mb-1">{title}</div>
-            <div className="text-2xl font-bold text-white">{value}</div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4">
+                <Icon className="h-8 w-8 text-white/90" />
+                {trend && (
+                  <span className="text-sm bg-white/20 px-3 py-1 rounded-full font-medium backdrop-blur-sm">
+                    {trend}
+                  </span>
+                )}
+              </div>
+              <div className="text-sm font-medium text-white/90 mb-2">{title}</div>
+              <div className="text-3xl font-bold text-white">{value}</div>
+            </div>
           </div>
         </CardContent>
       </Card>
     );
   };
-
-  const QuickActionButton = ({ icon: Icon, label, onClick, bgColor, hoverColor, textColor }: any) => (
-    <Button 
-      onClick={onClick} 
-      className={`h-20 flex-col gap-2 ${bgColor} ${hoverColor} ${textColor} border-0 shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105`}
-    >
-      <Icon className="h-6 w-6" />
-      <span className="text-xs font-medium whitespace-nowrap">{label}</span>
-    </Button>
-  );
 
   return (
     <DashboardTemplate title="Dashboard">
@@ -87,27 +85,31 @@ export default function PlatformDashboard() {
           </div>
         </div>
       ) : (
-        <div className="flex-1 space-y-6">
-          {/* Welcome Header */}
-          <div className="bg-primary p-6 text-white rounded-2xl mx-6 mt-6">
-            <div className="flex items-center justify-between">
+        <div className="flex-1 space-y-8">
+          {/* Welcome Header - More modern with better spacing */}
+          <div className="bg-gradient-to-r from-primary via-primary to-primary/90 p-8 text-white rounded-3xl mx-8 mt-8 relative overflow-hidden shadow-xl">
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
+            
+            <div className="relative z-10 flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold mb-2">
+                <h1 className="text-3xl font-bold mb-3">
                   Bem-vindo, {clientConfig?.branding.companyName.split(' ')[0]}! 👋
                 </h1>
-                <p className="text-primary-foreground/80">
-                  Hoje você tem {dashboardMetrics.consultationsToday} consultas agendadas e {dashboardMetrics.pendingTasks} novos questionários respondidos
+                <p className="text-primary-foreground/90 text-lg">
+                  Hoje você tem <span className="font-semibold">8</span> consultas agendadas e <span className="font-semibold">3</span> novos questionários respondidos
                 </p>
               </div>
               <div className="text-right">
-                <div className="text-sm text-primary-foreground/80">Hoje</div>
-                <div className="text-lg font-semibold">{new Date().toLocaleDateString('pt-BR')}</div>
+                <div className="text-sm text-primary-foreground/80 mb-1">Hoje</div>
+                <div className="text-xl font-bold">{new Date().toLocaleDateString('pt-BR')}</div>
               </div>
             </div>
           </div>
 
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-6">
+          {/* Metrics Grid - Better spacing and modern cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-8">
             <MetricCard
               title="Pacientes Ativos"
               value="127"
@@ -138,46 +140,47 @@ export default function PlatformDashboard() {
             />
           </div>
 
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 px-6">
-
-            {/* Consultas de Hoje */}
-            <Card className="shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <CardTitle className="text-lg font-semibold">Consultas de Hoje</CardTitle>
-                <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
-                  Ver agenda completa
-                </Button>
+          {/* Main Content Grid - Modern spacing and design */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 px-8 pb-8">
+            {/* Consultas de Hoje - Modern card design */}
+            <Card className="shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl border-0 overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 pb-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl font-bold text-gray-900">Consultas de Hoje</CardTitle>
+                  <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 hover:bg-primary/5 rounded-xl">
+                    Ver agenda completa
+                  </Button>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-3 rounded-lg border">
-                    <div className="text-sm font-medium text-muted-foreground w-16">09:00</div>
+                  <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-primary/20 hover:bg-gray-50/50 transition-all duration-200">
+                    <div className="text-sm font-bold text-gray-600 w-16 bg-gray-100 rounded-lg py-2 text-center">09:00</div>
                     <div className="flex-1">
-                      <div className="font-medium">Ana Silva</div>
-                      <div className="text-sm text-muted-foreground">Consulta</div>
+                      <div className="font-semibold text-gray-900">Ana Silva</div>
+                      <div className="text-sm text-gray-500">Consulta</div>
                     </div>
-                    <Badge className="bg-primary/10 text-primary hover:bg-primary/20">
+                    <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-0 rounded-lg px-3 py-1">
                       Confirmado
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-4 p-3 rounded-lg border">
-                    <div className="text-sm font-medium text-muted-foreground w-16">10:00</div>
+                  <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-primary/20 hover:bg-gray-50/50 transition-all duration-200">
+                    <div className="text-sm font-bold text-gray-600 w-16 bg-gray-100 rounded-lg py-2 text-center">10:00</div>
                     <div className="flex-1">
-                      <div className="font-medium">João Santos</div>
-                      <div className="text-sm text-muted-foreground">Retorno</div>
+                      <div className="font-semibold text-gray-900">João Santos</div>
+                      <div className="text-sm text-gray-500">Retorno</div>
                     </div>
-                    <Badge className="bg-primary/10 text-primary hover:bg-primary/20">
+                    <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-0 rounded-lg px-3 py-1">
                       Confirmado
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-4 p-3 rounded-lg border">
-                    <div className="text-sm font-medium text-muted-foreground w-16">11:00</div>
+                  <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-warning/20 hover:bg-warning/5 transition-all duration-200">
+                    <div className="text-sm font-bold text-gray-600 w-16 bg-gray-100 rounded-lg py-2 text-center">11:00</div>
                     <div className="flex-1">
-                      <div className="font-medium">Maria Costa</div>
-                      <div className="text-sm text-muted-foreground">Avaliação</div>
+                      <div className="font-semibold text-gray-900">Maria Costa</div>
+                      <div className="text-sm text-gray-500">Avaliação</div>
                     </div>
-                    <Badge variant="outline" className="border-warning text-warning">
+                    <Badge className="bg-warning/10 text-warning hover:bg-warning/20 border-0 rounded-lg px-3 py-1">
                       Pendente
                     </Badge>
                   </div>
@@ -185,44 +188,44 @@ export default function PlatformDashboard() {
               </CardContent>
             </Card>
 
-            {/* Atividades Recentes */}
-            <Card className="shadow-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            {/* Atividades Recentes - Modern card design */}
+            <Card className="shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl border-0 overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 pb-6">
+                <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-3">
                   Atividades Recentes
                   <TrendingUp className="h-5 w-5 text-primary" />
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Utensils className="h-5 w-5 text-primary" />
+              <CardContent className="p-6">
+                <div className="space-y-5">
+                  <div className="flex items-center gap-4 group hover:bg-gray-50/50 p-3 rounded-xl transition-all duration-200">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <Utensils className="h-6 w-6 text-primary" />
                     </div>
                     <div className="flex-1">
-                      <div className="font-medium text-sm">Ana Silva</div>
-                      <div className="text-xs text-muted-foreground">Novo plano alimentar criado</div>
-                      <div className="text-xs text-muted-foreground">5 min atrás</div>
+                      <div className="font-semibold text-gray-900 mb-1">Ana Silva</div>
+                      <div className="text-sm text-gray-600 mb-1">Novo plano alimentar criado</div>
+                      <div className="text-xs text-gray-400">5 min atrás</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                      <FileText className="h-5 w-5 text-blue-600" />
+                  <div className="flex items-center gap-4 group hover:bg-gray-50/50 p-3 rounded-xl transition-all duration-200">
+                    <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                      <FileText className="h-6 w-6 text-blue-600" />
                     </div>
                     <div className="flex-1">
-                      <div className="font-medium text-sm">João Santos</div>
-                      <div className="text-xs text-muted-foreground">Questionário respondido</div>
-                      <div className="text-xs text-muted-foreground">12 min atrás</div>
+                      <div className="font-semibold text-gray-900 mb-1">João Santos</div>
+                      <div className="text-sm text-gray-600 mb-1">Questionário respondido</div>
+                      <div className="text-xs text-gray-400">12 min atrás</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
-                      <Calendar className="h-5 w-5 text-orange-600" />
+                  <div className="flex items-center gap-4 group hover:bg-gray-50/50 p-3 rounded-xl transition-all duration-200">
+                    <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                      <Calendar className="h-6 w-6 text-orange-600" />
                     </div>
                     <div className="flex-1">
-                      <div className="font-medium text-sm">Maria Costa</div>
-                      <div className="text-xs text-muted-foreground">Consulta agendada para amanhã</div>
-                      <div className="text-xs text-muted-foreground">25 min atrás</div>
+                      <div className="font-semibold text-gray-900 mb-1">Maria Costa</div>
+                      <div className="text-sm text-gray-600 mb-1">Consulta agendada para amanhã</div>
+                      <div className="text-xs text-gray-400">25 min atrás</div>
                     </div>
                   </div>
                 </div>
