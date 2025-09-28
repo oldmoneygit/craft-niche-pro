@@ -86,24 +86,25 @@ export default function PlatformDashboard() {
         </div>
       ) : (
         <div className="flex-1 space-y-8">
-          {/* Welcome Header - More modern with better spacing */}
-          <div className="bg-gradient-to-r from-primary via-primary to-primary/90 p-8 text-white rounded-3xl mx-8 mt-8 relative overflow-hidden shadow-xl">
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
+          {/* Welcome Header - Dark theme with high contrast */}
+          <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-8 text-white rounded-3xl mx-8 mt-8 relative overflow-hidden shadow-2xl border border-slate-700/50">
+            {/* Decorative elements with accent colors */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/20 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-primary/10 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5"></div>
             
             <div className="relative z-10 flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold mb-3 text-white">
+                <h1 className="text-4xl font-bold mb-4 text-white bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">
                   Bem-vindo, {clientConfig?.branding.companyName.split(' ')[0]}! 👋
                 </h1>
-                <p className="text-white/90 text-lg">
-                  Hoje você tem <span className="font-semibold text-white">8</span> consultas agendadas e <span className="font-semibold text-white">3</span> novos questionários respondidos
+                <p className="text-gray-300 text-lg leading-relaxed">
+                  Hoje você tem <span className="font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg">8</span> consultas agendadas e <span className="font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg">3</span> novos questionários respondidos
                 </p>
               </div>
-              <div className="text-right">
-                <div className="text-sm text-white/80 mb-1">Hoje</div>
-                <div className="text-xl font-bold text-white">{new Date().toLocaleDateString('pt-BR')}</div>
+              <div className="text-right bg-slate-800/50 rounded-2xl p-4 backdrop-blur-sm border border-slate-600/30">
+                <div className="text-sm text-gray-400 mb-2 font-medium">Hoje</div>
+                <div className="text-2xl font-bold text-white">{new Date().toLocaleDateString('pt-BR')}</div>
               </div>
             </div>
           </div>
