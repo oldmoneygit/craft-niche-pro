@@ -31,17 +31,19 @@ export default function DashboardTemplate({ children, title }: DashboardTemplate
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
           {clientConfig && <PlatformSidebar />}
-          <div className="flex-1 flex flex-col">
-            <header className="h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center px-4">
+          <div className="flex-1 flex flex-col min-w-0">
+            <header className="h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center px-6 lg:px-8 shadow-sm">
               {clientConfig && <SidebarTrigger />}
               <div className="ml-4">
-                <h1 className="text-lg font-semibold">
+                <h1 className="text-lg font-semibold text-foreground">
                   {clientConfig?.branding.companyName || 'Plataforma'}
                 </h1>
               </div>
             </header>
-            <main className="flex-1 overflow-auto">
-              {children}
+            <main className="flex-1 overflow-auto bg-gray-50/30">
+              <div className="h-full w-full max-w-none">
+                {children}
+              </div>
             </main>
           </div>
         </div>

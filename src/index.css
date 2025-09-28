@@ -68,15 +68,15 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
 
-    /* Green sidebar like in the reference */
-    --sidebar-background: 142 69% 58%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 142 69% 58%;
-    --sidebar-accent: 142 69% 48%;
+    /* Subtle neutral sidebar with wellness touch */
+    --sidebar-background: 220 13% 18%;
+    --sidebar-foreground: 220 9% 85%;
+    --sidebar-primary: 220 9% 85%;
+    --sidebar-primary-foreground: 220 13% 18%;
+    --sidebar-accent: 142 25% 35%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 142 69% 48%;
-    --sidebar-ring: 0 0% 100%;
+    --sidebar-border: 220 13% 25%;
+    --sidebar-ring: 142 25% 35%;
   }
 
   .dark {
@@ -119,14 +119,14 @@ All colors MUST be HSL.
     --border: 217 32% 22%;
     --input: 217 32% 15%;
     --ring: 142 69% 68%;
-    --sidebar-background: 142 69% 48%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 142 69% 48%;
-    --sidebar-accent: 142 69% 38%;
+    --sidebar-background: 220 13% 15%;
+    --sidebar-foreground: 220 9% 80%;
+    --sidebar-primary: 220 9% 80%;
+    --sidebar-primary-foreground: 220 13% 15%;
+    --sidebar-accent: 142 25% 40%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 142 69% 38%;
-    --sidebar-ring: 0 0% 100%;
+    --sidebar-border: 220 13% 22%;
+    --sidebar-ring: 142 25% 40%;
   }
 }
 

@@ -85,32 +85,33 @@ export default function PlatformDashboard() {
           </div>
         </div>
       ) : (
-        <div className="flex-1 space-y-8">
-          {/* Welcome Header - Dark theme with high contrast */}
-          <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-8 text-white rounded-3xl mx-8 mt-8 relative overflow-hidden shadow-2xl border border-slate-700/50">
-            {/* Decorative elements with accent colors */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/20 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-primary/10 to-transparent rounded-full translate-y-12 -translate-x-12"></div>
-            <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5"></div>
+        <div className="flex-1 space-y-6 p-6 lg:p-8">
+          {/* Welcome Header - Clean and modern */}
+          <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-6 lg:p-8 text-white rounded-2xl relative overflow-hidden shadow-lg border border-slate-700/50">
+            {/* Background pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-20 h-20 rounded-full bg-white/20 -translate-y-10 translate-x-10"></div>
+              <div className="absolute bottom-0 left-0 w-16 h-16 rounded-full bg-white/10 translate-y-8 -translate-x-8"></div>
+            </div>
             
-            <div className="relative z-10 flex items-center justify-between">
+            <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
               <div>
-                <h1 className="text-4xl font-bold mb-4 text-white bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">
+                <h1 className="text-2xl lg:text-3xl font-bold mb-3 text-white">
                   Bem-vindo, {clientConfig?.branding.companyName.split(' ')[0]}! 👋
                 </h1>
-                <p className="text-gray-300 text-lg leading-relaxed">
+                <p className="text-gray-300 text-base lg:text-lg leading-relaxed">
                   Hoje você tem <span className="font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg">8</span> consultas agendadas e <span className="font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg">3</span> novos questionários respondidos
                 </p>
               </div>
-              <div className="text-right bg-slate-800/50 rounded-2xl p-4 backdrop-blur-sm border border-slate-600/30">
+              <div className="text-left lg:text-right bg-slate-800/50 rounded-2xl p-4 backdrop-blur-sm border border-slate-600/30 w-full lg:w-auto">
                 <div className="text-sm text-gray-400 mb-2 font-medium">Hoje</div>
-                <div className="text-2xl font-bold text-white">{new Date().toLocaleDateString('pt-BR')}</div>
+                <div className="text-xl lg:text-2xl font-bold text-white">{new Date().toLocaleDateString('pt-BR')}</div>
               </div>
             </div>
           </div>
 
-          {/* Metrics Grid - Better spacing and modern cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-8">
+          {/* Metrics Grid - Responsive and well-spaced */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
             <MetricCard
               title="Pacientes Ativos"
               value="127"
@@ -141,8 +142,8 @@ export default function PlatformDashboard() {
             />
           </div>
 
-          {/* Main Content Grid - Modern spacing and design */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 px-8 pb-8">
+          {/* Main Content Grid - Clean layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             {/* Consultas de Hoje - Modern card design */}
             <Card className="shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl border-0 overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 pb-6">

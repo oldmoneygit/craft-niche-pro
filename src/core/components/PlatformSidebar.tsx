@@ -128,25 +128,25 @@ export function PlatformSidebar() {
   const getNavClassName = (path: string) => {
     const active = isActive(path);
     return active 
-      ? "bg-white/20 text-sidebar-foreground font-medium rounded-lg" 
-      : "hover:bg-white/10 text-sidebar-foreground/80 hover:text-sidebar-foreground rounded-lg";
+      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium rounded-lg" 
+      : "hover:bg-sidebar-accent/20 text-sidebar-foreground/80 hover:text-sidebar-foreground rounded-lg transition-all duration-200";
   };
 
   return (
     <Sidebar className={state === "collapsed" ? "w-14" : "w-64"} collapsible="icon">
-      <SidebarContent className="bg-sidebar text-sidebar-foreground">
-        {/* Brand Header */}
-        <div className="p-6 border-b border-sidebar-border/20">
+      <SidebarContent className="bg-sidebar text-sidebar-foreground border-r border-sidebar-border/30">
+        {/* Brand Header - Cleaner design */}
+        <div className="p-4 lg:p-6 border-b border-sidebar-border/30">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-sidebar-foreground font-bold text-lg">
+            <div className="w-10 h-10 bg-sidebar-accent/20 rounded-lg flex items-center justify-center text-sidebar-foreground font-bold text-lg border border-sidebar-accent/30">
               {clientConfig.branding.companyName.charAt(0)}
             </div>
             {state !== "collapsed" && (
-              <div>
-                <h2 className="font-bold text-lg text-sidebar-foreground">
+              <div className="min-w-0 flex-1">
+                <h2 className="font-bold text-lg text-sidebar-foreground truncate">
                   {clientConfig.branding.companyName}
                 </h2>
-                <p className="text-xs text-sidebar-foreground/80">Nutrição</p>
+                <p className="text-xs text-sidebar-foreground/70">Nutrição</p>
               </div>
             )}
           </div>
