@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Edit, Trash2, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
+import ClientStats from '@/components/platform/ClientStats';
 
 const clientSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -27,7 +28,11 @@ const clientSchema = z.object({
 
 export default function PlatformClients() {
   const { clientId } = useParams<{ clientId: string }>();
-  const { tenant, loading: tenantLoading } = useTenant(clientId || '');
+  
+  // Use gabriel-gandin as fallback if clientId is invalid
+  const actualClientId = clientId && clientId !== ':clientId' ? clientId : 'gabriel-gandin';
+  
+  const { tenant, loading: tenantLoading } = useTenant(actualClientId);
   const { clients, loading: clientsLoading, createClient, updateClient, deleteClient } = useClients(tenant?.id);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -128,11 +133,18 @@ export default function PlatformClients() {
     }
   };
 
+  console.log('PlatformClients - ClientId:', actualClientId);
+  console.log('PlatformClients - Tenant:', tenant);
+  console.log('PlatformClients - Clients:', clients.length);
+
   if (tenantLoading) {
     return (
       <DashboardTemplate title="Clientes">
-        <div className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="flex items-center justify-center h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Carregando clientes...</p>
+          </div>
         </div>
       </DashboardTemplate>
     );
@@ -141,10 +153,11 @@ export default function PlatformClients() {
   if (!tenant) {
     return (
       <DashboardTemplate title="Clientes">
-        <div className="flex items-center justify-center h-full">
+        <div className="flex items-center justify-center h-[400px]">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-4">Plataforma não encontrada</h1>
-            <p className="text-muted-foreground">A plataforma solicitada não existe ou não está disponível.</p>
+            <p className="text-muted-foreground">A plataforma "{actualClientId}" não existe ou não está disponível.</p>
+            <p className="text-sm text-muted-foreground mt-2">ClientId: {actualClientId}</p>
           </div>
         </div>
       </DashboardTemplate>
@@ -278,66 +291,7 @@ export default function PlatformClients() {
         </Card>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total de Clientes</CardTitle>
-              <User className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">{clients.length}</div>
-              <p className="text-xs text-muted-foreground">
-                clientes cadastrados
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Novos este mês</CardTitle>
-              <Plus className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {clients.filter(client => {
-                  const created = new Date(client.created_at);
-                  const now = new Date();
-                  return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
-                }).length}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                novos clientes
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Com objetivos</CardTitle>
-              <Badge variant="outline" className="h-4 w-4 p-0" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {clients.filter(client => client.goal && client.goal.trim()).length}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                têm objetivos definidos
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Com contato</CardTitle>
-              <User className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-600">
-                {clients.filter(client => client.email || client.phone).length}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                com email ou telefone
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <ClientStats clients={clients} />
 
         {/* Clients List */}
         <div className="grid gap-4">
