@@ -4,7 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ClientConfigProvider } from "@/core/contexts/ClientConfigContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
+import Auth from "./pages/Auth";
 import RedirectToGabrielGandin from "./components/redirects/RedirectToGabrielGandin";
 import RedirectToClinicaExemplo from "./components/redirects/RedirectToClinicaExemplo";
 import RedirectToAdmin from "./components/redirects/RedirectToAdmin";
@@ -29,43 +32,47 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <ClientConfigProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Landing e Onboarding */}
-            <Route path="/" element={<Index />} />
-            <Route path="/onboarding" element={<Onboarding />} />
-            
-            {/* Admin Dashboard */}
-            <Route path="/admin" element={<AdminDashboard />} />
-            
-            {/* Plataformas Multi-tenant */}
-            <Route path="/platform/:clientId" element={<PlatformDashboard />} />
-            <Route path="/platform/:clientId/login" element={<PlatformLogin />} />
-            <Route path="/platform/:clientId/clients" element={<PlatformClients />} />
-            <Route path="/platform/:clientId/chat" element={<PlatformChat />} />
-            <Route path="/platform/:clientId/ai-agent" element={<PlatformAIAgent />} />
-            <Route path="/platform/:clientId/scheduling" element={<PlatformScheduling />} />
-            <Route path="/platform/:clientId/analytics" element={<PlatformAnalytics />} />
-            <Route path="/platform/:clientId/questionnaires" element={<PlatformQuestionnaires />} />
-            <Route path="/platform/:clientId/meal-plans" element={<PlatformMealPlans />} />
-            <Route path="/platform/:clientId/financial" element={<PlatformFinancial />} />
-            <Route path="/platform/:clientId/settings" element={<PlatformSettings />} />
-            
-            {/* Questionários Públicos */}
-            <Route path="/questionnaire/:questionnaireId" element={<QuestionnairePublic />} />
-            
-            {/* Redirecionamentos das rotas antigas para as novas */}
-            <Route path="/nutricionista" element={<RedirectToGabrielGandin />} />
-            <Route path="/clinic" element={<RedirectToClinicaExemplo />} />
-            <Route path="/login" element={<RedirectToAdmin />} />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </ClientConfigProvider>
+      <AuthProvider>
+        <ClientConfigProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Landing e Onboarding */}
+              <Route path="/" element={<Index />} />
+              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/auth" element={<Auth />} />
+              
+              {/* Admin Dashboard */}
+              <Route path="/admin" element={<AdminDashboard />} />
+              
+              {/* Plataformas Multi-tenant */}
+              <Route path="/platform/:clientId" element={<ProtectedRoute><PlatformDashboard /></ProtectedRoute>} />
+              <Route path="/platform/:clientId/dashboard" element={<ProtectedRoute><PlatformDashboard /></ProtectedRoute>} />
+              <Route path="/platform/:clientId/login" element={<PlatformLogin />} />
+              <Route path="/platform/:clientId/clientes" element={<ProtectedRoute><PlatformClients /></ProtectedRoute>} />
+              <Route path="/platform/:clientId/chat" element={<ProtectedRoute><PlatformChat /></ProtectedRoute>} />
+              <Route path="/platform/:clientId/ai-agent" element={<ProtectedRoute><PlatformAIAgent /></ProtectedRoute>} />
+              <Route path="/platform/:clientId/agendamentos" element={<ProtectedRoute><PlatformScheduling /></ProtectedRoute>} />
+              <Route path="/platform/:clientId/analytics" element={<ProtectedRoute><PlatformAnalytics /></ProtectedRoute>} />
+              <Route path="/platform/:clientId/questionnaires" element={<ProtectedRoute><PlatformQuestionnaires /></ProtectedRoute>} />
+              <Route path="/platform/:clientId/meal-plans" element={<ProtectedRoute><PlatformMealPlans /></ProtectedRoute>} />
+              <Route path="/platform/:clientId/financial" element={<ProtectedRoute><PlatformFinancial /></ProtectedRoute>} />
+              <Route path="/platform/:clientId/settings" element={<ProtectedRoute><PlatformSettings /></ProtectedRoute>} />
+              
+              {/* Questionários Públicos */}
+              <Route path="/questionnaire/:questionnaireId" element={<QuestionnairePublic />} />
+              
+              {/* Redirecionamentos das rotas antigas para as novas */}
+              <Route path="/nutricionista" element={<RedirectToGabrielGandin />} />
+              <Route path="/clinic" element={<RedirectToClinicaExemplo />} />
+              <Route path="/login" element={<RedirectToAdmin />} />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </ClientConfigProvider>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

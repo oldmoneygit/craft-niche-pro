@@ -44,7 +44,7 @@ export function PlatformSidebar() {
     },
     {
       title: 'Clientes',
-      url: `${platformBasePath}/clients`,
+      url: `${platformBasePath}/clientes`,
       icon: Users,
       enabled: isModuleEnabled('clientManagement'),
     },
@@ -62,7 +62,7 @@ export function PlatformSidebar() {
     },
     {
       title: 'Agendamentos',
-      url: `${platformBasePath}/scheduling`,
+      url: `${platformBasePath}/agendamentos`,
       icon: Calendar,
       enabled: isModuleEnabled('scheduling'),
     },

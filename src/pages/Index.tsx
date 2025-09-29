@@ -171,7 +171,7 @@ const Index = () => {
 
                 <Button 
                   className="w-full bg-green-600 hover:bg-green-700 text-white group"
-                  onClick={() => navigate('/platform/gabriel-gandin')}
+                  onClick={() => navigate('/auth')}
                 >
                   Ver Plataforma em Ação
                   <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
