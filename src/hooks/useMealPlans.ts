@@ -21,14 +21,16 @@ export interface MealPlan {
   updated_at: string;
 }
 
-export function useMealPlans() {
+export function useMealPlans(tenantId?: string) {
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const { tenant } = useTenant('gabriel-gandin');
   const { toast } = useToast();
+  
+  const actualTenantId = tenantId || tenant?.id;
 
   const fetchMealPlans = async () => {
-    if (!tenant?.id) {
+    if (!actualTenantId) {
       setLoading(false);
       return;
     }
@@ -38,7 +40,7 @@ export function useMealPlans() {
       const { data, error } = await supabase
         .from('meal_plans')
         .select('*')
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', actualTenantId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -55,12 +57,12 @@ export function useMealPlans() {
   };
 
   const createMealPlan = async (mealPlan: Omit<MealPlan, 'id' | 'tenant_id' | 'created_at' | 'updated_at'>) => {
-    if (!tenant?.id) return null;
+    if (!actualTenantId) return null;
 
     try {
       const { data, error } = await supabase
         .from('meal_plans')
-        .insert([{ ...mealPlan, tenant_id: tenant.id }])
+        .insert([{ ...mealPlan, tenant_id: actualTenantId }])
         .select()
         .single();
 
@@ -134,7 +136,7 @@ export function useMealPlans() {
 
   useEffect(() => {
     fetchMealPlans();
-  }, [tenant?.id]);
+  }, [actualTenantId]);
 
   return {
     mealPlans,

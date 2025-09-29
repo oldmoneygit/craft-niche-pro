@@ -13,6 +13,8 @@ import { useCommunications } from '@/hooks/useCommunications';
 import { useClients } from '@/hooks/useClients';
 import { useTenant } from '@/hooks/useTenant';
 import { useClientConfig } from '@/core/contexts/ClientConfigContext';
+import EmailTemplateManager from '@/components/platform/EmailTemplateManager';
+import CommunicationHistory from '@/components/platform/CommunicationHistory';
 
 export default function PlatformCommunication() {
   const { clientId } = useParams<{ clientId: string }>();
@@ -166,12 +168,21 @@ export default function PlatformCommunication() {
           </Card>
         </div>
 
-        <Tabs defaultValue="conversations" className="space-y-4">
+        <Tabs defaultValue="history" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="conversations">Conversas</TabsTrigger>
+            <TabsTrigger value="history">Histórico</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
+            <TabsTrigger value="conversations">Conversas</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="history">
+            <CommunicationHistory clientId={actualClientId} />
+          </TabsContent>
+
+          <TabsContent value="templates">
+            <EmailTemplateManager clientId={actualClientId} />
+          </TabsContent>
 
           <TabsContent value="conversations">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -243,40 +254,6 @@ export default function PlatformCommunication() {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
-
-          <TabsContent value="templates">
-            <Card>
-              <CardHeader>
-                <CardTitle>Templates de Mensagem</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {templates.map((template) => (
-                    <div key={template.id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium">{template.name}</h4>
-                        <Badge variant="outline">{template.type}</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">{template.content}</p>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline">Editar</Button>
-                        <Button size="sm" variant="outline">Usar</Button>
-                      </div>
-                    </div>
-                  ))}
-                  {templates.length === 0 && (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground mb-4">Nenhum template encontrado</p>
-                      <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Criar Template
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="analytics">
