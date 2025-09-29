@@ -193,6 +193,9 @@ export function useCommunications(clientId?: string) {
     if (tenant?.id) {
       fetchCommunications();
       fetchTemplates();
+    } else {
+      // If no tenant, stop loading
+      setLoading(false);
     }
   }, [tenant?.id]);
 
