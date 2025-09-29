@@ -153,17 +153,17 @@ export default function PlatformClients() {
 
   return (
     <DashboardTemplate title="Clientes">
-      <div className="space-y-6">
+      <div className="space-y-6 p-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Clientes</h1>
+            <h1 className="text-3xl font-bold text-foreground">Clientes</h1>
             <p className="text-muted-foreground">Gerencie seus clientes e pacientes</p>
           </div>
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={resetForm} className="flex items-center gap-2">
+              <Button variant="success" onClick={resetForm} className="flex items-center gap-2">
                 <Plus className="w-4 h-4" />
                 Novo Cliente
               </Button>
@@ -253,7 +253,7 @@ export default function PlatformClients() {
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancelar
                   </Button>
-                  <Button type="submit">
+                  <Button variant="success" type="submit">
                     {editingClient ? 'Atualizar' : 'Criar'}
                   </Button>
                 </div>
@@ -278,29 +278,35 @@ export default function PlatformClients() {
         </Card>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total de Clientes</CardTitle>
               <User className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{clients.length}</div>
+              <div className="text-2xl font-bold text-primary">{clients.length}</div>
+              <p className="text-xs text-muted-foreground">
+                clientes cadastrados
+              </p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Novos este mês</CardTitle>
-              <Plus className="h-4 w-4 text-muted-foreground" />
+              <Plus className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-2xl font-bold text-green-600">
                 {clients.filter(client => {
                   const created = new Date(client.created_at);
                   const now = new Date();
                   return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
                 }).length}
               </div>
+              <p className="text-xs text-muted-foreground">
+                novos clientes
+              </p>
             </CardContent>
           </Card>
           <Card>
@@ -309,9 +315,26 @@ export default function PlatformClients() {
               <Badge variant="outline" className="h-4 w-4 p-0" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {clients.filter(client => client.goal).length}
+              <div className="text-2xl font-bold text-blue-600">
+                {clients.filter(client => client.goal && client.goal.trim()).length}
               </div>
+              <p className="text-xs text-muted-foreground">
+                têm objetivos definidos
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Com contato</CardTitle>
+              <User className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-600">
+                {clients.filter(client => client.email || client.phone).length}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                com email ou telefone
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -331,7 +354,7 @@ export default function PlatformClients() {
                   {searchTerm ? 'Nenhum cliente corresponde à sua busca.' : 'Comece adicionando seu primeiro cliente.'}
                 </p>
                 {!searchTerm && (
-                  <Button onClick={() => setIsDialogOpen(true)}>
+                  <Button variant="success" onClick={() => setIsDialogOpen(true)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Adicionar Cliente
                   </Button>
@@ -340,25 +363,75 @@ export default function PlatformClients() {
             </Card>
           ) : (
             filteredClients.map((client) => (
-              <Card key={client.id}>
+              <Card key={client.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="pt-6">
                   <div className="flex justify-between items-start">
-                    <div className="space-y-2">
-                      <h3 className="font-semibold text-lg">{client.name}</h3>
-                      <div className="space-y-1 text-sm text-muted-foreground">
-                        {client.email && <p>📧 {client.email}</p>}
-                        {client.phone && <p>📱 {client.phone}</p>}
-                        {client.birth_date && <p>🎂 {new Date(client.birth_date).toLocaleDateString('pt-BR')}</p>}
-                        {client.weight_current && <p>⚖️ {client.weight_current}kg</p>}
-                        {client.height && <p>📏 {client.height}cm</p>}
-                        {client.goal && <p>🎯 {client.goal}</p>}
+                    <div className="space-y-3 flex-1">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                          <User className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg">{client.name}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Cliente desde {new Date(client.created_at).toLocaleDateString('pt-BR')}
+                          </p>
+                        </div>
                       </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-muted-foreground">
+                        {client.email && (
+                          <div className="flex items-center gap-2">
+                            <span>📧</span>
+                            <span>{client.email}</span>
+                          </div>
+                        )}
+                        {client.phone && (
+                          <div className="flex items-center gap-2">
+                            <span>📱</span>
+                            <span>{client.phone}</span>
+                          </div>
+                        )}
+                        {client.birth_date && (
+                          <div className="flex items-center gap-2">
+                            <span>🎂</span>
+                            <span>{new Date(client.birth_date).toLocaleDateString('pt-BR')}</span>
+                          </div>
+                        )}
+                        {(client.weight_current || client.height) && (
+                          <div className="flex items-center gap-2">
+                            <span>📏</span>
+                            <span>
+                              {client.weight_current && `${client.weight_current}kg`}
+                              {client.weight_current && client.height && ' • '}
+                              {client.height && `${client.height}cm`}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {client.goal && (
+                        <div className="bg-muted/50 rounded-lg p-3">
+                          <p className="text-sm">
+                            <span className="font-medium">🎯 Objetivo:</span> {client.goal}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {client.allergies && (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                          <p className="text-sm text-yellow-800">
+                            <span className="font-medium">⚠️ Restrições:</span> {client.allergies}
+                          </p>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(client)}>
+                    
+                    <div className="flex gap-2 ml-4">
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(client)} className="h-8 w-8 p-0">
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleDelete(client.id)}>
+                      <Button variant="outline" size="sm" onClick={() => handleDelete(client.id)} className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
