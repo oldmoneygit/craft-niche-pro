@@ -29,10 +29,10 @@ export default function DashboardTemplate({ children, title }: DashboardTemplate
   return (
     <BaseTemplate title={title}>
       <SidebarProvider>
-        <div className="min-h-screen flex w-full">
-          {clientConfig && <PlatformSidebar />}
+        <div className="min-h-screen flex w-full relative">
+          {clientConfig && <div className="z-50"><PlatformSidebar /></div>}
           <div className="flex-1 flex flex-col min-w-0">
-            <header className="h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center px-6 lg:px-8 shadow-sm">
+            <header className="h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center px-6 lg:px-8 shadow-sm z-50 relative">
               {clientConfig && <SidebarTrigger />}
               <div className="ml-4">
                 <h1 className="text-lg font-semibold text-foreground">
