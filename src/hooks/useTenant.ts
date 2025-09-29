@@ -21,7 +21,7 @@ export function useTenant(tenantSubdomain: string) {
           .from('tenants')
           .select('*')
           .eq('subdomain', tenantSubdomain)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('Error fetching tenant:', error);
