@@ -118,6 +118,120 @@ export type Database = {
           },
         ]
       }
+      communications: {
+        Row: {
+          client_id: string
+          content: string
+          created_at: string
+          direction: string
+          id: string
+          metadata: Json | null
+          status: string
+          template_used: string | null
+          tenant_id: string
+          type: string
+        }
+        Insert: {
+          client_id: string
+          content: string
+          created_at?: string
+          direction: string
+          id?: string
+          metadata?: Json | null
+          status?: string
+          template_used?: string | null
+          tenant_id: string
+          type: string
+        }
+        Update: {
+          client_id?: string
+          content?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          metadata?: Json | null
+          status?: string
+          template_used?: string | null
+          tenant_id?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      meal_plans: {
+        Row: {
+          client_id: string
+          created_at: string
+          end_date: string
+          id: string
+          name: string
+          plan_data: Json
+          start_date: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          end_date: string
+          id?: string
+          name: string
+          plan_data?: Json
+          start_date: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          end_date?: string
+          id?: string
+          name?: string
+          plan_data?: Json
+          start_date?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      message_templates: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          name: string
+          subject: string | null
+          tenant_id: string
+          type: string
+          updated_at: string
+          variables: Json | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          name: string
+          subject?: string | null
+          tenant_id: string
+          type: string
+          updated_at?: string
+          variables?: Json | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          name?: string
+          subject?: string | null
+          tenant_id?: string
+          type?: string
+          updated_at?: string
+          variables?: Json | null
+        }
+        Relationships: []
+      }
       tenants: {
         Row: {
           business_name: string

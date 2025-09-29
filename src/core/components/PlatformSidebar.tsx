@@ -49,8 +49,8 @@ export function PlatformSidebar() {
       enabled: isModuleEnabled('clientManagement'),
     },
     {
-      title: 'Chat & WhatsApp',
-      url: `${platformBasePath}/chat`,
+      title: 'Comunicação',
+      url: `${platformBasePath}/comunicacao`,
       icon: MessageCircle,
       enabled: isModuleEnabled('whatsappChat'),
     },
@@ -87,7 +87,7 @@ export function PlatformSidebar() {
     if (isModuleEnabled('mealPlans')) {
       businessSpecificItems.push({
         title: 'Planos Alimentares',
-        url: `${platformBasePath}/meal-plans`,
+        url: `${platformBasePath}/planos-alimentares`,
         icon: Utensils,
       });
     }

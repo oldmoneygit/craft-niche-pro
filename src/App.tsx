@@ -57,6 +57,8 @@ const App = () => (
               <Route path="/platform/:clientId/analytics" element={<PlatformAnalytics />} />
               <Route path="/platform/:clientId/questionnaires" element={<PlatformQuestionnaires />} />
               <Route path="/platform/:clientId/meal-plans" element={<PlatformMealPlans />} />
+              <Route path="/platform/:clientId/planos-alimentares" element={<PlatformMealPlans />} />
+              <Route path="/platform/:clientId/comunicacao" element={<PlatformChat />} />
               <Route path="/platform/:clientId/financial" element={<PlatformFinancial />} />
               <Route path="/platform/:clientId/settings" element={<PlatformSettings />} />
               
