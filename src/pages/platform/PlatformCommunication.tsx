@@ -17,16 +17,27 @@ import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 export default function PlatformCommunication() {
   const { clientId } = useParams<{ clientId: string }>();
   const { setClientId, clientConfig, loading: configLoading, error, clearError } = useClientConfig();
-  const { tenant } = useTenant(clientId || 'gabriel-gandin');
-  const { communications, templates, loading } = useCommunications(clientId);
+  
+  // Use gabriel-gandin as fallback if clientId is invalid
+  const actualClientId = clientId && clientId !== ':clientId' ? clientId : 'gabriel-gandin';
+  
+  const { tenant } = useTenant(actualClientId);
+  const { communications, templates, loading } = useCommunications(actualClientId);
   const { clients } = useClients(tenant?.id);
   const [searchQuery, setSearchQuery] = useState('');
 
   React.useEffect(() => {
-    if (clientId && clientId.trim()) {
-      setClientId(clientId);
-    }
-  }, [clientId, setClientId]);
+    console.log('PlatformCommunication: clientId from params:', clientId);
+    console.log('PlatformCommunication: actualClientId:', actualClientId);
+    setClientId(actualClientId);
+  }, [actualClientId, setClientId]);
+
+  React.useEffect(() => {
+    console.log('PlatformCommunication: tenant:', tenant);
+    console.log('PlatformCommunication: configLoading:', configLoading);
+    console.log('PlatformCommunication: loading:', loading);
+    console.log('PlatformCommunication: error:', error);
+  }, [tenant, configLoading, loading, error]);
 
   // Mock conversations for now
   const conversations = [
