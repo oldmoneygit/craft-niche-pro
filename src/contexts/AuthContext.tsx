@@ -55,7 +55,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       options: {
         emailRedirectTo: redirectUrl,
         data: {
-          full_name: email === 'jefersoncemep@gmail.com' ? 'Jeferson ADMIN' : ''
+          full_name: email === 'jefersoncemep@gmail.com' ? 'Jeferson ADMIN' : '',
+          email_verified: true // Força verificação imediata
         }
       }
     });
