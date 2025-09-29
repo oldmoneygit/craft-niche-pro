@@ -82,7 +82,7 @@ const ChatView = () => {
             Monitore e gerencie conversas do agente de IA
           </p>
         </div>
-        <Button variant="outline">
+        <Button variant="secondary">
           <Settings className="h-4 w-4 mr-2" />
           Configurar IA
         </Button>
@@ -223,11 +223,11 @@ const ChatView = () => {
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">
+                <Button variant="secondary" size="sm">
                   <Phone className="h-4 w-4 mr-2" />
                   Ligar
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="secondary" size="sm">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </div>

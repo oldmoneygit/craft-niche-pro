@@ -167,7 +167,7 @@ export default function EmailTemplateManager({ clientId }: EmailTemplateManagerP
               
               <div className="flex gap-2">
                 <Button type="submit" className="action-primary">Salvar</Button>
-                <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
+                <Button type="button" variant="secondary" onClick={() => setIsCreateOpen(false)}>
                   Cancelar
                 </Button>
               </div>

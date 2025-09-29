@@ -287,7 +287,7 @@ export default function MealPlanEditor({ clientId, tenantId, mealPlan, onSave, o
           <Save className="h-4 w-4 mr-2" />
           Salvar Plano
         </Button>
-        <Button variant="outline" onClick={onCancel}>
+        <Button variant="secondary" onClick={onCancel}>
           Cancelar
         </Button>
       </div>

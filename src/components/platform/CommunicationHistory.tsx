@@ -224,7 +224,7 @@ export default function CommunicationHistory({ clientId }: CommunicationHistoryP
 
               <div className="flex gap-2">
                 <Button className="action-primary" onClick={handleSendEmail}>Enviar</Button>
-                <Button variant="outline" onClick={() => setIsComposeOpen(false)}>
+                <Button variant="secondary" onClick={() => setIsComposeOpen(false)}>
                   Cancelar
                 </Button>
               </div>
