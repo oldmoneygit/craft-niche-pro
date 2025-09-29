@@ -170,127 +170,313 @@ export default function PlatformMealPlans() {
       <html>
         <head>
           <title>Plano Alimentar - ${plan.name}</title>
+          <meta charset="UTF-8">
           <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            
             body {
-              font-family: Arial, sans-serif;
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              line-height: 1.6;
+              color: #2c3e50;
+              background: white;
+            }
+            
+            .container {
               max-width: 800px;
               margin: 0 auto;
-              padding: 20px;
-              color: #333;
+              padding: 40px;
             }
-            .header {
+            
+            .platform-header {
               text-align: center;
-              border-bottom: 2px solid #0891b2;
-              padding-bottom: 20px;
-              margin-bottom: 30px;
-            }
-            .plan-title {
-              font-size: 24px;
-              font-weight: bold;
-              margin-bottom: 10px;
-              color: #0891b2;
-            }
-            .client-info {
-              font-size: 18px;
-              margin-bottom: 5px;
-            }
-            .date-info {
-              font-size: 14px;
-              color: #666;
-            }
-            .meal-section {
-              margin-bottom: 30px;
-              break-inside: avoid;
-            }
-            .meal-title {
-              font-size: 18px;
-              font-weight: bold;
-              background-color: #0891b2;
+              margin-bottom: 40px;
+              padding-bottom: 30px;
+              border-bottom: 3px solid #0891b2;
+              background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
               color: white;
-              padding: 10px;
-              margin-bottom: 10px;
+              padding: 30px;
+              border-radius: 15px 15px 0 0;
+              box-shadow: 0 4px 15px rgba(8, 145, 178, 0.2);
             }
-            .meal-items {
-              padding: 0 15px;
-            }
-            .meal-item {
+            
+            .platform-name {
+              font-size: 28px;
+              font-weight: 700;
               margin-bottom: 8px;
-              padding: 5px 0;
-              border-bottom: 1px solid #eee;
+              text-transform: uppercase;
+              letter-spacing: 2px;
             }
+            
+            .platform-subtitle {
+              font-size: 16px;
+              opacity: 0.9;
+              font-weight: 300;
+            }
+            
+            .plan-header {
+              background: white;
+              padding: 30px;
+              margin-bottom: 30px;
+              border-radius: 0 0 15px 15px;
+              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            }
+            
+            .plan-title {
+              font-size: 26px;
+              font-weight: 600;
+              margin-bottom: 15px;
+              color: #0891b2;
+              text-align: center;
+            }
+            
+            .client-info {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 15px;
+              padding: 15px;
+              background: #f8fafc;
+              border-radius: 10px;
+              border-left: 4px solid #0891b2;
+            }
+            
+            .client-name {
+              font-size: 18px;
+              font-weight: 600;
+              color: #1e293b;
+            }
+            
+            .date-info {
+              font-size: 16px;
+              color: #64748b;
+              text-align: center;
+              margin-bottom: 15px;
+            }
+            
             .status-badge {
               display: inline-block;
-              padding: 4px 12px;
-              border-radius: 15px;
-              font-size: 12px;
-              font-weight: bold;
+              padding: 8px 16px;
+              border-radius: 25px;
+              font-size: 14px;
+              font-weight: 600;
               text-transform: uppercase;
-              margin-bottom: 10px;
+              letter-spacing: 1px;
             }
-            .status-ativo { background-color: #10b981; color: white; }
-            .status-pausado { background-color: #f59e0b; color: white; }
-            .status-concluido { background-color: #3b82f6; color: white; }
+            
+            .status-ativo { 
+              background: linear-gradient(135deg, #10b981, #059669); 
+              color: white; 
+              box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+            }
+            .status-pausado { 
+              background: linear-gradient(135deg, #f59e0b, #d97706); 
+              color: white; 
+              box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+            }
+            .status-concluido { 
+              background: linear-gradient(135deg, #3b82f6, #2563eb); 
+              color: white; 
+              box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+            }
+            
+            .meals-container {
+              display: grid;
+              gap: 25px;
+            }
+            
+            .meal-section {
+              background: white;
+              border-radius: 15px;
+              overflow: hidden;
+              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+              border: 1px solid #e2e8f0;
+              break-inside: avoid;
+            }
+            
+            .meal-header {
+              background: linear-gradient(135deg, #0891b2, #06b6d4);
+              color: white;
+              padding: 20px;
+              display: flex;
+              align-items: center;
+              gap: 12px;
+            }
+            
+            .meal-emoji {
+              font-size: 24px;
+            }
+            
+            .meal-title {
+              font-size: 20px;
+              font-weight: 600;
+              letter-spacing: 0.5px;
+            }
+            
+            .meal-items {
+              padding: 25px;
+            }
+            
+            .meal-item {
+              display: flex;
+              align-items: center;
+              padding: 12px 0;
+              border-bottom: 1px solid #f1f5f9;
+              font-size: 16px;
+              color: #334155;
+            }
+            
+            .meal-item:last-child {
+              border-bottom: none;
+            }
+            
+            .meal-item::before {
+              content: "🍽️";
+              margin-right: 12px;
+              font-size: 16px;
+            }
+            
+            .footer {
+              margin-top: 40px;
+              text-align: center;
+              color: #64748b;
+              font-size: 14px;
+              padding-top: 30px;
+              border-top: 2px solid #e2e8f0;
+            }
+            
+            .print-date {
+              margin-bottom: 10px;
+              font-weight: 500;
+            }
+            
             @media print {
-              body { margin: 0; }
-              .header { page-break-after: avoid; }
-              .meal-section { page-break-inside: avoid; }
+              body { 
+                margin: 0; 
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              .container {
+                padding: 20px;
+              }
+              .platform-header { 
+                page-break-after: avoid; 
+              }
+              .meal-section { 
+                page-break-inside: avoid; 
+                margin-bottom: 20px;
+              }
+              .plan-header {
+                page-break-after: avoid;
+              }
             }
           </style>
         </head>
         <body>
-          <div class="header">
-            <div class="plan-title">${plan.name}</div>
-            <div class="client-info">Cliente: ${clientName}</div>
-            <div class="date-info">
-              Período: ${format(new Date(plan.start_date), 'dd/MM/yyyy', { locale: ptBR })} a ${format(new Date(plan.end_date), 'dd/MM/yyyy', { locale: ptBR })}
+          <div class="container">
+            <div class="platform-header">
+              <div class="platform-name">Gabriel Gandin</div>
+              <div class="platform-subtitle">Nutricionista • Plataforma de Gestão Nutricional</div>
             </div>
-            <span class="status-badge status-${plan.status}">
-              ${plan.status.charAt(0).toUpperCase() + plan.status.slice(1)}
-            </span>
-          </div>
 
-          <div class="meal-section">
-            <div class="meal-title">☀️ Café da Manhã</div>
-            <div class="meal-items">
-              ${plan.plan_data.breakfast.filter(item => item.trim()).map(item => 
-                `<div class="meal-item">• ${item}</div>`
-              ).join('')}
+            <div class="plan-header">
+              <div class="plan-title">${plan.name}</div>
+              
+              <div class="client-info">
+                <div>
+                  <div class="client-name">👤 ${clientName}</div>
+                </div>
+                <div>
+                  <span class="status-badge status-${plan.status}">
+                    ${plan.status.charAt(0).toUpperCase() + plan.status.slice(1)}
+                  </span>
+                </div>
+              </div>
+              
+              <div class="date-info">
+                📅 Período: ${format(new Date(plan.start_date), 'dd/MM/yyyy', { locale: ptBR })} até ${format(new Date(plan.end_date), 'dd/MM/yyyy', { locale: ptBR })}
+              </div>
             </div>
-          </div>
 
-          <div class="meal-section">
-            <div class="meal-title">🌞 Almoço</div>
-            <div class="meal-items">
-              ${plan.plan_data.lunch.filter(item => item.trim()).map(item => 
-                `<div class="meal-item">• ${item}</div>`
-              ).join('')}
+            <div class="meals-container">
+              <div class="meal-section">
+                <div class="meal-header">
+                  <span class="meal-emoji">☀️</span>
+                  <span class="meal-title">Café da Manhã</span>
+                </div>
+                <div class="meal-items">
+                  ${plan.plan_data.breakfast.filter(item => item.trim()).length > 0 
+                    ? plan.plan_data.breakfast.filter(item => item.trim()).map(item => 
+                        `<div class="meal-item">${item}</div>`
+                      ).join('')
+                    : '<div class="meal-item" style="color: #94a3b8; font-style: italic;">Nenhum item adicionado</div>'
+                  }
+                </div>
+              </div>
+
+              <div class="meal-section">
+                <div class="meal-header">
+                  <span class="meal-emoji">🌞</span>
+                  <span class="meal-title">Almoço</span>
+                </div>
+                <div class="meal-items">
+                  ${plan.plan_data.lunch.filter(item => item.trim()).length > 0 
+                    ? plan.plan_data.lunch.filter(item => item.trim()).map(item => 
+                        `<div class="meal-item">${item}</div>`
+                      ).join('')
+                    : '<div class="meal-item" style="color: #94a3b8; font-style: italic;">Nenhum item adicionado</div>'
+                  }
+                </div>
+              </div>
+
+              <div class="meal-section">
+                <div class="meal-header">
+                  <span class="meal-emoji">🌙</span>
+                  <span class="meal-title">Jantar</span>
+                </div>
+                <div class="meal-items">
+                  ${plan.plan_data.dinner.filter(item => item.trim()).length > 0 
+                    ? plan.plan_data.dinner.filter(item => item.trim()).map(item => 
+                        `<div class="meal-item">${item}</div>`
+                      ).join('')
+                    : '<div class="meal-item" style="color: #94a3b8; font-style: italic;">Nenhum item adicionado</div>'
+                  }
+                </div>
+              </div>
+
+              <div class="meal-section">
+                <div class="meal-header">
+                  <span class="meal-emoji">🍎</span>
+                  <span class="meal-title">Lanches</span>
+                </div>
+                <div class="meal-items">
+                  ${plan.plan_data.snacks.filter(item => item.trim()).length > 0 
+                    ? plan.plan_data.snacks.filter(item => item.trim()).map(item => 
+                        `<div class="meal-item">${item}</div>`
+                      ).join('')
+                    : '<div class="meal-item" style="color: #94a3b8; font-style: italic;">Nenhum item adicionado</div>'
+                  }
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div class="meal-section">
-            <div class="meal-title">🌙 Jantar</div>
-            <div class="meal-items">
-              ${plan.plan_data.dinner.filter(item => item.trim()).map(item => 
-                `<div class="meal-item">• ${item}</div>`
-              ).join('')}
-            </div>
-          </div>
-
-          <div class="meal-section">
-            <div class="meal-title">🍎 Lanches</div>
-            <div class="meal-items">
-              ${plan.plan_data.snacks.filter(item => item.trim()).map(item => 
-                `<div class="meal-item">• ${item}</div>`
-              ).join('')}
+            <div class="footer">
+              <div class="print-date">Documento gerado em ${format(new Date(), 'dd/MM/yyyy \'às\' HH:mm', { locale: ptBR })}</div>
+              <div>Gabriel Gandin - Nutricionista | Plataforma de Gestão Nutricional</div>
             </div>
           </div>
 
           <script>
             window.onload = function() {
-              window.print();
-              window.onafterprint = function() {
-                window.close();
-              };
+              setTimeout(() => {
+                window.print();
+                window.onafterprint = function() {
+                  window.close();
+                };
+              }, 500);
             };
           </script>
         </body>
