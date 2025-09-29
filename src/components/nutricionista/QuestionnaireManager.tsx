@@ -388,8 +388,7 @@ const QuestionnaireManager = () => {
 
             <Button
               onClick={() => setShowQuestionEditor(true)}
-              variant="outline"
-              className="w-full"
+              className="action-primary w-full"
             >
               <Plus className="h-4 w-4 mr-2" />
               Adicionar Nova Pergunta
@@ -410,7 +409,7 @@ const QuestionnaireManager = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Questionários</h2>
-        <Button onClick={handleCreateQuestionnaire}>
+        <Button className="action-primary" onClick={handleCreateQuestionnaire}>
           <Plus className="h-4 w-4 mr-2" />
           Novo Questionário
         </Button>

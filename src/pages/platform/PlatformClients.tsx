@@ -308,7 +308,7 @@ export default function PlatformClients() {
                   {searchTerm ? 'Nenhum cliente corresponde à sua busca.' : 'Comece adicionando seu primeiro cliente.'}
                 </p>
                 {!searchTerm && (
-                  <Button variant="success" onClick={() => setIsDialogOpen(true)}>
+                  <Button className="action-primary" onClick={() => setIsDialogOpen(true)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Adicionar Cliente
                   </Button>

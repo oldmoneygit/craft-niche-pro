@@ -283,7 +283,7 @@ export default function MealPlanEditor({ clientId, tenantId, mealPlan, onSave, o
       </Card>
 
       <div className="flex gap-3">
-        <Button variant="success" onClick={handleSave}>
+        <Button className="action-primary" onClick={handleSave}>
           <Save className="h-4 w-4 mr-2" />
           Salvar Plano
         </Button>
