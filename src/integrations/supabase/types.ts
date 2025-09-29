@@ -14,7 +14,137 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointments: {
+        Row: {
+          client_id: string
+          created_at: string
+          datetime: string
+          id: string
+          notes: string | null
+          status: string
+          tenant_id: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          datetime: string
+          id?: string
+          notes?: string | null
+          status?: string
+          tenant_id: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          datetime?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          tenant_id?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          allergies: string | null
+          birth_date: string | null
+          created_at: string
+          email: string | null
+          goal: string | null
+          height: number | null
+          id: string
+          name: string
+          phone: string | null
+          tenant_id: string
+          updated_at: string
+          weight_current: number | null
+        }
+        Insert: {
+          allergies?: string | null
+          birth_date?: string | null
+          created_at?: string
+          email?: string | null
+          goal?: string | null
+          height?: number | null
+          id?: string
+          name: string
+          phone?: string | null
+          tenant_id: string
+          updated_at?: string
+          weight_current?: number | null
+        }
+        Update: {
+          allergies?: string | null
+          birth_date?: string | null
+          created_at?: string
+          email?: string | null
+          goal?: string | null
+          height?: number | null
+          id?: string
+          name?: string
+          phone?: string | null
+          tenant_id?: string
+          updated_at?: string
+          weight_current?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          business_name: string
+          created_at: string
+          id: string
+          owner_email: string
+          subdomain: string
+          updated_at: string
+        }
+        Insert: {
+          business_name: string
+          created_at?: string
+          id?: string
+          owner_email: string
+          subdomain: string
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string
+          created_at?: string
+          id?: string
+          owner_email?: string
+          subdomain?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
