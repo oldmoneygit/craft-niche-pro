@@ -23,6 +23,11 @@ export default function PlatformCommunication() {
   // Use gabriel-gandin as fallback if clientId is invalid
   const actualClientId = clientId && clientId !== ':clientId' ? clientId : 'gabriel-gandin';
   
+  // Initialize the client config context
+  React.useEffect(() => {
+    setClientId(actualClientId);
+  }, [actualClientId, setClientId]);
+  
   const { tenant } = useTenant(actualClientId);
   const { communications, templates, loading } = useCommunications(actualClientId);
   const { clients } = useClients(tenant?.id);

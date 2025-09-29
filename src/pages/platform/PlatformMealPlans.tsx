@@ -17,6 +17,7 @@ import DashboardTemplate from '@/core/layouts/DashboardTemplate';
 import { useMealPlans, MealPlan } from '@/hooks/useMealPlans';
 import { useClients } from '@/hooks/useClients';
 import { useTenant } from '@/hooks/useTenant';
+import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 import { cn } from '@/lib/utils';
 
 export default function PlatformMealPlans() {

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import DashboardTemplate from '@/core/layouts/DashboardTemplate';
 import { useTenant } from '@/hooks/useTenant';
 import { useClients } from '@/hooks/useClients';
+import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

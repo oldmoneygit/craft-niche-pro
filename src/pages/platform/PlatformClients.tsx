@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import DashboardTemplate from '@/core/layouts/DashboardTemplate';
+import PlatformPageWrapper from '@/core/layouts/PlatformPageWrapper';
 import { useTenant } from '@/hooks/useTenant';
 import { useClients } from '@/hooks/useClients';
 import { Button } from '@/components/ui/button';
@@ -139,20 +139,20 @@ export default function PlatformClients() {
 
   if (tenantLoading) {
     return (
-      <DashboardTemplate title="Clientes">
+      <PlatformPageWrapper title="Clientes">
         <div className="flex items-center justify-center h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">Carregando clientes...</p>
           </div>
         </div>
-      </DashboardTemplate>
+      </PlatformPageWrapper>
     );
   }
 
   if (!tenant) {
     return (
-      <DashboardTemplate title="Clientes">
+      <PlatformPageWrapper title="Clientes">
         <div className="flex items-center justify-center h-[400px]">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground mb-4">Plataforma não encontrada</h1>
@@ -160,12 +160,12 @@ export default function PlatformClients() {
             <p className="text-sm text-muted-foreground mt-2">ClientId: {actualClientId}</p>
           </div>
         </div>
-      </DashboardTemplate>
+      </PlatformPageWrapper>
     );
   }
 
   return (
-    <DashboardTemplate title="Clientes">
+    <PlatformPageWrapper title="Clientes">
       <div className="space-y-6 p-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
@@ -396,6 +396,6 @@ export default function PlatformClients() {
           )}
         </div>
       </div>
-    </DashboardTemplate>
+    </PlatformPageWrapper>
   );
 }
