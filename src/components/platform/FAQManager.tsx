@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useFAQItems, FAQItem } from '@/hooks/useFAQItems';
+import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 
 const FAQ_CATEGORIES = [
@@ -22,6 +23,7 @@ const FAQ_CATEGORIES = [
 
 export default function FAQManager() {
   const { faqItems, loading, createFAQItem, updateFAQItem, deleteFAQItem } = useFAQItems();
+  const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<FAQItem | null>(null);
@@ -45,7 +47,33 @@ export default function FAQManager() {
   };
 
   const handleCreate = async () => {
-    if (!formData.question.trim() || !formData.answer.trim() || !formData.category) return;
+    // Validações
+    if (!formData.question.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "A pergunta não pode estar vazia",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!formData.answer.trim()) {
+      toast({
+        title: "Campo obrigatório", 
+        description: "A resposta não pode estar vazia",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!formData.category || formData.category.trim() === '') {
+      toast({
+        title: "Campo obrigatório",
+        description: "Selecione uma categoria",
+        variant: "destructive"
+      });
+      return;
+    }
 
     const result = await createFAQItem(formData);
     if (result) {
@@ -66,7 +94,26 @@ export default function FAQManager() {
   };
 
   const handleUpdate = async () => {
-    if (!editingItem || !formData.question.trim() || !formData.answer.trim()) return;
+    if (!editingItem) return;
+    
+    // Validações
+    if (!formData.question.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "A pergunta não pode estar vazia",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!formData.answer.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "A resposta não pode estar vazia", 
+        variant: "destructive"
+      });
+      return;
+    }
 
     const result = await updateFAQItem(editingItem.id, formData);
     if (result) {

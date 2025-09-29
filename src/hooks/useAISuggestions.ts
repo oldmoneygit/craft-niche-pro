@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useClientConfig } from '@/core/contexts/ClientConfigContext';
-import { useTenant } from '@/hooks/useTenant';
+import { useTenantId } from './useTenantId';
 import { useToast } from '@/hooks/use-toast';
 
 export interface AISuggestion {
@@ -18,19 +17,18 @@ export interface AISuggestion {
 export const useAISuggestions = () => {
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
   const [loading, setLoading] = useState(true);
-  const { clientConfig } = useClientConfig();
-  const { tenant } = useTenant(clientConfig?.subdomain || '');
+  const { tenantId, loading: tenantLoading } = useTenantId();
   const { toast } = useToast();
 
   const fetchSuggestions = async () => {
-    if (!tenant?.id) return;
+    if (!tenantId || tenantLoading) return;
 
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('ai_suggestions')
         .select('*')
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', tenantId)
         .eq('resolved', false)
         .order('priority', { ascending: true })
         .order('created_at', { ascending: false });
@@ -50,18 +48,20 @@ export const useAISuggestions = () => {
   };
 
   useEffect(() => {
-    fetchSuggestions();
-  }, [tenant?.id]);
+    if (!tenantLoading && tenantId) {
+      fetchSuggestions();
+    }
+  }, [tenantId, tenantLoading]);
 
   const createSuggestion = async (data: Omit<AISuggestion, 'id' | 'tenant_id' | 'created_at' | 'updated_at' | 'resolved'>) => {
-    if (!tenant?.id) return null;
+    if (!tenantId) return null;
 
     try {
       const { data: newSuggestion, error } = await supabase
         .from('ai_suggestions')
         .insert({
           ...data,
-          tenant_id: tenant.id,
+          tenant_id: tenantId,
         })
         .select()
         .single();

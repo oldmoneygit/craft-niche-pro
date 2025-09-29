@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useClientConfig } from '@/core/contexts/ClientConfigContext';
-import { useTenant } from '@/hooks/useTenant';
+import { useTenantId } from './useTenantId';
 
 export interface AIInsight {
   id: string;
@@ -16,38 +15,53 @@ export interface AIInsight {
 export const useAIInsights = () => {
   const [insights, setInsights] = useState<AIInsight[]>([]);
   const [loading, setLoading] = useState(true);
-  const { clientConfig } = useClientConfig();
-  const { tenant } = useTenant(clientConfig?.subdomain || '');
+  const { tenantId, loading: tenantLoading } = useTenantId();
 
   const generateInsights = async () => {
-    if (!tenant?.id) return;
+    if (!tenantId || tenantLoading) return;
 
     setLoading(true);
     try {
       const insights: AIInsight[] = [];
 
       // 1. Clientes sem retorno há mais de 14 dias
-      const { data: noReturnClients, error: noReturnError } = await supabase
+      const fourteenDaysAgo = new Date();
+      fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+      const { data: allClients, error: clientsError } = await supabase
         .from('clients')
         .select(`
           id, name, email, phone,
-          appointments!inner(datetime, status)
+          appointments(datetime, status)
         `)
-        .eq('tenant_id', tenant.id)
-        .lt('appointments.datetime', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString())
-        .order('appointments.datetime', { ascending: false })
-        .limit(1, { foreignTable: 'appointments' });
+        .eq('tenant_id', tenantId);
 
-      if (!noReturnError && noReturnClients && noReturnClients.length > 0) {
-        insights.push({
-          id: 'no_return',
-          type: 'no_return',
-          title: 'Clientes sem retorno',
-          description: `${noReturnClients.length} cliente${noReturnClients.length > 1 ? 's' : ''} há mais de 14 dias sem consulta`,
-          priority: 1,
-          clientData: noReturnClients,
-          count: noReturnClients.length,
+      if (!clientsError && allClients) {
+        const noReturnClients = allClients.filter(client => {
+          const appointments = client.appointments || [];
+          if (appointments.length === 0) return false;
+          
+          // Pegar o appointment mais recente
+          const sortedAppointments = [...appointments].sort(
+            (a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime()
+          );
+          const lastAppointment = sortedAppointments[0];
+          
+          // Verificar se o último appointment foi há mais de 14 dias
+          return new Date(lastAppointment.datetime) < fourteenDaysAgo;
         });
+
+        if (noReturnClients.length > 0) {
+          insights.push({
+            id: 'no_return',
+            type: 'no_return',
+            title: 'Clientes sem retorno',
+            description: `${noReturnClients.length} cliente${noReturnClients.length > 1 ? 's' : ''} há mais de 14 dias sem consulta`,
+            priority: 1,
+            clientData: noReturnClients,
+            count: noReturnClients.length,
+          });
+        }
       }
 
       // 2. Múltiplas faltas (2+ consultas perdidas)
@@ -57,7 +71,7 @@ export const useAIInsights = () => {
           client_id,
           clients!inner(id, name, email, phone)
         `)
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', tenantId)
         .eq('status', 'faltou');
 
       if (!missedError && missedAppointments) {
@@ -119,8 +133,10 @@ export const useAIInsights = () => {
   };
 
   useEffect(() => {
-    generateInsights();
-  }, [tenant?.id]);
+    if (!tenantLoading && tenantId) {
+      generateInsights();
+    }
+  }, [tenantId, tenantLoading]);
 
   return {
     insights,

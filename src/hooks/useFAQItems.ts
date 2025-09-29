@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useClientConfig } from '@/core/contexts/ClientConfigContext';
-import { useTenant } from '@/hooks/useTenant';
+import { useTenantId } from './useTenantId';
 import { useToast } from '@/hooks/use-toast';
 
 export interface FAQItem {
@@ -18,19 +17,18 @@ export interface FAQItem {
 export const useFAQItems = () => {
   const [faqItems, setFaqItems] = useState<FAQItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { clientConfig } = useClientConfig();
-  const { tenant } = useTenant(clientConfig?.subdomain || '');
+  const { tenantId, loading: tenantLoading } = useTenantId();
   const { toast } = useToast();
 
   const fetchFAQItems = async () => {
-    if (!tenant?.id) return;
+    if (!tenantId || tenantLoading) return;
 
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('faq_items')
         .select('*')
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -48,18 +46,20 @@ export const useFAQItems = () => {
   };
 
   useEffect(() => {
-    fetchFAQItems();
-  }, [tenant?.id]);
+    if (!tenantLoading && tenantId) {
+      fetchFAQItems();
+    }
+  }, [tenantId, tenantLoading]);
 
   const createFAQItem = async (data: Omit<FAQItem, 'id' | 'tenant_id' | 'created_at' | 'updated_at'>) => {
-    if (!tenant?.id) return null;
+    if (!tenantId) return null;
 
     try {
       const { data: newItem, error } = await supabase
         .from('faq_items')
         .insert({
           ...data,
-          tenant_id: tenant.id,
+          tenant_id: tenantId,
         })
         .select()
         .single();

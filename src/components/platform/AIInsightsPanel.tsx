@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAIInsights } from '@/hooks/useAIInsights';
 import { useAISuggestions } from '@/hooks/useAISuggestions';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 import { 
   AlertTriangle, 
   TrendingUp, 
@@ -37,12 +39,27 @@ const PRIORITY_LABELS = {
 export default function AIInsightsPanel() {
   const { insights, loading, refresh } = useAIInsights();
   const { ignoreSuggestion, postponeSuggestion, createSuggestion } = useAISuggestions();
+  const navigate = useNavigate();
+  const { clientId } = useParams();
+  const { toast } = useToast();
 
   const handleViewClients = (insight: any) => {
-    // Placeholder: In a real implementation, this would navigate to the clients page
-    // with a filter applied to show only the relevant clients
-    console.log('View clients for insight:', insight);
-    alert(`Funcionalidade em desenvolvimento: Ver clientes relacionados a "${insight.title}"`);
+    if (!insight.clientData || insight.clientData.length === 0) {
+      toast({
+        title: "Nenhum cliente",
+        description: "Não há clientes para visualizar",
+      });
+      return;
+    }
+    
+    // Navegar para página de clientes com filtro
+    navigate(`/platform/${clientId}/clients`, {
+      state: { 
+        filterType: insight.type,
+        clientIds: insight.clientData.map((c: any) => c.id),
+        insightTitle: insight.title
+      }
+    });
   };
 
   const handleIgnore = async (insight: any) => {
