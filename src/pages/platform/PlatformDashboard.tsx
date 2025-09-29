@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 import DashboardTemplate from '@/core/layouts/DashboardTemplate';
+import AIInsightsPanel from '@/components/platform/AIInsightsPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -141,6 +142,9 @@ export default function PlatformDashboard() {
               color="purple"
             />
           </div>
+
+          {/* AI Insights Panel */}
+          <AIInsightsPanel />
 
           {/* Main Content Grid - Clean layout */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">

@@ -23,6 +23,7 @@ import PlatformChat from "./pages/platform/PlatformChat";
 import PlatformCommunication from "./pages/platform/PlatformCommunication";
 import PlatformQuestionnaires from "./pages/platform/PlatformQuestionnaires";
 import PlatformMealPlans from "./pages/platform/PlatformMealPlans";
+import PlatformFAQBot from "./pages/platform/PlatformFAQBot";
 import PlatformFinancial from "./pages/platform/PlatformFinancial";
 import PlatformScheduling from "./pages/platform/PlatformScheduling";
 import PlatformAIAgent from "./pages/platform/PlatformAIAgent";
@@ -61,6 +62,7 @@ const App = () => (
               <Route path="/platform/:clientId/questionnaires" element={<PlatformProtectedRoute><PlatformQuestionnaires /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/meal-plans" element={<PlatformProtectedRoute><PlatformMealPlans /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/planos-alimentares" element={<PlatformProtectedRoute><PlatformMealPlans /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/faq-bot" element={<PlatformProtectedRoute><PlatformFAQBot /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/comunicacao" element={<PlatformProtectedRoute><PlatformCommunication /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/financial" element={<PlatformProtectedRoute><PlatformFinancial /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/settings" element={<PlatformProtectedRoute><PlatformSettings /></PlatformProtectedRoute>} />

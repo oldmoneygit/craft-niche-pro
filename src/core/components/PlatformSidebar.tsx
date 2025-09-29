@@ -61,6 +61,12 @@ export function PlatformSidebar() {
       enabled: isModuleEnabled('aiAgent'),
     },
     {
+      title: 'FAQ Bot',
+      url: `${platformBasePath}/faq-bot`,
+      icon: Bot,
+      enabled: true, // FAQ Bot is always enabled
+    },
+    {
       title: 'Agendamentos',
       url: `${platformBasePath}/agendamentos`,
       icon: Calendar,

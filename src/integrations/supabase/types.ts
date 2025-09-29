@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_suggestions: {
+        Row: {
+          created_at: string
+          data: Json
+          id: string
+          priority: number
+          resolved: boolean
+          tenant_id: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          id?: string
+          priority?: number
+          resolved?: boolean
+          tenant_id: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          id?: string
+          priority?: number
+          resolved?: boolean
+          tenant_id?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       appointments: {
         Row: {
           client_id: string
@@ -154,6 +187,39 @@ export type Database = {
           template_used?: string | null
           tenant_id?: string
           type?: string
+        }
+        Relationships: []
+      }
+      faq_items: {
+        Row: {
+          active: boolean
+          answer: string
+          category: string
+          created_at: string
+          id: string
+          question: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          answer: string
+          category: string
+          created_at?: string
+          id?: string
+          question: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          answer?: string
+          category?: string
+          created_at?: string
+          id?: string
+          question?: string
+          tenant_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
