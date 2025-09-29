@@ -47,18 +47,18 @@ const App = () => (
               <Route path="/admin" element={<AdminDashboard />} />
               
               {/* Plataformas Multi-tenant */}
-              <Route path="/platform/:clientId" element={<ProtectedRoute><PlatformDashboard /></ProtectedRoute>} />
-              <Route path="/platform/:clientId/dashboard" element={<ProtectedRoute><PlatformDashboard /></ProtectedRoute>} />
+              <Route path="/platform/:clientId" element={<PlatformDashboard />} />
+              <Route path="/platform/:clientId/dashboard" element={<PlatformDashboard />} />
               <Route path="/platform/:clientId/login" element={<PlatformLogin />} />
-              <Route path="/platform/:clientId/clientes" element={<ProtectedRoute><PlatformClients /></ProtectedRoute>} />
-              <Route path="/platform/:clientId/chat" element={<ProtectedRoute><PlatformChat /></ProtectedRoute>} />
-              <Route path="/platform/:clientId/ai-agent" element={<ProtectedRoute><PlatformAIAgent /></ProtectedRoute>} />
-              <Route path="/platform/:clientId/agendamentos" element={<ProtectedRoute><PlatformScheduling /></ProtectedRoute>} />
-              <Route path="/platform/:clientId/analytics" element={<ProtectedRoute><PlatformAnalytics /></ProtectedRoute>} />
-              <Route path="/platform/:clientId/questionnaires" element={<ProtectedRoute><PlatformQuestionnaires /></ProtectedRoute>} />
-              <Route path="/platform/:clientId/meal-plans" element={<ProtectedRoute><PlatformMealPlans /></ProtectedRoute>} />
-              <Route path="/platform/:clientId/financial" element={<ProtectedRoute><PlatformFinancial /></ProtectedRoute>} />
-              <Route path="/platform/:clientId/settings" element={<ProtectedRoute><PlatformSettings /></ProtectedRoute>} />
+              <Route path="/platform/:clientId/clientes" element={<PlatformClients />} />
+              <Route path="/platform/:clientId/chat" element={<PlatformChat />} />
+              <Route path="/platform/:clientId/ai-agent" element={<PlatformAIAgent />} />
+              <Route path="/platform/:clientId/agendamentos" element={<PlatformScheduling />} />
+              <Route path="/platform/:clientId/analytics" element={<PlatformAnalytics />} />
+              <Route path="/platform/:clientId/questionnaires" element={<PlatformQuestionnaires />} />
+              <Route path="/platform/:clientId/meal-plans" element={<PlatformMealPlans />} />
+              <Route path="/platform/:clientId/financial" element={<PlatformFinancial />} />
+              <Route path="/platform/:clientId/settings" element={<PlatformSettings />} />
               
               {/* Questionários Públicos */}
               <Route path="/questionnaire/:questionnaireId" element={<QuestionnairePublic />} />
