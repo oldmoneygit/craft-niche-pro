@@ -28,11 +28,11 @@ export interface MessageTemplate {
   updated_at: string;
 }
 
-export function useCommunications() {
+export function useCommunications(clientId?: string) {
   const [communications, setCommunications] = useState<Communication[]>([]);
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
   const [loading, setLoading] = useState(true);
-  const { tenant } = useTenant('gabriel-gandin');
+  const { tenant } = useTenant(clientId || 'gabriel-gandin');
   const { toast } = useToast();
 
   const fetchCommunications = async () => {

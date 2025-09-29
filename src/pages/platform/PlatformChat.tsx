@@ -28,7 +28,7 @@ export default function PlatformChat() {
           </div>
         </div>
       ) : (
-        <ChatAI />
+        <ChatAI clientId={clientId} />
       )}
     </DashboardTemplate>
   );

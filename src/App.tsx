@@ -18,6 +18,7 @@ import PlatformDashboard from "./pages/platform/PlatformDashboard";
 import PlatformLogin from "./pages/platform/PlatformLogin";
 import PlatformClients from "./pages/platform/PlatformClients";
 import PlatformChat from "./pages/platform/PlatformChat";
+import PlatformCommunication from "./pages/platform/PlatformCommunication";
 import PlatformQuestionnaires from "./pages/platform/PlatformQuestionnaires";
 import PlatformMealPlans from "./pages/platform/PlatformMealPlans";
 import PlatformFinancial from "./pages/platform/PlatformFinancial";
@@ -58,7 +59,7 @@ const App = () => (
               <Route path="/platform/:clientId/questionnaires" element={<PlatformQuestionnaires />} />
               <Route path="/platform/:clientId/meal-plans" element={<PlatformMealPlans />} />
               <Route path="/platform/:clientId/planos-alimentares" element={<PlatformMealPlans />} />
-              <Route path="/platform/:clientId/comunicacao" element={<PlatformChat />} />
+              <Route path="/platform/:clientId/comunicacao" element={<PlatformCommunication />} />
               <Route path="/platform/:clientId/financial" element={<PlatformFinancial />} />
               <Route path="/platform/:clientId/settings" element={<PlatformSettings />} />
               

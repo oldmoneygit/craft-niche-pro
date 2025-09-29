@@ -39,7 +39,7 @@ import {
 import AIAgent from "./AIAgent";
 import { mockNutriData } from "@/lib/mockDataNutricionista";
 
-const ChatAI = () => {
+const ChatAI = ({ clientId }: { clientId?: string }) => {
   const [newMessage, setNewMessage] = useState("");
   const [showAutomationSettings, setShowAutomationSettings] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState(null);
