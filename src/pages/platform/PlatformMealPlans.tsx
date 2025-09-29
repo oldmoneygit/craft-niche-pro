@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import DashboardTemplate from '@/core/layouts/DashboardTemplate';
+import PlatformPageWrapper from '@/core/layouts/PlatformPageWrapper';
 import { useMealPlans, MealPlan } from '@/hooks/useMealPlans';
 import { useClients } from '@/hooks/useClients';
 import { useTenant } from '@/hooks/useTenant';
@@ -160,7 +160,7 @@ export default function PlatformMealPlans() {
   };
 
   return (
-    <DashboardTemplate>
+    <PlatformPageWrapper title="Planos Alimentares">
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
@@ -480,9 +480,169 @@ export default function PlatformMealPlans() {
       {/* Edit Dialog */}
       <Dialog open={!!editingPlan} onOpenChange={(open) => !open && setEditingPlan(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          {/* ... same content as create modal */}
+          <DialogHeader>
+            <DialogTitle>Editar Plano Alimentar</DialogTitle>
+            <DialogDescription>
+              Edite as informações do plano alimentar.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Nome do Plano</Label>
+                <Input
+                  id="edit-name"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-client">Cliente</Label>
+                <Select value={formData.client_id} onValueChange={(value) => setFormData(prev => ({ ...prev, client_id: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um cliente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Data de Início</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="secondary" className="w-full justify-start text-left font-normal">
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {format(formData.start_date, 'dd/MM/yyyy', { locale: ptBR })}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={formData.start_date}
+                      onSelect={(date) => date && setFormData(prev => ({ ...prev, start_date: date }))}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Data de Fim</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="secondary" className="w-full justify-start text-left font-normal">
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {format(formData.end_date, 'dd/MM/yyyy', { locale: ptBR })}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={formData.end_date}
+                      onSelect={(date) => date && setFormData(prev => ({ ...prev, end_date: date }))}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-status">Status</Label>
+                <Select value={formData.status} onValueChange={(value: any) => setFormData(prev => ({ ...prev, status: value }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ativo">Ativo</SelectItem>
+                    <SelectItem value="pausado">Pausado</SelectItem>
+                    <SelectItem value="concluido">Concluído</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <Tabs defaultValue="breakfast" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="breakfast">Café da Manhã</TabsTrigger>
+                <TabsTrigger value="lunch">Almoço</TabsTrigger>
+                <TabsTrigger value="dinner">Jantar</TabsTrigger>
+                <TabsTrigger value="snacks">Lanches</TabsTrigger>
+              </TabsList>
+              
+              {(['breakfast', 'lunch', 'dinner', 'snacks'] as const).map((mealType) => (
+                <TabsContent key={mealType} value={mealType} className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-lg font-medium">
+                      {mealType === 'breakfast' && 'Café da Manhã'}
+                      {mealType === 'lunch' && 'Almoço'}
+                      {mealType === 'dinner' && 'Jantar'}
+                      {mealType === 'snacks' && 'Lanches'}
+                    </Label>
+                    <Button type="button" className="action-primary" size="sm" onClick={() => addMealItem(mealType)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Adicionar Item
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {formData.plan_data[mealType].map((item, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={item}
+                          onChange={(e) => updateMealItem(mealType, index, e.target.value)}
+                          placeholder="Ex: Pão integral com ovos"
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => removeMealItem(mealType, index)}
+                          className="shrink-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+              ))}
+            </Tabs>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  setEditingPlan(null);
+                  resetForm();
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                className="action-primary"
+                onClick={handleUpdatePlan}
+                disabled={!formData.name || !formData.client_id}
+              >
+                Salvar Alterações
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
-    </DashboardTemplate>
+    </PlatformPageWrapper>
   );
 }
