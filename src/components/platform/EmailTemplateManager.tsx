@@ -105,10 +105,10 @@ export default function EmailTemplateManager({ clientId }: EmailTemplateManagerP
         <h3 className="text-xl font-semibold">Templates de Email</h3>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => resetForm()}>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Template
-            </Button>
+          <Button variant="success" onClick={() => resetForm()}>
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Template
+          </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
@@ -166,7 +166,7 @@ export default function EmailTemplateManager({ clientId }: EmailTemplateManagerP
               </div>
               
               <div className="flex gap-2">
-                <Button type="submit">Salvar</Button>
+                <Button type="submit" variant="success">Salvar</Button>
                 <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
                   Cancelar
                 </Button>
@@ -228,7 +228,7 @@ export default function EmailTemplateManager({ clientId }: EmailTemplateManagerP
         {templates.length === 0 && (
           <div className="text-center py-8">
             <p className="text-muted-foreground mb-4">Nenhum template encontrado</p>
-            <Button onClick={() => setIsCreateOpen(true)}>
+            <Button variant="success" onClick={() => setIsCreateOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Criar Primeiro Template
             </Button>

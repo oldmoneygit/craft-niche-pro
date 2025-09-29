@@ -168,7 +168,7 @@ export default function PlatformMealPlans() {
           </div>
           <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => { resetForm(); setEditingPlan(null); }}>
+              <Button variant="success" onClick={() => { resetForm(); setEditingPlan(null); }}>
                 <Plus className="mr-2 h-4 w-4" />
                 Novo Plano
               </Button>
@@ -329,6 +329,7 @@ export default function PlatformMealPlans() {
                     Cancelar
                   </Button>
                   <Button
+                    variant="success"
                     onClick={editingPlan ? handleUpdatePlan : handleCreatePlan}
                     disabled={!formData.name || !formData.client_id}
                   >
@@ -394,7 +395,7 @@ export default function PlatformMealPlans() {
                   : 'Comece criando seu primeiro plano alimentar.'}
               </p>
               {!searchTerm && selectedClient === 'all' && (
-                <Button onClick={() => setIsCreateModalOpen(true)}>
+                <Button variant="success" onClick={() => setIsCreateModalOpen(true)}>
                   <Plus className="mr-2 h-4 w-4" />
                   Criar Primeiro Plano
                 </Button>

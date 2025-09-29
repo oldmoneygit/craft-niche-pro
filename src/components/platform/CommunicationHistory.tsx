@@ -145,10 +145,10 @@ export default function CommunicationHistory({ clientId }: CommunicationHistoryP
         <h3 className="text-xl font-semibold">Histórico de Comunicação</h3>
         <Dialog open={isComposeOpen} onOpenChange={setIsComposeOpen}>
           <DialogTrigger asChild>
-            <Button>
-              <Send className="h-4 w-4 mr-2" />
-              Nova Mensagem
-            </Button>
+          <Button variant="success">
+            <Send className="h-4 w-4 mr-2" />
+            Nova Mensagem
+          </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
@@ -223,7 +223,7 @@ export default function CommunicationHistory({ clientId }: CommunicationHistoryP
               </div>
 
               <div className="flex gap-2">
-                <Button onClick={handleSendEmail}>Enviar</Button>
+                <Button variant="success" onClick={handleSendEmail}>Enviar</Button>
                 <Button variant="outline" onClick={() => setIsComposeOpen(false)}>
                   Cancelar
                 </Button>

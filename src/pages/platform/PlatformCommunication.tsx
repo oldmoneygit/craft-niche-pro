@@ -102,7 +102,7 @@ export default function PlatformCommunication() {
               <Settings className="h-4 w-4 mr-2" />
               Configurações
             </Button>
-            <Button>
+            <Button variant="success">
               <Plus className="h-4 w-4 mr-2" />
               Nova Mensagem
             </Button>
