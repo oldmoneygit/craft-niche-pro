@@ -257,7 +257,7 @@ export default function PlatformScheduling() {
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={resetForm} className="flex items-center gap-2">
+              <Button onClick={resetForm} className="action-primary flex items-center gap-2">
                 <Plus className="w-4 h-4" />
                 Novo Agendamento
               </Button>
@@ -331,7 +331,7 @@ export default function PlatformScheduling() {
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancelar
                   </Button>
-                  <Button type="submit">
+                  <Button type="submit" className="action-primary">
                     {editingAppointment ? 'Atualizar' : 'Criar'}
                   </Button>
                 </div>
@@ -404,7 +404,7 @@ export default function PlatformScheduling() {
                 <p className="text-muted-foreground text-center mb-4">
                   Comece criando seu primeiro agendamento.
                 </p>
-                <Button onClick={() => setIsDialogOpen(true)}>
+                <Button onClick={() => setIsDialogOpen(true)} className="action-primary">
                   <Plus className="w-4 h-4 mr-2" />
                   Novo Agendamento
                 </Button>
@@ -436,12 +436,12 @@ export default function PlatformScheduling() {
                       </div>
                       <div className="flex gap-2 mt-3">
                         {appointment.status === 'agendado' && (
-                          <Button size="sm" variant="outline" onClick={() => updateStatus(appointment.id, 'confirmado')}>
+                          <Button size="sm" className="action-success" onClick={() => updateStatus(appointment.id, 'confirmado')}>
                             Confirmar
                           </Button>
                         )}
                         {appointment.status === 'confirmado' && (
-                          <Button size="sm" variant="outline" onClick={() => updateStatus(appointment.id, 'realizado')}>
+                          <Button size="sm" className="action-primary" onClick={() => updateStatus(appointment.id, 'realizado')}>
                             Marcar como Realizado
                           </Button>
                         )}

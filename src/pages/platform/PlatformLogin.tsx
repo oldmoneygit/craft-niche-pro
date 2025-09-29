@@ -129,7 +129,7 @@ export default function PlatformLogin() {
                   </Button>
                 </div>
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full action-primary">
                 Entrar
               </Button>
             </form>

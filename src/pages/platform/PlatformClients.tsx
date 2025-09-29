@@ -176,7 +176,7 @@ export default function PlatformClients() {
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="success" onClick={resetForm} className="flex items-center gap-2">
+              <Button className="action-primary flex items-center gap-2" onClick={resetForm}>
                 <Plus className="w-4 h-4" />
                 Novo Cliente
               </Button>
@@ -266,7 +266,7 @@ export default function PlatformClients() {
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancelar
                   </Button>
-                  <Button variant="success" type="submit">
+                  <Button className="action-primary" type="submit">
                     {editingClient ? 'Atualizar' : 'Criar'}
                   </Button>
                 </div>
