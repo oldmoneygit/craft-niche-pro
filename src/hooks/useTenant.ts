@@ -16,11 +16,6 @@ export function useTenant(tenantSubdomain: string) {
 
   useEffect(() => {
     async function fetchTenant() {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
       try {
         const { data, error } = await supabase
           .from('tenants')
@@ -43,7 +38,7 @@ export function useTenant(tenantSubdomain: string) {
     }
 
     fetchTenant();
-  }, [tenantSubdomain, user]);
+  }, [tenantSubdomain]);
 
   return { tenant, loading };
 }
