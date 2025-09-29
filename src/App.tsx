@@ -16,6 +16,8 @@ import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import PlatformDashboard from "./pages/platform/PlatformDashboard";
 import PlatformLogin from "./pages/platform/PlatformLogin";
+import PlatformAuth from "./pages/platform/PlatformAuth";
+import PlatformProtectedRoute from "./components/auth/PlatformProtectedRoute";
 import PlatformClients from "./pages/platform/PlatformClients";
 import PlatformChat from "./pages/platform/PlatformChat";
 import PlatformCommunication from "./pages/platform/PlatformCommunication";
@@ -48,20 +50,20 @@ const App = () => (
               <Route path="/admin" element={<AdminDashboard />} />
               
               {/* Plataformas Multi-tenant */}
-              <Route path="/platform/:clientId" element={<PlatformDashboard />} />
-              <Route path="/platform/:clientId/dashboard" element={<PlatformDashboard />} />
-              <Route path="/platform/:clientId/login" element={<PlatformLogin />} />
-              <Route path="/platform/:clientId/clientes" element={<PlatformClients />} />
-              <Route path="/platform/:clientId/chat" element={<PlatformChat />} />
-              <Route path="/platform/:clientId/ai-agent" element={<PlatformAIAgent />} />
-              <Route path="/platform/:clientId/agendamentos" element={<PlatformScheduling />} />
-              <Route path="/platform/:clientId/analytics" element={<PlatformAnalytics />} />
-              <Route path="/platform/:clientId/questionnaires" element={<PlatformQuestionnaires />} />
-              <Route path="/platform/:clientId/meal-plans" element={<PlatformMealPlans />} />
-              <Route path="/platform/:clientId/planos-alimentares" element={<PlatformMealPlans />} />
-              <Route path="/platform/:clientId/comunicacao" element={<PlatformCommunication />} />
-              <Route path="/platform/:clientId/financial" element={<PlatformFinancial />} />
-              <Route path="/platform/:clientId/settings" element={<PlatformSettings />} />
+              <Route path="/platform/:clientId/login" element={<PlatformAuth />} />
+              <Route path="/platform/:clientId" element={<PlatformProtectedRoute><PlatformDashboard /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/dashboard" element={<PlatformProtectedRoute><PlatformDashboard /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/clientes" element={<PlatformProtectedRoute><PlatformClients /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/chat" element={<PlatformProtectedRoute><PlatformChat /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/ai-agent" element={<PlatformProtectedRoute><PlatformAIAgent /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/agendamentos" element={<PlatformProtectedRoute><PlatformScheduling /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/analytics" element={<PlatformProtectedRoute><PlatformAnalytics /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/questionnaires" element={<PlatformProtectedRoute><PlatformQuestionnaires /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/meal-plans" element={<PlatformProtectedRoute><PlatformMealPlans /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/planos-alimentares" element={<PlatformProtectedRoute><PlatformMealPlans /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/comunicacao" element={<PlatformProtectedRoute><PlatformCommunication /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/financial" element={<PlatformProtectedRoute><PlatformFinancial /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/settings" element={<PlatformProtectedRoute><PlatformSettings /></PlatformProtectedRoute>} />
               
               {/* Questionários Públicos */}
               <Route path="/questionnaire/:questionnaireId" element={<QuestionnairePublic />} />

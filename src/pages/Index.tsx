@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import CreateAdminButton from "@/components/admin/CreateAdminButton";
 import { 
   Building2, 
   UserCheck, 
@@ -43,6 +44,7 @@ const Index = () => {
             <a href="#exemplos" className="text-muted-foreground hover:text-foreground transition-colors">Exemplos</a>
             <a href="#recursos" className="text-muted-foreground hover:text-foreground transition-colors">Recursos</a>
             <a href="#precos" className="text-muted-foreground hover:text-foreground transition-colors">Preços</a>
+            <CreateAdminButton />
             <Button variant="outline" onClick={() => navigate('/admin')}>Admin</Button>
             <Button className="action-primary" onClick={() => navigate('/onboarding')}>
               Criar Plataforma
@@ -171,7 +173,7 @@ const Index = () => {
 
                 <Button 
                   className="w-full bg-green-600 hover:bg-green-700 text-white group"
-                  onClick={() => navigate('/auth')}
+                  onClick={() => navigate('/platform/gabriel-gandin')}
                 >
                   Ver Plataforma em Ação
                   <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
