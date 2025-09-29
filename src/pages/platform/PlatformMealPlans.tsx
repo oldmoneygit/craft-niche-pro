@@ -159,6 +159,148 @@ export default function PlatformMealPlans() {
     }
   };
 
+  const printMealPlan = (plan: MealPlan) => {
+    const clientName = getClientName(plan.client_id);
+    const printWindow = window.open('', '_blank');
+    
+    if (!printWindow) return;
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Plano Alimentar - ${plan.name}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              max-width: 800px;
+              margin: 0 auto;
+              padding: 20px;
+              color: #333;
+            }
+            .header {
+              text-align: center;
+              border-bottom: 2px solid #0891b2;
+              padding-bottom: 20px;
+              margin-bottom: 30px;
+            }
+            .plan-title {
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 10px;
+              color: #0891b2;
+            }
+            .client-info {
+              font-size: 18px;
+              margin-bottom: 5px;
+            }
+            .date-info {
+              font-size: 14px;
+              color: #666;
+            }
+            .meal-section {
+              margin-bottom: 30px;
+              break-inside: avoid;
+            }
+            .meal-title {
+              font-size: 18px;
+              font-weight: bold;
+              background-color: #0891b2;
+              color: white;
+              padding: 10px;
+              margin-bottom: 10px;
+            }
+            .meal-items {
+              padding: 0 15px;
+            }
+            .meal-item {
+              margin-bottom: 8px;
+              padding: 5px 0;
+              border-bottom: 1px solid #eee;
+            }
+            .status-badge {
+              display: inline-block;
+              padding: 4px 12px;
+              border-radius: 15px;
+              font-size: 12px;
+              font-weight: bold;
+              text-transform: uppercase;
+              margin-bottom: 10px;
+            }
+            .status-ativo { background-color: #10b981; color: white; }
+            .status-pausado { background-color: #f59e0b; color: white; }
+            .status-concluido { background-color: #3b82f6; color: white; }
+            @media print {
+              body { margin: 0; }
+              .header { page-break-after: avoid; }
+              .meal-section { page-break-inside: avoid; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="plan-title">${plan.name}</div>
+            <div class="client-info">Cliente: ${clientName}</div>
+            <div class="date-info">
+              Período: ${format(new Date(plan.start_date), 'dd/MM/yyyy', { locale: ptBR })} a ${format(new Date(plan.end_date), 'dd/MM/yyyy', { locale: ptBR })}
+            </div>
+            <span class="status-badge status-${plan.status}">
+              ${plan.status.charAt(0).toUpperCase() + plan.status.slice(1)}
+            </span>
+          </div>
+
+          <div class="meal-section">
+            <div class="meal-title">☀️ Café da Manhã</div>
+            <div class="meal-items">
+              ${plan.plan_data.breakfast.filter(item => item.trim()).map(item => 
+                `<div class="meal-item">• ${item}</div>`
+              ).join('')}
+            </div>
+          </div>
+
+          <div class="meal-section">
+            <div class="meal-title">🌞 Almoço</div>
+            <div class="meal-items">
+              ${plan.plan_data.lunch.filter(item => item.trim()).map(item => 
+                `<div class="meal-item">• ${item}</div>`
+              ).join('')}
+            </div>
+          </div>
+
+          <div class="meal-section">
+            <div class="meal-title">🌙 Jantar</div>
+            <div class="meal-items">
+              ${plan.plan_data.dinner.filter(item => item.trim()).map(item => 
+                `<div class="meal-item">• ${item}</div>`
+              ).join('')}
+            </div>
+          </div>
+
+          <div class="meal-section">
+            <div class="meal-title">🍎 Lanches</div>
+            <div class="meal-items">
+              ${plan.plan_data.snacks.filter(item => item.trim()).map(item => 
+                `<div class="meal-item">• ${item}</div>`
+              ).join('')}
+            </div>
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+              window.onafterprint = function() {
+                window.close();
+              };
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+  };
+
   return (
     <PlatformPageWrapper title="Planos Alimentares">
       <div className="space-y-6">
@@ -455,7 +597,7 @@ export default function PlatformMealPlans() {
                     <Button variant="secondary" size="sm" onClick={() => startEdit(plan)}>
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="secondary" size="sm">
+                    <Button variant="secondary" size="sm" onClick={() => printMealPlan(plan)}>
                       <Printer className="h-4 w-4" />
                     </Button>
                     <Button variant="secondary" size="sm">
