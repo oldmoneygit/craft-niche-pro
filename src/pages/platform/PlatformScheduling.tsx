@@ -328,7 +328,7 @@ export default function PlatformScheduling() {
                 </div>
                 
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button type="button" variant="secondary" onClick={() => setIsDialogOpen(false)}>
                     Cancelar
                   </Button>
                   <Button type="submit" className="action-primary">
@@ -445,16 +445,16 @@ export default function PlatformScheduling() {
                             Marcar como Realizado
                           </Button>
                         )}
-                        <Button size="sm" variant="outline" onClick={() => updateStatus(appointment.id, 'cancelado')}>
+                        <Button size="sm" variant="destructive" onClick={() => updateStatus(appointment.id, 'cancelado')}>
                           Cancelar
                         </Button>
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(appointment)}>
+                      <Button variant="secondary" size="sm" onClick={() => handleEdit(appointment)}>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleDelete(appointment.id)}>
+                      <Button variant="destructive" size="sm" onClick={() => handleDelete(appointment.id)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>

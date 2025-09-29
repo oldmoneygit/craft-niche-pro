@@ -98,7 +98,7 @@ export default function PlatformCommunication() {
             <p className="text-muted-foreground">Gerencie conversas e mensagens com seus clientes</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline">
+            <Button variant="secondary">
               <Settings className="h-4 w-4 mr-2" />
               Configurações
             </Button>

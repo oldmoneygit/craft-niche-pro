@@ -215,7 +215,7 @@ export default function PlatformMealPlans() {
                     <Label>Data de Início</Label>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full justify-start text-left font-normal">
+                        <Button variant="secondary" className="w-full justify-start text-left font-normal">
                           <Calendar className="mr-2 h-4 w-4" />
                           {format(formData.start_date, 'dd/MM/yyyy', { locale: ptBR })}
                         </Button>
@@ -236,7 +236,7 @@ export default function PlatformMealPlans() {
                     <Label>Data de Fim</Label>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full justify-start text-left font-normal">
+                        <Button variant="secondary" className="w-full justify-start text-left font-normal">
                           <Calendar className="mr-2 h-4 w-4" />
                           {format(formData.end_date, 'dd/MM/yyyy', { locale: ptBR })}
                         </Button>
@@ -285,7 +285,7 @@ export default function PlatformMealPlans() {
                           {mealType === 'dinner' && 'Jantar'}
                           {mealType === 'snacks' && 'Lanches'}
                         </Label>
-                        <Button type="button" variant="outline" size="sm" onClick={() => addMealItem(mealType)}>
+                        <Button type="button" className="action-primary" size="sm" onClick={() => addMealItem(mealType)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Adicionar Item
                         </Button>
@@ -451,13 +451,13 @@ export default function PlatformMealPlans() {
                 
                 <CardFooter className="flex justify-between">
                   <div className="flex gap-1">
-                    <Button variant="outline" size="sm" onClick={() => startEdit(plan)}>
+                    <Button variant="secondary" size="sm" onClick={() => startEdit(plan)}>
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="secondary" size="sm">
                       <Printer className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="secondary" size="sm">
                       <Send className="h-4 w-4" />
                     </Button>
                   </div>

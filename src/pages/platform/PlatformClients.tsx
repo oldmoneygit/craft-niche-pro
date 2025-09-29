@@ -263,7 +263,7 @@ export default function PlatformClients() {
                   />
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button type="button" variant="secondary" onClick={() => setIsDialogOpen(false)}>
                     Cancelar
                   </Button>
                   <Button className="action-primary" type="submit">
@@ -382,10 +382,10 @@ export default function PlatformClients() {
                     </div>
                     
                     <div className="flex gap-2 ml-4">
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(client)} className="h-8 w-8 p-0">
+                      <Button variant="secondary" size="sm" onClick={() => handleEdit(client)} className="h-8 w-8 p-0">
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleDelete(client.id)} className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground">
+                      <Button variant="destructive" size="sm" onClick={() => handleDelete(client.id)} className="h-8 w-8 p-0">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
