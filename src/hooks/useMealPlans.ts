@@ -24,7 +24,7 @@ export interface MealPlan {
 export function useMealPlans() {
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
   const [loading, setLoading] = useState(true);
-  const { tenant } = useTenant();
+  const { tenant } = useTenant('gabriel-gandin');
   const { toast } = useToast();
 
   const fetchMealPlans = async () => {

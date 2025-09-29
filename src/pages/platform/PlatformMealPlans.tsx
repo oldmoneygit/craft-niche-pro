@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Plus, Search, Calendar, User, Send, Printer, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,13 +16,16 @@ import { ptBR } from 'date-fns/locale';
 import DashboardTemplate from '@/core/layouts/DashboardTemplate';
 import { useMealPlans, MealPlan } from '@/hooks/useMealPlans';
 import { useClients } from '@/hooks/useClients';
+import { useTenant } from '@/hooks/useTenant';
 import { cn } from '@/lib/utils';
 
 export default function PlatformMealPlans() {
+  const { clientId } = useParams<{ clientId: string }>();
+  const { tenant } = useTenant(clientId || 'gabriel-gandin');
   const { mealPlans, loading, createMealPlan, updateMealPlan, deleteMealPlan } = useMealPlans();
-  const { clients } = useClients();
+  const { clients } = useClients(tenant?.id);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedClient, setSelectedClient] = useState<string>('');
+  const [selectedClient, setSelectedClient] = useState<string>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<MealPlan | null>(null);
 
@@ -42,7 +46,7 @@ export default function PlatformMealPlans() {
 
   const filteredPlans = mealPlans.filter(plan => {
     const matchesSearch = plan.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesClient = selectedClient === '' || plan.client_id === selectedClient;
+    const matchesClient = selectedClient === 'all' || plan.client_id === selectedClient;
     return matchesSearch && matchesClient;
   });
 
@@ -352,7 +356,7 @@ export default function PlatformMealPlans() {
               <SelectValue placeholder="Filtrar por cliente" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os clientes</SelectItem>
+              <SelectItem value="all">Todos os clientes</SelectItem>
               {clients.map((client) => (
                 <SelectItem key={client.id} value={client.id}>
                   {client.name}
@@ -385,11 +389,11 @@ export default function PlatformMealPlans() {
               <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium mb-2">Nenhum plano encontrado</h3>
               <p className="text-muted-foreground text-center mb-4">
-                {searchTerm || selectedClient
+                {searchTerm || selectedClient !== 'all'
                   ? 'Tente ajustar os filtros de busca.'
                   : 'Comece criando seu primeiro plano alimentar.'}
               </p>
-              {!searchTerm && !selectedClient && (
+              {!searchTerm && selectedClient === 'all' && (
                 <Button onClick={() => setIsCreateModalOpen(true)}>
                   <Plus className="mr-2 h-4 w-4" />
                   Criar Primeiro Plano

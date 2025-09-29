@@ -32,7 +32,7 @@ export function useCommunications() {
   const [communications, setCommunications] = useState<Communication[]>([]);
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
   const [loading, setLoading] = useState(true);
-  const { tenant } = useTenant();
+  const { tenant } = useTenant('gabriel-gandin');
   const { toast } = useToast();
 
   const fetchCommunications = async () => {
