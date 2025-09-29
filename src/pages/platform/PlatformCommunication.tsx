@@ -12,13 +12,21 @@ import DashboardTemplate from '@/core/layouts/DashboardTemplate';
 import { useCommunications } from '@/hooks/useCommunications';
 import { useClients } from '@/hooks/useClients';
 import { useTenant } from '@/hooks/useTenant';
+import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 
 export default function PlatformCommunication() {
   const { clientId } = useParams<{ clientId: string }>();
+  const { setClientId, clientConfig, loading: configLoading, error, clearError } = useClientConfig();
   const { tenant } = useTenant(clientId || 'gabriel-gandin');
   const { communications, templates, loading } = useCommunications(clientId);
   const { clients } = useClients(tenant?.id);
   const [searchQuery, setSearchQuery] = useState('');
+
+  React.useEffect(() => {
+    if (clientId && clientId.trim()) {
+      setClientId(clientId);
+    }
+  }, [clientId, setClientId]);
 
   // Mock conversations for now
   const conversations = [
@@ -40,13 +48,28 @@ export default function PlatformCommunication() {
     },
   ];
 
-  if (loading) {
+  if (configLoading || loading) {
     return (
       <DashboardTemplate title="Comunicação">
         <div className="flex items-center justify-center h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">Carregando comunicações...</p>
+          </div>
+        </div>
+      </DashboardTemplate>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardTemplate title="Comunicação">
+        <div className="flex items-center justify-center h-[400px]">
+          <div className="text-center">
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <Button onClick={() => { clearError(); if (clientId) setClientId(clientId); }}>
+              Tentar novamente
+            </Button>
           </div>
         </div>
       </DashboardTemplate>
