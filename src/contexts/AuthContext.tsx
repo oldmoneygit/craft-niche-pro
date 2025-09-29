@@ -49,13 +49,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (email: string, password: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl
+        emailRedirectTo: redirectUrl,
+        data: {
+          full_name: email === 'jefersoncemep@gmail.com' ? 'Jeferson ADMIN' : ''
+        }
       }
     });
+
+    // Se é o usuário admin, criar o perfil associado ao tenant Gabriel Gandin
+    if (!error && data.user && email === 'jefersoncemep@gmail.com') {
+      await supabase.from('profiles').insert({
+        user_id: data.user.id,
+        full_name: 'Jeferson ADMIN',
+        tenant_id: '2429b7ea-da52-4fbb-8bbe-c678facfd260',
+        role: 'admin'
+      });
+    }
+
     return { error };
   };
 

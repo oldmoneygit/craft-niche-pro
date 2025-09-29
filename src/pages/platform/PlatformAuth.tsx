@@ -57,6 +57,15 @@ export default function PlatformAuth() {
       let result;
       if (isSignUp) {
         result = await signUp(email, password);
+        if (!result.error) {
+          // Para o usuário admin específico, associar ao tenant Gabriel Gandin
+          if (email === 'jefersoncemep@gmail.com') {
+            toast({
+              title: 'Conta admin criada!',
+              description: 'Usuário admin configurado para Gabriel Gandin.',
+            });
+          }
+        }
       } else {
         result = await signIn(email, password);
       }
