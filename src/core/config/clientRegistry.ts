@@ -8,9 +8,9 @@ export const mockClientConfigs: Record<string, ClientConfig> = {
     businessType: 'nutritionist',
     subdomain: 'gabriel-gandin',
     theme: {
-      primaryColor: 'hsl(142, 71%, 45%)',
-      secondaryColor: 'hsl(142, 33%, 24%)',
-      accentColor: 'hsl(47, 96%, 53%)',
+      primaryColor: '142 69% 58%',
+      secondaryColor: '217 91% 60%',
+      accentColor: '142 69% 95%',
     },
     modules: {
       clientManagement: true,
@@ -44,9 +44,9 @@ export const mockClientConfigs: Record<string, ClientConfig> = {
     branding: {
       companyName: 'Gabriel Gandin Nutrição',
       customColors: {
-        primary: 'hsl(142, 71%, 45%)',
-        secondary: 'hsl(142, 33%, 24%)',
-        accent: 'hsl(47, 96%, 53%)',
+        primary: '142 69% 58%',
+        secondary: '217 91% 60%',
+        accent: '142 69% 95%',
       },
     },
   },
