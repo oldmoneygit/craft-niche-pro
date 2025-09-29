@@ -26,7 +26,7 @@ export default function FAQManager() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<FAQItem | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const [formData, setFormData] = useState({
     question: '',
@@ -87,7 +87,7 @@ export default function FAQManager() {
       item.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.answer.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesCategory = selectedCategory === '' || item.category === selectedCategory;
+    const matchesCategory = selectedCategory === '' || selectedCategory === 'all' || item.category === selectedCategory;
     
     return matchesSearch && matchesCategory;
   });
@@ -195,7 +195,7 @@ export default function FAQManager() {
             <SelectValue placeholder="Todas as categorias" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas as categorias</SelectItem>
+            <SelectItem value="all">Todas as categorias</SelectItem>
             {FAQ_CATEGORIES.map(category => (
               <SelectItem key={category} value={category}>
                 {category}
@@ -240,7 +240,7 @@ export default function FAQManager() {
           <Card>
             <CardContent className="text-center py-8">
               <p className="text-muted-foreground">
-                {searchTerm || selectedCategory 
+                {searchTerm || (selectedCategory && selectedCategory !== 'all')
                   ? "Nenhuma FAQ encontrada com os filtros aplicados."
                   : "Nenhuma FAQ criada ainda. Clique em 'Nova FAQ' para começar."
                 }
