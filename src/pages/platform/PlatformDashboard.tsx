@@ -230,10 +230,19 @@ export default function PlatformDashboard() {
       '2h': `Sua consulta é hoje daqui 2 horas. Estamos te esperando!`
     };
 
-    // Usar web.whatsapp.com para evitar bloqueio do api.whatsapp.com
-    const phoneNumber = `55${phone.replace(/\D/g, '')}`;
-    const whatsappLink = `https://web.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(messages[type as keyof typeof messages])}`;
-    window.open(whatsappLink, '_blank');
+    // Criar link temporário para evitar bloqueios
+    const phoneNumber = phone.replace(/\D/g, '');
+    const message = messages[type as keyof typeof messages];
+    const whatsappLink = `https://api.whatsapp.com/send?phone=55${phoneNumber}&text=${encodeURIComponent(message)}`;
+    
+    // Usar elemento <a> para evitar bloqueio de popup
+    const link = document.createElement('a');
+    link.href = whatsappLink;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
     // Marcar como enviado
     await sendReminder(appointmentId, type);
