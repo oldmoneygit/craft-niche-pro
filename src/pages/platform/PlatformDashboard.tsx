@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 import DashboardTemplate from '@/core/layouts/DashboardTemplate';
@@ -6,6 +6,8 @@ import AIInsightsPanel from '@/components/platform/AIInsightsPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { useTenantId } from '@/hooks/useTenantId';
 import {
   Users,
   Calendar,
@@ -23,15 +25,124 @@ import {
   Bot,
   Utensils
 } from 'lucide-react';
+
+interface DashboardStats {
+  totalClients: number;
+  totalAppointments: number;
+  appointmentsThisMonth: number;
+  appointmentsToday: number;
+}
+
+interface UpcomingAppointment {
+  id: string;
+  datetime: string;
+  type: string;
+  status: string;
+  clients: {
+    name: string;
+  } | null;
+}
+
 export default function PlatformDashboard() {
   const { clientId } = useParams<{ clientId: string }>();
-  const { setClientId, clientConfig, loading, error, clearError } = useClientConfig();
+  const { setClientId, clientConfig, loading: configLoading, error, clearError } = useClientConfig();
+  const { tenantId, loading: tenantLoading } = useTenantId();
+  
+  const [stats, setStats] = useState<DashboardStats>({
+    totalClients: 0,
+    totalAppointments: 0,
+    appointmentsThisMonth: 0,
+    appointmentsToday: 0
+  });
+  const [upcomingAppointments, setUpcomingAppointments] = useState<UpcomingAppointment[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (clientId && clientId.trim()) {
       setClientId(clientId);
     }
   }, [clientId, setClientId]);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      if (!tenantId || tenantLoading) return;
+
+      try {
+        setLoading(true);
+
+        // 1. Total de clientes
+        const { count: clientCount } = await supabase
+          .from('clients')
+          .select('*', { count: 'exact', head: true })
+          .eq('tenant_id', tenantId);
+
+        // 2. Consultas deste mês
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const { count: monthAppointments } = await supabase
+          .from('appointments')
+          .select('*', { count: 'exact', head: true })
+          .eq('tenant_id', tenantId)
+          .gte('datetime', startOfMonth.toISOString());
+
+        // 3. Total de consultas
+        const { count: totalAppointments } = await supabase
+          .from('appointments')
+          .select('*', { count: 'exact', head: true })
+          .eq('tenant_id', tenantId);
+
+        // 4. Consultas de hoje
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const { count: todayAppointments } = await supabase
+          .from('appointments')
+          .select('*', { count: 'exact', head: true })
+          .eq('tenant_id', tenantId)
+          .gte('datetime', startOfDay.toISOString())
+          .lte('datetime', endOfDay.toISOString());
+
+        // 5. Próximas consultas de hoje
+        const { data: todayUpcoming } = await supabase
+          .from('appointments')
+          .select(`
+            id,
+            datetime,
+            type,
+            status,
+            clients (
+              name
+            )
+          `)
+          .eq('tenant_id', tenantId)
+          .gte('datetime', new Date().toISOString())
+          .lte('datetime', endOfDay.toISOString())
+          .in('status', ['agendado', 'confirmado'])
+          .order('datetime', { ascending: true })
+          .limit(5);
+
+        setStats({
+          totalClients: clientCount || 0,
+          totalAppointments: totalAppointments || 0,
+          appointmentsThisMonth: monthAppointments || 0,
+          appointmentsToday: todayAppointments || 0
+        });
+
+        setUpcomingAppointments(todayUpcoming || []);
+
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [tenantId, tenantLoading]);
 
   const MetricCard = ({ title, value, icon: Icon, trend, color = "blue" }: any) => {
     const colorClasses = {
@@ -69,9 +180,11 @@ export default function PlatformDashboard() {
     );
   };
 
+  const isLoading = loading || configLoading || tenantLoading;
+
   return (
     <DashboardTemplate title="Dashboard">
-      {loading ? (
+      {isLoading ? (
         <div className="flex items-center justify-center h-full">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
         </div>
@@ -98,7 +211,7 @@ export default function PlatformDashboard() {
                   Bem-vindo, {clientConfig?.branding.companyName.split(' ')[0]}! 👋
                 </h1>
                 <p className="text-gray-300 text-base lg:text-lg leading-relaxed">
-                  Hoje você tem <span className="font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg">8</span> consultas agendadas e <span className="font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg">3</span> novos questionários respondidos
+                  Hoje você tem <span className="font-bold text-primary bg-primary/10 px-2 py-1 rounded-lg">{stats.appointmentsToday}</span> consultas agendadas
                 </p>
               </div>
               <div className="text-left lg:text-right bg-slate-800/50 rounded-2xl p-4 backdrop-blur-sm border border-slate-600/30 w-full lg:w-auto">
@@ -111,31 +224,27 @@ export default function PlatformDashboard() {
           {/* Metrics Grid - Responsive and well-spaced */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
             <MetricCard
-              title="Pacientes Ativos"
-              value="127"
+              title="Total de Pacientes"
+              value={stats.totalClients}
               icon={Users}
-              trend="+8%"
               color="blue"
             />
             <MetricCard
-              title="Receita Mensal"
-              value="R$ 28.500"
-              icon={DollarSign}
-              trend="+12%"
+              title="Consultas Este Mês"
+              value={stats.appointmentsThisMonth}
+              icon={Calendar}
               color="green"
             />
             <MetricCard
               title="Consultas Hoje"
-              value="8"
-              icon={Calendar}
-              trend="+2"
+              value={stats.appointmentsToday}
+              icon={Activity}
               color="orange"
             />
             <MetricCard
-              title="Taxa de Adesão"
-              value="89%"
+              title="Total de Consultas"
+              value={stats.totalAppointments}
               icon={TrendingUp}
-              trend="+5%"
               color="purple"
             />
           </div>
@@ -156,38 +265,36 @@ export default function PlatformDashboard() {
                 </div>
               </CardHeader>
               <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-primary/20 hover:bg-gray-50/50 transition-all duration-200">
-                    <div className="text-sm font-bold text-gray-600 w-16 bg-gray-100 rounded-lg py-2 text-center">09:00</div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">Ana Silva</div>
-                      <div className="text-sm text-gray-500">Consulta</div>
-                    </div>
-                    <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-0 rounded-lg px-3 py-1">
-                      Confirmado
-                    </Badge>
+                {upcomingAppointments.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p>Nenhuma consulta agendada para hoje</p>
                   </div>
-                  <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-primary/20 hover:bg-gray-50/50 transition-all duration-200">
-                    <div className="text-sm font-bold text-gray-600 w-16 bg-gray-100 rounded-lg py-2 text-center">10:00</div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">João Santos</div>
-                      <div className="text-sm text-gray-500">Retorno</div>
-                    </div>
-                    <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-0 rounded-lg px-3 py-1">
-                      Confirmado
-                    </Badge>
+                ) : (
+                  <div className="space-y-4">
+                    {upcomingAppointments.map((appointment) => (
+                      <div key={appointment.id} className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-primary/20 hover:bg-gray-50/50 transition-all duration-200">
+                        <div className="text-sm font-bold text-gray-600 w-16 bg-gray-100 rounded-lg py-2 text-center">
+                          {new Date(appointment.datetime).toLocaleTimeString('pt-BR', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-900">{appointment.clients?.name || 'Sem nome'}</div>
+                          <div className="text-sm text-gray-500">{appointment.type}</div>
+                        </div>
+                        <Badge className={`border-0 rounded-lg px-3 py-1 ${
+                          appointment.status === 'confirmado' 
+                            ? 'bg-primary/10 text-primary hover:bg-primary/20' 
+                            : 'bg-warning/10 text-warning hover:bg-warning/20'
+                        }`}>
+                          {appointment.status === 'confirmado' ? 'Confirmado' : 'Agendado'}
+                        </Badge>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-warning/20 hover:bg-warning/5 transition-all duration-200">
-                    <div className="text-sm font-bold text-gray-600 w-16 bg-gray-100 rounded-lg py-2 text-center">11:00</div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">Maria Costa</div>
-                      <div className="text-sm text-gray-500">Avaliação</div>
-                    </div>
-                    <Badge className="bg-warning/10 text-warning hover:bg-warning/20 border-0 rounded-lg px-3 py-1">
-                      Pendente
-                    </Badge>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
