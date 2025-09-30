@@ -286,12 +286,13 @@ export default function PlatformDashboard() {
                       <div key={appointment.id} className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-primary/20 hover:bg-gray-50/50 transition-all duration-200">
                         <div className="flex flex-col items-center justify-center text-sm font-bold text-gray-600 min-w-[80px] bg-gray-100 rounded-lg py-2 px-3">
                           <div className="text-xs text-gray-500">
-                            {new Date(appointment.datetime).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                            {toZonedTime(new Date(appointment.datetime), 'America/Sao_Paulo').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                           </div>
                           <div className="text-base">
-                            {new Date(appointment.datetime).toLocaleTimeString('pt-BR', { 
+                            {toZonedTime(new Date(appointment.datetime), 'America/Sao_Paulo').toLocaleTimeString('pt-BR', { 
                               hour: '2-digit', 
-                              minute: '2-digit' 
+                              minute: '2-digit',
+                              timeZone: 'America/Sao_Paulo'
                             })}
                           </div>
                         </div>
