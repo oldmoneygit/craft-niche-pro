@@ -93,11 +93,10 @@ export default function PlatformDashboard() {
           .select('*', { count: 'exact', head: true })
           .eq('tenant_id', tenantId);
 
-        // 4. Consultas de hoje
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date();
-        endOfDay.setHours(23, 59, 59, 999);
+        // 4. Consultas de hoje (corrigido para timezone local)
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
 
         const { count: todayAppointments } = await supabase
           .from('appointments')
@@ -106,8 +105,11 @@ export default function PlatformDashboard() {
           .gte('datetime', startOfDay.toISOString())
           .lte('datetime', endOfDay.toISOString());
 
-        // 5. Consultas de hoje
-        const { data: todayUpcoming, error: appointmentsError } = await supabase
+        // 5. Próximas consultas (sempre a partir de agora, nos próximos 30 dias)
+        const thirtyDaysLater = new Date();
+        thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30);
+        
+        const { data: upcomingAppointments, error: appointmentsError } = await supabase
           .from('appointments')
           .select(`
             id,
@@ -119,44 +121,20 @@ export default function PlatformDashboard() {
             )
           `)
           .eq('tenant_id', tenantId)
-          .gte('datetime', startOfDay.toISOString())
-          .lt('datetime', endOfDay.toISOString())
+          .gte('datetime', new Date().toISOString())
+          .lte('datetime', thirtyDaysLater.toISOString())
           .order('datetime', { ascending: true })
           .limit(10);
 
-        // 6. Se não houver consultas hoje, buscar próximas consultas (próximos 7 dias)
-        let displayAppointments = todayUpcoming || [];
-        if (displayAppointments.length === 0) {
-          const sevenDaysLater = new Date();
-          sevenDaysLater.setDate(sevenDaysLater.getDate() + 7);
-          
-          const { data: upcomingWeek } = await supabase
-            .from('appointments')
-            .select(`
-              id,
-              datetime,
-              type,
-              status,
-              clients (
-                name
-              )
-            `)
-            .eq('tenant_id', tenantId)
-            .gte('datetime', new Date().toISOString())
-            .lte('datetime', sevenDaysLater.toISOString())
-            .order('datetime', { ascending: true })
-            .limit(5);
-          
-          displayAppointments = upcomingWeek || [];
-        }
-
         console.log('Dashboard Debug:', {
           tenantId,
+          now: now.toISOString(),
           startOfDay: startOfDay.toISOString(),
           endOfDay: endOfDay.toISOString(),
-          todayCount: todayUpcoming?.length || 0,
-          displayCount: displayAppointments.length,
-          appointmentsError
+          todayCount: todayAppointments || 0,
+          upcomingCount: upcomingAppointments?.length || 0,
+          appointmentsError,
+          appointments: upcomingAppointments
         });
 
         setStats({
@@ -166,7 +144,7 @@ export default function PlatformDashboard() {
           appointmentsToday: todayAppointments || 0
         });
 
-        setUpcomingAppointments(displayAppointments);
+        setUpcomingAppointments(upcomingAppointments || []);
 
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -292,9 +270,7 @@ export default function PlatformDashboard() {
             <Card className="shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl border-0 overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 pb-6">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl font-bold text-gray-900">
-                    {stats.appointmentsToday > 0 ? 'Consultas de Hoje' : 'Próximas Consultas'}
-                  </CardTitle>
+                  <CardTitle className="text-xl font-bold text-gray-900">Próximas Consultas</CardTitle>
                   <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 hover:bg-primary/5 rounded-xl">
                     Ver agenda completa
                   </Button>
@@ -304,17 +280,22 @@ export default function PlatformDashboard() {
                 {upcomingAppointments.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p>Nenhuma consulta agendada nos próximos dias</p>
+                    <p>Nenhuma consulta agendada</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {upcomingAppointments.map((appointment) => (
                       <div key={appointment.id} className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-primary/20 hover:bg-gray-50/50 transition-all duration-200">
-                        <div className="text-sm font-bold text-gray-600 w-16 bg-gray-100 rounded-lg py-2 text-center">
-                          {new Date(appointment.datetime).toLocaleTimeString('pt-BR', { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
+                        <div className="flex flex-col items-center justify-center text-sm font-bold text-gray-600 min-w-[80px] bg-gray-100 rounded-lg py-2 px-3">
+                          <div className="text-xs text-gray-500">
+                            {new Date(appointment.datetime).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                          </div>
+                          <div className="text-base">
+                            {new Date(appointment.datetime).toLocaleTimeString('pt-BR', { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </div>
                         </div>
                         <div className="flex-1">
                           <div className="font-semibold text-gray-900">{appointment.clients?.name || 'Sem nome'}</div>
