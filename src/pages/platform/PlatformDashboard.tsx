@@ -302,16 +302,25 @@ export default function PlatformDashboard() {
       return;
     }
 
-    // Copiar mensagem e telefone automaticamente
-    const phoneNumber = selectedClient.phone.replace(/\D/g, '');
-    const dataToAppend = `Telefone: ${phoneNumber}\n\nMensagem:\n${testMessage}`;
+    // Limpar o número - remover tudo exceto dígitos
+    let phoneNumber = selectedClient.phone.replace(/\D/g, '');
     
-    navigator.clipboard.writeText(dataToAppend);
+    // Se não começar com 55, adicionar (código do Brasil)
+    if (!phoneNumber.startsWith('55')) {
+      phoneNumber = '55' + phoneNumber;
+    }
+    
+    // Criar o link do WhatsApp no formato correto
+    const whatsappLink = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(testMessage)}`;
+    
+    console.log('WhatsApp Link:', whatsappLink); // Para debug
+    
+    // Abrir em nova aba
+    window.open(whatsappLink, '_blank');
     
     toast({
-      title: "Dados copiados!",
-      description: `Telefone e mensagem copiados. Abra o WhatsApp Web manualmente e cole.`,
-      duration: 5000
+      title: "Abrindo WhatsApp",
+      description: `Abrindo conversa com ${selectedClient.name}`
     });
   };
 
@@ -486,10 +495,11 @@ export default function PlatformDashboard() {
                     <div className="flex flex-wrap gap-2">
                       <Button
                         onClick={handleTestSendWhatsApp}
-                        className="bg-purple-500 hover:bg-purple-600 text-white flex items-center gap-2 w-full"
+                        className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 w-full"
+                        size="lg"
                       >
-                        <Copy className="h-4 w-4" />
-                        Copiar Tudo (Telefone + Mensagem)
+                        <Send className="h-5 w-5" />
+                        Enviar via WhatsApp
                       </Button>
                       <Button
                         onClick={handleCopyMessage}
@@ -498,7 +508,7 @@ export default function PlatformDashboard() {
                         className="flex items-center gap-2 flex-1"
                       >
                         <Copy className="h-4 w-4" />
-                        Apenas Mensagem
+                        Copiar Mensagem
                       </Button>
                       <Button
                         onClick={() => {
@@ -510,21 +520,18 @@ export default function PlatformDashboard() {
                         className="flex items-center gap-2 flex-1"
                       >
                         <Copy className="h-4 w-4" />
-                        Apenas Telefone
+                        Copiar Telefone
                       </Button>
                     </div>
 
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <p className="text-sm font-medium text-blue-900 mb-2 flex items-center gap-2">
                         <MessageCircle className="h-4 w-4" />
-                        Como enviar (enquanto resolvemos o problema):
+                        Teste de Envio Automático:
                       </p>
-                      <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
-                        <li>Clique em <strong>"Copiar Tudo"</strong> acima</li>
-                        <li>Abra o WhatsApp Web em uma nova aba: <a href="https://web.whatsapp.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-medium">web.whatsapp.com</a></li>
-                        <li>Cole o telefone na busca e abra a conversa</li>
-                        <li>Cole e envie a mensagem</li>
-                      </ol>
+                      <p className="text-sm text-blue-800">
+                        Clique no botão "Enviar via WhatsApp" para abrir automaticamente o WhatsApp com o número e mensagem prontos.
+                      </p>
                     </div>
                   </>
                 )}
