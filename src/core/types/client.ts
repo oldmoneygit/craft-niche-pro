@@ -72,11 +72,8 @@ export interface ClientBranding {
 }
 
 export type BusinessType = 
-  | 'nutritionist'
-  | 'clinic' 
-  | 'salon'
-  | 'fitness'
-  | 'dentist'
-  | 'veterinary'
-  | 'consulting'
-  | 'other';
+  | 'nutrition'
+  // Future business types will be added here when implemented
+  // | 'psychology'
+  // | 'fitness'
+  // | 'clinic';

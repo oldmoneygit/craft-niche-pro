@@ -8,7 +8,6 @@ import {
   Bot,
   FileText,
   Utensils,
-  Stethoscope,
   DollarSign,
   Settings
 } from 'lucide-react';
@@ -82,7 +81,8 @@ export function PlatformSidebar() {
 
   const businessSpecificItems = [];
   
-  if (clientConfig.businessType === 'nutritionist') {
+  // Nutrition-specific features
+  if (clientConfig.businessType === 'nutrition') {
     if (isModuleEnabled('questionnaires')) {
       businessSpecificItems.push({
         title: 'Questionários',
@@ -98,16 +98,7 @@ export function PlatformSidebar() {
       });
     }
   }
-
-  if (clientConfig.businessType === 'clinic') {
-    if (isModuleEnabled('medicalRecords')) {
-      businessSpecificItems.push({
-        title: 'Prontuários',
-        url: `${platformBasePath}/medical-records`,
-        icon: Stethoscope,
-      });
-    }
-  }
+  // Future business types will be added here when implemented
 
   const settingsItems = [
     {
