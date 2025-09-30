@@ -44,6 +44,16 @@ interface UpcomingAppointment {
   } | null;
 }
 
+interface NextAppointment {
+  id: string;
+  datetime: string;
+  type: string;
+  status: string;
+  clients: {
+    name: string;
+  } | null;
+}
+
 export default function PlatformDashboard() {
   const { clientId } = useParams<{ clientId: string }>();
   const { setClientId, clientConfig, loading: configLoading, error, clearError } = useClientConfig();
@@ -56,6 +66,7 @@ export default function PlatformDashboard() {
     appointmentsToday: 0
   });
   const [upcomingAppointments, setUpcomingAppointments] = useState<UpcomingAppointment[]>([]);
+  const [nextAppointments, setNextAppointments] = useState<NextAppointment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -135,6 +146,28 @@ export default function PlatformDashboard() {
           appointments: todayAppointments
         });
 
+        // 6. Próximas consultas (após hoje, próximos 7 dias)
+        const { data: nextAppointmentsData, error: nextAppointmentsError } = await supabase
+          .from('appointments')
+          .select(`
+            id,
+            datetime,
+            type,
+            status,
+            clients (
+              name
+            )
+          `)
+          .eq('tenant_id', tenantId)
+          .gt('datetime', endOfDay.toISOString())
+          .order('datetime', { ascending: true })
+          .limit(5);
+
+        console.log('Next Appointments Debug:', {
+          nextAppointmentsData,
+          nextAppointmentsError
+        });
+
         setStats({
           totalClients: clientCount || 0,
           totalAppointments: totalAppointments || 0,
@@ -143,6 +176,7 @@ export default function PlatformDashboard() {
         });
 
         setUpcomingAppointments(todayAppointments || []);
+        setNextAppointments(nextAppointmentsData || []);
 
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -293,7 +327,7 @@ export default function PlatformDashboard() {
           <AIInsightsPanel />
 
           {/* Main Content Grid - Clean layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Consultas de Hoje - Modern card design */}
             <Card className="shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl border-0 overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 pb-6">
@@ -313,6 +347,52 @@ export default function PlatformDashboard() {
                 ) : (
                   <div className="space-y-4">
                     {upcomingAppointments.map((appointment) => (
+                      <div key={appointment.id} className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-primary/20 hover:bg-gray-50/50 transition-all duration-200">
+                        <div className="flex flex-col items-center justify-center text-sm font-bold text-gray-600 min-w-[80px] bg-gray-100 rounded-lg py-2 px-3">
+                          <div className="text-xs text-gray-500">
+                            {toZonedTime(new Date(appointment.datetime), 'America/Sao_Paulo').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                          </div>
+                          <div className="text-base">
+                            {toZonedTime(new Date(appointment.datetime), 'America/Sao_Paulo').toLocaleTimeString('pt-BR', { 
+                              hour: '2-digit', 
+                              minute: '2-digit',
+                              timeZone: 'America/Sao_Paulo'
+                            })}
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-900">{appointment.clients?.name || 'Sem nome'}</div>
+                          <div className="text-sm text-gray-500">{appointment.type}</div>
+                        </div>
+                        <Badge className={`border-0 rounded-lg px-3 py-1 ${getStatusBadgeConfig(appointment.status).className}`}>
+                          {getStatusBadgeConfig(appointment.status).label}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Próximas Consultas - Modern card design */}
+            <Card className="shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl border-0 overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 pb-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl font-bold text-gray-900">Próximas Consultas</CardTitle>
+                  <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 hover:bg-primary/5 rounded-xl">
+                    Ver todas
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                {nextAppointments.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p>Nenhuma consulta futura</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {nextAppointments.map((appointment) => (
                       <div key={appointment.id} className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-primary/20 hover:bg-gray-50/50 transition-all duration-200">
                         <div className="flex flex-col items-center justify-center text-sm font-bold text-gray-600 min-w-[80px] bg-gray-100 rounded-lg py-2 px-3">
                           <div className="text-xs text-gray-500">
