@@ -23,12 +23,9 @@ import {
   Bot,
   Utensils
 } from 'lucide-react';
-import { mockNutriData } from '@/lib/mockDataNutricionista';
-
 export default function PlatformDashboard() {
   const { clientId } = useParams<{ clientId: string }>();
   const { setClientId, clientConfig, loading, error, clearError } = useClientConfig();
-  const { dashboardMetrics, recentActivity } = mockNutriData;
 
   React.useEffect(() => {
     if (clientId && clientId.trim()) {

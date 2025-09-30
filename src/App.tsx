@@ -19,8 +19,6 @@ import PlatformMealPlans from "./pages/platform/PlatformMealPlans";
 import PlatformFAQBot from "./pages/platform/PlatformFAQBot";
 import PlatformFinancial from "./pages/platform/PlatformFinancial";
 import PlatformScheduling from "./pages/platform/PlatformScheduling";
-import PlatformAIAgent from "./pages/platform/PlatformAIAgent";
-import PlatformAnalytics from "./pages/platform/PlatformAnalytics";
 import PlatformSettings from "./pages/platform/PlatformSettings";
 import QuestionnairePublic from "./pages/QuestionnairePublic";
 
@@ -44,15 +42,12 @@ const App = () => (
               <Route path="/platform/:clientId/dashboard" element={<PlatformProtectedRoute><PlatformDashboard /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/clientes" element={<PlatformProtectedRoute><PlatformClients /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/chat" element={<PlatformProtectedRoute><PlatformChat /></PlatformProtectedRoute>} />
-              <Route path="/platform/:clientId/ai-agent" element={<PlatformProtectedRoute><PlatformAIAgent /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/agendamentos" element={<PlatformProtectedRoute><PlatformScheduling /></PlatformProtectedRoute>} />
-              <Route path="/platform/:clientId/analytics" element={<PlatformProtectedRoute><PlatformAnalytics /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/questionnaires" element={<PlatformProtectedRoute><PlatformQuestionnaires /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/meal-plans" element={<PlatformProtectedRoute><PlatformMealPlans /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/planos-alimentares" element={<PlatformProtectedRoute><PlatformMealPlans /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/faq-bot" element={<PlatformProtectedRoute><PlatformFAQBot /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/comunicacao" element={<PlatformProtectedRoute><PlatformCommunication /></PlatformProtectedRoute>} />
-              <Route path="/platform/:clientId/financial" element={<PlatformProtectedRoute><PlatformFinancial /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/settings" element={<PlatformProtectedRoute><PlatformSettings /></PlatformProtectedRoute>} />
               
               {/* Public Questionnaires */}

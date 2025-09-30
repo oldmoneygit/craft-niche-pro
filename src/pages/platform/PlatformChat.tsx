@@ -2,11 +2,10 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 import DashboardTemplate from '@/core/layouts/DashboardTemplate';
-import ChatAI from '@/components/nutricionista/ChatAI';
 
 export default function PlatformChat() {
   const { clientId } = useParams<{ clientId: string }>();
-  const { setClientId, clientConfig, loading, error, clearError } = useClientConfig();
+  const { setClientId, clientConfig, loading } = useClientConfig();
 
   React.useEffect(() => {
     if (clientId && clientId.trim()) {
@@ -28,7 +27,10 @@ export default function PlatformChat() {
           </div>
         </div>
       ) : (
-        <ChatAI clientId={clientId} />
+        <div className="p-6">
+          <h2 className="text-2xl font-bold mb-4">Chat & WhatsApp - Em Desenvolvimento</h2>
+          <p className="text-muted-foreground">Funcionalidade de chat será implementada na próxima fase.</p>
+        </div>
       )}
     </DashboardTemplate>
   );
