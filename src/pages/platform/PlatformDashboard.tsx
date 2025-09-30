@@ -388,6 +388,20 @@ export default function PlatformDashboard() {
             </CardHeader>
             {remindersExpanded && (
               <CardContent className="p-6">
+                {/* Aviso sobre problema do WhatsApp */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4 flex items-start gap-3">
+                  <Bell className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-yellow-900 mb-1">
+                      ⚠️ Problema conhecido com envio via WhatsApp
+                    </p>
+                    <p className="text-xs text-yellow-700">
+                      Estamos trabalhando para resolver o erro de bloqueio ao enviar mensagens. 
+                      Por enquanto, copie manualmente a mensagem e envie pelo WhatsApp Web.
+                    </p>
+                  </div>
+                </div>
+
                 {pendingReminders.length === 0 ? (
                   <div className="text-center py-8">
                     <Clock className="h-12 w-12 mx-auto text-gray-400 mb-3" />
