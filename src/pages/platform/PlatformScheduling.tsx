@@ -16,6 +16,7 @@ import { Calendar, Plus, Edit, Trash2, Clock, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
+import { fromZonedTime, toZonedTime } from 'date-fns-tz';
 
 const appointmentSchema = z.object({
   client_id: z.string().min(1, 'Cliente é obrigatório'),
@@ -112,11 +113,18 @@ export default function PlatformScheduling() {
     
     try {
       const validatedData = appointmentSchema.parse(formData);
+      
+      // Convert local datetime to UTC, preserving the actual time entered by the user
+      const localDateTime = new Date(validatedData.datetime);
+      const utcDateTime = fromZonedTime(localDateTime, 'America/Sao_Paulo');
 
       if (editingAppointment) {
         const { error } = await supabase
           .from('appointments')
-          .update(validatedData)
+          .update({
+            ...validatedData,
+            datetime: utcDateTime.toISOString(),
+          })
           .eq('id', editingAppointment.id);
 
         if (error) throw error;
@@ -126,7 +134,7 @@ export default function PlatformScheduling() {
           .from('appointments')
           .insert([{
             client_id: validatedData.client_id,
-            datetime: validatedData.datetime,
+            datetime: utcDateTime.toISOString(),
             type: validatedData.type,
             notes: validatedData.notes,
             tenant_id: tenant!.id,
@@ -158,9 +166,15 @@ export default function PlatformScheduling() {
 
   const handleEdit = (appointment: Appointment) => {
     setEditingAppointment(appointment);
+    
+    // Convert UTC datetime to local timezone for the datetime-local input
+    const utcDate = new Date(appointment.datetime);
+    const localDate = toZonedTime(utcDate, 'America/Sao_Paulo');
+    const formattedDate = localDate.toISOString().slice(0, 16);
+    
     setFormData({
       client_id: appointment.client_id,
-      datetime: appointment.datetime.slice(0, 16), // Format for datetime-local input
+      datetime: formattedDate,
       type: appointment.type,
       notes: appointment.notes || '',
     });
@@ -429,8 +443,8 @@ export default function PlatformScheduling() {
                         </Badge>
                       </div>
                       <div className="space-y-1 text-sm text-muted-foreground">
-                        <p>📅 {new Date(appointment.datetime).toLocaleDateString('pt-BR')}</p>
-                        <p>🕐 {new Date(appointment.datetime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
+                        <p>📅 {toZonedTime(new Date(appointment.datetime), 'America/Sao_Paulo').toLocaleDateString('pt-BR')}</p>
+                        <p>🕐 {toZonedTime(new Date(appointment.datetime), 'America/Sao_Paulo').toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
                         {appointment.clients?.email && <p>📧 {appointment.clients.email}</p>}
                         {appointment.clients?.phone && <p>📱 {appointment.clients.phone}</p>}
                         {appointment.notes && <p>📝 {appointment.notes}</p>}
