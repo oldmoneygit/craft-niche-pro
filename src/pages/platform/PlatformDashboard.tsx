@@ -98,18 +98,15 @@ export default function PlatformDashboard() {
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
         const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
 
-        const { count: todayAppointments } = await supabase
+        const { count: todayCount } = await supabase
           .from('appointments')
           .select('*', { count: 'exact', head: true })
           .eq('tenant_id', tenantId)
           .gte('datetime', startOfDay.toISOString())
           .lte('datetime', endOfDay.toISOString());
 
-        // 5. Próximas consultas (sempre a partir de agora, nos próximos 30 dias)
-        const thirtyDaysLater = new Date();
-        thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30);
-        
-        const { data: upcomingAppointments, error: appointmentsError } = await supabase
+        // 5. Consultas de hoje (do início ao fim do dia)
+        const { data: todayAppointments, error: appointmentsError } = await supabase
           .from('appointments')
           .select(`
             id,
@@ -121,30 +118,29 @@ export default function PlatformDashboard() {
             )
           `)
           .eq('tenant_id', tenantId)
-          .gte('datetime', new Date().toISOString())
-          .lte('datetime', thirtyDaysLater.toISOString())
-          .order('datetime', { ascending: true })
-          .limit(10);
+          .gte('datetime', startOfDay.toISOString())
+          .lte('datetime', endOfDay.toISOString())
+          .order('datetime', { ascending: true });
 
         console.log('Dashboard Debug:', {
           tenantId,
           now: now.toISOString(),
           startOfDay: startOfDay.toISOString(),
           endOfDay: endOfDay.toISOString(),
-          todayCount: todayAppointments || 0,
-          upcomingCount: upcomingAppointments?.length || 0,
+          todayCount: todayCount || 0,
+          appointmentsToday: todayAppointments?.length || 0,
           appointmentsError,
-          appointments: upcomingAppointments
+          appointments: todayAppointments
         });
 
         setStats({
           totalClients: clientCount || 0,
           totalAppointments: totalAppointments || 0,
           appointmentsThisMonth: monthAppointments || 0,
-          appointmentsToday: todayAppointments || 0
+          appointmentsToday: todayCount || 0
         });
 
-        setUpcomingAppointments(upcomingAppointments || []);
+        setUpcomingAppointments(todayAppointments || []);
 
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -270,7 +266,7 @@ export default function PlatformDashboard() {
             <Card className="shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl border-0 overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 pb-6">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl font-bold text-gray-900">Próximas Consultas</CardTitle>
+                  <CardTitle className="text-xl font-bold text-gray-900">Consultas de Hoje</CardTitle>
                   <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 hover:bg-primary/5 rounded-xl">
                     Ver agenda completa
                   </Button>
