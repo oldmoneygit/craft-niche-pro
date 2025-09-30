@@ -19,6 +19,7 @@ import PlatformMealPlans from "./pages/platform/PlatformMealPlans";
 import PlatformFAQBot from "./pages/platform/PlatformFAQBot";
 import PlatformScheduling from "./pages/platform/PlatformScheduling";
 import PlatformSettings from "./pages/platform/PlatformSettings";
+import PlatformReminderSettings from "./pages/platform/PlatformReminderSettings";
 import QuestionnairePublic from "./pages/QuestionnairePublic";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/platform/:clientId/faq-bot" element={<PlatformProtectedRoute><PlatformFAQBot /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/comunicacao" element={<PlatformProtectedRoute><PlatformCommunication /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/settings" element={<PlatformProtectedRoute><PlatformSettings /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/lembretes" element={<PlatformProtectedRoute><PlatformReminderSettings /></PlatformProtectedRoute>} />
               
               {/* Public Questionnaires */}
               <Route path="/questionnaire/:questionnaireId" element={<QuestionnairePublic />} />

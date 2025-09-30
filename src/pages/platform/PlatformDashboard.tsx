@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from '@/hooks/useTenantId';
+import { useReminders } from '@/hooks/useReminders';
+import { toast } from '@/hooks/use-toast';
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 import {
   Users,
@@ -25,7 +27,8 @@ import {
   Heart,
   Bot,
   Utensils,
-  Clock
+  Clock,
+  Send
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -59,6 +62,7 @@ export default function PlatformDashboard() {
   const { clientId } = useParams<{ clientId: string }>();
   const { setClientId, clientConfig, loading: configLoading, error, clearError } = useClientConfig();
   const { tenantId, loading: tenantLoading } = useTenantId();
+  const { pendingReminders, sendReminder } = useReminders();
   
   const [stats, setStats] = useState<DashboardStats>({
     totalClients: 0,
@@ -219,6 +223,26 @@ export default function PlatformDashboard() {
     }
   };
 
+  const handleSendReminder = async (appointmentId: string, type: string, clientName: string, phone: string) => {
+    const messages = {
+      '72h': `Olá! Sua consulta com ${clientConfig?.branding.companyName} está agendada para daqui 3 dias. Confirme sua presença respondendo SIM.`,
+      '24h': `Lembrete: Sua consulta é amanhã! Nos vemos em breve.`,
+      '2h': `Sua consulta é hoje daqui 2 horas. Estamos te esperando!`
+    };
+
+    // Abrir WhatsApp Web com mensagem pronta
+    const whatsappLink = `https://wa.me/55${phone.replace(/\D/g, '')}?text=${encodeURIComponent(messages[type as keyof typeof messages])}`;
+    window.open(whatsappLink, '_blank');
+
+    // Marcar como enviado
+    await sendReminder(appointmentId, type);
+    
+    toast({
+      title: "Lembrete enviado",
+      description: `Lembrete enviado para ${clientName}`
+    });
+  };
+
   const MetricCard = ({ title, value, icon: Icon, trend, color = "blue" }: any) => {
     const colorClasses = {
       blue: "bg-gradient-to-br from-metric-blue to-metric-blue/90",
@@ -326,6 +350,66 @@ export default function PlatformDashboard() {
 
           {/* AI Insights Panel */}
           <AIInsightsPanel />
+
+          {/* Lembretes Pendentes */}
+          {pendingReminders.length > 0 && (
+            <Card className="shadow-lg border-orange-200 bg-orange-50 rounded-2xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-br from-orange-500 to-orange-600 text-white pb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                    <Bell className="h-5 w-5" />
+                  </div>
+                  <CardTitle className="text-xl font-bold">
+                    Lembretes Pendentes ({pendingReminders.length})
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-3">
+                  {pendingReminders.map(({ appointment, needsReminders }) => (
+                    <div key={appointment.id} className="bg-white p-4 rounded-xl border border-orange-200 shadow-sm hover:shadow-md transition-all">
+                      <div className="flex items-start justify-between gap-4 mb-3">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 mb-1">{appointment.clients.name}</h4>
+                          <p className="text-sm text-gray-600">
+                            {toZonedTime(new Date(appointment.datetime), 'America/Sao_Paulo').toLocaleDateString('pt-BR', {
+                              day: '2-digit',
+                              month: 'long',
+                              year: 'numeric'
+                            })} às {toZonedTime(new Date(appointment.datetime), 'America/Sao_Paulo').toLocaleTimeString('pt-BR', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
+                        <Badge className={getStatusBadgeConfig(appointment.status).className}>
+                          {getStatusBadgeConfig(appointment.status).label}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {needsReminders.map(type => (
+                          <Button
+                            key={type}
+                            onClick={() => handleSendReminder(
+                              appointment.id,
+                              type,
+                              appointment.clients.name,
+                              appointment.clients.phone
+                            )}
+                            size="sm"
+                            className="bg-orange-500 hover:bg-orange-600 text-white"
+                          >
+                            <Send className="w-3 h-3 mr-1" />
+                            Enviar {type === '72h' ? '3 dias' : type === '24h' ? '1 dia' : '2h'} antes
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Main Content Grid - Clean layout */}
           <div className="grid grid-cols-1 gap-6 lg:gap-8">

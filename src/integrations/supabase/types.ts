@@ -47,6 +47,47 @@ export type Database = {
         }
         Relationships: []
       }
+      appointment_reminders: {
+        Row: {
+          appointment_id: string
+          client_response: string | null
+          created_at: string | null
+          id: string
+          reminder_type: string
+          sent_at: string
+          status: string | null
+          tenant_id: string
+        }
+        Insert: {
+          appointment_id: string
+          client_response?: string | null
+          created_at?: string | null
+          id?: string
+          reminder_type: string
+          sent_at?: string
+          status?: string | null
+          tenant_id: string
+        }
+        Update: {
+          appointment_id?: string
+          client_response?: string | null
+          created_at?: string | null
+          id?: string
+          reminder_type?: string
+          sent_at?: string
+          status?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_reminders_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
           client_id: string

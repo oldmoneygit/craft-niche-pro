@@ -9,7 +9,8 @@ import {
   FileText,
   Utensils,
   DollarSign,
-  Settings
+  Settings,
+  Bell
 } from 'lucide-react';
 import {
   Sidebar,
@@ -101,6 +102,12 @@ export function PlatformSidebar() {
   // Future business types will be added here when implemented
 
   const settingsItems = [
+    {
+      title: 'Lembretes',
+      url: `${platformBasePath}/lembretes`,
+      icon: Bell,
+      enabled: true,
+    },
     {
       title: 'Financeiro',
       url: `${platformBasePath}/financial`,
