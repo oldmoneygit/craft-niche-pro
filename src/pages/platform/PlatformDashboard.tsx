@@ -433,9 +433,9 @@ export default function PlatformDashboard() {
           <AIInsightsPanel />
 
           {/* Card de Teste de Lembretes */}
-          <Card className="shadow-lg border-purple-200 bg-purple-50 rounded-2xl overflow-hidden">
+          <Card className="shadow-lg border-orange-200 bg-orange-50 rounded-2xl overflow-hidden">
             <CardHeader 
-              className="bg-gradient-to-br from-purple-500 to-purple-600 text-white pb-6 cursor-pointer hover:from-purple-600 hover:to-purple-700 transition-all"
+              className="bg-gradient-to-br from-orange-500 to-orange-600 text-white pb-6 cursor-pointer hover:from-orange-600 hover:to-orange-700 transition-all"
               onClick={() => setTestReminderExpanded(!testReminderExpanded)}
             >
               <div className="flex items-center justify-between">
@@ -444,7 +444,7 @@ export default function PlatformDashboard() {
                     <MessageCircle className="h-5 w-5" />
                   </div>
                   <CardTitle className="text-xl font-bold">
-                    Teste de Envio de Lembretes
+                    Envio de Lembretes
                   </CardTitle>
                 </div>
                 {testReminderExpanded ? (
@@ -459,7 +459,7 @@ export default function PlatformDashboard() {
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-start gap-2">
                   <Bell className="h-4 w-4 text-yellow-600 flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-yellow-700">
-                    Use este card para testar diferentes métodos de envio de mensagens até resolvermos o problema.
+                    Use este card para enviar lembretes personalizados para seus clientes.
                   </p>
                 </div>
 
@@ -495,7 +495,7 @@ export default function PlatformDashboard() {
                     <div className="flex flex-wrap gap-2">
                       <Button
                         onClick={handleTestSendWhatsApp}
-                        className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 w-full"
+                        className="bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-2 w-full"
                         size="lg"
                       >
                         <Send className="h-5 w-5" />
@@ -527,10 +527,10 @@ export default function PlatformDashboard() {
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <p className="text-sm font-medium text-blue-900 mb-2 flex items-center gap-2">
                         <MessageCircle className="h-4 w-4" />
-                        Teste de Envio Automático:
+                        Como funciona:
                       </p>
                       <p className="text-sm text-blue-800">
-                        Clique no botão "Enviar via WhatsApp" para abrir automaticamente o WhatsApp com o número e mensagem prontos.
+                        Selecione o cliente, edite a mensagem se necessário e clique em "Enviar via WhatsApp". O WhatsApp abrirá automaticamente com a conversa pronta para envio.
                       </p>
                     </div>
                   </>
