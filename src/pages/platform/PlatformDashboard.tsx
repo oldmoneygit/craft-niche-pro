@@ -230,8 +230,9 @@ export default function PlatformDashboard() {
       '2h': `Sua consulta é hoje daqui 2 horas. Estamos te esperando!`
     };
 
-    // Abrir WhatsApp Web com mensagem pronta
-    const whatsappLink = `https://wa.me/55${phone.replace(/\D/g, '')}?text=${encodeURIComponent(messages[type as keyof typeof messages])}`;
+    // Usar web.whatsapp.com para evitar bloqueio do api.whatsapp.com
+    const phoneNumber = `55${phone.replace(/\D/g, '')}`;
+    const whatsappLink = `https://web.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(messages[type as keyof typeof messages])}`;
     window.open(whatsappLink, '_blank');
 
     // Marcar como enviado
