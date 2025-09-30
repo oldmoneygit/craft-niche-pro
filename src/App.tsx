@@ -6,14 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ClientConfigProvider } from "@/core/contexts/ClientConfigContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import RedirectToGabrielGandin from "./components/redirects/RedirectToGabrielGandin";
-import RedirectToClinicaExemplo from "./components/redirects/RedirectToClinicaExemplo";
-import RedirectToAdmin from "./components/redirects/RedirectToAdmin";
-import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
-import AdminDashboard from "./pages/admin/AdminDashboard";
 import PlatformDashboard from "./pages/platform/PlatformDashboard";
 import PlatformLogin from "./pages/platform/PlatformLogin";
 import PlatformAuth from "./pages/platform/PlatformAuth";
@@ -42,15 +35,10 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* Landing e Onboarding */}
-              <Route path="/" element={<Index />} />
-              <Route path="/onboarding" element={<Onboarding />} />
-              <Route path="/auth" element={<Auth />} />
+              {/* Redirect root to gabriel-gandin platform */}
+              <Route path="/" element={<PlatformLogin />} />
               
-              {/* Admin Dashboard */}
-              <Route path="/admin" element={<AdminDashboard />} />
-              
-              {/* Plataformas Multi-tenant */}
+              {/* Platform Routes */}
               <Route path="/platform/:clientId/login" element={<PlatformAuth />} />
               <Route path="/platform/:clientId" element={<PlatformProtectedRoute><PlatformDashboard /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/dashboard" element={<PlatformProtectedRoute><PlatformDashboard /></PlatformProtectedRoute>} />
@@ -67,13 +55,8 @@ const App = () => (
               <Route path="/platform/:clientId/financial" element={<PlatformProtectedRoute><PlatformFinancial /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/settings" element={<PlatformProtectedRoute><PlatformSettings /></PlatformProtectedRoute>} />
               
-              {/* Questionários Públicos */}
+              {/* Public Questionnaires */}
               <Route path="/questionnaire/:questionnaireId" element={<QuestionnairePublic />} />
-              
-              {/* Redirecionamentos das rotas antigas para as novas */}
-              <Route path="/nutricionista" element={<RedirectToGabrielGandin />} />
-              <Route path="/clinic" element={<RedirectToClinicaExemplo />} />
-              <Route path="/login" element={<RedirectToAdmin />} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
