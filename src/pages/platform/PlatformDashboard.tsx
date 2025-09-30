@@ -302,20 +302,16 @@ export default function PlatformDashboard() {
       return;
     }
 
+    // Copiar mensagem e telefone automaticamente
     const phoneNumber = selectedClient.phone.replace(/\D/g, '');
-    const whatsappLink = `https://api.whatsapp.com/send?phone=55${phoneNumber}&text=${encodeURIComponent(testMessage)}`;
+    const dataToAppend = `Telefone: ${phoneNumber}\n\nMensagem:\n${testMessage}`;
     
-    const link = document.createElement('a');
-    link.href = whatsappLink;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
+    navigator.clipboard.writeText(dataToAppend);
+    
     toast({
-      title: "Tentando abrir WhatsApp",
-      description: `Abrindo conversa com ${selectedClient.name}`
+      title: "Dados copiados!",
+      description: `Telefone e mensagem copiados. Abra o WhatsApp Web manualmente e cole.`,
+      duration: 5000
     });
   };
 
@@ -489,13 +485,20 @@ export default function PlatformDashboard() {
 
                     <div className="flex flex-wrap gap-2">
                       <Button
+                        onClick={handleTestSendWhatsApp}
+                        className="bg-purple-500 hover:bg-purple-600 text-white flex items-center gap-2 w-full"
+                      >
+                        <Copy className="h-4 w-4" />
+                        Copiar Tudo (Telefone + Mensagem)
+                      </Button>
+                      <Button
                         onClick={handleCopyMessage}
                         variant="outline"
                         size="sm"
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 flex-1"
                       >
                         <Copy className="h-4 w-4" />
-                        Copiar Mensagem
+                        Apenas Mensagem
                       </Button>
                       <Button
                         onClick={() => {
@@ -504,27 +507,22 @@ export default function PlatformDashboard() {
                         }}
                         variant="outline"
                         size="sm"
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 flex-1"
                       >
                         <Copy className="h-4 w-4" />
-                        Copiar Telefone
-                      </Button>
-                      <Button
-                        onClick={handleTestSendWhatsApp}
-                        className="bg-purple-500 hover:bg-purple-600 text-white flex items-center gap-2"
-                        size="sm"
-                      >
-                        <Send className="h-4 w-4" />
-                        Tentar Enviar via WhatsApp
+                        Apenas Telefone
                       </Button>
                     </div>
 
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                      <p className="text-xs text-gray-600 mb-2 font-medium">Instruções:</p>
-                      <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside">
-                        <li>Copie a mensagem e o telefone usando os botões acima</li>
-                        <li>Abra o WhatsApp Web manualmente</li>
-                        <li>Cole o número na busca e inicie a conversa</li>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <p className="text-sm font-medium text-blue-900 mb-2 flex items-center gap-2">
+                        <MessageCircle className="h-4 w-4" />
+                        Como enviar (enquanto resolvemos o problema):
+                      </p>
+                      <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+                        <li>Clique em <strong>"Copiar Tudo"</strong> acima</li>
+                        <li>Abra o WhatsApp Web em uma nova aba: <a href="https://web.whatsapp.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-medium">web.whatsapp.com</a></li>
+                        <li>Cole o telefone na busca e abra a conversa</li>
                         <li>Cole e envie a mensagem</li>
                       </ol>
                     </div>
