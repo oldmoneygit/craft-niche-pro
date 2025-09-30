@@ -6,8 +6,6 @@ import AIInsightsPanel from '@/components/platform/AIInsightsPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from '@/hooks/useTenantId';
 import { useReminders } from '@/hooks/useReminders';
@@ -32,9 +30,7 @@ import {
   Clock,
   Send,
   ChevronDown,
-  ChevronUp,
-  Copy,
-  MessageCircle
+  ChevronUp
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -70,10 +66,6 @@ export default function PlatformDashboard() {
   const { tenantId, loading: tenantLoading } = useTenantId();
   const { pendingReminders, sendReminder } = useReminders();
   const [remindersExpanded, setRemindersExpanded] = useState(false);
-  const [testReminderExpanded, setTestReminderExpanded] = useState(false);
-  const [allClients, setAllClients] = useState<any[]>([]);
-  const [selectedClientId, setSelectedClientId] = useState<string>('');
-  const [testMessage, setTestMessage] = useState('Olá! Esta é uma mensagem de teste de lembrete de consulta.');
   
   const [stats, setStats] = useState<DashboardStats>({
     totalClients: 0,
@@ -103,17 +95,6 @@ export default function PlatformDashboard() {
           .from('clients')
           .select('*', { count: 'exact', head: true })
           .eq('tenant_id', tenantId);
-
-        // Buscar todos os clientes para o seletor de teste
-        const { data: clientsData } = await supabase
-          .from('clients')
-          .select('id, name, phone, email')
-          .eq('tenant_id', tenantId)
-          .order('name');
-        
-        if (clientsData) {
-          setAllClients(clientsData);
-        }
 
         // 2. Consultas deste mês
         const startOfMonth = new Date();
@@ -275,55 +256,6 @@ export default function PlatformDashboard() {
     });
   };
 
-  const handleCopyMessage = () => {
-    navigator.clipboard.writeText(testMessage);
-    toast({
-      title: "Mensagem copiada",
-      description: "A mensagem foi copiada para a área de transferência"
-    });
-  };
-
-  const handleCopyPhone = (phone: string) => {
-    navigator.clipboard.writeText(phone);
-    toast({
-      title: "Telefone copiado",
-      description: "O número foi copiado para a área de transferência"
-    });
-  };
-
-  const handleTestSendWhatsApp = () => {
-    const selectedClient = allClients.find(c => c.id === selectedClientId);
-    if (!selectedClient) {
-      toast({
-        title: "Erro",
-        description: "Selecione um cliente primeiro",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Limpar o número - remover tudo exceto dígitos
-    let phoneNumber = selectedClient.phone.replace(/\D/g, '');
-    
-    // Se não começar com 55, adicionar (código do Brasil)
-    if (!phoneNumber.startsWith('55')) {
-      phoneNumber = '55' + phoneNumber;
-    }
-    
-    // Criar o link do WhatsApp no formato correto
-    const whatsappLink = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(testMessage)}`;
-    
-    console.log('WhatsApp Link:', whatsappLink); // Para debug
-    
-    // Abrir em nova aba
-    window.open(whatsappLink, '_blank');
-    
-    toast({
-      title: "Abrindo WhatsApp",
-      description: `Abrindo conversa com ${selectedClient.name}`
-    });
-  };
-
   const MetricCard = ({ title, value, icon: Icon, trend, color = "blue" }: any) => {
     const colorClasses = {
       blue: "bg-gradient-to-br from-metric-blue to-metric-blue/90",
@@ -431,113 +363,6 @@ export default function PlatformDashboard() {
 
           {/* AI Insights Panel */}
           <AIInsightsPanel />
-
-          {/* Card de Teste de Lembretes */}
-          <Card className="shadow-lg border-orange-200 bg-orange-50 rounded-2xl overflow-hidden">
-            <CardHeader 
-              className="bg-gradient-to-br from-orange-500 to-orange-600 text-white pb-6 cursor-pointer hover:from-orange-600 hover:to-orange-700 transition-all"
-              onClick={() => setTestReminderExpanded(!testReminderExpanded)}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                    <MessageCircle className="h-5 w-5" />
-                  </div>
-                  <CardTitle className="text-xl font-bold">
-                    Envio de Lembretes
-                  </CardTitle>
-                </div>
-                {testReminderExpanded ? (
-                  <ChevronUp className="h-5 w-5" />
-                ) : (
-                  <ChevronDown className="h-5 w-5" />
-                )}
-              </div>
-            </CardHeader>
-            {testReminderExpanded && (
-              <CardContent className="p-6 space-y-4">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-start gap-2">
-                  <Bell className="h-4 w-4 text-yellow-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-yellow-700">
-                    Use este card para enviar lembretes personalizados para seus clientes.
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Selecionar Cliente</label>
-                  <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                    <SelectTrigger className="bg-white">
-                      <SelectValue placeholder="Escolha um cliente..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {allClients.map((client) => (
-                        <SelectItem key={client.id} value={client.id}>
-                          {client.name} - {client.phone}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {selectedClientId && (
-                  <>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-700">Mensagem</label>
-                      <Textarea
-                        value={testMessage}
-                        onChange={(e) => setTestMessage(e.target.value)}
-                        rows={4}
-                        className="bg-white"
-                        placeholder="Digite a mensagem de teste..."
-                      />
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        onClick={handleTestSendWhatsApp}
-                        className="bg-orange-500 hover:bg-orange-600 text-white flex items-center gap-2 w-full"
-                        size="lg"
-                      >
-                        <Send className="h-5 w-5" />
-                        Enviar via WhatsApp
-                      </Button>
-                      <Button
-                        onClick={handleCopyMessage}
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center gap-2 flex-1"
-                      >
-                        <Copy className="h-4 w-4" />
-                        Copiar Mensagem
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          const client = allClients.find(c => c.id === selectedClientId);
-                          if (client) handleCopyPhone(client.phone);
-                        }}
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center gap-2 flex-1"
-                      >
-                        <Copy className="h-4 w-4" />
-                        Copiar Telefone
-                      </Button>
-                    </div>
-
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <p className="text-sm font-medium text-blue-900 mb-2 flex items-center gap-2">
-                        <MessageCircle className="h-4 w-4" />
-                        Como funciona:
-                      </p>
-                      <p className="text-sm text-blue-800">
-                        Selecione o cliente, edite a mensagem se necessário e clique em "Enviar via WhatsApp". O WhatsApp abrirá automaticamente com a conversa pronta para envio.
-                      </p>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            )}
-          </Card>
 
           {/* Lembretes Pendentes - Sempre visível */}
           <Card className="shadow-lg border-orange-200 bg-orange-50 rounded-2xl overflow-hidden">
