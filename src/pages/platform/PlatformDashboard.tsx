@@ -154,6 +154,36 @@ export default function PlatformDashboard() {
     fetchDashboardData();
   }, [tenantId, tenantLoading]);
 
+  const getStatusBadgeConfig = (status: string) => {
+    switch (status) {
+      case 'agendado':
+        return {
+          label: 'Agendado',
+          className: 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+        };
+      case 'confirmado':
+        return {
+          label: 'Confirmado',
+          className: 'bg-green-100 text-green-800 hover:bg-green-200'
+        };
+      case 'realizado':
+        return {
+          label: 'Realizado',
+          className: 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+        };
+      case 'cancelado':
+        return {
+          label: 'Cancelado',
+          className: 'bg-red-100 text-red-800 hover:bg-red-200'
+        };
+      default:
+        return {
+          label: 'Agendado',
+          className: 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+        };
+    }
+  };
+
   const MetricCard = ({ title, value, icon: Icon, trend, color = "blue" }: any) => {
     const colorClasses = {
       blue: "bg-gradient-to-br from-metric-blue to-metric-blue/90",
@@ -300,12 +330,8 @@ export default function PlatformDashboard() {
                           <div className="font-semibold text-gray-900">{appointment.clients?.name || 'Sem nome'}</div>
                           <div className="text-sm text-gray-500">{appointment.type}</div>
                         </div>
-                        <Badge className={`border-0 rounded-lg px-3 py-1 ${
-                          appointment.status === 'confirmado' 
-                            ? 'bg-primary/10 text-primary hover:bg-primary/20' 
-                            : 'bg-warning/10 text-warning hover:bg-warning/20'
-                        }`}>
-                          {appointment.status === 'confirmado' ? 'Confirmado' : 'Agendado'}
+                        <Badge className={`border-0 rounded-lg px-3 py-1 ${getStatusBadgeConfig(appointment.status).className}`}>
+                          {getStatusBadgeConfig(appointment.status).label}
                         </Badge>
                       </div>
                     ))}
