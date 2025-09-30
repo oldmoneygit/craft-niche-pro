@@ -106,8 +106,8 @@ export default function PlatformDashboard() {
           .gte('datetime', startOfDay.toISOString())
           .lte('datetime', endOfDay.toISOString());
 
-        // 5. Próximas consultas de hoje
-        const { data: todayUpcoming } = await supabase
+        // 5. Próximas consultas de hoje (TODAS as consultas de hoje, não só futuras)
+        const { data: todayUpcoming, error: appointmentsError } = await supabase
           .from('appointments')
           .select(`
             id,
@@ -119,11 +119,18 @@ export default function PlatformDashboard() {
             )
           `)
           .eq('tenant_id', tenantId)
-          .gte('datetime', new Date().toISOString())
+          .gte('datetime', startOfDay.toISOString())
           .lte('datetime', endOfDay.toISOString())
-          .in('status', ['agendado', 'confirmado'])
           .order('datetime', { ascending: true })
-          .limit(5);
+          .limit(10);
+
+        console.log('Dashboard Debug:', {
+          tenantId,
+          startOfDay: startOfDay.toISOString(),
+          endOfDay: endOfDay.toISOString(),
+          todayUpcoming,
+          appointmentsError
+        });
 
         setStats({
           totalClients: clientCount || 0,
