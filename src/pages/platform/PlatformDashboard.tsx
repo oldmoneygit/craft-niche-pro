@@ -106,7 +106,7 @@ export default function PlatformDashboard() {
           .gte('datetime', startOfDay.toISOString())
           .lte('datetime', endOfDay.toISOString());
 
-        // 5. Próximas consultas de hoje (TODAS as consultas de hoje, não só futuras)
+        // 5. Consultas de hoje
         const { data: todayUpcoming, error: appointmentsError } = await supabase
           .from('appointments')
           .select(`
@@ -120,15 +120,42 @@ export default function PlatformDashboard() {
           `)
           .eq('tenant_id', tenantId)
           .gte('datetime', startOfDay.toISOString())
-          .lte('datetime', endOfDay.toISOString())
+          .lt('datetime', endOfDay.toISOString())
           .order('datetime', { ascending: true })
           .limit(10);
+
+        // 6. Se não houver consultas hoje, buscar próximas consultas (próximos 7 dias)
+        let displayAppointments = todayUpcoming || [];
+        if (displayAppointments.length === 0) {
+          const sevenDaysLater = new Date();
+          sevenDaysLater.setDate(sevenDaysLater.getDate() + 7);
+          
+          const { data: upcomingWeek } = await supabase
+            .from('appointments')
+            .select(`
+              id,
+              datetime,
+              type,
+              status,
+              clients (
+                name
+              )
+            `)
+            .eq('tenant_id', tenantId)
+            .gte('datetime', new Date().toISOString())
+            .lte('datetime', sevenDaysLater.toISOString())
+            .order('datetime', { ascending: true })
+            .limit(5);
+          
+          displayAppointments = upcomingWeek || [];
+        }
 
         console.log('Dashboard Debug:', {
           tenantId,
           startOfDay: startOfDay.toISOString(),
           endOfDay: endOfDay.toISOString(),
-          todayUpcoming,
+          todayCount: todayUpcoming?.length || 0,
+          displayCount: displayAppointments.length,
           appointmentsError
         });
 
@@ -139,7 +166,7 @@ export default function PlatformDashboard() {
           appointmentsToday: todayAppointments || 0
         });
 
-        setUpcomingAppointments(todayUpcoming || []);
+        setUpcomingAppointments(displayAppointments);
 
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -265,7 +292,9 @@ export default function PlatformDashboard() {
             <Card className="shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl border-0 overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 pb-6">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl font-bold text-gray-900">Consultas de Hoje</CardTitle>
+                  <CardTitle className="text-xl font-bold text-gray-900">
+                    {stats.appointmentsToday > 0 ? 'Consultas de Hoje' : 'Próximas Consultas'}
+                  </CardTitle>
                   <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 hover:bg-primary/5 rounded-xl">
                     Ver agenda completa
                   </Button>
@@ -275,7 +304,7 @@ export default function PlatformDashboard() {
                 {upcomingAppointments.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p>Nenhuma consulta agendada para hoje</p>
+                    <p>Nenhuma consulta agendada nos próximos dias</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
