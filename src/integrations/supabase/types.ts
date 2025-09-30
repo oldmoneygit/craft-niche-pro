@@ -336,6 +336,53 @@ export type Database = {
           },
         ]
       }
+      tenant_config: {
+        Row: {
+          ai_config: Json | null
+          branding: Json | null
+          business_type: string | null
+          created_at: string | null
+          custom_fields: Json | null
+          enabled_features: Json | null
+          id: string
+          tenant_id: string
+          terminology: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          ai_config?: Json | null
+          branding?: Json | null
+          business_type?: string | null
+          created_at?: string | null
+          custom_fields?: Json | null
+          enabled_features?: Json | null
+          id?: string
+          tenant_id: string
+          terminology?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          ai_config?: Json | null
+          branding?: Json | null
+          business_type?: string | null
+          created_at?: string | null
+          custom_fields?: Json | null
+          enabled_features?: Json | null
+          id?: string
+          tenant_id?: string
+          terminology?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_config_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           business_name: string
