@@ -17,7 +17,6 @@ import PlatformCommunication from "./pages/platform/PlatformCommunication";
 import PlatformQuestionnaires from "./pages/platform/PlatformQuestionnaires";
 import PlatformMealPlans from "./pages/platform/PlatformMealPlans";
 import PlatformFAQBot from "./pages/platform/PlatformFAQBot";
-import PlatformFinancial from "./pages/platform/PlatformFinancial";
 import PlatformScheduling from "./pages/platform/PlatformScheduling";
 import PlatformSettings from "./pages/platform/PlatformSettings";
 import QuestionnairePublic from "./pages/QuestionnairePublic";
