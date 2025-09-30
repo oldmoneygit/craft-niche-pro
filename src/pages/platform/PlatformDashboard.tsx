@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from '@/hooks/useTenantId';
+import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 import {
   Users,
   Calendar,
@@ -93,10 +94,11 @@ export default function PlatformDashboard() {
           .select('*', { count: 'exact', head: true })
           .eq('tenant_id', tenantId);
 
-        // 4. Consultas de hoje (corrigido para timezone local)
-        const now = new Date();
-        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        // 4. Consultas de hoje (timezone de São Paulo)
+        const timeZone = 'America/Sao_Paulo';
+        const now = toZonedTime(new Date(), timeZone);
+        const startOfDay = fromZonedTime(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0), timeZone);
+        const endOfDay = fromZonedTime(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999), timeZone);
 
         const { count: todayCount } = await supabase
           .from('appointments')
