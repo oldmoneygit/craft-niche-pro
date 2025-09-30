@@ -6,6 +6,9 @@ import AIInsightsPanel from '@/components/platform/AIInsightsPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from '@/hooks/useTenantId';
 import { useReminders } from '@/hooks/useReminders';
@@ -30,7 +33,9 @@ import {
   Clock,
   Send,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  CheckCircle2,
+  History
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -66,6 +71,12 @@ export default function PlatformDashboard() {
   const { tenantId, loading: tenantLoading } = useTenantId();
   const { pendingReminders, sendReminder } = useReminders();
   const [remindersExpanded, setRemindersExpanded] = useState(false);
+  const [sentRemindersExpanded, setSentRemindersExpanded] = useState(false);
+  const [sentReminders, setSentReminders] = useState<any[]>([]);
+  const [customReminderDialogOpen, setCustomReminderDialogOpen] = useState(false);
+  const [customMessage, setCustomMessage] = useState('');
+  const [selectedClientForCustom, setSelectedClientForCustom] = useState('');
+  const [allClients, setAllClients] = useState<any[]>([]);
   
   const [stats, setStats] = useState<DashboardStats>({
     totalClients: 0,
@@ -83,18 +94,57 @@ export default function PlatformDashboard() {
     }
   }, [clientId, setClientId]);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      if (!tenantId || tenantLoading) return;
+  const fetchDashboardData = async () => {
+    if (!tenantId || tenantLoading) return;
 
-      try {
-        setLoading(true);
+    try {
+      setLoading(true);
 
         // 1. Total de clientes
         const { count: clientCount } = await supabase
           .from('clients')
           .select('*', { count: 'exact', head: true })
           .eq('tenant_id', tenantId);
+
+        // Buscar todos os clientes
+        const { data: clientsData } = await supabase
+          .from('clients')
+          .select('id, name, phone, email')
+          .eq('tenant_id', tenantId)
+          .order('name');
+        
+        if (clientsData) {
+          setAllClients(clientsData);
+        }
+
+        // Buscar lembretes enviados (últimos 30 dias)
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const { data: remindersData } = await supabase
+          .from('appointment_reminders')
+          .select(`
+            id,
+            reminder_type,
+            sent_at,
+            status,
+            appointment_id,
+            appointments (
+              datetime,
+              clients (
+                id,
+                name,
+                phone
+              )
+            )
+          `)
+          .eq('tenant_id', tenantId)
+          .gte('sent_at', thirtyDaysAgo.toISOString())
+          .order('sent_at', { ascending: false });
+        
+        if (remindersData) {
+          setSentReminders(remindersData);
+        }
 
         // 2. Consultas deste mês
         const startOfMonth = new Date();
@@ -193,7 +243,20 @@ export default function PlatformDashboard() {
       }
     };
 
+  useEffect(() => {
     fetchDashboardData();
+  }, [tenantId, tenantLoading]);
+
+  // Listener para recarregar dados quando lembrete personalizado for enviado
+  useEffect(() => {
+    const handleReload = () => {
+      if (tenantId && !tenantLoading) {
+        fetchDashboardData();
+      }
+    };
+    
+    window.addEventListener('dashboardReload', handleReload);
+    return () => window.removeEventListener('dashboardReload', handleReload);
   }, [tenantId, tenantLoading]);
 
   const getStatusBadgeConfig = (status: string) => {
@@ -254,6 +317,56 @@ export default function PlatformDashboard() {
       title: "Lembrete enviado",
       description: `Lembrete enviado para ${clientName}`
     });
+  };
+
+  const handleSendCustomReminder = async () => {
+    if (!selectedClientForCustom || !customMessage || !tenantId) {
+      toast({
+        title: "Erro",
+        description: "Selecione um cliente e digite uma mensagem",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const selectedClient = allClients.find(c => c.id === selectedClientForCustom);
+    if (!selectedClient) return;
+
+    // Limpar o número
+    let phoneNumber = selectedClient.phone.replace(/\D/g, '');
+    if (!phoneNumber.startsWith('55')) {
+      phoneNumber = '55' + phoneNumber;
+    }
+
+    // Abrir WhatsApp
+    const whatsappLink = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(customMessage)}`;
+    window.open(whatsappLink, '_blank');
+
+    // Registrar o lembrete personalizado no banco
+    try {
+      await supabase.from('appointment_reminders').insert({
+        tenant_id: tenantId,
+        reminder_type: 'personalizado',
+        status: 'sent',
+        appointment_id: null // lembretes personalizados não tem appointment_id
+      });
+
+      toast({
+        title: "Lembrete enviado",
+        description: `Lembrete personalizado para ${selectedClient.name}`
+      });
+
+      // Limpar e fechar
+      setCustomMessage('');
+      setSelectedClientForCustom('');
+      setCustomReminderDialogOpen(false);
+      
+      // Recarregar dados
+      const event = new Event('dashboardReload');
+      window.dispatchEvent(event);
+    } catch (error) {
+      console.error('Error saving custom reminder:', error);
+    }
   };
 
   const MetricCard = ({ title, value, icon: Icon, trend, color = "blue" }: any) => {
@@ -379,11 +492,66 @@ export default function PlatformDashboard() {
                     Lembretes Pendentes {pendingReminders.length > 0 && `(${pendingReminders.length})`}
                   </CardTitle>
                 </div>
-                {remindersExpanded ? (
-                  <ChevronUp className="h-5 w-5" />
-                ) : (
-                  <ChevronDown className="h-5 w-5" />
-                )}
+                <div className="flex items-center gap-2">
+                  <Dialog open={customReminderDialogOpen} onOpenChange={setCustomReminderDialogOpen}>
+                    <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>
+                      <Button 
+                        size="sm" 
+                        variant="secondary"
+                        className="bg-white/20 hover:bg-white/30 text-white border-0"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Lembrete Personalizado
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[500px]">
+                      <DialogHeader>
+                        <DialogTitle>Criar Lembrete Personalizado</DialogTitle>
+                        <DialogDescription>
+                          Envie uma mensagem personalizada para qualquer cliente
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Cliente</label>
+                          <Select value={selectedClientForCustom} onValueChange={setSelectedClientForCustom}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione um cliente..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {allClients.map((client) => (
+                                <SelectItem key={client.id} value={client.id}>
+                                  {client.name} - {client.phone}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Mensagem</label>
+                          <Textarea
+                            value={customMessage}
+                            onChange={(e) => setCustomMessage(e.target.value)}
+                            placeholder="Digite sua mensagem personalizada..."
+                            rows={5}
+                          />
+                        </div>
+                        <Button 
+                          onClick={handleSendCustomReminder}
+                          className="w-full bg-orange-500 hover:bg-orange-600"
+                        >
+                          <Send className="h-4 w-4 mr-2" />
+                          Enviar via WhatsApp
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  {remindersExpanded ? (
+                    <ChevronUp className="h-5 w-5" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5" />
+                  )}
+                </div>
               </div>
             </CardHeader>
             {remindersExpanded && (
@@ -432,6 +600,77 @@ export default function PlatformDashboard() {
                               Enviar {type === '72h' ? '3 dias' : type === '24h' ? '1 dia' : '2h'} antes
                             </Button>
                           ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            )}
+          </Card>
+
+          {/* Histórico de Lembretes Enviados */}
+          <Card className="shadow-lg border-green-200 bg-green-50 rounded-2xl overflow-hidden">
+            <CardHeader 
+              className="bg-gradient-to-br from-green-500 to-green-600 text-white pb-6 cursor-pointer hover:from-green-600 hover:to-green-700 transition-all"
+              onClick={() => setSentRemindersExpanded(!sentRemindersExpanded)}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                    <CheckCircle2 className="h-5 w-5" />
+                  </div>
+                  <CardTitle className="text-xl font-bold">
+                    Lembretes Enviados (últimos 30 dias)
+                  </CardTitle>
+                </div>
+                <Badge variant="secondary" className="bg-white/20 text-white border-0 hover:bg-white/30 mr-2">
+                  {sentReminders.length}
+                </Badge>
+                {sentRemindersExpanded ? (
+                  <ChevronUp className="h-5 w-5" />
+                ) : (
+                  <ChevronDown className="h-5 w-5" />
+                )}
+              </div>
+            </CardHeader>
+            {sentRemindersExpanded && (
+              <CardContent className="p-6">
+                {sentReminders.length === 0 ? (
+                  <div className="text-center py-8">
+                    <History className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                    <p className="text-gray-600">Nenhum lembrete enviado nos últimos 30 dias</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {sentReminders.map((reminder) => (
+                      <div key={reminder.id} className="bg-white p-4 rounded-xl border border-green-200 shadow-sm">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                              <h4 className="font-semibold text-gray-900">
+                                {reminder.appointments?.clients?.name || 'Cliente não encontrado'}
+                              </h4>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-1">
+                              {reminder.appointments?.clients?.phone || 'Telefone não disponível'}
+                            </p>
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <span>Enviado em {new Date(reminder.sent_at).toLocaleString('pt-BR')}</span>
+                              <span>•</span>
+                              <Badge variant="outline" className="text-xs">
+                                {reminder.reminder_type === 'personalizado' ? 'Personalizado' :
+                                 reminder.reminder_type === '72h' ? '3 dias antes' :
+                                 reminder.reminder_type === '24h' ? '1 dia antes' : '2h antes'}
+                              </Badge>
+                            </div>
+                            {reminder.appointments?.datetime && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                Consulta: {new Date(reminder.appointments.datetime).toLocaleString('pt-BR')}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
