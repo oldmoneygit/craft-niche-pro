@@ -9,6 +9,9 @@ interface Question {
   question: string;
   options?: string[];
   required: boolean;
+  scorable?: boolean;
+  weight?: number;
+  optionScores?: Record<string, number>;
 }
 
 interface QuestionnaireData {
@@ -147,6 +150,41 @@ export default function PublicQuestionnaireResponse() {
     return true;
   };
 
+  // Calculate score based on question weights and option scores
+  const calculateScore = (answers: Record<string, any>, questions: Question[]): number => {
+    let totalScore = 0;
+    let totalWeight = 0;
+
+    questions.forEach(question => {
+      if (!question.scorable) return;
+
+      const answer = answers[question.id];
+      const weight = question.weight || 1;
+      let questionScore = 0;
+
+      if (question.type === 'radio') {
+        // Nota da opção selecionada
+        questionScore = question.optionScores?.[answer] || 0;
+      } 
+      else if (question.type === 'checkbox' && Array.isArray(answer)) {
+        // Média das opções marcadas
+        const scores = answer.map(opt => question.optionScores?.[opt] || 0);
+        questionScore = scores.length > 0 
+          ? scores.reduce((a, b) => a + b, 0) / scores.length 
+          : 0;
+      }
+      else if (question.type === 'scale') {
+        // Escala 1-10 → 0-100
+        questionScore = (answer / 10) * 100;
+      }
+
+      totalScore += questionScore * weight;
+      totalWeight += weight;
+    });
+
+    return totalWeight > 0 ? Math.round((totalScore / totalWeight)) : 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -156,9 +194,12 @@ export default function PublicQuestionnaireResponse() {
     setError('');
 
     try {
+      // Calcular pontuação
+      const finalScore = calculateScore(answers, questionnaire?.questions || []);
       console.log('🚀 Iniciando submissão...');
       console.log('Response ID:', responseId);
       console.log('Respondent data:', respondentData);
+      console.log('Pontuação final:', finalScore);
 
       // 1. ATUALIZAR respostas
       const phoneClean = respondentData.phone.replace(/\D/g, '');
@@ -171,7 +212,8 @@ export default function PublicQuestionnaireResponse() {
           completed_at: new Date().toISOString(),
           respondent_name: respondentData.name,
           respondent_phone: phoneClean,
-          respondent_email: respondentData.email || null
+          respondent_email: respondentData.email || null,
+          score: finalScore
         })
         .eq('id', responseId);
 
@@ -415,14 +457,73 @@ export default function PublicQuestionnaireResponse() {
   }
 
   if (success) {
+    const finalScore = calculateScore(answers, questionnaire?.questions || []);
+    
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Respostas Enviadas!</h2>
-          <p className="text-gray-600">
-            Obrigado por responder o questionário. O nutricionista vai analisar suas respostas em breve.
+        <div className="bg-white rounded-lg shadow-xl p-8 max-w-lg w-full">
+          {/* Logo */}
+          <div className="text-center mb-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-12 h-12 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">Respostas Enviadas!</h2>
+          </div>
+
+          {/* Pontuação */}
+          {finalScore > 0 && (
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-6 text-center border-2 border-blue-200">
+              <p className="text-sm text-gray-600 mb-2">Sua pontuação</p>
+              <p className="text-5xl font-bold text-blue-600 mb-2">{finalScore}%</p>
+              <p className="text-sm text-gray-700">
+                {finalScore >= 80 ? '😁 Excelente!' : 
+                 finalScore >= 60 ? '😊 Bom trabalho!' :
+                 finalScore >= 40 ? '😐 Continue assim!' :
+                 '☹️ Vamos melhorar!'}
+              </p>
+            </div>
+          )}
+
+          <p className="text-gray-600 text-center mb-4">
+            Obrigado por responder! O nutricionista vai analisar suas respostas em breve.
           </p>
+
+          {/* Breakdown opcional */}
+          {finalScore > 0 && questionnaire?.questions.some((q: Question) => q.scorable) && (
+            <details className="text-sm">
+              <summary className="cursor-pointer text-gray-600 hover:text-gray-900 mb-2">
+                Ver detalhes da pontuação
+              </summary>
+              <div className="bg-gray-50 rounded p-3 space-y-2">
+                {questionnaire?.questions
+                  .filter((q: Question) => q.scorable)
+                  .map((q: Question) => {
+                    const answer = answers[q.id];
+                    let score = 0;
+                    
+                    if (q.type === 'radio') {
+                      score = q.optionScores?.[answer] || 0;
+                    } else if (q.type === 'scale') {
+                      score = (answer / 10) * 100;
+                    } else if (q.type === 'checkbox' && Array.isArray(answer)) {
+                      const scores = answer.map(opt => q.optionScores?.[opt] || 0);
+                      score = scores.length > 0 
+                        ? scores.reduce((a, b) => a + b, 0) / scores.length 
+                        : 0;
+                    }
+                    
+                    return (
+                      <div key={q.id} className="flex justify-between items-center">
+                        <span className="text-xs text-gray-700">{q.question}</span>
+                        <span className="text-xs font-semibold">
+                          {score >= 80 ? '😁' : score >= 60 ? '😊' : score >= 40 ? '😐' : '☹️'}
+                        </span>
+                      </div>
+                    );
+                  })}
+              </div>
+            </details>
+          )}
         </div>
       </div>
     );

@@ -476,6 +476,7 @@ export type Database = {
           respondent_email: string | null
           respondent_name: string | null
           respondent_phone: string | null
+          score: number | null
           status: string | null
           tenant_id: string
         }
@@ -490,6 +491,7 @@ export type Database = {
           respondent_email?: string | null
           respondent_name?: string | null
           respondent_phone?: string | null
+          score?: number | null
           status?: string | null
           tenant_id: string
         }
@@ -504,6 +506,7 @@ export type Database = {
           respondent_email?: string | null
           respondent_name?: string | null
           respondent_phone?: string | null
+          score?: number | null
           status?: string | null
           tenant_id?: string
         }

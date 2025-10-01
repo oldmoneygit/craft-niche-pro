@@ -178,6 +178,24 @@ export default function PlatformQuestionnaireResponses() {
                     <span className="font-semibold text-lg">
                       {response.respondent_name || response.clients?.name || 'Nome não informado'}
                     </span>
+                    
+                    {/* Badge de pontuação */}
+                    {response.score !== null && response.score !== undefined && (
+                      <span className={`text-sm px-3 py-1 rounded-full font-semibold ${
+                        response.score >= 80 ? 'bg-green-100 text-green-800' :
+                        response.score >= 60 ? 'bg-blue-100 text-blue-800' :
+                        response.score >= 40 ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {response.score}% {
+                          response.score >= 80 ? '😁' :
+                          response.score >= 60 ? '😊' :
+                          response.score >= 40 ? '😐' :
+                          '☹️'
+                        }
+                      </span>
+                    )}
+                    
                     {response.client_id && (
                       <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
                         Cliente vinculado
@@ -301,7 +319,7 @@ export default function PlatformQuestionnaireResponses() {
 
             {/* Informações do Respondente */}
             <div className="bg-gray-50 border-b p-4">
-              <div className="grid grid-cols-3 gap-4 text-sm">
+              <div className="grid grid-cols-4 gap-4 text-sm">
                 <div>
                   <p className="text-gray-600">Nome</p>
                   <p className="font-semibold">{selectedResponse.respondent_name}</p>
@@ -314,6 +332,24 @@ export default function PlatformQuestionnaireResponses() {
                   <p className="text-gray-600">E-mail</p>
                   <p className="font-semibold">{selectedResponse.respondent_email || 'Não informado'}</p>
                 </div>
+                {selectedResponse.score !== null && selectedResponse.score !== undefined && (
+                  <div>
+                    <p className="text-gray-600">Pontuação</p>
+                    <p className={`font-bold text-2xl ${
+                      selectedResponse.score >= 80 ? 'text-green-600' :
+                      selectedResponse.score >= 60 ? 'text-blue-600' :
+                      selectedResponse.score >= 40 ? 'text-yellow-600' :
+                      'text-red-600'
+                    }`}>
+                      {selectedResponse.score}% {
+                        selectedResponse.score >= 80 ? '😁' :
+                        selectedResponse.score >= 60 ? '😊' :
+                        selectedResponse.score >= 40 ? '😐' :
+                        '☹️'
+                      }
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 

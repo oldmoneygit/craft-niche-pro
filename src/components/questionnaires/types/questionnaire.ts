@@ -12,6 +12,9 @@ export interface Question {
   required: boolean;
   minScore?: number;
   maxScore?: number;
+  scorable?: boolean; // Se esta pergunta conta pontos
+  weight?: number; // Peso da pergunta (1-10)
+  optionScores?: Record<string, number>; // Nota de cada opção (0-100)
 }
 
 export interface FeedbackRange {
@@ -46,4 +49,5 @@ export interface QuestionnaireResponse {
   answers: Record<string, string | string[]>;
   totalScore: number;
   feedbackReceived: string;
+  score?: number; // Pontuação final (0-100)
 }
