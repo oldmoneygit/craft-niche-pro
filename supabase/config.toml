@@ -67,6 +67,9 @@ enable_confirmations = false
 [functions.send-email]
 verify_jwt = false
 
+[functions.ai-chat]
+verify_jwt = true
+
 [analytics]
 enabled = true
 port = 54327
