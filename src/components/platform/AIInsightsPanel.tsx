@@ -59,21 +59,47 @@ export default function AIInsightsPanel() {
   };
 
   const handleIgnore = async (insight: any) => {
-    // Create a suggestion to track the ignore action
-    await createSuggestion({
+    // Create a suggestion first to track it
+    const suggestion = await createSuggestion({
       type: insight.type,
       priority: insight.priority,
-      data: { insight_id: insight.id, action: 'ignored' },
+      data: { 
+        insight_id: insight.id, 
+        action: 'ignored',
+        clientCount: insight.count,
+        clientData: insight.clientData 
+      },
     });
+
+    if (suggestion) {
+      // Mark as resolved immediately (ignored)
+      await ignoreSuggestion(suggestion.id);
+      
+      // Refresh insights to remove from display
+      refresh();
+    }
   };
 
   const handlePostpone = async (insight: any) => {
-    // Create a suggestion to track the postpone action
-    await createSuggestion({
+    // Create a suggestion to track it
+    const suggestion = await createSuggestion({
       type: insight.type,
       priority: insight.priority,
-      data: { insight_id: insight.id, action: 'postponed' },
+      data: { 
+        insight_id: insight.id, 
+        action: 'postponed',
+        clientCount: insight.count,
+        clientData: insight.clientData 
+      },
     });
+
+    if (suggestion) {
+      // Postpone for 24 hours
+      await postponeSuggestion(suggestion.id);
+      
+      // Refresh insights to remove from display temporarily
+      refresh();
+    }
   };
 
   if (loading) {
