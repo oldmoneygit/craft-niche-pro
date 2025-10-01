@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { ClipboardList, Plus, Send, Eye, Trash2, Copy, X, Edit } from 'lucide-react';
+import { ClipboardList, Plus, Send, Eye, Trash2, Copy, X, Edit, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from '@/hooks/useTenantId';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 
 const QUESTIONNAIRE_TEMPLATES = [
   {
@@ -243,6 +245,9 @@ interface Questionnaire {
 export const PlatformQuestionnaires = () => {
   const { tenantId } = useTenantId();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { clientId } = useParams();
+  const clientConfig = useClientConfig();
   const [questionnaires, setQuestionnaires] = useState<Questionnaire[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
@@ -955,7 +960,16 @@ export const PlatformQuestionnaires = () => {
             <p className="text-sm text-muted-foreground mb-4">
               {q.questions.length} pergunta{q.questions.length !== 1 ? 's' : ''}
             </p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-4 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/platform/${clientId}/questionarios/${q.id}/respostas`)}
+                className="flex items-center justify-center gap-2"
+              >
+                <FileText className="w-4 h-4" />
+                Respostas
+              </Button>
               <Button
                 variant="outline"
                 size="sm"

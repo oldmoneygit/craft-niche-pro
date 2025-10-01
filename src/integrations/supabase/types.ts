@@ -473,6 +473,9 @@ export type Database = {
           id: string
           public_token: string | null
           questionnaire_id: string | null
+          respondent_email: string | null
+          respondent_name: string | null
+          respondent_phone: string | null
           status: string | null
           tenant_id: string
         }
@@ -484,6 +487,9 @@ export type Database = {
           id?: string
           public_token?: string | null
           questionnaire_id?: string | null
+          respondent_email?: string | null
+          respondent_name?: string | null
+          respondent_phone?: string | null
           status?: string | null
           tenant_id: string
         }
@@ -495,6 +501,9 @@ export type Database = {
           id?: string
           public_token?: string | null
           questionnaire_id?: string | null
+          respondent_email?: string | null
+          respondent_name?: string | null
+          respondent_phone?: string | null
           status?: string | null
           tenant_id?: string
         }

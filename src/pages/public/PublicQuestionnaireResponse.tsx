@@ -28,6 +28,12 @@ export default function PublicQuestionnaireResponse() {
   const [success, setSuccess] = useState(false);
   const [responseId, setResponseId] = useState('');
   const [debugInfo, setDebugInfo] = useState('');
+  const [respondentData, setRespondentData] = useState({
+    name: '',
+    phone: '',
+    email: ''
+  });
+  const [step, setStep] = useState<'info' | 'questions'>('info');
 
   useEffect(() => {
     console.log('Token recebido:', token);
@@ -154,7 +160,10 @@ export default function PublicQuestionnaireResponse() {
         .update({
           answers: answers,
           status: 'completed',
-          completed_at: new Date().toISOString()
+          completed_at: new Date().toISOString(),
+          respondent_name: respondentData.name,
+          respondent_phone: respondentData.phone,
+          respondent_email: respondentData.email || null
         })
         .eq('id', responseId);
 
@@ -192,6 +201,80 @@ export default function PublicQuestionnaireResponse() {
               Debug: {debugInfo}
             </p>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 'info') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 py-12 px-4">
+        <div className="max-w-md mx-auto">
+          <div className="bg-white rounded-lg shadow-xl p-8">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Antes de começar...</h2>
+              <p className="text-gray-600 mt-2">Por favor, informe seus dados de contato</p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome completo *
+                </label>
+                <input
+                  type="text"
+                  value={respondentData.name}
+                  onChange={(e) => setRespondentData({...respondentData, name: e.target.value})}
+                  placeholder="Seu nome"
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Telefone/WhatsApp *
+                </label>
+                <input
+                  type="tel"
+                  value={respondentData.phone}
+                  onChange={(e) => {
+                    const phone = e.target.value.replace(/\D/g, '');
+                    setRespondentData({...respondentData, phone});
+                  }}
+                  placeholder="(00) 00000-0000"
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  E-mail (opcional)
+                </label>
+                <input
+                  type="email"
+                  value={respondentData.email}
+                  onChange={(e) => setRespondentData({...respondentData, email: e.target.value})}
+                  placeholder="seu@email.com"
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+
+              <button
+                onClick={() => {
+                  if (!respondentData.name || !respondentData.phone) {
+                    alert('Por favor, preencha nome e telefone');
+                    return;
+                  }
+                  setStep('questions');
+                }}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-3 rounded-lg hover:from-green-600 hover:to-emerald-600"
+              >
+                Continuar para o Questionário
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
