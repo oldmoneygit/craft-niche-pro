@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ClipboardList, Plus, Send, Eye, Trash2, Copy, X, Edit, FileText } from 'lucide-react';
+import { ClipboardList, Plus, Send, Eye, Trash2, Copy, X, Edit, FileText, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from '@/hooks/useTenantId';
 import { useToast } from '@/hooks/use-toast';
@@ -432,6 +432,111 @@ export const PlatformQuestionnaires = () => {
     });
   };
 
+  const loadWeeklyFeedbackTemplate = () => {
+    const feedbackQuestions: Question[] = [
+      {
+        id: '1',
+        type: 'text',
+        question: 'Qual seu nome completo?',
+        required: true
+      },
+      {
+        id: '2',
+        type: 'scale',
+        question: 'Como você avalia sua semana em relação à dieta? (1 = Péssima, 10 = Excelente)',
+        required: true
+      },
+      {
+        id: '3',
+        type: 'radio',
+        question: 'Você conseguiu seguir o plano alimentar?',
+        options: ['Sim, 100%', 'Sim, mais de 70%', 'Sim, entre 50-70%', 'Menos de 50%', 'Não consegui seguir'],
+        required: true
+      },
+      {
+        id: '4',
+        type: 'checkbox',
+        question: 'Quais dificuldades você teve esta semana? (marque todas que se aplicam)',
+        options: [
+          'Nenhuma dificuldade',
+          'Fome entre as refeições',
+          'Dificuldade em preparar as refeições',
+          'Falta de tempo',
+          'Comer fora de casa',
+          'Ansiedade/compulsão',
+          'Custo dos alimentos',
+          'Eventos sociais',
+          'Outra'
+        ],
+        required: true
+      },
+      {
+        id: '5',
+        type: 'textarea',
+        question: 'Se marcou "Outra" ou quer detalhar alguma dificuldade, explique aqui:',
+        required: false
+      },
+      {
+        id: '6',
+        type: 'radio',
+        question: 'Como está seu nível de energia durante o dia?',
+        options: ['Muito baixo', 'Baixo', 'Normal', 'Bom', 'Excelente'],
+        required: true
+      },
+      {
+        id: '7',
+        type: 'radio',
+        question: 'Como está seu sono?',
+        options: ['Péssimo', 'Ruim', 'Regular', 'Bom', 'Excelente'],
+        required: true
+      },
+      {
+        id: '8',
+        type: 'textarea',
+        question: 'Há algo no plano alimentar que você gostaria de mudar ou ajustar?',
+        required: false
+      },
+      {
+        id: '9',
+        type: 'radio',
+        question: 'Você sentiu algum sintoma diferente esta semana?',
+        options: ['Não', 'Sim, leve', 'Sim, moderado', 'Sim, forte'],
+        required: true
+      },
+      {
+        id: '10',
+        type: 'textarea',
+        question: 'Se sentiu sintomas, descreva quais:',
+        required: false
+      },
+      {
+        id: '11',
+        type: 'scale',
+        question: 'Qual sua motivação para continuar? (1 = Nenhuma, 10 = Muito motivado)',
+        required: true
+      },
+      {
+        id: '12',
+        type: 'textarea',
+        question: 'Observações adicionais ou dúvidas:',
+        required: false
+      }
+    ];
+
+    setFormData({
+      title: 'Feedback Semanal - Acompanhamento',
+      description: 'Questionário semanal para avaliar como você está se sentindo e adaptar melhor o seu plano alimentar às suas necessidades.',
+      questions: feedbackQuestions
+    });
+
+    setIsCreating(true);
+
+    toast({
+      title: "Template Carregado",
+      description: "Questionário de feedback semanal pronto para criar"
+    });
+  };
+
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`Tem certeza que deseja deletar o questionário "${title}"?\n\nEsta ação não pode ser desfeita.`)) {
       return;
@@ -571,6 +676,14 @@ export const PlatformQuestionnaires = () => {
           >
             <ClipboardList className="w-4 h-4" />
             Carregar Exemplo
+          </Button>
+          <Button
+            onClick={loadWeeklyFeedbackTemplate}
+            variant="outline"
+            className="flex items-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50"
+          >
+            <Calendar className="w-4 h-4" />
+            Feedback Semanal
           </Button>
           <Button
             onClick={() => setShowTemplates(true)}

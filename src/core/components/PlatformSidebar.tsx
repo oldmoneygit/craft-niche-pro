@@ -91,6 +91,12 @@ export function PlatformSidebar() {
       enabled: isModuleEnabled('questionnaires'),
     },
     {
+      title: 'Feedbacks Semanais',
+      url: `${platformBasePath}/feedbacks-semanais`,
+      icon: Calendar,
+      enabled: isModuleEnabled('questionnaires'),
+    },
+    {
       title: 'Relatórios',
       url: `${platformBasePath}/analytics`,
       icon: BarChart3,

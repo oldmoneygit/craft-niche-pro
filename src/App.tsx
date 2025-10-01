@@ -23,6 +23,7 @@ import PlatformScheduling from "./pages/platform/PlatformScheduling";
 import PlatformSettings from "./pages/platform/PlatformSettings";
 import PlatformReminderSettings from "./pages/platform/PlatformReminderSettings";
 import PlatformKnowledge from "./pages/platform/PlatformKnowledge";
+import PlatformWeeklyFeedbacks from "./pages/platform/PlatformWeeklyFeedbacks";
 import QuestionnairePublic from "./pages/QuestionnairePublic";
 import PublicQuestionnaireResponse from "./pages/public/PublicQuestionnaireResponse";
 
@@ -50,6 +51,7 @@ const App = () => (
               <Route path="/platform/:clientId/agendamentos" element={<PlatformProtectedRoute><PlatformScheduling /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/questionnaires" element={<PlatformProtectedRoute><PlatformQuestionnaires /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/questionarios/:questionnaireId/respostas" element={<PlatformProtectedRoute><PlatformQuestionnaireResponses /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/feedbacks-semanais" element={<PlatformProtectedRoute><PlatformWeeklyFeedbacks /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/meal-plans" element={<PlatformProtectedRoute><PlatformMealPlans /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/planos-alimentares" element={<PlatformProtectedRoute><PlatformMealPlans /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/ai-chat" element={<PlatformProtectedRoute><PlatformAIChat /></PlatformProtectedRoute>} />
