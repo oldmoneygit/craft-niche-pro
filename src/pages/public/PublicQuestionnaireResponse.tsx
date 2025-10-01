@@ -379,6 +379,16 @@ export default function PublicQuestionnaireResponse() {
     const currentQuestion = questionnaire.questions[currentQuestionIndex];
     const progress = ((currentQuestionIndex + 1) / questionnaire.questions.length) * 100;
 
+    // DEBUG LOG
+    console.log('Pergunta atual:', {
+      id: currentQuestion.id,
+      type: currentQuestion.type,
+      question: currentQuestion.question,
+      hasOptions: !!currentQuestion.options,
+      optionsCount: currentQuestion.options?.length || 0,
+      options: currentQuestion.options
+    });
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden">
@@ -400,8 +410,9 @@ export default function PublicQuestionnaireResponse() {
                 </span>
                 <span className="text-xs bg-gray-100 px-3 py-1 rounded-full text-gray-600">
                   {currentQuestion.type === 'text' ? 'Resposta curta' :
-                   currentQuestion.type === 'single_select' ? 'Escolha uma' :
-                   currentQuestion.type === 'multi_select' ? 'Múltipla escolha' :
+                   currentQuestion.type === 'textarea' ? 'Resposta longa' :
+                   (currentQuestion.type === 'single_select' || currentQuestion.type === 'radio') ? 'Escolha uma' :
+                   (currentQuestion.type === 'multi_select' || currentQuestion.type === 'checkbox') ? 'Múltipla escolha' :
                    currentQuestion.type === 'number' ? 'Número' :
                    'Escala 1-10'}
                 </span>
@@ -413,7 +424,7 @@ export default function PublicQuestionnaireResponse() {
             </div>
 
             {/* Campo de resposta */}
-            <div className="mb-8">
+            <div className="mb-8 min-h-[200px]">
               {currentQuestion.type === 'text' && (
                 <input
                   type="text"
@@ -421,77 +432,110 @@ export default function PublicQuestionnaireResponse() {
                   onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value, 'text')}
                   placeholder="Digite sua resposta..."
                   className="w-full border-2 border-gray-300 rounded-lg p-4 text-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  autoFocus
                 />
               )}
 
-              {currentQuestion.type === 'single_select' && (
+              {currentQuestion.type === 'textarea' && (
+                <textarea
+                  value={answers[currentQuestion.id] || ''}
+                  onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value, 'textarea')}
+                  placeholder="Digite sua resposta..."
+                  rows={5}
+                  className="w-full border-2 border-gray-300 rounded-lg p-4 text-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  autoFocus
+                />
+              )}
+
+              {(currentQuestion.type === 'single_select' || currentQuestion.type === 'radio') && (
                 <div className="space-y-3">
-                  {currentQuestion.options?.map((option) => (
-                    <button
-                      key={option}
-                      onClick={() => handleAnswerChange(currentQuestion.id, option, 'radio')}
-                      className={`w-full text-left p-4 rounded-lg border-2 transition ${
-                        answers[currentQuestion.id] === option
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                  {(!currentQuestion.options || currentQuestion.options.length === 0) ? (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                      <p className="text-yellow-800 text-sm">
+                        ⚠️ Erro: Esta pergunta não possui opções configuradas
+                      </p>
+                    </div>
+                  ) : (
+                    currentQuestion.options.map((option, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleAnswerChange(currentQuestion.id, option, 'radio')}
+                        className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                           answers[currentQuestion.id] === option
-                            ? 'border-green-500'
-                            : 'border-gray-300'
-                        }`}>
-                          {answers[currentQuestion.id] === option && (
-                            <div className="w-3 h-3 rounded-full bg-green-500" />
-                          )}
+                            ? 'border-green-500 bg-green-50 shadow-md'
+                            : 'border-gray-200 hover:border-green-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                            answers[currentQuestion.id] === option
+                              ? 'border-green-500 bg-green-500'
+                              : 'border-gray-300'
+                          }`}>
+                            {answers[currentQuestion.id] === option && (
+                              <div className="w-3 h-3 rounded-full bg-white" />
+                            )}
+                          </div>
+                          <span className="text-base text-gray-900">{option}</span>
                         </div>
-                        <span className="text-gray-900">{option}</span>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    ))
+                  )}
                 </div>
               )}
 
-              {currentQuestion.type === 'multi_select' && (
+              {(currentQuestion.type === 'multi_select' || currentQuestion.type === 'checkbox') && (
                 <div className="space-y-3">
-                  {currentQuestion.options?.map((option) => (
-                    <button
-                      key={option}
-                      onClick={() => handleAnswerChange(currentQuestion.id, option, 'checkbox')}
-                      className={`w-full text-left p-4 rounded-lg border-2 transition ${
-                        (answers[currentQuestion.id] || []).includes(option)
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                          (answers[currentQuestion.id] || []).includes(option)
-                            ? 'border-green-500 bg-green-500'
-                            : 'border-gray-300'
-                        }`}>
-                          {(answers[currentQuestion.id] || []).includes(option) && (
-                            <CheckCircle className="w-4 h-4 text-white" />
-                          )}
-                        </div>
-                        <span className="text-gray-900">{option}</span>
-                      </div>
-                    </button>
-                  ))}
+                  {(!currentQuestion.options || currentQuestion.options.length === 0) ? (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                      <p className="text-yellow-800 text-sm">
+                        ⚠️ Erro: Esta pergunta não possui opções configuradas
+                      </p>
+                    </div>
+                  ) : (
+                    currentQuestion.options.map((option, idx) => {
+                      const isChecked = (answers[currentQuestion.id] || []).includes(option);
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => handleAnswerChange(currentQuestion.id, option, 'checkbox')}
+                          className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                            isChecked
+                              ? 'border-green-500 bg-green-50 shadow-md'
+                              : 'border-gray-200 hover:border-green-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-6 h-6 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                              isChecked
+                                ? 'border-green-500 bg-green-500'
+                                : 'border-gray-300'
+                            }`}>
+                              {isChecked && (
+                                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </div>
+                            <span className="text-base text-gray-900">{option}</span>
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
                 </div>
               )}
 
               {currentQuestion.type === 'scale' && (
                 <div>
-                  <div className="flex justify-between gap-2 mb-3">
+                  <div className="grid grid-cols-5 gap-3 mb-4">
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                       <button
                         key={num}
                         onClick={() => handleAnswerChange(currentQuestion.id, num, 'scale')}
-                        className={`flex-1 h-14 rounded-lg font-bold text-lg transition ${
+                        className={`h-16 rounded-lg font-bold text-xl transition-all ${
                           answers[currentQuestion.id] === num
-                            ? 'bg-green-500 text-white scale-110'
+                            ? 'bg-green-500 text-white scale-110 shadow-lg'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                       >
@@ -499,9 +543,9 @@ export default function PublicQuestionnaireResponse() {
                       </button>
                     ))}
                   </div>
-                  <div className="flex justify-between text-xs text-gray-500">
-                    <span>Baixo</span>
-                    <span>Alto</span>
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>1 = Baixo</span>
+                    <span>10 = Alto</span>
                   </div>
                 </div>
               )}
@@ -548,7 +592,7 @@ export default function PublicQuestionnaireResponse() {
                     {index + 1}. {q.question}
                   </p>
                   <p className="text-gray-700 mb-2">
-                    {q.type === 'multi_select' && Array.isArray(answers[q.id])
+                    {(q.type === 'multi_select' || q.type === 'checkbox') && Array.isArray(answers[q.id])
                       ? answers[q.id].join(', ') || 'Não respondido'
                       : answers[q.id] || 'Não respondido'}
                   </p>
