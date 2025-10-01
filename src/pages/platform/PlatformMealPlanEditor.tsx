@@ -160,8 +160,11 @@ export default function PlatformMealPlanEditor() {
           .from('meal_plans')
           .insert({
             tenant_id: tenantId,
+            name: formData.title,
             title: formData.title,
             client_id: formData.client_id,
+            start_date: new Date().toISOString().split('T')[0],
+            end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             calories_target: formData.calories_target ? parseInt(formData.calories_target) : null,
             notes: formData.notes,
             active: formData.active
@@ -175,6 +178,7 @@ export default function PlatformMealPlanEditor() {
         const { error } = await supabase
           .from('meal_plans')
           .update({
+            name: formData.title,
             title: formData.title,
             client_id: formData.client_id,
             calories_target: formData.calories_target ? parseInt(formData.calories_target) : null,
