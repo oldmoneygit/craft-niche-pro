@@ -156,6 +156,9 @@ export default function PublicQuestionnaireResponse() {
     setError('');
 
     try {
+      // 1. ATUALIZAR respostas
+      const phoneClean = respondentData.phone.replace(/\D/g, ''); // Salvar só números
+      
       const { error: updateError } = await supabase
         .from('questionnaire_responses')
         .update({
@@ -163,16 +166,73 @@ export default function PublicQuestionnaireResponse() {
           status: 'completed',
           completed_at: new Date().toISOString(),
           respondent_name: respondentData.name,
-          respondent_phone: respondentData.phone,
+          respondent_phone: phoneClean,
           respondent_email: respondentData.email || null
         })
         .eq('id', responseId);
 
       if (updateError) throw updateError;
 
+      // 2. BUSCAR tenant_id da resposta
+      const { data: responseData } = await supabase
+        .from('questionnaire_responses')
+        .select('tenant_id')
+        .eq('id', responseId)
+        .single();
+
+      if (!responseData) throw new Error('Tenant não encontrado');
+
+      // 3. BUSCAR cliente existente pelo TELEFONE
+      const { data: existingClient } = await supabase
+        .from('clients')
+        .select('id, email')
+        .eq('tenant_id', responseData.tenant_id)
+        .eq('phone', phoneClean)
+        .maybeSingle();
+
+      let clientId;
+
+      if (existingClient) {
+        // CLIENTE EXISTE - vincular e atualizar email se fornecido
+        clientId = existingClient.id;
+        
+        // Se email foi fornecido E é diferente do cadastrado, atualizar
+        if (respondentData.email && respondentData.email !== existingClient.email) {
+          await supabase
+            .from('clients')
+            .update({ 
+              email: respondentData.email,
+              name: respondentData.name // Atualizar nome também
+            })
+            .eq('id', clientId);
+        }
+
+      } else {
+        // CLIENTE NÃO EXISTE - criar novo
+        const { data: newClient, error: clientError } = await supabase
+          .from('clients')
+          .insert({
+            tenant_id: responseData.tenant_id,
+            name: respondentData.name,
+            phone: phoneClean,
+            email: respondentData.email || null
+          })
+          .select('id')
+          .single();
+
+        if (clientError) throw clientError;
+        clientId = newClient.id;
+      }
+
+      // 4. VINCULAR resposta ao cliente
+      await supabase
+        .from('questionnaire_responses')
+        .update({ client_id: clientId })
+        .eq('id', responseId);
+
       setSuccess(true);
 
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error submitting:', err);
       setError('Erro ao enviar respostas. Tente novamente.');
       setSubmitting(false);

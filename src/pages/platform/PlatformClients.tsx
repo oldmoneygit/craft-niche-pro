@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Edit, Trash2, User, Send, FileText } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, User, Send, FileText, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import ClientStats from '@/components/platform/ClientStats';
@@ -47,6 +47,8 @@ export default function PlatformClients() {
   const [inactiveClients, setInactiveClients] = useState<any[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [clientQuestionnaires, setClientQuestionnaires] = useState<any[]>([]);
+  const [selectedQuestionnaireResponse, setSelectedQuestionnaireResponse] = useState<any>(null);
+  const [isResponseModalOpen, setIsResponseModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -77,6 +79,42 @@ export default function PlatformClients() {
       .order('completed_at', { ascending: false });
 
     setClientQuestionnaires(data || []);
+  };
+
+  const openQuestionnaireModal = async (responseId: string) => {
+    try {
+      // Buscar resposta completa com dados do questionário
+      const { data: response } = await supabase
+        .from('questionnaire_responses')
+        .select(`
+          *,
+          questionnaires(id, title, description, questions)
+        `)
+        .eq('id', responseId)
+        .single();
+
+      if (response) {
+        setSelectedQuestionnaireResponse(response);
+        setIsResponseModalOpen(true);
+      }
+    } catch (error) {
+      console.error('Error fetching response details:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as respostas",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const formatPhone = (phone: string) => {
+    const cleaned = phone.replace(/\D/g, '');
+    if (cleaned.length === 11) {
+      return cleaned.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+    } else if (cleaned.length === 10) {
+      return cleaned.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3');
+    }
+    return phone;
   };
 
   useEffect(() => {
@@ -550,7 +588,7 @@ export default function PlatformClients() {
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      navigate(`/platform/${clientConfig.subdomain}/questionarios/${response.questionnaire_id}/respostas`);
+                                      openQuestionnaireModal(response.id);
                                     }}
                                     className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-white ml-2"
                                   >
@@ -613,6 +651,122 @@ export default function PlatformClients() {
               <Send className="w-5 h-5" />
               Enviar para Todos ({inactiveClients.length})
             </Button>
+          </div>
+        )}
+
+        {/* Modal Ver Respostas do Cliente */}
+        {isResponseModalOpen && selectedQuestionnaireResponse && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold">
+                      {selectedQuestionnaireResponse.questionnaires.title}
+                    </h3>
+                    <p className="text-green-100 mt-1">
+                      Respondido por {selectedQuestionnaireResponse.respondent_name}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsResponseModalOpen(false);
+                      setSelectedQuestionnaireResponse(null);
+                    }}
+                    className="text-white hover:bg-white/20 rounded-lg p-2 transition"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Informações do Respondente */}
+              <div className="bg-gray-50 border-b p-4">
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-600 text-xs uppercase">Nome</p>
+                    <p className="font-semibold">{selectedQuestionnaireResponse.respondent_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 text-xs uppercase">Telefone</p>
+                    <p className="font-semibold">{formatPhone(selectedQuestionnaireResponse.respondent_phone)}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 text-xs uppercase">E-mail</p>
+                    <p className="font-semibold">{selectedQuestionnaireResponse.respondent_email || 'Não informado'}</p>
+                  </div>
+                </div>
+                <div className="mt-2 text-xs text-gray-600">
+                  Respondido em {new Date(selectedQuestionnaireResponse.completed_at).toLocaleString('pt-BR', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </div>
+              </div>
+
+              {/* Respostas */}
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="space-y-6">
+                  {selectedQuestionnaireResponse.questionnaires.questions.map((question: any, index: number) => {
+                    const answer = selectedQuestionnaireResponse.answers[question.id];
+                    
+                    return (
+                      <div key={question.id} className="border-b pb-4 last:border-b-0">
+                        <p className="font-semibold text-gray-900 mb-2">
+                          {index + 1}. {question.question}
+                          {question.required && <span className="text-red-500 ml-1">*</span>}
+                        </p>
+                        <p className="text-xs text-gray-500 mb-3">
+                          Tipo: {
+                            question.type === 'text' ? 'Resposta curta' :
+                            question.type === 'textarea' ? 'Resposta longa' :
+                            question.type === 'radio' ? 'Múltipla escolha' :
+                            question.type === 'checkbox' ? 'Caixas de seleção' :
+                            'Escala (1-10)'
+                          }
+                        </p>
+                        
+                        <div className="bg-green-50 rounded-lg p-4">
+                          {question.type === 'checkbox' && Array.isArray(answer) ? (
+                            <ul className="list-disc list-inside space-y-1">
+                              {answer.map((item: string, i: number) => (
+                                <li key={i} className="text-gray-900">{item}</li>
+                              ))}
+                            </ul>
+                          ) : question.type === 'scale' ? (
+                            <div className="flex items-center gap-3">
+                              <span className="text-4xl font-bold text-green-600">{answer}</span>
+                              <span className="text-gray-600 text-lg">/ 10</span>
+                            </div>
+                          ) : (
+                            <p className="text-gray-900 whitespace-pre-wrap">
+                              {answer || 'Não respondido'}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="border-t p-4 bg-gray-50 flex justify-end">
+                <button
+                  onClick={() => {
+                    setIsResponseModalOpen(false);
+                    setSelectedQuestionnaireResponse(null);
+                  }}
+                  className="px-6 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 font-medium"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
