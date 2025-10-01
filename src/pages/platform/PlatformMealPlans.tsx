@@ -1,976 +1,231 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Plus, Search, Calendar, User, Send, Printer, Edit, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import PlatformPageWrapper from '@/core/layouts/PlatformPageWrapper';
-import { useMealPlans, MealPlan } from '@/hooks/useMealPlans';
-import { useClients } from '@/hooks/useClients';
-import { useTenant } from '@/hooks/useTenant';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { UtensilsCrossed, Plus, Send, Trash2, Edit, Copy } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useTenantId } from '@/hooks/useTenantId';
+import { useToast } from '@/hooks/use-toast';
 import { useClientConfig } from '@/core/contexts/ClientConfigContext';
-import { cn } from '@/lib/utils';
+import PlatformPageWrapper from '@/core/layouts/PlatformPageWrapper';
 
 export default function PlatformMealPlans() {
-  const { clientId } = useParams<{ clientId: string }>();
-  const { tenant } = useTenant(clientId || 'gabriel-gandin');
-  const { mealPlans, loading, createMealPlan, updateMealPlan, deleteMealPlan } = useMealPlans();
-  const { clients } = useClients(tenant?.id);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedClient, setSelectedClient] = useState<string>('all');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingPlan, setEditingPlan] = useState<MealPlan | null>(null);
+  const { tenantId } = useTenantId();
+  const { clientConfig } = useClientConfig();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [plans, setPlans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    client_id: '',
-    start_date: new Date(),
-    end_date: new Date(),
-    status: 'ativo' as 'ativo' | 'concluido' | 'pausado',
-    plan_data: {
-      breakfast: [''],
-      lunch: [''],
-      dinner: [''],
-      snacks: ['']
-    }
-  });
+  useEffect(() => {
+    if (tenantId) fetchPlans();
+  }, [tenantId]);
 
-  const filteredPlans = mealPlans.filter(plan => {
-    const matchesSearch = plan.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesClient = selectedClient === 'all' || plan.client_id === selectedClient;
-    return matchesSearch && matchesClient;
-  });
+  const fetchPlans = async () => {
+    if (!tenantId) return;
 
-  const handleCreatePlan = async () => {
-    if (!formData.name || !formData.client_id) return;
+    setLoading(true);
+    const { data } = await supabase
+      .from('meal_plans')
+      .select(`
+        *,
+        clients(id, name, phone)
+      `)
+      .eq('tenant_id', tenantId)
+      .order('created_at', { ascending: false });
 
-    const newPlan = await createMealPlan({
-      name: formData.name,
-      client_id: formData.client_id,
-      start_date: format(formData.start_date, 'yyyy-MM-dd'),
-      end_date: format(formData.end_date, 'yyyy-MM-dd'),
-      status: formData.status,
-      plan_data: formData.plan_data
-    });
+    setPlans(data || []);
+    setLoading(false);
+  };
 
-    if (newPlan) {
-      setIsCreateModalOpen(false);
-      resetForm();
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`Deletar plano "${title}"?`)) return;
+
+    const { error } = await supabase
+      .from('meal_plans')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast({ title: "Erro", description: "Não foi possível deletar", variant: "destructive" });
+    } else {
+      toast({ title: "Deletado", description: "Plano removido com sucesso" });
+      fetchPlans();
     }
   };
 
-  const handleUpdatePlan = async () => {
-    if (!editingPlan) return;
-
-    const updatedPlan = await updateMealPlan(editingPlan.id, {
-      name: formData.name,
-      client_id: formData.client_id,
-      start_date: format(formData.start_date, 'yyyy-MM-dd'),
-      end_date: format(formData.end_date, 'yyyy-MM-dd'),
-      status: formData.status,
-      plan_data: formData.plan_data
-    });
-
-    if (updatedPlan) {
-      setEditingPlan(null);
-      resetForm();
+  const handleSendToClient = async (plan: any) => {
+    if (!plan.public_token) {
+      // Gerar token se não existir
+      const token = `${plan.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      await supabase
+        .from('meal_plans')
+        .update({ public_token: token })
+        .eq('id', plan.id);
+      
+      plan.public_token = token;
     }
-  };
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      client_id: '',
-      start_date: new Date(),
-      end_date: new Date(),
-      status: 'ativo',
-      plan_data: {
-        breakfast: [''],
-        lunch: [''],
-        dinner: [''],
-        snacks: ['']
-      }
-    });
-  };
-
-  const startEdit = (plan: MealPlan) => {
-    setEditingPlan(plan);
-    setFormData({
-      name: plan.name,
-      client_id: plan.client_id,
-      start_date: new Date(plan.start_date),
-      end_date: new Date(plan.end_date),
-      status: plan.status,
-      plan_data: plan.plan_data
-    });
-  };
-
-  const addMealItem = (mealType: keyof typeof formData.plan_data) => {
-    setFormData(prev => ({
-      ...prev,
-      plan_data: {
-        ...prev.plan_data,
-        [mealType]: [...prev.plan_data[mealType], '']
-      }
-    }));
-  };
-
-  const updateMealItem = (mealType: keyof typeof formData.plan_data, index: number, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      plan_data: {
-        ...prev.plan_data,
-        [mealType]: prev.plan_data[mealType].map((item, i) => i === index ? value : item)
-      }
-    }));
-  };
-
-  const removeMealItem = (mealType: keyof typeof formData.plan_data, index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      plan_data: {
-        ...prev.plan_data,
-        [mealType]: prev.plan_data[mealType].filter((_, i) => i !== index)
-      }
-    }));
-  };
-
-  const getClientName = (clientId: string) => {
-    const client = clients.find(c => c.id === clientId);
-    return client?.name || 'Cliente não encontrado';
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'ativo': return 'bg-green-500';
-      case 'concluido': return 'bg-blue-500';
-      case 'pausado': return 'bg-yellow-500';
-      default: return 'bg-gray-500';
-    }
-  };
-
-  const printMealPlan = (plan: MealPlan) => {
-    const clientName = getClientName(plan.client_id);
-    const printWindow = window.open('', '_blank');
+    const publicLink = `${window.location.origin}/plano/${plan.public_token}`;
+    const message = `Olá ${plan.clients.name}! 🥗\n\nSeu plano alimentar está pronto:\n\n${publicLink}\n\nQualquer dúvida, estou à disposição!`;
     
-    if (!printWindow) return;
+    const whatsappLink = `https://wa.me/55${plan.clients.phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappLink, '_blank');
 
-    const printContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Plano Alimentar - ${plan.name}</title>
-          <meta charset="UTF-8">
-          <style>
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-            
-            body {
-              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-              line-height: 1.6;
-              color: #2c3e50;
-              background: white;
-            }
-            
-            .container {
-              max-width: 800px;
-              margin: 0 auto;
-              padding: 40px;
-            }
-            
-            .platform-header {
-              text-align: center;
-              margin-bottom: 40px;
-              padding-bottom: 30px;
-              border-bottom: 3px solid #0891b2;
-              background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
-              color: white;
-              padding: 30px;
-              border-radius: 15px 15px 0 0;
-              box-shadow: 0 4px 15px rgba(8, 145, 178, 0.2);
-            }
-            
-            .platform-name {
-              font-size: 28px;
-              font-weight: 700;
-              margin-bottom: 8px;
-              text-transform: uppercase;
-              letter-spacing: 2px;
-            }
-            
-            .platform-subtitle {
-              font-size: 16px;
-              opacity: 0.9;
-              font-weight: 300;
-            }
-            
-            .plan-header {
-              background: white;
-              padding: 30px;
-              margin-bottom: 30px;
-              border-radius: 0 0 15px 15px;
-              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            }
-            
-            .plan-title {
-              font-size: 26px;
-              font-weight: 600;
-              margin-bottom: 15px;
-              color: #0891b2;
-              text-align: center;
-            }
-            
-            .client-info {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-bottom: 15px;
-              padding: 15px;
-              background: #f8fafc;
-              border-radius: 10px;
-              border-left: 4px solid #0891b2;
-            }
-            
-            .client-name {
-              font-size: 18px;
-              font-weight: 600;
-              color: #1e293b;
-            }
-            
-            .date-info {
-              font-size: 16px;
-              color: #64748b;
-              text-align: center;
-              margin-bottom: 15px;
-            }
-            
-            .status-badge {
-              display: inline-block;
-              padding: 8px 16px;
-              border-radius: 25px;
-              font-size: 14px;
-              font-weight: 600;
-              text-transform: uppercase;
-              letter-spacing: 1px;
-            }
-            
-            .status-ativo { 
-              background: linear-gradient(135deg, #10b981, #059669); 
-              color: white; 
-              box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
-            }
-            .status-pausado { 
-              background: linear-gradient(135deg, #f59e0b, #d97706); 
-              color: white; 
-              box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
-            }
-            .status-concluido { 
-              background: linear-gradient(135deg, #3b82f6, #2563eb); 
-              color: white; 
-              box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
-            }
-            
-            .meals-container {
-              display: grid;
-              gap: 25px;
-            }
-            
-            .meal-section {
-              background: white;
-              border-radius: 15px;
-              overflow: hidden;
-              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-              border: 1px solid #e2e8f0;
-              break-inside: avoid;
-            }
-            
-            .meal-header {
-              background: linear-gradient(135deg, #0891b2, #06b6d4);
-              color: white;
-              padding: 20px;
-              display: flex;
-              align-items: center;
-              gap: 12px;
-            }
-            
-            .meal-emoji {
-              font-size: 24px;
-            }
-            
-            .meal-title {
-              font-size: 20px;
-              font-weight: 600;
-              letter-spacing: 0.5px;
-            }
-            
-            .meal-items {
-              padding: 25px;
-            }
-            
-            .meal-item {
-              display: flex;
-              align-items: center;
-              padding: 12px 0;
-              border-bottom: 1px solid #f1f5f9;
-              font-size: 16px;
-              color: #334155;
-            }
-            
-            .meal-item:last-child {
-              border-bottom: none;
-            }
-            
-            .meal-item::before {
-              content: "🍽️";
-              margin-right: 12px;
-              font-size: 16px;
-            }
-            
-            .footer {
-              margin-top: 40px;
-              text-align: center;
-              color: #64748b;
-              font-size: 14px;
-              padding-top: 30px;
-              border-top: 2px solid #e2e8f0;
-            }
-            
-            .print-date {
-              margin-bottom: 10px;
-              font-weight: 500;
-            }
-            
-            @media print {
-              body { 
-                margin: 0; 
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              .container {
-                padding: 20px;
-              }
-              .platform-header { 
-                page-break-after: avoid; 
-              }
-              .meal-section { 
-                page-break-inside: avoid; 
-                margin-bottom: 20px;
-              }
-              .plan-header {
-                page-break-after: avoid;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="platform-header">
-              <div class="platform-name">Gabriel Gandin</div>
-              <div class="platform-subtitle">Nutricionista • Plataforma de Gestão Nutricional</div>
-            </div>
+    toast({ title: "WhatsApp aberto", description: "Envie o plano para o cliente" });
+  };
 
-            <div class="plan-header">
-              <div class="plan-title">${plan.name}</div>
-              
-              <div class="client-info">
-                <div>
-                  <div class="client-name">👤 ${clientName}</div>
-                </div>
-                <div>
-                  <span class="status-badge status-${plan.status}">
-                    ${plan.status.charAt(0).toUpperCase() + plan.status.slice(1)}
-                  </span>
-                </div>
-              </div>
-              
-              <div class="date-info">
-                📅 Período: ${format(new Date(plan.start_date), 'dd/MM/yyyy', { locale: ptBR })} até ${format(new Date(plan.end_date), 'dd/MM/yyyy', { locale: ptBR })}
-              </div>
-            </div>
+  const handleDuplicate = async (planId: string) => {
+    // Buscar plano completo
+    const { data: originalPlan } = await supabase
+      .from('meal_plans')
+      .select('*')
+      .eq('id', planId)
+      .single();
 
-            <div class="meals-container">
-              <div class="meal-section">
-                <div class="meal-header">
-                  <span class="meal-emoji">☀️</span>
-                  <span class="meal-title">Café da Manhã</span>
-                </div>
-                <div class="meal-items">
-                  ${plan.plan_data.breakfast.filter(item => item.trim()).length > 0 
-                    ? plan.plan_data.breakfast.filter(item => item.trim()).map(item => 
-                        `<div class="meal-item">${item}</div>`
-                      ).join('')
-                    : '<div class="meal-item" style="color: #94a3b8; font-style: italic;">Nenhum item adicionado</div>'
-                  }
-                </div>
-              </div>
+    if (!originalPlan) return;
 
-              <div class="meal-section">
-                <div class="meal-header">
-                  <span class="meal-emoji">🌞</span>
-                  <span class="meal-title">Almoço</span>
-                </div>
-                <div class="meal-items">
-                  ${plan.plan_data.lunch.filter(item => item.trim()).length > 0 
-                    ? plan.plan_data.lunch.filter(item => item.trim()).map(item => 
-                        `<div class="meal-item">${item}</div>`
-                      ).join('')
-                    : '<div class="meal-item" style="color: #94a3b8; font-style: italic;">Nenhum item adicionado</div>'
-                  }
-                </div>
-              </div>
+    // Criar cópia
+    const { data: newPlan, error } = await supabase
+      .from('meal_plans')
+      .insert({
+        tenant_id: originalPlan.tenant_id,
+        client_id: originalPlan.client_id,
+        title: `${originalPlan.title} (Cópia)`,
+        active: false,
+        calories_target: originalPlan.calories_target,
+        notes: originalPlan.notes
+      })
+      .select()
+      .single();
 
-              <div class="meal-section">
-                <div class="meal-header">
-                  <span class="meal-emoji">🌙</span>
-                  <span class="meal-title">Jantar</span>
-                </div>
-                <div class="meal-items">
-                  ${plan.plan_data.dinner.filter(item => item.trim()).length > 0 
-                    ? plan.plan_data.dinner.filter(item => item.trim()).map(item => 
-                        `<div class="meal-item">${item}</div>`
-                      ).join('')
-                    : '<div class="meal-item" style="color: #94a3b8; font-style: italic;">Nenhum item adicionado</div>'
-                  }
-                </div>
-              </div>
+    if (error || !newPlan) {
+      toast({ title: "Erro ao duplicar", variant: "destructive" });
+      return;
+    }
 
-              <div class="meal-section">
-                <div class="meal-header">
-                  <span class="meal-emoji">🍎</span>
-                  <span class="meal-title">Lanches</span>
-                </div>
-                <div class="meal-items">
-                  ${plan.plan_data.snacks.filter(item => item.trim()).length > 0 
-                    ? plan.plan_data.snacks.filter(item => item.trim()).map(item => 
-                        `<div class="meal-item">${item}</div>`
-                      ).join('')
-                    : '<div class="meal-item" style="color: #94a3b8; font-style: italic;">Nenhum item adicionado</div>'
-                  }
-                </div>
-              </div>
-            </div>
+    // Duplicar refeições
+    const { data: meals } = await supabase
+      .from('meals')
+      .select('*, meal_foods(*)')
+      .eq('meal_plan_id', planId);
 
-            <div class="footer">
-              <div class="print-date">Documento gerado em ${format(new Date(), 'dd/MM/yyyy \'às\' HH:mm', { locale: ptBR })}</div>
-              <div>Gabriel Gandin - Nutricionista | Plataforma de Gestão Nutricional</div>
-            </div>
-          </div>
+    if (meals) {
+      for (const meal of meals) {
+        const { data: newMeal } = await supabase
+          .from('meals')
+          .insert({
+            meal_plan_id: newPlan.id,
+            name: meal.name,
+            time: meal.time,
+            order_index: meal.order_index
+          })
+          .select()
+          .single();
 
-          <script>
-            window.onload = function() {
-              setTimeout(() => {
-                window.print();
-                window.onafterprint = function() {
-                  window.close();
-                };
-              }, 500);
-            };
-          </script>
-        </body>
-      </html>
-    `;
+        if (newMeal && meal.meal_foods) {
+          const foods = meal.meal_foods.map((f: any) => ({
+            meal_id: newMeal.id,
+            name: f.name,
+            quantity: f.quantity,
+            calories: f.calories,
+            order_index: f.order_index
+          }));
 
-    printWindow.document.write(printContent);
-    printWindow.document.close();
+          await supabase.from('meal_foods').insert(foods);
+        }
+      }
+    }
+
+    toast({ title: "Plano duplicado", description: "Você pode editá-lo agora" });
+    fetchPlans();
   };
 
   return (
     <PlatformPageWrapper title="Planos Alimentares">
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Planos Alimentares</h1>
-            <p className="text-muted-foreground">Gerencie os planos alimentares dos seus clientes</p>
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <UtensilsCrossed className="w-7 h-7" />
+              Planos Alimentares
+            </h2>
+            <p className="text-muted-foreground mt-1">
+              Crie e gerencie planos alimentares para seus clientes
+            </p>
           </div>
-          <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-            <DialogTrigger asChild>
-              <Button className="action-primary" onClick={() => { resetForm(); setEditingPlan(null); }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Novo Plano
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{editingPlan ? 'Editar Plano Alimentar' : 'Novo Plano Alimentar'}</DialogTitle>
-                <DialogDescription>
-                  {editingPlan ? 'Edite as informações do plano alimentar.' : 'Crie um novo plano alimentar para seu cliente.'}
-                </DialogDescription>
-              </DialogHeader>
+          <button
+            onClick={() => navigate(`/platform/${clientConfig?.clientId}/planos-alimentares/novo`)}
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-primary/90"
+          >
+            <Plus className="w-4 h-4" />
+            Novo Plano
+          </button>
+        </div>
 
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nome do Plano</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Ex: Plano de Emagrecimento - Janeiro"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="client">Cliente</Label>
-                    <Select value={formData.client_id} onValueChange={(value) => setFormData(prev => ({ ...prev, client_id: value }))}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o cliente" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {clients.map((client) => (
-                          <SelectItem key={client.id} value={client.id}>
-                            {client.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+        {/* Lista de planos */}
+        {loading ? (
+          <div className="text-center py-12 text-muted-foreground">Carregando...</div>
+        ) : plans.length === 0 ? (
+          <div className="text-center py-12">
+            <UtensilsCrossed className="w-16 h-16 mx-auto mb-4 opacity-50 text-muted-foreground" />
+            <p className="text-muted-foreground">Nenhum plano criado ainda</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {plans.map(plan => (
+              <div key={plan.id} className="bg-card rounded-lg shadow p-5 border-l-4 border-primary">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg">{plan.title}</h3>
+                    <p className="text-sm text-muted-foreground">{plan.clients?.name}</p>
+                    {plan.active && (
+                      <span className="inline-block mt-1 text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
+                        Plano Ativo
+                      </span>
+                    )}
+                    {plan.calories_target && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Meta: {plan.calories_target} kcal/dia
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label>Data de Início</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="secondary" className="w-full justify-start text-left font-normal">
-                          <Calendar className="mr-2 h-4 w-4" />
-                          {format(formData.start_date, 'dd/MM/yyyy', { locale: ptBR })}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <CalendarComponent
-                          mode="single"
-                          selected={formData.start_date}
-                          onSelect={(date) => date && setFormData(prev => ({ ...prev, start_date: date }))}
-                          initialFocus
-                          className="pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Data de Fim</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="secondary" className="w-full justify-start text-left font-normal">
-                          <Calendar className="mr-2 h-4 w-4" />
-                          {format(formData.end_date, 'dd/MM/yyyy', { locale: ptBR })}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <CalendarComponent
-                          mode="single"
-                          selected={formData.end_date}
-                          onSelect={(date) => date && setFormData(prev => ({ ...prev, end_date: date }))}
-                          initialFocus
-                          className="pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="status">Status</Label>
-                    <Select value={formData.status} onValueChange={(value: any) => setFormData(prev => ({ ...prev, status: value }))}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="ativo">Ativo</SelectItem>
-                        <SelectItem value="pausado">Pausado</SelectItem>
-                        <SelectItem value="concluido">Concluído</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <Tabs defaultValue="breakfast" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="breakfast">Café da Manhã</TabsTrigger>
-                    <TabsTrigger value="lunch">Almoço</TabsTrigger>
-                    <TabsTrigger value="dinner">Jantar</TabsTrigger>
-                    <TabsTrigger value="snacks">Lanches</TabsTrigger>
-                  </TabsList>
-                  
-                  {(['breakfast', 'lunch', 'dinner', 'snacks'] as const).map((mealType) => (
-                    <TabsContent key={mealType} value={mealType} className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <Label className="text-lg font-medium">
-                          {mealType === 'breakfast' && 'Café da Manhã'}
-                          {mealType === 'lunch' && 'Almoço'}
-                          {mealType === 'dinner' && 'Jantar'}
-                          {mealType === 'snacks' && 'Lanches'}
-                        </Label>
-                        <Button type="button" className="action-primary" size="sm" onClick={() => addMealItem(mealType)}>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Adicionar Item
-                        </Button>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        {formData.plan_data[mealType].map((item, index) => (
-                          <div key={index} className="flex gap-2">
-                            <Input
-                              value={item}
-                              onChange={(e) => updateMealItem(mealType, index, e.target.value)}
-                              placeholder={`Item ${index + 1}`}
-                            />
-                            {formData.plan_data[mealType].length > 1 && (
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => removeMealItem(mealType, index)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </TabsContent>
-                  ))}
-                </Tabs>
-
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setIsCreateModalOpen(false);
-                      setEditingPlan(null);
-                      resetForm();
-                    }}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => navigate(`/platform/${clientConfig?.clientId}/planos-alimentares/${plan.id}`)}
+                    className="px-3 py-2 border border-border rounded hover:bg-accent text-sm flex items-center justify-center gap-2"
                   >
-                    Cancelar
-                  </Button>
-                  <Button
-                    className="action-primary"
-                    onClick={editingPlan ? handleUpdatePlan : handleCreatePlan}
-                    disabled={!formData.name || !formData.client_id}
+                    <Edit className="w-4 h-4" />
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleSendToClient(plan)}
+                    className="px-3 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 text-sm flex items-center justify-center gap-2"
                   >
-                    {editingPlan ? 'Salvar Alterações' : 'Criar Plano'}
-                  </Button>
+                    <Send className="w-4 h-4" />
+                    Enviar
+                  </button>
+                  <button
+                    onClick={() => handleDuplicate(plan.id)}
+                    className="px-3 py-2 border border-blue-500 text-blue-600 rounded hover:bg-blue-50 text-sm flex items-center justify-center gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Duplicar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(plan.id, plan.title)}
+                    className="px-3 py-2 border border-destructive text-destructive rounded hover:bg-destructive/10 text-sm flex items-center justify-center gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Deletar
+                  </button>
                 </div>
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Buscar planos..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          
-          <Select value={selectedClient} onValueChange={setSelectedClient}>
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="Filtrar por cliente" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os clientes</SelectItem>
-              {clients.map((client) => (
-                <SelectItem key={client.id} value={client.id}>
-                  {client.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, index) => (
-              <Card key={index} className="animate-pulse">
-                <CardHeader>
-                  <div className="h-4 bg-muted rounded w-3/4"></div>
-                  <div className="h-3 bg-muted rounded w-1/2"></div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="h-3 bg-muted rounded"></div>
-                    <div className="h-3 bg-muted rounded w-2/3"></div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : filteredPlans.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">Nenhum plano encontrado</h3>
-              <p className="text-muted-foreground text-center mb-4">
-                {searchTerm || selectedClient !== 'all'
-                  ? 'Tente ajustar os filtros de busca.'
-                  : 'Comece criando seu primeiro plano alimentar.'}
-              </p>
-              {!searchTerm && selectedClient === 'all' && (
-                <Button className="action-primary" onClick={() => setIsCreateModalOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Criar Primeiro Plano
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPlans.map((plan) => (
-              <Card key={plan.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{plan.name}</CardTitle>
-                      <CardDescription className="flex items-center">
-                        <User className="h-4 w-4 mr-1" />
-                        {getClientName(plan.client_id)}
-                      </CardDescription>
-                    </div>
-                    <Badge className={cn('text-white', getStatusColor(plan.status))}>
-                      {plan.status.charAt(0).toUpperCase() + plan.status.slice(1)}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      {format(new Date(plan.start_date), 'dd/MM/yyyy', { locale: ptBR })} - {format(new Date(plan.end_date), 'dd/MM/yyyy', { locale: ptBR })}
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-2 mt-4">
-                      <div className="text-center p-2 bg-muted/50 rounded">
-                        <div className="font-medium text-foreground">{plan.plan_data.breakfast.filter(item => item.trim()).length}</div>
-                        <div className="text-xs">Café</div>
-                      </div>
-                      <div className="text-center p-2 bg-muted/50 rounded">
-                        <div className="font-medium text-foreground">{plan.plan_data.lunch.filter(item => item.trim()).length}</div>
-                        <div className="text-xs">Almoço</div>
-                      </div>
-                      <div className="text-center p-2 bg-muted/50 rounded">
-                        <div className="font-medium text-foreground">{plan.plan_data.dinner.filter(item => item.trim()).length}</div>
-                        <div className="text-xs">Jantar</div>
-                      </div>
-                      <div className="text-center p-2 bg-muted/50 rounded">
-                        <div className="font-medium text-foreground">{plan.plan_data.snacks.filter(item => item.trim()).length}</div>
-                        <div className="text-xs">Lanches</div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-                
-                <CardFooter className="flex justify-between">
-                  <div className="flex gap-1">
-                    <Button variant="secondary" size="sm" onClick={() => startEdit(plan)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="secondary" size="sm" onClick={() => printMealPlan(plan)}>
-                      <Printer className="h-4 w-4" />
-                    </Button>
-                    <Button variant="secondary" size="sm">
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => deleteMealPlan(plan.id)}
-                    className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </CardFooter>
-              </Card>
             ))}
           </div>
         )}
       </div>
-
-      {/* Edit Dialog */}
-      <Dialog open={!!editingPlan} onOpenChange={(open) => !open && setEditingPlan(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Editar Plano Alimentar</DialogTitle>
-            <DialogDescription>
-              Edite as informações do plano alimentar.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-name">Nome do Plano</Label>
-                <Input
-                  id="edit-name"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-client">Cliente</Label>
-                <Select value={formData.client_id} onValueChange={(value) => setFormData(prev => ({ ...prev, client_id: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um cliente" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map((client) => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Data de Início</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="secondary" className="w-full justify-start text-left font-normal">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      {format(formData.start_date, 'dd/MM/yyyy', { locale: ptBR })}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent
-                      mode="single"
-                      selected={formData.start_date}
-                      onSelect={(date) => date && setFormData(prev => ({ ...prev, start_date: date }))}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Data de Fim</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="secondary" className="w-full justify-start text-left font-normal">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      {format(formData.end_date, 'dd/MM/yyyy', { locale: ptBR })}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent
-                      mode="single"
-                      selected={formData.end_date}
-                      onSelect={(date) => date && setFormData(prev => ({ ...prev, end_date: date }))}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-status">Status</Label>
-                <Select value={formData.status} onValueChange={(value: any) => setFormData(prev => ({ ...prev, status: value }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ativo">Ativo</SelectItem>
-                    <SelectItem value="pausado">Pausado</SelectItem>
-                    <SelectItem value="concluido">Concluído</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <Tabs defaultValue="breakfast" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="breakfast">Café da Manhã</TabsTrigger>
-                <TabsTrigger value="lunch">Almoço</TabsTrigger>
-                <TabsTrigger value="dinner">Jantar</TabsTrigger>
-                <TabsTrigger value="snacks">Lanches</TabsTrigger>
-              </TabsList>
-              
-              {(['breakfast', 'lunch', 'dinner', 'snacks'] as const).map((mealType) => (
-                <TabsContent key={mealType} value={mealType} className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <Label className="text-lg font-medium">
-                      {mealType === 'breakfast' && 'Café da Manhã'}
-                      {mealType === 'lunch' && 'Almoço'}
-                      {mealType === 'dinner' && 'Jantar'}
-                      {mealType === 'snacks' && 'Lanches'}
-                    </Label>
-                    <Button type="button" className="action-primary" size="sm" onClick={() => addMealItem(mealType)}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar Item
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    {formData.plan_data[mealType].map((item, index) => (
-                      <div key={index} className="flex gap-2">
-                        <Input
-                          value={item}
-                          onChange={(e) => updateMealItem(mealType, index, e.target.value)}
-                          placeholder="Ex: Pão integral com ovos"
-                          className="flex-1"
-                        />
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => removeMealItem(mealType, index)}
-                          className="shrink-0"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent>
-              ))}
-            </Tabs>
-
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => {
-                  setEditingPlan(null);
-                  resetForm();
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button
-                className="action-primary"
-                onClick={handleUpdatePlan}
-                disabled={!formData.name || !formData.client_id}
-              >
-                Salvar Alterações
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </PlatformPageWrapper>
   );
 }
