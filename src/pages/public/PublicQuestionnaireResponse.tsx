@@ -542,10 +542,10 @@ export default function PublicQuestionnaireResponse() {
             <p className="text-gray-600 mb-6">Confira suas respostas antes de enviar</p>
             
             <div className="space-y-4 mb-8">
-              {questionnaire.questions.map((q: Question, index: number) => (
+              {questionnaire.questions.map((q: any, index: number) => (
                 <div key={q.id} className="border-b pb-4">
                   <p className="font-semibold text-gray-900 mb-2">
-                    {index + 1}. {q.title}
+                    {index + 1}. {q.question}
                   </p>
                   <p className="text-gray-700 mb-2">
                     {q.type === 'multi_select' && Array.isArray(answers[q.id])

@@ -251,6 +251,7 @@ export const PlatformQuestionnaires = () => {
   const [questionnaires, setQuestionnaires] = useState<Questionnaire[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [showTemplatesDropdown, setShowTemplatesDropdown] = useState(false);
   const [viewingQuestionnaire, setViewingQuestionnaire] = useState<Questionnaire | null>(null);
   const [editingQuestionnaire, setEditingQuestionnaire] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -972,56 +973,83 @@ export const PlatformQuestionnaires = () => {
         </div>
         <div className="flex gap-2">
           {/* Dropdown de templates */}
-          <div className="relative group">
+          <div className="relative">
             <Button
+              onClick={() => setShowTemplatesDropdown(!showTemplatesDropdown)}
               variant="outline"
               className="flex items-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50"
             >
               Templates Prontos
-              <ChevronDown className="w-4 h-4" />
+              <ChevronDown className={`w-4 h-4 transition-transform ${showTemplatesDropdown ? 'rotate-180' : ''}`} />
             </Button>
             
-            <div className="absolute top-full left-0 mt-1 bg-background border rounded-lg shadow-lg min-w-[250px] hidden group-hover:block z-10">
-              <button
-                onClick={loadTemplate1_AvaliacaoInicial}
-                className="w-full text-left px-4 py-3 hover:bg-muted border-b"
-              >
-                <p className="font-medium">Avaliação Inicial Completa</p>
-                <p className="text-xs text-muted-foreground">13 perguntas</p>
-              </button>
-              
-              <button
-                onClick={loadWeeklyFeedbackTemplate}
-                className="w-full text-left px-4 py-3 hover:bg-muted border-b"
-              >
-                <p className="font-medium">Feedback Semanal</p>
-                <p className="text-xs text-muted-foreground">12 perguntas</p>
-              </button>
-              
-              <button
-                onClick={loadTemplate3_AcompanhamentoMensal}
-                className="w-full text-left px-4 py-3 hover:bg-muted border-b"
-              >
-                <p className="font-medium">Acompanhamento Mensal</p>
-                <p className="text-xs text-muted-foreground">10 perguntas</p>
-              </button>
-              
-              <button
-                onClick={loadTemplate4_AvaliacaoHabitosSono}
-                className="w-full text-left px-4 py-3 hover:bg-muted border-b"
-              >
-                <p className="font-medium">Hábitos de Sono e Recuperação</p>
-                <p className="text-xs text-muted-foreground">8 perguntas</p>
-              </button>
-              
-              <button
-                onClick={loadTemplate5_SaudeIntestinal}
-                className="w-full text-left px-4 py-3 hover:bg-muted"
-              >
-                <p className="font-medium">Saúde Intestinal</p>
-                <p className="text-xs text-muted-foreground">11 perguntas</p>
-              </button>
-            </div>
+            {showTemplatesDropdown && (
+              <>
+                {/* Backdrop para fechar ao clicar fora */}
+                <div 
+                  className="fixed inset-0 z-10" 
+                  onClick={() => setShowTemplatesDropdown(false)}
+                />
+                
+                {/* Dropdown */}
+                <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border rounded-lg shadow-xl min-w-[280px] z-20 max-h-[400px] overflow-y-auto">
+                  <button
+                    onClick={() => {
+                      loadTemplate1_AvaliacaoInicial();
+                      setShowTemplatesDropdown(false);
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b transition"
+                  >
+                    <p className="font-medium text-gray-900 dark:text-gray-100">📋 Avaliação Inicial Completa</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">13 perguntas • Conhecimento geral do paciente</p>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      loadWeeklyFeedbackTemplate();
+                      setShowTemplatesDropdown(false);
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b transition"
+                  >
+                    <p className="font-medium text-gray-900 dark:text-gray-100">📊 Feedback Semanal</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">10 perguntas • Com pontuação automática</p>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      loadTemplate3_AcompanhamentoMensal();
+                      setShowTemplatesDropdown(false);
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b transition"
+                  >
+                    <p className="font-medium text-gray-900 dark:text-gray-100">📅 Acompanhamento Mensal</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">10 perguntas • Avaliação de progresso</p>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      loadTemplate4_AvaliacaoHabitosSono();
+                      setShowTemplatesDropdown(false);
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b transition"
+                  >
+                    <p className="font-medium text-gray-900 dark:text-gray-100">😴 Hábitos de Sono</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">8 perguntas • Qualidade do sono e recuperação</p>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      loadTemplate5_SaudeIntestinal();
+                      setShowTemplatesDropdown(false);
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                  >
+                    <p className="font-medium text-gray-900 dark:text-gray-100">🦠 Saúde Intestinal</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">11 perguntas • Sintomas digestivos</p>
+                  </button>
+                </div>
+              </>
+            )}
           </div>
 
           <Button
