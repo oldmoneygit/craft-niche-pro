@@ -231,6 +231,9 @@ interface Question {
   question: string;
   options?: string[];
   required: boolean;
+  scorable?: boolean;
+  weight?: number;
+  optionScores?: Record<string, number>;
 }
 
 interface Questionnaire {
@@ -445,14 +448,25 @@ export const PlatformQuestionnaires = () => {
         id: '2',
         type: 'scale',
         question: 'Como você avalia sua semana em relação à dieta? (1 = Péssima, 10 = Excelente)',
-        required: true
+        required: true,
+        scorable: true,
+        weight: 5
       },
       {
         id: '3',
         type: 'radio',
         question: 'Você conseguiu seguir o plano alimentar?',
         options: ['Sim, 100%', 'Sim, mais de 70%', 'Sim, entre 50-70%', 'Menos de 50%', 'Não consegui seguir'],
-        required: true
+        required: true,
+        scorable: true,
+        weight: 8,
+        optionScores: {
+          'Sim, 100%': 100,
+          'Sim, mais de 70%': 80,
+          'Sim, entre 50-70%': 60,
+          'Menos de 50%': 30,
+          'Não consegui seguir': 0
+        }
       },
       {
         id: '4',
@@ -469,7 +483,20 @@ export const PlatformQuestionnaires = () => {
           'Eventos sociais',
           'Outra'
         ],
-        required: true
+        required: true,
+        scorable: true,
+        weight: 3,
+        optionScores: {
+          'Nenhuma dificuldade': 100,
+          'Fome entre as refeições': 60,
+          'Dificuldade em preparar as refeições': 50,
+          'Falta de tempo': 50,
+          'Comer fora de casa': 40,
+          'Ansiedade/compulsão': 30,
+          'Custo dos alimentos': 50,
+          'Eventos sociais': 40,
+          'Outra': 50
+        }
       },
       {
         id: '5',
@@ -482,14 +509,32 @@ export const PlatformQuestionnaires = () => {
         type: 'radio',
         question: 'Como está seu nível de energia durante o dia?',
         options: ['Muito baixo', 'Baixo', 'Normal', 'Bom', 'Excelente'],
-        required: true
+        required: true,
+        scorable: true,
+        weight: 4,
+        optionScores: {
+          'Muito baixo': 0,
+          'Baixo': 25,
+          'Normal': 50,
+          'Bom': 75,
+          'Excelente': 100
+        }
       },
       {
         id: '7',
         type: 'radio',
         question: 'Como está seu sono?',
         options: ['Péssimo', 'Ruim', 'Regular', 'Bom', 'Excelente'],
-        required: true
+        required: true,
+        scorable: true,
+        weight: 4,
+        optionScores: {
+          'Péssimo': 0,
+          'Ruim': 25,
+          'Regular': 50,
+          'Bom': 75,
+          'Excelente': 100
+        }
       },
       {
         id: '8',
@@ -514,7 +559,9 @@ export const PlatformQuestionnaires = () => {
         id: '11',
         type: 'scale',
         question: 'Qual sua motivação para continuar? (1 = Nenhuma, 10 = Muito motivado)',
-        required: true
+        required: true,
+        scorable: true,
+        weight: 6
       },
       {
         id: '12',
@@ -534,7 +581,7 @@ export const PlatformQuestionnaires = () => {
 
     toast({
       title: "Template Carregado",
-      description: "Questionário de feedback semanal pronto para criar"
+      description: "Questionário de feedback semanal com pontuação automática"
     });
   };
 
@@ -1011,8 +1058,15 @@ export const PlatformQuestionnaires = () => {
                     }}
                     className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b transition"
                   >
-                    <p className="font-medium text-gray-900 dark:text-gray-100">📊 Feedback Semanal</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">10 perguntas • Com pontuação automática</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-gray-100">📊 Feedback Semanal</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">12 perguntas</p>
+                      </div>
+                      <span className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded-full font-bold">
+                        COM PONTUAÇÃO
+                      </span>
+                    </div>
                   </button>
                   
                   <button
@@ -1325,9 +1379,10 @@ export const PlatformQuestionnaires = () => {
 
                 <div className="space-y-3">
                   {formData.questions.map((q, index) => (
-                    <div key={q.id} className="border rounded-lg p-3 space-y-2 bg-muted/50">
+                    <div key={q.id} className="border-2 rounded-lg p-4 space-y-3 bg-background">
+                      {/* Header da pergunta */}
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-muted-foreground">Pergunta {index + 1}</span>
+                        <span className="text-sm font-bold text-foreground">Pergunta {index + 1}</span>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -1338,18 +1393,20 @@ export const PlatformQuestionnaires = () => {
                         </Button>
                       </div>
 
+                      {/* Campo da pergunta */}
                       <input
                         value={q.question}
                         onChange={e => updateQuestion(q.id, 'question', e.target.value)}
                         placeholder="Digite a pergunta..."
-                        className="w-full border rounded-lg p-2 text-sm bg-background"
+                        className="w-full border-2 border-input rounded-lg p-3 text-sm font-medium bg-background focus:border-primary"
                       />
 
-                      <div className="flex gap-2 flex-wrap">
+                      {/* Tipo e obrigatória */}
+                      <div className="grid grid-cols-2 gap-3">
                         <select
                           value={q.type}
                           onChange={e => updateQuestion(q.id, 'type', e.target.value)}
-                          className="border rounded-lg p-2 text-sm bg-background"
+                          className="border-2 border-input rounded-lg p-2 text-sm bg-background"
                         >
                           <option value="text">Resposta curta</option>
                           <option value="textarea">Resposta longa</option>
@@ -1358,24 +1415,134 @@ export const PlatformQuestionnaires = () => {
                           <option value="scale">Escala (1-10)</option>
                         </select>
 
-                        <label className="flex items-center gap-2 text-sm">
+                        <label className="flex items-center gap-2 text-sm border-2 border-input rounded-lg p-2 cursor-pointer hover:bg-muted">
                           <input
                             type="checkbox"
                             checked={q.required}
                             onChange={e => updateQuestion(q.id, 'required', e.target.checked)}
-                            className="rounded"
+                            className="w-4 h-4"
                           />
                           Obrigatória
                         </label>
                       </div>
 
+                      {/* Opções (apenas para radio/checkbox) */}
                       {(q.type === 'radio' || q.type === 'checkbox') && (
-                        <input
-                          placeholder="Opções (separadas por vírgula)"
-                          onChange={e => updateQuestion(q.id, 'options', e.target.value.split(',').map(o => o.trim()))}
-                          className="w-full border rounded-lg p-2 text-sm bg-background"
-                        />
+                        <div>
+                          <label className="block text-xs font-medium text-muted-foreground mb-1">
+                            Opções (separadas por vírgula):
+                          </label>
+                          <input
+                            placeholder="Ex: Sim, Não, Talvez"
+                            defaultValue={q.options?.join(', ') || ''}
+                            onBlur={e => {
+                              const options = e.target.value.split(',').map(o => o.trim()).filter(o => o);
+                              updateQuestion(q.id, 'options', options);
+                            }}
+                            className="w-full border-2 border-input rounded-lg p-2 text-sm bg-background"
+                          />
+                        </div>
                       )}
+
+                      {/* ===== SEÇÃO DE PONTUAÇÃO (MELHORADA) ===== */}
+                      <div className="border-t-2 pt-3 mt-3">
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                          <input
+                            type="checkbox"
+                            checked={q.scorable || false}
+                            onChange={e => {
+                              updateQuestion(q.id, 'scorable', e.target.checked);
+                              if (e.target.checked && !q.weight) {
+                                updateQuestion(q.id, 'weight', 5);
+                              }
+                            }}
+                            className="w-5 h-5 cursor-pointer"
+                          />
+                          <div>
+                            <span className="font-semibold text-foreground group-hover:text-primary">
+                              Esta pergunta conta pontos
+                            </span>
+                            <p className="text-xs text-muted-foreground">
+                              Ative para incluir no cálculo da pontuação final
+                            </p>
+                          </div>
+                        </label>
+
+                        {/* Configuração de pontuação (aparece se ativado) */}
+                        {q.scorable && (
+                          <div className="mt-3 space-y-3 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border-2 border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                            {/* Peso da pergunta */}
+                            <div>
+                              <label className="block text-sm font-bold text-foreground mb-2">
+                                Peso da pergunta: {q.weight || 5}
+                              </label>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">Baixo</span>
+                                <input
+                                  type="range"
+                                  min="1"
+                                  max="10"
+                                  value={q.weight || 5}
+                                  onChange={e => updateQuestion(q.id, 'weight', parseInt(e.target.value))}
+                                  className="flex-1"
+                                />
+                                <span className="text-xs text-muted-foreground">Alto</span>
+                                <span className="text-sm font-bold text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 px-2 py-1 rounded">
+                                  {q.weight || 5}/10
+                                </span>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Quanto maior o peso, mais esta pergunta impacta na nota final
+                              </p>
+                            </div>
+
+                            {/* Pontuação por opção (radio/checkbox) */}
+                            {(q.type === 'radio' || q.type === 'checkbox') && q.options && q.options.length > 0 && (
+                              <div>
+                                <label className="block text-sm font-bold text-foreground mb-2">
+                                  Pontuação de cada opção (0-100):
+                                </label>
+                                <div className="space-y-2">
+                                  {q.options.map((option, optIndex) => (
+                                    <div key={optIndex} className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-lg p-2 border">
+                                      <span className="text-sm flex-1 text-foreground">{option}</span>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={q.optionScores?.[option] || 0}
+                                        onChange={e => {
+                                          const newScores = { ...(q.optionScores || {}) };
+                                          newScores[option] = parseInt(e.target.value) || 0;
+                                          updateQuestion(q.id, 'optionScores', newScores);
+                                        }}
+                                        className="w-20 border-2 border-input rounded px-2 py-1 text-sm font-bold text-center focus:border-blue-500 bg-background"
+                                        placeholder="0-100"
+                                      />
+                                      <span className="text-xs text-muted-foreground">pts</span>
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="mt-2 text-xs text-muted-foreground bg-white dark:bg-gray-800 rounded p-2">
+                                  <strong>Dica:</strong> 100 = Ótimo • 70-90 = Bom • 40-60 = Neutro • 0-30 = Ruim
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Para tipo escala */}
+                            {q.type === 'scale' && (
+                              <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border">
+                                <p className="text-sm text-foreground">
+                                  <strong>Escala 1-10:</strong> Automaticamente convertida em 0-100 pontos
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Ex: Resposta "8" = 80 pontos
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
 
@@ -1387,6 +1554,28 @@ export const PlatformQuestionnaires = () => {
                 </div>
               </div>
             </div>
+
+            {/* Preview de pontuação */}
+            {formData.questions.some(q => q.scorable) && (
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 border-2 border-purple-200 dark:border-purple-800 rounded-lg p-4 mt-4">
+                <h4 className="font-bold text-purple-900 dark:text-purple-100 mb-2 flex items-center gap-2">
+                  📊 Resumo da Pontuação
+                </h4>
+                <div className="space-y-1 text-sm">
+                  <p className="text-foreground">
+                    <strong>{formData.questions.filter(q => q.scorable).length}</strong> perguntas contam pontos
+                  </p>
+                  <p className="text-foreground">
+                    Peso total: <strong>{formData.questions.filter(q => q.scorable).reduce((sum, q) => sum + (q.weight || 0), 0)}</strong>
+                  </p>
+                  <div className="mt-2 pt-2 border-t border-purple-200 dark:border-purple-800">
+                    <p className="text-xs text-muted-foreground">
+                      A pontuação final será calculada automaticamente e mostrada como porcentagem (0-100%)
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-3 mt-6">
               <Button
