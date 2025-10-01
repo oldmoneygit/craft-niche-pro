@@ -27,31 +27,36 @@ export default function PublicQuestionnaireResponse() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [responseId, setResponseId] = useState('');
+  const [debugInfo, setDebugInfo] = useState('');
 
   useEffect(() => {
-    if (token) fetchQuestionnaire();
+    console.log('Token recebido:', token);
+    if (token) {
+      fetchQuestionnaire();
+    } else {
+      setError('Token não encontrado na URL');
+      setLoading(false);
+    }
   }, [token]);
 
   const fetchQuestionnaire = async () => {
     try {
-      // Buscar response pelo token
+      // 1. Buscar response pelo token
       const { data: response, error: responseError } = await supabase
         .from('questionnaire_responses')
-        .select(`
-          id,
-          status,
-          questionnaires (
-            id,
-            title,
-            description,
-            questions
-          )
-        `)
+        .select('id, status, questionnaire_id, client_id')
         .eq('public_token', token)
-        .maybeSingle();
+        .single();
 
-      if (responseError || !response) {
+      if (responseError) {
+        console.error('Response error:', responseError);
         setError('Questionário não encontrado ou link inválido');
+        setLoading(false);
+        return;
+      }
+
+      if (!response) {
+        setError('Link inválido ou expirado');
         setLoading(false);
         return;
       }
@@ -64,12 +69,42 @@ export default function PublicQuestionnaireResponse() {
       }
 
       setResponseId(response.id);
-      setQuestionnaire(response.questionnaires as any);
+      setDebugInfo(`Response ID: ${response.id}, Questionnaire ID: ${response.questionnaire_id}`);
+      console.log('Response loaded:', response);
+
+      // 2. Buscar dados do questionário separadamente
+      const { data: questionnaireData, error: qError } = await supabase
+        .from('questionnaires')
+        .select('id, title, description, questions')
+        .eq('id', response.questionnaire_id)
+        .single();
+
+      if (qError) {
+        console.error('Questionnaire error:', qError);
+        setError('Erro ao carregar questionário');
+        setLoading(false);
+        return;
+      }
+
+      if (!questionnaireData) {
+        setError('Questionário não encontrado');
+        setLoading(false);
+        return;
+      }
+
+      console.log('Questionnaire loaded:', questionnaireData);
+      console.log('Questions:', questionnaireData.questions);
+      setQuestionnaire({
+        id: questionnaireData.id,
+        title: questionnaireData.title,
+        description: questionnaireData.description || '',
+        questions: questionnaireData.questions as unknown as Question[]
+      });
       setLoading(false);
 
-    } catch (err) {
-      console.error('Error fetching questionnaire:', err);
-      setError('Erro ao carregar questionário');
+    } catch (err: any) {
+      console.error('Unexpected error:', err);
+      setError('Erro inesperado ao carregar questionário');
       setLoading(false);
     }
   };
@@ -151,7 +186,12 @@ export default function PublicQuestionnaireResponse() {
         <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Ops!</h2>
-          <p className="text-gray-600">{error}</p>
+          <p className="text-gray-600 mb-4">{error}</p>
+          {debugInfo && (
+            <p className="text-xs text-gray-400 mt-2 p-2 bg-gray-50 rounded">
+              Debug: {debugInfo}
+            </p>
+          )}
         </div>
       </div>
     );
@@ -166,6 +206,26 @@ export default function PublicQuestionnaireResponse() {
           <p className="text-gray-600">
             Obrigado por responder o questionário. O nutricionista vai analisar suas respostas em breve.
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  console.log('Rendering questionnaire:', questionnaire);
+  console.log('Questions:', questionnaire?.questions);
+
+  if (!questionnaire || !questionnaire.questions) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
+          <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Questionário Vazio</h2>
+          <p className="text-gray-600">Este questionário não possui perguntas.</p>
+          {debugInfo && (
+            <p className="text-xs text-gray-400 mt-2 p-2 bg-gray-50 rounded">
+              Debug: {debugInfo}
+            </p>
+          )}
         </div>
       </div>
     );
