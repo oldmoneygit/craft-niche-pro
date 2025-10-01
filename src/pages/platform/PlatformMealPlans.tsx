@@ -19,6 +19,16 @@ export default function PlatformMealPlans() {
     if (tenantId) fetchPlans();
   }, [tenantId]);
 
+  // Recarregar quando a página voltar ao foco
+  useEffect(() => {
+    const handleFocus = () => {
+      if (tenantId) fetchPlans();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [tenantId]);
+
   const fetchPlans = async () => {
     if (!tenantId) return;
 
@@ -153,13 +163,24 @@ export default function PlatformMealPlans() {
               Crie e gerencie planos alimentares para seus clientes
             </p>
           </div>
-          <button
-            onClick={() => navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/novo`)}
-            className="bg-primary text-primary-foreground px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-primary/90"
-          >
-            <Plus className="w-4 h-4" />
-            Novo Plano
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={fetchPlans}
+              className="border border-border px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-accent"
+              title="Atualizar lista"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+              </svg>
+            </button>
+            <button
+              onClick={() => navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/novo`)}
+              className="bg-primary text-primary-foreground px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-primary/90"
+            >
+              <Plus className="w-4 h-4" />
+              Novo Plano
+            </button>
+          </div>
         </div>
 
         {/* Lista de planos */}
