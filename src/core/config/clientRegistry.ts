@@ -5,7 +5,7 @@ export const mockClientConfigs: Record<string, ClientConfig> = {
   'gabriel-gandin': {
     id: 'gabriel-gandin',
     name: 'Gabriel Gandin - Nutricionista',
-    businessType: 'nutritionist',
+    businessType: 'nutrition',
     subdomain: 'gabriel-gandin',
     theme: {
       primaryColor: '142 69% 58%',

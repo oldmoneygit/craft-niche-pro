@@ -6,7 +6,7 @@ import {
   BarChart3, 
   Calendar,
   Bot,
-  FileText,
+  ClipboardList,
   Utensils,
   DollarSign,
   Settings,
@@ -100,7 +100,7 @@ export function PlatformSidebar() {
       businessSpecificItems.push({
         title: 'Questionários',
         url: `${platformBasePath}/questionnaires`,
-        icon: FileText,
+        icon: ClipboardList,
       });
     }
     if (isModuleEnabled('mealPlans')) {
