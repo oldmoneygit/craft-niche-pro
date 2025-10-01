@@ -12,12 +12,14 @@ import {
   CheckCircle,
   ChevronDown,
   Send,
-  Activity
+  Activity,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from '@/hooks/useTenantId';
+import { useWhatsAppMessaging } from '@/hooks/useWhatsAppMessaging';
 
 export default function PlatformDashboard() {
   const { clientId } = useParams<{ clientId: string }>();
@@ -41,6 +43,14 @@ export default function PlatformDashboard() {
     today: false,
     upcoming: false
   });
+
+  const { 
+    sendReminder, 
+    sendConfirmationRequest, 
+    sendRemindersInBatch, 
+    sendConfirmationsInBatch,
+    sending 
+  } = useWhatsAppMessaging();
 
   useEffect(() => {
     if (clientId && clientId.trim()) {
@@ -164,10 +174,36 @@ export default function PlatformDashboard() {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const handleSendReminder = async (appointmentId: string, clientName: string) => {
-    // Placeholder para enviar lembrete individual
-    console.log('Enviando lembrete para:', clientName, appointmentId);
-    // TODO: Implementar envio de lembrete
+  const handleSendReminder = async (appointment: any) => {
+    const success = await sendReminder(appointment);
+    if (success) {
+      fetchDashboardData();
+    }
+  };
+
+  const handleSendConfirmation = async (appointment: any) => {
+    const success = await sendConfirmationRequest(appointment);
+    if (success) {
+      fetchDashboardData();
+    }
+  };
+
+  const handleSendAllReminders = async () => {
+    if (reminders.length === 0) return;
+    
+    if (confirm(`Deseja enviar ${reminders.length} lembretes em massa?`)) {
+      await sendRemindersInBatch(reminders);
+      fetchDashboardData();
+    }
+  };
+
+  const handleSendAllConfirmations = async () => {
+    if (confirmations.length === 0) return;
+    
+    if (confirm(`Deseja solicitar confirmação para ${confirmations.length} consultas?`)) {
+      await sendConfirmationsInBatch(confirmations);
+      fetchDashboardData();
+    }
   };
 
   const isLoading = loading || configLoading || tenantLoading;
@@ -250,12 +286,38 @@ export default function PlatformDashboard() {
                       {new Date(apt.datetime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
-                  <Button size="sm" className="bg-blue-500 hover:bg-blue-600">
-                    <Send className="w-4 h-4 mr-2" />
+                  <Button 
+                    size="sm" 
+                    className="bg-blue-500 hover:bg-blue-600"
+                    onClick={() => handleSendConfirmation(apt)}
+                    disabled={sending}
+                  >
+                    {sending ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4 mr-2" />
+                    )}
                     Pedir Confirmação
                   </Button>
                 </div>
               ))}
+              <Button 
+                className="w-full bg-blue-600 hover:bg-blue-700 mt-4"
+                onClick={handleSendAllConfirmations}
+                disabled={sending}
+              >
+                {sending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Enviando...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4 mr-2" />
+                    Enviar Todas Confirmações
+                  </>
+                )}
+              </Button>
             </div>
           )}
           {expandedSections.confirmations && confirmations.length === 0 && (
@@ -289,30 +351,45 @@ export default function PlatformDashboard() {
             <div className="bg-orange-50 p-4">
               <div className="space-y-2 mb-4">
                 {reminders.map(apt => (
-                  <div key={apt.id} className="bg-white rounded-lg p-4 flex items-center justify-between shadow-sm">
+                  <div key={apt.id} className="bg-white rounded-lg p-3 flex items-center justify-between">
                     <div>
-                      <p className="font-semibold text-gray-900">{apt.clients?.name}</p>
-                      <p className="text-sm text-gray-600">
-                        {new Date(apt.datetime).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                      <span className="font-medium text-gray-900">{apt.clients?.name}</span>
+                      <p className="text-xs text-gray-500">
+                        {new Date(apt.datetime).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} às{' '}
+                        {new Date(apt.datetime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                     <Button 
                       size="sm" 
-                      className="bg-orange-500 hover:bg-orange-600"
-                      onClick={() => handleSendReminder(apt.id, apt.clients?.name)}
+                      variant="outline"
+                      onClick={() => handleSendReminder(apt)}
+                      disabled={sending}
                     >
-                      <Send className="w-4 h-4 mr-2" />
-                      Enviar Lembrete
+                      {sending ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Send className="w-3 h-3" />
+                      )}
                     </Button>
                   </div>
                 ))}
               </div>
               <Button 
                 className="w-full bg-orange-600 hover:bg-orange-700"
-                onClick={() => navigate(`/platform/${clientConfig?.subdomain}/lembretes`)}
+                onClick={handleSendAllReminders}
+                disabled={sending}
               >
-                <Bell className="w-4 h-4 mr-2" />
-                Enviar Todos os Lembretes
+                {sending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Enviando...
+                  </>
+                ) : (
+                  <>
+                    <Bell className="w-4 h-4 mr-2" />
+                    Enviar Todos os Lembretes
+                  </>
+                )}
               </Button>
             </div>
           )}
