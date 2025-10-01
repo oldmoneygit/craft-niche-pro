@@ -53,12 +53,8 @@ export default function AIInsightsPanel() {
     }
     
     // Navegar para página de clientes com filtro
-    navigate(`/platform/${clientId}/clients`, {
-      state: { 
-        filterType: insight.type,
-        clientIds: insight.clientData.map((c: any) => c.id),
-        insightTitle: insight.title
-      }
+    navigate(`/platform/${clientId}/clientes`, {
+      state: { filter: 'inactive' }
     });
   };
 

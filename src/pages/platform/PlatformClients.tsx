@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import PlatformPageWrapper from '@/core/layouts/PlatformPageWrapper';
 import { useTenant } from '@/hooks/useTenant';
 import { useClients } from '@/hooks/useClients';
@@ -10,10 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Edit, Trash2, User } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, User, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import ClientStats from '@/components/platform/ClientStats';
+import { supabase } from '@/integrations/supabase/client';
 
 const clientSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -28,6 +29,8 @@ const clientSchema = z.object({
 
 export default function PlatformClients() {
   const { clientId } = useParams<{ clientId: string }>();
+  const location = useLocation();
+  const filterType = location.state?.filter;
   
   // Use gabriel-gandin as fallback if clientId is invalid
   const actualClientId = clientId && clientId !== ':clientId' ? clientId : 'gabriel-gandin';
@@ -37,6 +40,8 @@ export default function PlatformClients() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<any>(null);
+  const [activeFilter, setActiveFilter] = useState<string>(filterType || 'all');
+  const [inactiveClients, setInactiveClients] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -49,7 +54,65 @@ export default function PlatformClients() {
   });
   const { toast } = useToast();
 
-  const filteredClients = clients.filter(client =>
+  useEffect(() => {
+    if (filterType === 'inactive' && clients.length > 0) {
+      filterInactiveClients();
+    }
+  }, [filterType, clients]);
+
+  const filterInactiveClients = async () => {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const inactive = [];
+
+    for (const client of clients) {
+      const { data: appointments } = await supabase
+        .from('appointments')
+        .select('datetime, status')
+        .eq('client_id', client.id)
+        .eq('status', 'realizado')
+        .order('datetime', { ascending: false })
+        .limit(1);
+
+      if (appointments && appointments.length > 0) {
+        const lastDate = new Date(appointments[0].datetime);
+        if (lastDate < thirtyDaysAgo) {
+          const daysInactive = Math.floor((new Date().getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+          
+          inactive.push({
+            ...client,
+            lastAppointmentDate: lastDate,
+            daysInactive
+          });
+        }
+      }
+    }
+
+    inactive.sort((a, b) => b.daysInactive - a.daysInactive);
+    setInactiveClients(inactive);
+    setActiveFilter('inactive');
+  };
+
+  const handleSendFollowUp = (client: any) => {
+    const daysText = client.daysInactive 
+      ? `Faz ${client.daysInactive} dias que não nos falamos` 
+      : 'Faz um tempo que não nos falamos';
+
+    const message = `Olá ${client.name}! ${daysText} 😊\n\nComo você está? Gostaria de agendar um retorno para avaliarmos sua evolução?\n\nEstou aqui para te ajudar!`;
+    
+    const whatsappLink = `https://wa.me/55${client.phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappLink, '_blank');
+
+    toast({
+      title: "WhatsApp Aberto",
+      description: `Mensagem de follow-up para ${client.name}`
+    });
+  };
+
+  const displayedClients = activeFilter === 'inactive' ? inactiveClients : clients;
+
+  const filteredClients = displayedClients.filter(client =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (client.email && client.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -290,6 +353,33 @@ export default function PlatformClients() {
           </CardContent>
         </Card>
 
+        {/* Filtros */}
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setActiveFilter('all')}
+            variant={activeFilter === 'all' ? 'default' : 'outline'}
+            size="sm"
+          >
+            Todos ({clients.length})
+          </Button>
+          <Button
+            onClick={() => filterInactiveClients()}
+            variant={activeFilter === 'inactive' ? 'default' : 'outline'}
+            size="sm"
+            className={activeFilter === 'inactive' ? 'bg-yellow-500 hover:bg-yellow-600' : ''}
+          >
+            Inativos ({inactiveClients.length})
+          </Button>
+        </div>
+
+        {activeFilter === 'inactive' && inactiveClients.length > 0 && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <p className="text-sm text-yellow-800">
+              ⚠️ Mostrando clientes há mais de 30 dias sem consulta
+            </p>
+          </div>
+        )}
+
         {/* Stats */}
         <ClientStats clients={clients} />
 
@@ -317,8 +407,22 @@ export default function PlatformClients() {
             </Card>
           ) : (
             filteredClients.map((client) => (
-              <Card key={client.id} className="hover:shadow-md transition-shadow">
+              <Card key={client.id} className={`hover:shadow-md transition-shadow relative ${
+                activeFilter === 'inactive' ? 'border-2 border-yellow-300' : ''
+              }`}>
                 <CardContent className="pt-6">
+                  {activeFilter === 'inactive' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSendFollowUp(client);
+                      }}
+                      className="absolute top-3 right-3 p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition z-10"
+                      title="Enviar mensagem de follow-up"
+                    >
+                      <Send className="w-4 h-4" />
+                    </button>
+                  )}
                   <div className="flex justify-between items-start">
                     <div className="space-y-3 flex-1">
                       <div className="flex items-center gap-3">
@@ -326,10 +430,22 @@ export default function PlatformClients() {
                           <User className="h-6 w-6 text-primary" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-lg">{client.name}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-lg">{client.name}</h3>
+                            {activeFilter === 'inactive' && client.daysInactive && (
+                              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                                {client.daysInactive} dias inativo
+                              </Badge>
+                            )}
+                          </div>
                           <p className="text-sm text-muted-foreground">
                             Cliente desde {new Date(client.created_at).toLocaleDateString('pt-BR')}
                           </p>
+                          {activeFilter === 'inactive' && client.lastAppointmentDate && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              Última consulta: {new Date(client.lastAppointmentDate).toLocaleDateString('pt-BR')}
+                            </p>
+                          )}
                         </div>
                       </div>
                       
@@ -381,7 +497,7 @@ export default function PlatformClients() {
                       )}
                     </div>
                     
-                    <div className="flex gap-2 ml-4">
+                    <div className={`flex gap-2 ${activeFilter === 'inactive' ? 'mt-8' : ''}`}>
                       <Button variant="secondary" size="sm" onClick={() => handleEdit(client)} className="h-8 w-8 p-0">
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -395,6 +511,27 @@ export default function PlatformClients() {
             ))
           )}
         </div>
+
+        {/* Botão flutuante de ação em massa */}
+        {activeFilter === 'inactive' && inactiveClients.length > 0 && (
+          <div className="fixed bottom-6 right-6 z-50">
+            <Button
+              onClick={() => {
+                if (confirm(`Enviar mensagem de follow-up para ${inactiveClients.length} clientes?`)) {
+                  inactiveClients.forEach((client, index) => {
+                    setTimeout(() => {
+                      handleSendFollowUp(client);
+                    }, index * 2000);
+                  });
+                }
+              }}
+              className="bg-green-500 text-white hover:bg-green-600 px-6 py-3 rounded-full shadow-lg flex items-center gap-2"
+            >
+              <Send className="w-5 h-5" />
+              Enviar para Todos ({inactiveClients.length})
+            </Button>
+          </div>
+        )}
       </div>
     </PlatformPageWrapper>
   );
