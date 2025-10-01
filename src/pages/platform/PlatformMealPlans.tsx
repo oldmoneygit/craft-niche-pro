@@ -32,7 +32,7 @@ export default function PlatformMealPlans() {
       .eq('tenant_id', tenantId)
       .order('created_at', { ascending: false });
 
-    setPlans(data || []);
+    setPlans((data as any[]) || []);
     setLoading(false);
   };
 
@@ -58,7 +58,7 @@ export default function PlatformMealPlans() {
       const token = `${plan.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       await supabase
         .from('meal_plans')
-        .update({ public_token: token })
+        .update({ public_token: token } as any)
         .eq('id', plan.id);
       
       plan.public_token = token;
@@ -93,7 +93,7 @@ export default function PlatformMealPlans() {
         active: false,
         calories_target: originalPlan.calories_target,
         notes: originalPlan.notes
-      })
+      } as any)
       .select()
       .single();
 
@@ -104,33 +104,33 @@ export default function PlatformMealPlans() {
 
     // Duplicar refeições
     const { data: meals } = await supabase
-      .from('meals')
+      .from('meals' as any)
       .select('*, meal_foods(*)')
       .eq('meal_plan_id', planId);
 
     if (meals) {
-      for (const meal of meals) {
+      for (const meal of meals as any[]) {
         const { data: newMeal } = await supabase
-          .from('meals')
+          .from('meals' as any)
           .insert({
             meal_plan_id: newPlan.id,
             name: meal.name,
             time: meal.time,
             order_index: meal.order_index
-          })
+          } as any)
           .select()
           .single();
 
         if (newMeal && meal.meal_foods) {
           const foods = meal.meal_foods.map((f: any) => ({
-            meal_id: newMeal.id,
+            meal_id: (newMeal as any).id,
             name: f.name,
             quantity: f.quantity,
             calories: f.calories,
             order_index: f.order_index
           }));
 
-          await supabase.from('meal_foods').insert(foods);
+          await supabase.from('meal_foods' as any).insert(foods as any);
         }
       }
     }
@@ -154,7 +154,7 @@ export default function PlatformMealPlans() {
             </p>
           </div>
           <button
-            onClick={() => navigate(`/platform/${clientConfig?.clientId}/planos-alimentares/novo`)}
+            onClick={() => navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/novo`)}
             className="bg-primary text-primary-foreground px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-primary/90"
           >
             <Plus className="w-4 h-4" />
@@ -193,7 +193,7 @@ export default function PlatformMealPlans() {
 
                 <div className="grid grid-cols-2 gap-2">
                   <button
-                    onClick={() => navigate(`/platform/${clientConfig?.clientId}/planos-alimentares/${plan.id}`)}
+                    onClick={() => navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/${plan.id}`)}
                     className="px-3 py-2 border border-border rounded hover:bg-accent text-sm flex items-center justify-center gap-2"
                   >
                     <Edit className="w-4 h-4" />

@@ -351,44 +351,132 @@ export type Database = {
         }
         Relationships: []
       }
+      meal_foods: {
+        Row: {
+          calories: number | null
+          created_at: string | null
+          id: string
+          meal_id: string
+          name: string
+          order_index: number | null
+          quantity: string
+        }
+        Insert: {
+          calories?: number | null
+          created_at?: string | null
+          id?: string
+          meal_id: string
+          name: string
+          order_index?: number | null
+          quantity: string
+        }
+        Update: {
+          calories?: number | null
+          created_at?: string | null
+          id?: string
+          meal_id?: string
+          name?: string
+          order_index?: number | null
+          quantity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_foods_meal_id_fkey"
+            columns: ["meal_id"]
+            isOneToOne: false
+            referencedRelation: "meals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meal_plans: {
         Row: {
+          active: boolean | null
+          calories_target: number | null
           client_id: string
           created_at: string
           end_date: string
           id: string
           name: string
+          notes: string | null
           plan_data: Json
+          public_token: string | null
           start_date: string
           status: string
           tenant_id: string
+          title: string | null
           updated_at: string
         }
         Insert: {
+          active?: boolean | null
+          calories_target?: number | null
           client_id: string
           created_at?: string
           end_date: string
           id?: string
           name: string
+          notes?: string | null
           plan_data?: Json
+          public_token?: string | null
           start_date: string
           status?: string
           tenant_id: string
+          title?: string | null
           updated_at?: string
         }
         Update: {
+          active?: boolean | null
+          calories_target?: number | null
           client_id?: string
           created_at?: string
           end_date?: string
           id?: string
           name?: string
+          notes?: string | null
           plan_data?: Json
+          public_token?: string | null
           start_date?: string
           status?: string
           tenant_id?: string
+          title?: string | null
           updated_at?: string
         }
         Relationships: []
+      }
+      meals: {
+        Row: {
+          created_at: string | null
+          id: string
+          meal_plan_id: string
+          name: string
+          order_index: number | null
+          time: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          meal_plan_id: string
+          name: string
+          order_index?: number | null
+          time?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          meal_plan_id?: string
+          name?: string
+          order_index?: number | null
+          time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meals_meal_plan_id_fkey"
+            columns: ["meal_plan_id"]
+            isOneToOne: false
+            referencedRelation: "meal_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       message_templates: {
         Row: {

@@ -75,20 +75,20 @@ export default function PlatformMealPlanEditor() {
       setFormData({
         title: plan.title,
         client_id: plan.client_id,
-        calories_target: plan.calories_target || '',
+        calories_target: plan.calories_target ? String(plan.calories_target) : '',
         notes: plan.notes || '',
         active: plan.active
       });
 
       // Buscar refeições
       const { data: mealsData } = await supabase
-        .from('meals')
+        .from('meals' as any)
         .select('*, meal_foods(*)')
         .eq('meal_plan_id', planId)
         .order('order_index');
 
       if (mealsData) {
-        setMeals(mealsData.map(m => ({
+        setMeals(mealsData.map((m: any) => ({
           id: m.id,
           name: m.name,
           time: m.time,
@@ -165,7 +165,7 @@ export default function PlatformMealPlanEditor() {
             calories_target: formData.calories_target ? parseInt(formData.calories_target) : null,
             notes: formData.notes,
             active: formData.active
-          })
+          } as any)
           .select()
           .single();
 
@@ -180,13 +180,13 @@ export default function PlatformMealPlanEditor() {
             calories_target: formData.calories_target ? parseInt(formData.calories_target) : null,
             notes: formData.notes,
             active: formData.active
-          })
+          } as any)
           .eq('id', planId);
 
         if (error) throw error;
 
         // Deletar refeições antigas
-        await supabase.from('meals').delete().eq('meal_plan_id', planId);
+        await supabase.from('meals' as any).delete().eq('meal_plan_id', planId);
       }
 
       // Criar refeições
@@ -194,13 +194,13 @@ export default function PlatformMealPlanEditor() {
         const meal = meals[i];
         
         const { data: newMeal, error: mealError } = await supabase
-          .from('meals')
+          .from('meals' as any)
           .insert({
             meal_plan_id: currentPlanId,
             name: meal.name,
             time: meal.time,
             order_index: i
-          })
+          } as any)
           .select()
           .single();
 
@@ -209,7 +209,7 @@ export default function PlatformMealPlanEditor() {
         // Criar alimentos
         if (meal.foods.length > 0) {
           const foods = meal.foods.map((f, idx) => ({
-            meal_id: newMeal.id,
+            meal_id: (newMeal as any).id,
             name: f.name,
             quantity: f.quantity,
             calories: f.calories,
@@ -217,15 +217,15 @@ export default function PlatformMealPlanEditor() {
           }));
 
           const { error: foodsError } = await supabase
-            .from('meal_foods')
-            .insert(foods);
+            .from('meal_foods' as any)
+            .insert(foods as any);
 
           if (foodsError) throw foodsError;
         }
       }
 
       toast({ title: "Salvo!", description: "Plano alimentar salvo com sucesso" });
-      navigate(`/platform/${clientConfig?.clientId}/planos-alimentares`);
+      navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares`);
 
     } catch (error) {
       console.error('Error saving plan:', error);
@@ -243,7 +243,7 @@ export default function PlatformMealPlanEditor() {
         {/* Header */}
         <div className="flex items-center gap-4">
           <button
-            onClick={() => navigate(`/platform/${clientConfig?.clientId}/planos-alimentares`)}
+            onClick={() => navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares`)}
             className="p-2 hover:bg-accent rounded"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -413,7 +413,7 @@ export default function PlatformMealPlanEditor() {
         {/* Botões de ação */}
         <div className="flex gap-3 sticky bottom-4">
           <button
-            onClick={() => navigate(`/platform/${clientConfig?.clientId}/planos-alimentares`)}
+            onClick={() => navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares`)}
             className="flex-1 border-2 border-border rounded-lg py-3 font-semibold hover:bg-accent"
           >
             Cancelar

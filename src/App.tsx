@@ -18,6 +18,7 @@ import PlatformCommunication from "./pages/platform/PlatformCommunication";
 import PlatformQuestionnaires from "./pages/platform/PlatformQuestionnaires";
 import PlatformQuestionnaireResponses from "./pages/platform/PlatformQuestionnaireResponses";
 import PlatformMealPlans from "./pages/platform/PlatformMealPlans";
+import PlatformMealPlanEditor from "./pages/platform/PlatformMealPlanEditor";
 import PlatformAIChat from "./pages/platform/PlatformAIChat";
 import PlatformScheduling from "./pages/platform/PlatformScheduling";
 import PlatformSettings from "./pages/platform/PlatformSettings";
@@ -26,6 +27,7 @@ import PlatformKnowledge from "./pages/platform/PlatformKnowledge";
 import PlatformWeeklyFeedbacks from "./pages/platform/PlatformWeeklyFeedbacks";
 import QuestionnairePublic from "./pages/QuestionnairePublic";
 import PublicQuestionnaireResponse from "./pages/public/PublicQuestionnaireResponse";
+import PublicMealPlanView from "./pages/public/PublicMealPlanView";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +56,7 @@ const App = () => (
               <Route path="/platform/:clientId/feedbacks-semanais" element={<PlatformProtectedRoute><PlatformWeeklyFeedbacks /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/meal-plans" element={<PlatformProtectedRoute><PlatformMealPlans /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/planos-alimentares" element={<PlatformProtectedRoute><PlatformMealPlans /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/planos-alimentares/:planId" element={<PlatformProtectedRoute><PlatformMealPlanEditor /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/ai-chat" element={<PlatformProtectedRoute><PlatformAIChat /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/ai-agent" element={<PlatformProtectedRoute><PlatformAIChat /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/comunicacao" element={<PlatformProtectedRoute><PlatformCommunication /></PlatformProtectedRoute>} />
@@ -64,6 +67,9 @@ const App = () => (
               {/* Public Questionnaires */}
               <Route path="/questionnaire/:questionnaireId" element={<QuestionnairePublic />} />
               <Route path="/responder/:token" element={<PublicQuestionnaireResponse />} />
+              
+              {/* Public Meal Plan */}
+              <Route path="/plano/:token" element={<PublicMealPlanView />} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
