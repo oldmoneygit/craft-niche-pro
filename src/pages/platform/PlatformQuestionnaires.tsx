@@ -1378,20 +1378,51 @@ export const PlatformQuestionnaires = () => {
                 </div>
 
                 <div className="space-y-3">
-                  {formData.questions.map((q, index) => (
-                    <div key={q.id} className="border-2 rounded-lg p-4 space-y-3 bg-background">
-                      {/* Header da pergunta */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-foreground">Pergunta {index + 1}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeQuestion(q.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
+                  {formData.questions.map((q, index) => {
+                    const getQuestionIcon = (type: string) => {
+                      switch (type) {
+                        case 'text': return '✍️';
+                        case 'textarea': return '📝';
+                        case 'radio': return '🔘';
+                        case 'checkbox': return '☑️';
+                        case 'scale': return '📊';
+                        default: return '❓';
+                      }
+                    };
+
+                    const getQuestionTypeLabel = (type: string) => {
+                      switch (type) {
+                        case 'text': return 'Resposta Curta';
+                        case 'textarea': return 'Resposta Longa';
+                        case 'radio': return 'Múltipla Escolha';
+                        case 'checkbox': return 'Caixas de Seleção';
+                        case 'scale': return 'Escala 1-10';
+                        default: return 'Desconhecido';
+                      }
+                    };
+
+                    return (
+                      <div key={q.id} className="border-2 rounded-lg p-4 space-y-3 bg-background hover:shadow-md transition">
+                        {/* Header da pergunta com ícone */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl">{getQuestionIcon(q.type)}</span>
+                            <div>
+                              <span className="text-sm font-bold text-foreground">Pergunta {index + 1}</span>
+                              <span className="ml-2 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded-full">
+                                {getQuestionTypeLabel(q.type)}
+                              </span>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeQuestion(q.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
 
                       {/* Campo da pergunta */}
                       <input
@@ -1544,7 +1575,8 @@ export const PlatformQuestionnaires = () => {
                         )}
                       </div>
                     </div>
-                  ))}
+                  );
+                  })}
 
                   {formData.questions.length === 0 && (
                     <div className="text-center py-8 text-muted-foreground">
@@ -1621,7 +1653,16 @@ export const PlatformQuestionnaires = () => {
             <p className="text-sm text-muted-foreground mb-4">
               {q.questions.length} pergunta{q.questions.length !== 1 ? 's' : ''}
             </p>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(`/questionario/preview/${q.id}`, '_blank')}
+                className="flex items-center justify-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50"
+              >
+                <Eye className="w-4 h-4" />
+                Preview
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -1631,6 +1672,8 @@ export const PlatformQuestionnaires = () => {
                 <FileText className="w-4 h-4" />
                 Respostas
               </Button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -1652,7 +1695,7 @@ export const PlatformQuestionnaires = () => {
               <Button
                 size="sm"
                 onClick={() => generatePublicLink(q.id)}
-                className="flex items-center justify-center gap-2"
+                className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90"
               >
                 <Send className="w-4 h-4" />
                 Enviar

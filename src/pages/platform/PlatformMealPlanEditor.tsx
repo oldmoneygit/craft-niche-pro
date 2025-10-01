@@ -47,8 +47,20 @@ export default function PlatformMealPlanEditor() {
   useEffect(() => {
     if (tenantId) {
       fetchClients();
-      if (!isNew) fetchPlan();
-      else setLoading(false);
+      
+      if (!isNew) {
+        fetchPlan();
+      } else {
+        // Verificar se há template na URL
+        const params = new URLSearchParams(window.location.search);
+        const template = params.get('template');
+        
+        if (template) {
+          loadTemplate(template);
+        }
+        
+        setLoading(false);
+      }
     }
   }, [tenantId, planId]);
 
@@ -141,6 +153,200 @@ export default function PlatformMealPlanEditor() {
         ? { ...m, foods: m.foods.map(f => f.id === foodId ? { ...f, [field]: value } : f) }
         : m
     ));
+  };
+
+  const loadTemplate = (templateName: string) => {
+    const templates: Record<string, any> = {
+      lowcarb1600: {
+        title: 'Plano Low Carb 1600kcal',
+        calories_target: 1600,
+        notes: 'Evitar açúcares e carboidratos refinados. Priorizar proteínas e gorduras boas.',
+        meals: [
+          { id: 'temp-1', name: 'Café da Manhã', time: '07:00', foods: [
+            { id: 'f1', name: 'Ovos mexidos', quantity: '2 unidades', calories: 140 },
+            { id: 'f2', name: 'Abacate', quantity: '1/2 unidade', calories: 120 },
+            { id: 'f3', name: 'Café preto', quantity: '1 xícara', calories: 5 }
+          ]},
+          { id: 'temp-2', name: 'Lanche da Manhã', time: '10:00', foods: [
+            { id: 'f4', name: 'Mix de castanhas', quantity: '30g', calories: 180 }
+          ]},
+          { id: 'temp-3', name: 'Almoço', time: '12:30', foods: [
+            { id: 'f5', name: 'Peito de frango grelhado', quantity: '150g', calories: 250 },
+            { id: 'f6', name: 'Salada verde', quantity: 'À vontade', calories: 50 },
+            { id: 'f7', name: 'Azeite extra virgem', quantity: '1 colher de sopa', calories: 120 },
+            { id: 'f8', name: 'Brócolis cozido', quantity: '100g', calories: 35 }
+          ]},
+          { id: 'temp-4', name: 'Lanche da Tarde', time: '16:00', foods: [
+            { id: 'f9', name: 'Queijo branco', quantity: '2 fatias', calories: 100 },
+            { id: 'f10', name: 'Tomate cereja', quantity: '5 unidades', calories: 15 }
+          ]},
+          { id: 'temp-5', name: 'Jantar', time: '19:30', foods: [
+            { id: 'f11', name: 'Salmão grelhado', quantity: '150g', calories: 280 },
+            { id: 'f12', name: 'Aspargos refogados', quantity: '100g', calories: 40 },
+            { id: 'f13', name: 'Salada mista', quantity: 'À vontade', calories: 50 }
+          ]},
+          { id: 'temp-6', name: 'Ceia', time: '21:30', foods: [
+            { id: 'f14', name: 'Iogurte natural integral', quantity: '1 pote', calories: 130 }
+          ]}
+        ]
+      },
+      lowcarb1800: {
+        title: 'Plano Low Carb 1800kcal',
+        calories_target: 1800,
+        notes: 'Manutenção com carboidratos reduzidos.',
+        meals: [
+          { id: 'temp-1', name: 'Café da Manhã', time: '07:00', foods: [
+            { id: 'f1', name: 'Omelete', quantity: '3 ovos', calories: 210 },
+            { id: 'f2', name: 'Queijo cottage', quantity: '50g', calories: 60 },
+            { id: 'f3', name: 'Abacate', quantity: '1/2 unidade', calories: 120 }
+          ]},
+          { id: 'temp-2', name: 'Lanche da Manhã', time: '10:00', foods: [
+            { id: 'f4', name: 'Amendoim', quantity: '40g', calories: 230 }
+          ]},
+          { id: 'temp-3', name: 'Almoço', time: '12:30', foods: [
+            { id: 'f5', name: 'Carne vermelha magra', quantity: '180g', calories: 320 },
+            { id: 'f6', name: 'Arroz integral', quantity: '3 colheres de sopa', calories: 90 },
+            { id: 'f7', name: 'Feijão', quantity: '2 colheres de sopa', calories: 80 },
+            { id: 'f8', name: 'Salada', quantity: 'À vontade', calories: 50 }
+          ]},
+          { id: 'temp-4', name: 'Lanche da Tarde', time: '16:00', foods: [
+            { id: 'f9', name: 'Whey protein', quantity: '1 scoop', calories: 120 },
+            { id: 'f10', name: 'Banana', quantity: '1 unidade', calories: 90 }
+          ]},
+          { id: 'temp-5', name: 'Jantar', time: '19:30', foods: [
+            { id: 'f11', name: 'Tilápia grelhada', quantity: '180g', calories: 200 },
+            { id: 'f12', name: 'Batata doce', quantity: '100g', calories: 90 },
+            { id: 'f13', name: 'Legumes refogados', quantity: '150g', calories: 80 }
+          ]},
+          { id: 'temp-6', name: 'Ceia', time: '21:30', foods: [
+            { id: 'f14', name: 'Pasta de amendoim', quantity: '1 colher de sopa', calories: 95 }
+          ]}
+        ]
+      },
+      vegano1800: {
+        title: 'Plano Vegano 1800kcal',
+        calories_target: 1800,
+        notes: '100% baseado em plantas. Rico em proteínas vegetais.',
+        meals: [
+          { id: 'temp-1', name: 'Café da Manhã', time: '07:00', foods: [
+            { id: 'f1', name: 'Aveia', quantity: '50g', calories: 190 },
+            { id: 'f2', name: 'Leite de amêndoas', quantity: '200ml', calories: 40 },
+            { id: 'f3', name: 'Banana', quantity: '1 unidade', calories: 90 },
+            { id: 'f4', name: 'Pasta de amendoim', quantity: '1 colher de sopa', calories: 95 }
+          ]},
+          { id: 'temp-2', name: 'Lanche da Manhã', time: '10:00', foods: [
+            { id: 'f5', name: 'Frutas vermelhas', quantity: '1 xícara', calories: 70 },
+            { id: 'f6', name: 'Castanhas', quantity: '30g', calories: 180 }
+          ]},
+          { id: 'temp-3', name: 'Almoço', time: '12:30', foods: [
+            { id: 'f7', name: 'Grão de bico', quantity: '150g', calories: 240 },
+            { id: 'f8', name: 'Quinoa', quantity: '100g', calories: 120 },
+            { id: 'f9', name: 'Brócolis', quantity: '100g', calories: 35 },
+            { id: 'f10', name: 'Tofu grelhado', quantity: '100g', calories: 145 }
+          ]},
+          { id: 'temp-4', name: 'Lanche da Tarde', time: '16:00', foods: [
+            { id: 'f11', name: 'Proteína vegetal em pó', quantity: '1 scoop', calories: 110 },
+            { id: 'f12', name: 'Maçã', quantity: '1 unidade', calories: 80 }
+          ]},
+          { id: 'temp-5', name: 'Jantar', time: '19:30', foods: [
+            { id: 'f13', name: 'Lentilha', quantity: '150g', calories: 180 },
+            { id: 'f14', name: 'Batata doce', quantity: '100g', calories: 90 },
+            { id: 'f15', name: 'Salada verde', quantity: 'À vontade', calories: 50 }
+          ]},
+          { id: 'temp-6', name: 'Ceia', time: '21:30', foods: [
+            { id: 'f16', name: 'Hummus', quantity: '3 colheres de sopa', calories: 120 }
+          ]}
+        ]
+      },
+      vegetariano2000: {
+        title: 'Plano Vegetariano 2000kcal',
+        calories_target: 2000,
+        notes: 'Com ovos e laticínios. Alto em proteínas.',
+        meals: [
+          { id: 'temp-1', name: 'Café da Manhã', time: '07:00', foods: [
+            { id: 'f1', name: 'Pão integral', quantity: '2 fatias', calories: 140 },
+            { id: 'f2', name: 'Ovo cozido', quantity: '2 unidades', calories: 140 },
+            { id: 'f3', name: 'Queijo branco', quantity: '2 fatias', calories: 100 },
+            { id: 'f4', name: 'Suco de laranja natural', quantity: '200ml', calories: 90 }
+          ]},
+          { id: 'temp-2', name: 'Lanche da Manhã', time: '10:00', foods: [
+            { id: 'f5', name: 'Iogurte grego', quantity: '150g', calories: 130 },
+            { id: 'f6', name: 'Granola', quantity: '30g', calories: 140 }
+          ]},
+          { id: 'temp-3', name: 'Almoço', time: '12:30', foods: [
+            { id: 'f7', name: 'Arroz integral', quantity: '5 colheres de sopa', calories: 150 },
+            { id: 'f8', name: 'Feijão', quantity: '3 colheres de sopa', calories: 120 },
+            { id: 'f9', name: 'Ovo frito', quantity: '1 unidade', calories: 90 },
+            { id: 'f10', name: 'Salada', quantity: 'À vontade', calories: 50 },
+            { id: 'f11', name: 'Legumes refogados', quantity: '150g', calories: 80 }
+          ]},
+          { id: 'temp-4', name: 'Lanche da Tarde', time: '16:00', foods: [
+            { id: 'f12', name: 'Vitamina de frutas', quantity: '300ml', calories: 180 },
+            { id: 'f13', name: 'Barra de cereal', quantity: '1 unidade', calories: 90 }
+          ]},
+          { id: 'temp-5', name: 'Jantar', time: '19:30', foods: [
+            { id: 'f14', name: 'Panqueca de aveia', quantity: '2 unidades', calories: 200 },
+            { id: 'f15', name: 'Queijo minas', quantity: '50g', calories: 120 },
+            { id: 'f16', name: 'Salada de rúcula', quantity: 'À vontade', calories: 40 }
+          ]},
+          { id: 'temp-6', name: 'Ceia', time: '21:30', foods: [
+            { id: 'f17', name: 'Leite desnatado', quantity: '200ml', calories: 80 }
+          ]}
+        ]
+      },
+      emagrecimento1400: {
+        title: 'Plano Emagrecimento 1400kcal',
+        calories_target: 1400,
+        notes: 'Déficit calórico moderado. Beber 2-3L de água por dia.',
+        meals: [
+          { id: 'temp-1', name: 'Café da Manhã', time: '07:00', foods: [
+            { id: 'f1', name: 'Tapioca', quantity: '1 unidade pequena', calories: 120 },
+            { id: 'f2', name: 'Ovo mexido', quantity: '1 unidade', calories: 70 },
+            { id: 'f3', name: 'Café preto', quantity: '1 xícara', calories: 5 }
+          ]},
+          { id: 'temp-2', name: 'Lanche da Manhã', time: '10:00', foods: [
+            { id: 'f4', name: 'Maçã', quantity: '1 unidade', calories: 80 }
+          ]},
+          { id: 'temp-3', name: 'Almoço', time: '12:30', foods: [
+            { id: 'f5', name: 'Peito de frango', quantity: '120g', calories: 200 },
+            { id: 'f6', name: 'Arroz integral', quantity: '3 colheres de sopa', calories: 90 },
+            { id: 'f7', name: 'Feijão', quantity: '2 colheres de sopa', calories: 80 },
+            { id: 'f8', name: 'Salada verde', quantity: 'À vontade', calories: 40 }
+          ]},
+          { id: 'temp-4', name: 'Lanche da Tarde', time: '16:00', foods: [
+            { id: 'f9', name: 'Iogurte natural light', quantity: '1 pote', calories: 90 },
+            { id: 'f10', name: 'Morango', quantity: '5 unidades', calories: 30 }
+          ]},
+          { id: 'temp-5', name: 'Jantar', time: '19:30', foods: [
+            { id: 'f11', name: 'Tilápia grelhada', quantity: '150g', calories: 165 },
+            { id: 'f12', name: 'Legumes cozidos', quantity: '150g', calories: 70 },
+            { id: 'f13', name: 'Salada', quantity: 'À vontade', calories: 40 }
+          ]},
+          { id: 'temp-6', name: 'Ceia', time: '21:30', foods: [
+            { id: 'f14', name: 'Chá verde', quantity: '1 xícara', calories: 0 },
+            { id: 'f15', name: 'Gelatina diet', quantity: '1 porção', calories: 10 }
+          ]}
+        ]
+      }
+    };
+
+    const templateData = templates[templateName];
+    
+    if (templateData) {
+      setFormData({
+        ...formData,
+        title: templateData.title,
+        calories_target: templateData.calories_target.toString(),
+        notes: templateData.notes
+      });
+      
+      setMeals(templateData.meals);
+      
+      toast({ 
+        title: "Template carregado", 
+        description: "Adapte o plano para seu cliente" 
+      });
+    }
   };
 
   const handleSave = async () => {

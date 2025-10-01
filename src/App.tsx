@@ -27,6 +27,7 @@ import PlatformKnowledge from "./pages/platform/PlatformKnowledge";
 import PlatformWeeklyFeedbacks from "./pages/platform/PlatformWeeklyFeedbacks";
 import PlatformFinancial from "./pages/platform/PlatformFinancial";
 import PlatformReports from "./pages/platform/PlatformReports";
+import { PlatformQuestionnairePreview } from "./pages/platform/PlatformQuestionnairePreview";
 import QuestionnairePublic from "./pages/QuestionnairePublic";
 import PublicQuestionnaireResponse from "./pages/public/PublicQuestionnaireResponse";
 import PublicMealPlanView from "./pages/public/PublicMealPlanView";
@@ -70,6 +71,7 @@ const App = () => (
               
               {/* Public Questionnaires */}
               <Route path="/questionnaire/:questionnaireId" element={<QuestionnairePublic />} />
+              <Route path="/questionario/preview/:questionnaireId" element={<PlatformQuestionnairePreview />} />
               <Route path="/responder/:token" element={<PublicQuestionnaireResponse />} />
               
               {/* Public Meal Plan */}

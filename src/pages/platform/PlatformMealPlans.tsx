@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UtensilsCrossed, Plus, Send, Trash2, Edit, Copy } from 'lucide-react';
+import { UtensilsCrossed, Plus, Send, Trash2, Edit, Copy, FileText, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from '@/hooks/useTenantId';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +14,7 @@ export default function PlatformMealPlans() {
   const navigate = useNavigate();
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showTemplatesDropdown, setShowTemplatesDropdown] = useState(false);
 
   useEffect(() => {
     if (tenantId) fetchPlans();
@@ -183,12 +184,90 @@ export default function PlatformMealPlans() {
                 <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
               </svg>
             </button>
+            
+            <div className="relative">
+              <button
+                onClick={() => setShowTemplatesDropdown(!showTemplatesDropdown)}
+                className="border border-blue-500 text-blue-600 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-50"
+              >
+                <FileText className="w-4 h-4" />
+                Usar Template
+                <ChevronDown className={`w-4 h-4 transition-transform ${showTemplatesDropdown ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showTemplatesDropdown && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-10" 
+                    onClick={() => setShowTemplatesDropdown(false)}
+                  />
+                  
+                  <div className="absolute top-full left-0 mt-1 bg-white dark:bg-gray-800 border rounded-lg shadow-xl min-w-[300px] z-20">
+                    <button
+                      onClick={() => {
+                        navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/novo?template=lowcarb1600`);
+                        setShowTemplatesDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b"
+                    >
+                      <p className="font-medium">Low Carb 1600kcal</p>
+                      <p className="text-xs text-muted-foreground">Emagrecimento moderado</p>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/novo?template=lowcarb1800`);
+                        setShowTemplatesDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b"
+                    >
+                      <p className="font-medium">Low Carb 1800kcal</p>
+                      <p className="text-xs text-muted-foreground">Manutenção</p>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/novo?template=vegano1800`);
+                        setShowTemplatesDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b"
+                    >
+                      <p className="font-medium">Vegano 1800kcal</p>
+                      <p className="text-xs text-muted-foreground">Baseado em plantas</p>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/novo?template=vegetariano2000`);
+                        setShowTemplatesDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b"
+                    >
+                      <p className="font-medium">Vegetariano 2000kcal</p>
+                      <p className="text-xs text-muted-foreground">Com ovos e laticínios</p>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/novo?template=emagrecimento1400`);
+                        setShowTemplatesDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      <p className="font-medium">Emagrecimento 1400kcal</p>
+                      <p className="text-xs text-muted-foreground">Déficit calórico</p>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+
             <button
               onClick={() => navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/novo`)}
               className="bg-primary text-primary-foreground px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-primary/90"
             >
               <Plus className="w-4 h-4" />
-              Novo Plano
+              Criar do Zero
             </button>
           </div>
         </div>
