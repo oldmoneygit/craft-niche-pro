@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import DashboardTemplate from '@/core/layouts/DashboardTemplate';
 import { useTenant } from '@/hooks/useTenant';
 import { useClients } from '@/hooks/useClients';
@@ -44,6 +44,7 @@ interface Appointment {
 
 export default function PlatformScheduling() {
   const { clientId } = useParams<{ clientId: string }>();
+  const location = useLocation();
   const { tenant, loading: tenantLoading } = useTenant(clientId || '');
   const { clients } = useClients(tenant?.id);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -57,6 +58,18 @@ export default function PlatformScheduling() {
     notes: '',
   });
   const { toast } = useToast();
+
+  // Handle prefilled data from leads
+  useEffect(() => {
+    if (location.state?.prefilledClientId) {
+      setFormData(prev => ({
+        ...prev,
+        client_id: location.state.prefilledClientId,
+        notes: location.state.prefilledNotes || ''
+      }));
+      setIsDialogOpen(true);
+    }
+  }, [location.state]);
 
   const fetchAppointments = async () => {
     if (!tenant?.id) return;

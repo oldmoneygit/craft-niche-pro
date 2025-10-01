@@ -5,6 +5,7 @@ import { useTenantId } from '@/hooks/useTenantId';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import DashboardTemplate from '@/core/layouts/DashboardTemplate';
+import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 
 interface Lead {
   id: string;
@@ -24,6 +25,7 @@ interface Lead {
 
 export default function PlatformLeads() {
   const { tenantId } = useTenantId();
+  const { clientConfig } = useClientConfig();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -62,17 +64,78 @@ export default function PlatformLeads() {
     await updateLeadStatus(lead.id, 'contacted');
   };
 
-  const handleSchedule = (lead: Lead) => {
-    // Navegar para página de agendamentos
-    navigate(`/platform/${tenantId}/agendamentos`, {
-      state: {
-        prefilledData: {
-          clientName: lead.name,
-          clientPhone: lead.phone,
-          notes: `Lead convertido - Horário preferido: ${lead.preferred_time_description}`
+  const handleSchedule = async (lead: Lead) => {
+    if (!clientConfig?.subdomain) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar configuração",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Verificar se já existe cliente com esse telefone
+      const { data: existingClients } = await supabase
+        .from('clients')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .eq('phone', lead.phone)
+        .maybeSingle();
+
+      let clientId = existingClients?.id;
+
+      if (!clientId) {
+        // Criar cliente novo
+        const { data: newClient, error } = await supabase
+          .from('clients')
+          .insert({
+            tenant_id: tenantId,
+            name: lead.name,
+            phone: lead.phone,
+            email: lead.email || null
+          })
+          .select()
+          .single();
+
+        if (error) {
+          toast({
+            title: "Erro",
+            description: "Não foi possível criar cliente",
+            variant: "destructive"
+          });
+          return;
         }
+
+        clientId = newClient.id;
       }
-    });
+
+      // Atualizar status do lead para "scheduled"
+      await supabase
+        .from('leads')
+        .update({ status: 'scheduled' })
+        .eq('id', lead.id);
+
+      // Navegar para agendamentos com dados pré-preenchidos
+      navigate(`/platform/${clientConfig.subdomain}/appointments`, {
+        state: {
+          prefilledClientId: clientId,
+          prefilledNotes: `Lead convertido - Horário preferido: ${lead.preferred_time_description}`
+        }
+      });
+
+      toast({
+        title: "Redirecionando",
+        description: "Abrindo página de agendamentos..."
+      });
+    } catch (error) {
+      console.error('Error scheduling lead:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível processar o agendamento",
+        variant: "destructive"
+      });
+    }
   };
 
   const updateLeadStatus = async (leadId: string, newStatus: string) => {
