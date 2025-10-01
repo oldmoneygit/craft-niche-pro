@@ -14,6 +14,8 @@ export default function PlatformFinancial() {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [editPaymentModal, setEditPaymentModal] = useState<{appointmentId: string, clientName: string, currentValue: number, currentStatus: string} | null>(null);
+  const [customPaymentModal, setCustomPaymentModal] = useState(false);
+  const [clients, setClients] = useState<any[]>([]);
   
   const [filters, setFilters] = useState({
     startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
@@ -24,8 +26,19 @@ export default function PlatformFinancial() {
   useEffect(() => {
     if (tenantId) {
       fetchFinancialData();
+      fetchClients();
     }
   }, [tenantId, filters]);
+
+  const fetchClients = async () => {
+    const { data } = await supabase
+      .from('clients')
+      .select('id, name')
+      .eq('tenant_id', tenantId)
+      .order('name');
+    
+    setClients(data || []);
+  };
 
   const fetchFinancialData = async () => {
     setLoading(true);
@@ -113,14 +126,23 @@ export default function PlatformFinancial() {
     <DashboardTemplate title="Financeiro">
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <DollarSign className="w-7 h-7" />
-            Financeiro
-          </h2>
-          <p className="text-muted-foreground mt-1">
-            Controle de pagamentos e receitas
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <DollarSign className="w-7 h-7" />
+              Financeiro
+            </h2>
+            <p className="text-muted-foreground mt-1">
+              Controle de pagamentos e receitas
+            </p>
+          </div>
+          <button
+            onClick={() => setCustomPaymentModal(true)}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition font-medium flex items-center gap-2"
+          >
+            <DollarSign className="w-4 h-4" />
+            Adicionar Receita
+          </button>
         </div>
 
         {/* Filtros */}
@@ -318,6 +340,139 @@ export default function PlatformFinancial() {
           </div>
         </div>
       </div>
+
+      {/* Modal de adicionar receita customizada */}
+      {customPaymentModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card rounded-lg max-w-md w-full p-6 border">
+            <h3 className="text-lg font-bold mb-4">Adicionar Receita</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Registre pagamentos extras ou serviços adicionais
+            </p>
+            
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const clientId = formData.get('client_id') as string;
+              const value = parseFloat(formData.get('value') as string);
+              const description = formData.get('description') as string;
+              const paymentMethod = formData.get('payment_method') as string;
+              const date = formData.get('date') as string;
+              
+              if (!clientId || !value || value <= 0) {
+                toast({ title: "Preencha todos os campos obrigatórios", variant: "destructive" });
+                return;
+              }
+
+              const { error } = await supabase
+                .from('appointments')
+                .insert({
+                  tenant_id: tenantId,
+                  client_id: clientId,
+                  datetime: new Date(date + 'T12:00:00').toISOString(),
+                  type: 'pagamento_avulso',
+                  status: 'concluido',
+                  value,
+                  payment_status: 'paid',
+                  payment_method: paymentMethod,
+                  payment_date: date,
+                  notes: description
+                });
+
+              if (error) {
+                toast({ title: "Erro ao salvar", variant: "destructive" });
+              } else {
+                toast({ title: "Receita registrada com sucesso" });
+                setCustomPaymentModal(false);
+                fetchFinancialData();
+              }
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Cliente *</label>
+                  <select
+                    name="client_id"
+                    required
+                    className="w-full border-2 rounded-lg p-2 focus:border-primary focus:outline-none bg-background"
+                  >
+                    <option value="">Selecione um cliente</option>
+                    {clients.map(client => (
+                      <option key={client.id} value={client.id}>{client.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Valor *</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
+                    <input
+                      type="number"
+                      name="value"
+                      step="0.01"
+                      required
+                      placeholder="0,00"
+                      className="w-full border-2 rounded-lg p-2 pl-10 focus:border-primary focus:outline-none bg-background"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Descrição</label>
+                  <input
+                    type="text"
+                    name="description"
+                    placeholder="Ex: Plano alimentar extra, consultoria..."
+                    className="w-full border-2 rounded-lg p-2 focus:border-primary focus:outline-none bg-background"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Data *</label>
+                  <input
+                    type="date"
+                    name="date"
+                    required
+                    defaultValue={new Date().toISOString().split('T')[0]}
+                    className="w-full border-2 rounded-lg p-2 focus:border-primary focus:outline-none bg-background"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Forma de Pagamento *</label>
+                  <select
+                    name="payment_method"
+                    required
+                    className="w-full border-2 rounded-lg p-2 focus:border-primary focus:outline-none bg-background"
+                  >
+                    <option value="dinheiro">Dinheiro</option>
+                    <option value="pix">PIX</option>
+                    <option value="cartao_debito">Cartão de Débito</option>
+                    <option value="cartao_credito">Cartão de Crédito</option>
+                    <option value="transferencia">Transferência</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setCustomPaymentModal(false)}
+                  className="flex-1 border-2 border-gray-300 rounded-lg py-2 hover:bg-gray-50 transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-primary text-primary-foreground rounded-lg py-2 hover:bg-primary/90 transition font-medium"
+                >
+                  Registrar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Modal de edição rápida de pagamento */}
       {editPaymentModal && (
