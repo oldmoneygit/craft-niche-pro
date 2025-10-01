@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import PlatformPageWrapper from '@/core/layouts/PlatformPageWrapper';
 import { useTenant } from '@/hooks/useTenant';
 import { useClients } from '@/hooks/useClients';
@@ -10,11 +10,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Edit, Trash2, User, Send } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, User, Send, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import ClientStats from '@/components/platform/ClientStats';
 import { supabase } from '@/integrations/supabase/client';
+import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 
 const clientSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -30,6 +31,8 @@ const clientSchema = z.object({
 export default function PlatformClients() {
   const { clientId } = useParams<{ clientId: string }>();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { clientConfig } = useClientConfig();
   const filterType = location.state?.filter;
   
   // Use gabriel-gandin as fallback if clientId is invalid
@@ -42,6 +45,8 @@ export default function PlatformClients() {
   const [editingClient, setEditingClient] = useState<any>(null);
   const [activeFilter, setActiveFilter] = useState<string>(filterType || 'all');
   const [inactiveClients, setInactiveClients] = useState<any[]>([]);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const [clientQuestionnaires, setClientQuestionnaires] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -59,6 +64,26 @@ export default function PlatformClients() {
       filterInactiveClients();
     }
   }, [filterType, clients]);
+
+  const fetchClientQuestionnaires = async (clientId: string) => {
+    const { data } = await supabase
+      .from('questionnaire_responses')
+      .select(`
+        *,
+        questionnaires(id, title, description)
+      `)
+      .eq('client_id', clientId)
+      .eq('status', 'completed')
+      .order('completed_at', { ascending: false });
+
+    setClientQuestionnaires(data || []);
+  };
+
+  useEffect(() => {
+    if (selectedClientId) {
+      fetchClientQuestionnaires(selectedClientId);
+    }
+  }, [selectedClientId]);
 
   const filterInactiveClients = async () => {
     const thirtyDaysAgo = new Date();
@@ -495,9 +520,67 @@ export default function PlatformClients() {
                           </p>
                         </div>
                       )}
+
+                      {/* Seção de Questionários Respondidos */}
+                      {selectedClientId === client.id && clientQuestionnaires.length > 0 && (
+                        <div className="mt-4 pt-4 border-t">
+                          <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                            <FileText className="w-4 h-4" />
+                            Questionários Respondidos ({clientQuestionnaires.length})
+                          </h4>
+                          
+                          <div className="space-y-2">
+                            {clientQuestionnaires.map(response => (
+                              <div key={response.id} className="bg-gray-50 rounded-lg p-3 border text-sm">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <p className="font-semibold text-gray-900">
+                                      {response.questionnaires.title}
+                                    </p>
+                                    <p className="text-xs text-gray-600 mt-1">
+                                      Respondido em {new Date(response.completed_at).toLocaleDateString('pt-BR', {
+                                        day: '2-digit',
+                                        month: 'long',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </p>
+                                  </div>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigate(`/platform/${clientConfig.subdomain}/questionarios/${response.questionnaire_id}/respostas`);
+                                    }}
+                                    className="px-3 py-1 text-xs border border-gray-300 rounded hover:bg-white ml-2"
+                                  >
+                                    Ver Respostas
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                     
                     <div className={`flex gap-2 ${activeFilter === 'inactive' ? 'mt-8' : ''}`}>
+                      <Button 
+                        variant="secondary" 
+                        size="sm" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (selectedClientId === client.id) {
+                            setSelectedClientId(null);
+                          } else {
+                            setSelectedClientId(client.id);
+                          }
+                        }} 
+                        className="h-8 px-3"
+                      >
+                        <FileText className="w-4 h-4 mr-1" />
+                        {selectedClientId === client.id ? 'Ocultar' : 'Questionários'}
+                      </Button>
                       <Button variant="secondary" size="sm" onClick={() => handleEdit(client)} className="h-8 w-8 p-0">
                         <Edit className="w-4 h-4" />
                       </Button>

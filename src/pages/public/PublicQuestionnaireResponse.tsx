@@ -34,6 +34,7 @@ export default function PublicQuestionnaireResponse() {
     email: ''
   });
   const [step, setStep] = useState<'info' | 'questions'>('info');
+  const [validationError, setValidationError] = useState('');
 
   useEffect(() => {
     console.log('Token recebido:', token);
@@ -231,22 +232,36 @@ export default function PublicQuestionnaireResponse() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Telefone/WhatsApp *
-                </label>
-                <input
-                  type="tel"
-                  value={respondentData.phone}
-                  onChange={(e) => {
-                    const phone = e.target.value.replace(/\D/g, '');
-                    setRespondentData({...respondentData, phone});
-                  }}
-                  placeholder="(00) 00000-0000"
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500"
-                  required
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Telefone/WhatsApp *
+              </label>
+              <input
+                type="tel"
+                value={respondentData.phone}
+                onChange={(e) => {
+                  let phone = e.target.value.replace(/\D/g, '');
+                  
+                  // Aplicar máscara (00) 00000-0000
+                  if (phone.length <= 11) {
+                    if (phone.length > 10) {
+                      phone = phone.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+                    } else if (phone.length > 6) {
+                      phone = phone.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+                    } else if (phone.length > 2) {
+                      phone = phone.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+                    } else if (phone.length > 0) {
+                      phone = phone.replace(/^(\d*)/, '($1');
+                    }
+                  }
+                  
+                  setRespondentData({...respondentData, phone});
+                }}
+                placeholder="(00) 00000-0000"
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500"
+                required
+              />
+            </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -261,18 +276,32 @@ export default function PublicQuestionnaireResponse() {
                 />
               </div>
 
-              <button
-                onClick={() => {
-                  if (!respondentData.name || !respondentData.phone) {
-                    alert('Por favor, preencha nome e telefone');
-                    return;
-                  }
-                  setStep('questions');
-                }}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-3 rounded-lg hover:from-green-600 hover:to-emerald-600"
-              >
-                Continuar para o Questionário
-              </button>
+            <button
+              onClick={() => {
+                // Validação rigorosa
+                if (!respondentData.name || respondentData.name.trim().length < 3) {
+                  setValidationError('Por favor, informe seu nome completo (mínimo 3 caracteres)');
+                  return;
+                }
+                
+                if (!respondentData.phone || respondentData.phone.replace(/\D/g, '').length < 10) {
+                  setValidationError('Por favor, informe um telefone válido com DDD');
+                  return;
+                }
+                
+                setValidationError('');
+                setStep('questions');
+              }}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-3 rounded-lg hover:from-green-600 hover:to-emerald-600"
+            >
+              Continuar para o Questionário
+            </button>
+
+            {validationError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-800 mt-2">
+                {validationError}
+              </div>
+            )}
             </div>
           </div>
         </div>

@@ -5,15 +5,19 @@ import { useTenantId } from '@/hooks/useTenantId';
 import { useToast } from '@/hooks/use-toast';
 import { FileText, User, Phone, Mail, Calendar, UserPlus, Eye } from 'lucide-react';
 import PlatformPageWrapper from '@/core/layouts/PlatformPageWrapper';
+import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 
 export default function PlatformQuestionnaireResponses() {
   const { questionnaireId } = useParams();
   const { tenantId } = useTenantId();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { clientConfig } = useClientConfig();
   const [responses, setResponses] = useState<any[]>([]);
   const [questionnaire, setQuestionnaire] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedResponse, setSelectedResponse] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (tenantId && questionnaireId) {
@@ -189,7 +193,10 @@ export default function PlatformQuestionnaireResponses() {
                     </button>
                   )}
                   <button
-                    onClick={() => {/* TODO: modal com respostas completas */}}
+                    onClick={() => {
+                      setSelectedResponse(response);
+                      setIsModalOpen(true);
+                    }}
                     className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm"
                   >
                     <Eye className="w-4 h-4" />
@@ -231,6 +238,133 @@ export default function PlatformQuestionnaireResponses() {
           )}
         </div>
       </div>
+
+      {/* Modal Ver Respostas Detalhadas */}
+      {isModalOpen && selectedResponse && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold">{questionnaire?.title}</h3>
+                  <p className="text-green-100 mt-1">
+                    Respondido por {selectedResponse.respondent_name}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setSelectedResponse(null);
+                  }}
+                  className="text-white hover:bg-white/20 rounded-lg p-2 text-2xl leading-none"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Informações do Respondente */}
+            <div className="bg-gray-50 border-b p-4">
+              <div className="grid grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-600">Nome</p>
+                  <p className="font-semibold">{selectedResponse.respondent_name}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Telefone</p>
+                  <p className="font-semibold">{selectedResponse.respondent_phone}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">E-mail</p>
+                  <p className="font-semibold">{selectedResponse.respondent_email || 'Não informado'}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Respostas */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-6">
+                {questionnaire?.questions.map((question: any, index: number) => {
+                  const answer = selectedResponse.answers[question.id];
+                  
+                  return (
+                    <div key={question.id} className="border-b pb-4">
+                      <p className="font-semibold text-gray-900 mb-2">
+                        {index + 1}. {question.question}
+                        {question.required && <span className="text-red-500 ml-1">*</span>}
+                      </p>
+                      <p className="text-xs text-gray-500 mb-2">
+                        Tipo: {
+                          question.type === 'text' ? 'Resposta curta' :
+                          question.type === 'textarea' ? 'Resposta longa' :
+                          question.type === 'radio' ? 'Múltipla escolha' :
+                          question.type === 'checkbox' ? 'Caixas de seleção' :
+                          'Escala (1-10)'
+                        }
+                      </p>
+                      
+                      <div className="bg-green-50 rounded-lg p-4 mt-2">
+                        {question.type === 'checkbox' && Array.isArray(answer) ? (
+                          <ul className="list-disc list-inside space-y-1">
+                            {answer.map((item: string, i: number) => (
+                              <li key={i} className="text-gray-900">{item}</li>
+                            ))}
+                          </ul>
+                        ) : question.type === 'scale' ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-3xl font-bold text-green-600">{answer}</span>
+                            <span className="text-gray-600">/ 10</span>
+                          </div>
+                        ) : (
+                          <p className="text-gray-900 whitespace-pre-wrap">{answer || 'Não respondido'}</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Footer com ações */}
+            <div className="border-t p-4 bg-gray-50">
+              <div className="flex gap-3">
+                {!selectedResponse.client_id && (
+                  <button
+                    onClick={() => {
+                      linkToClient(
+                        selectedResponse.id,
+                        selectedResponse.respondent_phone,
+                        selectedResponse.respondent_name,
+                        selectedResponse.respondent_email
+                      );
+                      setIsModalOpen(false);
+                    }}
+                    className="flex-1 bg-blue-500 text-white rounded-lg py-3 font-semibold hover:bg-blue-600 flex items-center justify-center gap-2"
+                  >
+                    <UserPlus className="w-5 h-5" />
+                    Vincular/Criar Cliente
+                  </button>
+                )}
+                {selectedResponse.client_id && (
+                  <button
+                    onClick={() => navigate(`/platform/${clientConfig.subdomain}/clientes`)}
+                    className="flex-1 bg-green-500 text-white rounded-lg py-3 font-semibold hover:bg-green-600"
+                  >
+                    Ver Cliente
+                  </button>
+                )}
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-100"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </PlatformPageWrapper>
   );
 }
