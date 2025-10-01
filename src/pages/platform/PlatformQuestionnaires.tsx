@@ -246,6 +246,7 @@ export const PlatformQuestionnaires = () => {
   const [questionnaires, setQuestionnaires] = useState<Questionnaire[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [viewingQuestionnaire, setViewingQuestionnaire] = useState<Questionnaire | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -476,6 +477,128 @@ export const PlatformQuestionnaires = () => {
         </div>
       )}
 
+      {/* Modal de Visualização */}
+      {viewingQuestionnaire && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-background rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-xl font-bold">{viewingQuestionnaire.title}</h3>
+                {viewingQuestionnaire.description && (
+                  <p className="text-sm text-muted-foreground mt-1">{viewingQuestionnaire.description}</p>
+                )}
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewingQuestionnaire(null)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-6 mt-6">
+              {viewingQuestionnaire.questions.map((question, index) => (
+                <div key={question.id} className="border rounded-lg p-4">
+                  <div className="flex items-start gap-2 mb-3">
+                    <span className="font-semibold text-muted-foreground">{index + 1}.</span>
+                    <div className="flex-1">
+                      <p className="font-medium">
+                        {question.question}
+                        {question.required && <span className="text-destructive ml-1">*</span>}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Tipo: {
+                          question.type === 'text' ? 'Resposta curta' :
+                          question.type === 'textarea' ? 'Resposta longa' :
+                          question.type === 'radio' ? 'Múltipla escolha' :
+                          question.type === 'checkbox' ? 'Caixas de seleção' :
+                          'Escala (1-10)'
+                        }
+                      </p>
+                    </div>
+                  </div>
+
+                  {question.type === 'text' && (
+                    <input
+                      type="text"
+                      disabled
+                      placeholder="Resposta curta..."
+                      className="w-full border rounded-lg p-2 bg-muted/50 text-sm"
+                    />
+                  )}
+
+                  {question.type === 'textarea' && (
+                    <textarea
+                      disabled
+                      placeholder="Resposta longa..."
+                      rows={3}
+                      className="w-full border rounded-lg p-2 bg-muted/50 text-sm"
+                    />
+                  )}
+
+                  {question.type === 'radio' && question.options && (
+                    <div className="space-y-2 mt-2">
+                      {question.options.map((option, i) => (
+                        <label key={i} className="flex items-center gap-2 text-sm">
+                          <input type="radio" disabled name={`q-${question.id}`} className="rounded-full" />
+                          {option}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+
+                  {question.type === 'checkbox' && question.options && (
+                    <div className="space-y-2 mt-2">
+                      {question.options.map((option, i) => (
+                        <label key={i} className="flex items-center gap-2 text-sm">
+                          <input type="checkbox" disabled className="rounded" />
+                          {option}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+
+                  {question.type === 'scale' && (
+                    <div className="mt-2">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+                        <span>1</span>
+                        <span>10</span>
+                      </div>
+                      <input
+                        type="range"
+                        disabled
+                        min="1"
+                        max="10"
+                        defaultValue="5"
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setViewingQuestionnaire(null)}
+                className="flex-1"
+              >
+                Fechar
+              </Button>
+              <Button
+                onClick={() => generatePublicLink(viewingQuestionnaire.id)}
+                className="flex-1 flex items-center justify-center gap-2"
+              >
+                <Copy className="w-4 h-4" />
+                Copiar Link Público
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal Criar */}
       {isCreating && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -632,6 +755,7 @@ export const PlatformQuestionnaires = () => {
               <Button
                 variant="outline"
                 size="sm"
+                onClick={() => setViewingQuestionnaire(q)}
                 className="flex-1 flex items-center justify-center gap-2"
               >
                 <Eye className="w-4 h-4" />
