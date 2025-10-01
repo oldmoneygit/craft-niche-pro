@@ -330,6 +330,101 @@ export const PlatformQuestionnaires = () => {
     }
   };
 
+  const loadExampleQuestionnaire = () => {
+    const exampleQuestions: Question[] = [
+      {
+        id: '1',
+        type: 'text',
+        question: 'Qual seu nome completo?',
+        required: true
+      },
+      {
+        id: '2',
+        type: 'text',
+        question: 'Qual sua idade?',
+        required: true
+      },
+      {
+        id: '3',
+        type: 'textarea',
+        question: 'Descreva sua rotina diária (horários de trabalho, estudo, etc)',
+        required: true
+      },
+      {
+        id: '4',
+        type: 'radio',
+        question: 'Qual seu principal objetivo?',
+        options: ['Emagrecimento', 'Ganho de massa muscular', 'Melhora de saúde', 'Manutenção de peso'],
+        required: true
+      },
+      {
+        id: '5',
+        type: 'checkbox',
+        question: 'Quais refeições você costuma fazer? (pode marcar várias)',
+        options: ['Café da manhã', 'Lanche da manhã', 'Almoço', 'Lanche da tarde', 'Jantar', 'Ceia'],
+        required: true
+      },
+      {
+        id: '6',
+        type: 'scale',
+        question: 'De 1 a 10, como você avalia sua alimentação atual?',
+        required: true
+      },
+      {
+        id: '7',
+        type: 'radio',
+        question: 'Você pratica atividade física?',
+        options: ['Não pratico', '1-2x por semana', '3-4x por semana', '5x ou mais por semana'],
+        required: true
+      },
+      {
+        id: '8',
+        type: 'checkbox',
+        question: 'Possui alguma restrição alimentar? (marque todas que se aplicam)',
+        options: ['Nenhuma', 'Intolerância à lactose', 'Alergia a glúten', 'Vegetariano', 'Vegano', 'Diabetes', 'Hipertensão'],
+        required: false
+      },
+      {
+        id: '9',
+        type: 'textarea',
+        question: 'Liste os alimentos que você NÃO gosta ou não come',
+        required: false
+      },
+      {
+        id: '10',
+        type: 'text',
+        question: 'Quantos litros de água você bebe por dia?',
+        required: true
+      },
+      {
+        id: '11',
+        type: 'radio',
+        question: 'Com que frequência você come fora de casa?',
+        options: ['Nunca', '1-2x por semana', '3-4x por semana', 'Diariamente'],
+        required: true
+      },
+      {
+        id: '12',
+        type: 'scale',
+        question: 'Numa escala de 1 a 10, quão comprometido você está em mudar seus hábitos?',
+        required: true
+      }
+    ];
+
+    setFormData({
+      title: 'Avaliação Nutricional Completa',
+      description: 'Este questionário nos ajuda a entender melhor seus hábitos alimentares e criar um plano personalizado para você.',
+      questions: exampleQuestions
+    });
+
+    setIsCreating(true);
+
+    toast({
+      title: "Template Carregado",
+      description: "Questionário de exemplo pronto para usar"
+    });
+  };
+
   const generatePublicLink = async (questionnaireId: string) => {
     if (!tenantId) return;
 
@@ -376,6 +471,14 @@ export const PlatformQuestionnaires = () => {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button
+            onClick={loadExampleQuestionnaire}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <ClipboardList className="w-4 h-4" />
+            Carregar Exemplo
+          </Button>
           <Button
             onClick={() => setShowTemplates(true)}
             variant="outline"
