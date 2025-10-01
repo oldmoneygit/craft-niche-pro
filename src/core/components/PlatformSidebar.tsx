@@ -85,6 +85,12 @@ export function PlatformSidebar() {
       enabled: isModuleEnabled('scheduling'),
     },
     {
+      title: 'Questionários',
+      url: `${platformBasePath}/questionnaires`,
+      icon: ClipboardList,
+      enabled: isModuleEnabled('questionnaires'),
+    },
+    {
       title: 'Relatórios',
       url: `${platformBasePath}/analytics`,
       icon: BarChart3,
@@ -96,13 +102,6 @@ export function PlatformSidebar() {
   
   // Nutrition-specific features
   if (clientConfig.businessType === 'nutrition') {
-    if (isModuleEnabled('questionnaires')) {
-      businessSpecificItems.push({
-        title: 'Questionários',
-        url: `${platformBasePath}/questionnaires`,
-        icon: ClipboardList,
-      });
-    }
     if (isModuleEnabled('mealPlans')) {
       businessSpecificItems.push({
         title: 'Planos Alimentares',
