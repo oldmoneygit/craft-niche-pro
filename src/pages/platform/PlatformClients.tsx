@@ -16,6 +16,7 @@ import { z } from 'zod';
 import ClientStats from '@/components/platform/ClientStats';
 import { supabase } from '@/integrations/supabase/client';
 import { useClientConfig } from '@/core/contexts/ClientConfigContext';
+import { ClientDetailsModal } from '@/components/platform/ClientDetailsModal';
 
 const clientSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -39,7 +40,7 @@ export default function PlatformClients() {
   const actualClientId = clientId && clientId !== ':clientId' ? clientId : 'gabriel-gandin';
   
   const { tenant, loading: tenantLoading } = useTenant(actualClientId);
-  const { clients, loading: clientsLoading, createClient, updateClient, deleteClient } = useClients(tenant?.id);
+  const { clients, loading: clientsLoading, createClient, updateClient, deleteClient, refetch: fetchClients } = useClients(tenant?.id);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<any>(null);
@@ -49,6 +50,7 @@ export default function PlatformClients() {
   const [clientQuestionnaires, setClientQuestionnaires] = useState<any[]>([]);
   const [selectedQuestionnaireResponse, setSelectedQuestionnaireResponse] = useState<any>(null);
   const [isResponseModalOpen, setIsResponseModalOpen] = useState(false);
+  const [selectedClientForDetails, setSelectedClientForDetails] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -470,9 +472,13 @@ export default function PlatformClients() {
             </Card>
           ) : (
             filteredClients.map((client) => (
-              <Card key={client.id} className={`hover:shadow-md transition-shadow relative ${
-                activeFilter === 'inactive' ? 'border-2 border-yellow-300' : ''
-              }`}>
+              <Card 
+                key={client.id} 
+                onClick={() => setSelectedClientForDetails(client)}
+                className={`hover:shadow-md transition-shadow relative cursor-pointer ${
+                  activeFilter === 'inactive' ? 'border-2 border-yellow-300' : ''
+                }`}
+              >
                 <CardContent className="pt-6">
                   {activeFilter === 'inactive' && (
                     <button
@@ -768,6 +774,18 @@ export default function PlatformClients() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Modal de detalhes */}
+        {selectedClientForDetails && (
+          <ClientDetailsModal
+            client={selectedClientForDetails}
+            onClose={() => setSelectedClientForDetails(null)}
+            onUpdate={() => {
+              fetchClients();
+              setSelectedClientForDetails(null);
+            }}
+          />
         )}
       </div>
     </PlatformPageWrapper>
