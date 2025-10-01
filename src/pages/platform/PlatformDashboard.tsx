@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 import DashboardTemplate from '@/core/layouts/DashboardTemplate';
 import AIInsightsPanel from '@/components/platform/AIInsightsPanel';
+import { InactiveClientsAlert } from '@/components/platform/InactiveClientsAlert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -476,6 +477,9 @@ export default function PlatformDashboard() {
 
           {/* AI Insights Panel */}
           <AIInsightsPanel />
+
+          {/* Pacientes Inativos Alert */}
+          <InactiveClientsAlert />
 
           {/* Lembretes Pendentes - Sempre visível */}
           <Card className="shadow-lg border-orange-200 bg-orange-50 rounded-2xl overflow-hidden">

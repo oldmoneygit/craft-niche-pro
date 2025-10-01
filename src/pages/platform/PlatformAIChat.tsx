@@ -13,6 +13,16 @@ interface Message {
   timestamp: Date;
 }
 
+interface SchedulingFlowState {
+  active: boolean;
+  step: 'intent' | 'name' | 'phone' | 'time' | 'confirm';
+  data: {
+    name?: string;
+    phone?: string;
+    preferredTime?: string;
+  };
+}
+
 export default function PlatformAIChat() {
   const { tenantId } = useTenantId();
   const { searchKnowledgeWithAI, detectSchedulingIntent, isProcessing } = useAIAgent();
@@ -20,6 +30,11 @@ export default function PlatformAIChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [schedulingFlow, setSchedulingFlow] = useState<SchedulingFlowState>({
+    active: false,
+    step: 'intent',
+    data: {}
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -39,31 +54,157 @@ export default function PlatformAIChat() {
     }]);
   }, []);
 
-  const handleSchedulingIntent = async () => {
-    if (!tenantId) return "Sistema indisponível no momento.";
-
+  const fetchAvailableSlots = async () => {
     try {
-      // Buscar próximos horários disponíveis (simplificado)
       const now = new Date();
-      const threeDaysLater = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+      const fiveDaysLater = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000);
 
-      const { data: existingAppointments } = await supabase
+      const { data: appointments } = await supabase
         .from('appointments')
         .select('datetime')
         .eq('tenant_id', tenantId)
         .gte('datetime', now.toISOString())
-        .lte('datetime', threeDaysLater.toISOString());
+        .lte('datetime', fiveDaysLater.toISOString());
 
-      // Lógica simplificada - sugerir alguns horários
-      const suggestions = [
-        "Amanhã às 14h",
-        "Quarta-feira às 10h",
-        "Sexta-feira às 16h"
-      ];
+      // Horários padrão de atendimento (9h às 17h)
+      const businessHours = [9, 10, 11, 14, 15, 16, 17];
+      const bookedSlots = appointments?.map(a => new Date(a.datetime).toISOString()) || [];
 
-      return `Tenho disponibilidade em:\n\n${suggestions.map((s, i) => `${i + 1}. ${s}`).join('\n')}\n\nQual horário você prefere?`;
+      // Gerar próximos 5 dias úteis com horários disponíveis
+      const slots = [];
+      let date = new Date(now);
+      date.setHours(0, 0, 0, 0);
+
+      for (let i = 0; i < 7 && slots.length < 6; i++) {
+        date.setDate(date.getDate() + 1);
+        
+        // Pular fins de semana
+        if (date.getDay() === 0 || date.getDay() === 6) continue;
+
+        // Verificar horários disponíveis neste dia
+        for (const hour of businessHours) {
+          const slotDate = new Date(date);
+          slotDate.setHours(hour, 0, 0, 0);
+          
+          if (slotDate > now && !bookedSlots.includes(slotDate.toISOString())) {
+            slots.push({
+              date: slotDate,
+              display: `${slotDate.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' })} às ${hour}h`
+            });
+            
+            if (slots.length >= 6) break;
+          }
+        }
+      }
+
+      return slots.map((s, i) => `${i + 1}. ${s.display}`).join('\n');
+
     } catch (error) {
-      return "Desculpe, tive um problema ao verificar disponibilidade. Por favor, entre em contato diretamente.";
+      console.error('Error fetching slots:', error);
+      return "Segunda 14h\nQuarta 10h\nSexta 16h";
+    }
+  };
+
+  const createLead = async (leadData: any) => {
+    if (!tenantId) return false;
+
+    try {
+      const { error } = await supabase.from('leads').insert({
+        tenant_id: tenantId,
+        name: leadData.name,
+        phone: leadData.phone,
+        preferred_time_description: leadData.preferredTime,
+        conversation_summary: leadData.conversationSummary,
+        status: 'pending'
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Novo Lead! 🎉",
+        description: `${leadData.name} quer agendar consulta`,
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error creating lead:', error);
+      return false;
+    }
+  };
+
+  const handleSchedulingIntent = async () => {
+    if (!tenantId) return "Sistema indisponível no momento.";
+
+    // Iniciar fluxo de agendamento
+    setSchedulingFlow({
+      active: true,
+      step: 'name',
+      data: {}
+    });
+
+    return "Ótimo! Vou te ajudar a agendar. Primeiro, qual seu nome completo?";
+  };
+
+  const processSchedulingFlow = async (message: string) => {
+    const { step, data } = schedulingFlow;
+
+    switch (step) {
+      case 'name':
+        setSchedulingFlow({
+          active: true,
+          step: 'phone',
+          data: { ...data, name: message }
+        });
+        return `Prazer, ${message}! Agora me passa seu telefone com DDD (ex: 11 99999-9999)`;
+
+      case 'phone':
+        // Validação básica de telefone
+        const phoneClean = message.replace(/\D/g, '');
+        if (phoneClean.length < 10) {
+          return "Por favor, digite um telefone válido com DDD (ex: 11 99999-9999)";
+        }
+
+        setSchedulingFlow({
+          active: true,
+          step: 'time',
+          data: { ...data, phone: message }
+        });
+
+        // Buscar horários disponíveis reais
+        const availableSlots = await fetchAvailableSlots();
+        return `Perfeito! Aqui estão os horários disponíveis:\n\n${availableSlots}\n\nQual você prefere? (pode digitar o número ou o dia/hora)`;
+
+      case 'time':
+        setSchedulingFlow({
+          active: true,
+          step: 'confirm',
+          data: { ...data, preferredTime: message }
+        });
+        return `Resumindo:\n\nNome: ${data.name}\nTelefone: ${data.phone}\nHorário: ${message}\n\nTudo certo? Digite SIM para confirmar ou CANCELAR para desistir.`;
+
+      case 'confirm':
+        if (message.toLowerCase().includes('sim')) {
+          // Criar lead no banco
+          const leadCreated = await createLead({
+            name: data.name!,
+            phone: data.phone!,
+            preferredTime: data.preferredTime!,
+            conversationSummary: `Lead capturado via IA Chat`
+          });
+
+          if (leadCreated) {
+            setSchedulingFlow({ active: false, step: 'intent', data: {} });
+            return `✅ Solicitação enviada com sucesso!\n\nO nutricionista vai confirmar seu horário em breve pelo WhatsApp. Qualquer dúvida, estou aqui!`;
+          } else {
+            return "Ops, tive um problema ao salvar. Por favor, tente novamente ou entre em contato diretamente.";
+          }
+        } else {
+          setSchedulingFlow({ active: false, step: 'intent', data: {} });
+          return "Agendamento cancelado. Precisando de algo mais, é só chamar!";
+        }
+
+      default:
+        return "Algo deu errado. Vamos começar de novo?";
     }
   };
 
@@ -78,22 +219,28 @@ export default function PlatformAIChat() {
       timestamp: new Date()
     };
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputValue;
     setInputValue('');
 
     // Processa com IA
     try {
       let aiResponse = '';
 
-      // Primeiro tenta buscar na base de conhecimento com IA
-      const result = await searchKnowledgeWithAI(inputValue, tenantId!);
-      
-      if (result && result.answer) {
-        aiResponse = result.answer;
-      } else if (detectSchedulingIntent(inputValue)) {
-        // Se detectar intenção de agendamento e não tem resposta específica
-        aiResponse = await handleSchedulingIntent();
+      // Se está em fluxo de agendamento, processar passo a passo
+      if (schedulingFlow.active) {
+        aiResponse = await processSchedulingFlow(currentInput);
       } else {
-        aiResponse = "Como posso ajudar? Posso responder dúvidas sobre nutrição ou ajudar com agendamento de consultas.";
+        // Primeiro tenta buscar na base de conhecimento com IA
+        const result = await searchKnowledgeWithAI(currentInput, tenantId!);
+        
+        if (result && result.answer) {
+          aiResponse = result.answer;
+        } else if (detectSchedulingIntent(currentInput)) {
+          // Se detectar intenção de agendamento e não tem resposta específica
+          aiResponse = await handleSchedulingIntent();
+        } else {
+          aiResponse = "Como posso ajudar? Posso responder dúvidas sobre nutrição ou ajudar com agendamento de consultas.";
+        }
       }
 
       // Adiciona resposta da IA

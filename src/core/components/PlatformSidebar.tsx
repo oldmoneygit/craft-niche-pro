@@ -11,7 +11,8 @@ import {
   DollarSign,
   Settings,
   Bell,
-  Brain
+  Brain,
+  UserPlus
 } from 'lucide-react';
 import {
   Sidebar,
@@ -24,12 +25,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
 import { useClientConfig } from '../contexts/ClientConfigContext';
+import { useLeadsNotifications } from '@/hooks/useLeadsNotifications';
 
 export function PlatformSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const { clientConfig, isModuleEnabled } = useClientConfig();
+  const { pendingCount } = useLeadsNotifications();
   
   if (!clientConfig) return null;
 
@@ -48,6 +52,13 @@ export function PlatformSidebar() {
       url: `${platformBasePath}/clientes`,
       icon: Users,
       enabled: isModuleEnabled('clientManagement'),
+    },
+    {
+      title: 'Leads',
+      url: `${platformBasePath}/leads`,
+      icon: UserPlus,
+      enabled: true,
+      badge: pendingCount > 0 ? pendingCount : undefined,
     },
     {
       title: 'Comunicação',
@@ -166,7 +177,16 @@ export function PlatformSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClassName(item.url)}>
                       <item.icon className="h-4 w-4" />
-                      {state !== "collapsed" && <span>{item.title}</span>}
+                      {state !== "collapsed" && (
+                        <span className="flex items-center justify-between flex-1">
+                          {item.title}
+                          {'badge' in item && item.badge && (
+                            <Badge variant="destructive" className="ml-auto">
+                              {item.badge}
+                            </Badge>
+                          )}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

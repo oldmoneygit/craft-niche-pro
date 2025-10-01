@@ -303,6 +303,54 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          conversation_summary: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string
+          preferred_datetime: string | null
+          preferred_time_description: string | null
+          source: string | null
+          status: string | null
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          conversation_summary?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone: string
+          preferred_datetime?: string | null
+          preferred_time_description?: string | null
+          source?: string | null
+          status?: string | null
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          conversation_summary?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string
+          preferred_datetime?: string | null
+          preferred_time_description?: string | null
+          source?: string | null
+          status?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       meal_plans: {
         Row: {
           client_id: string
