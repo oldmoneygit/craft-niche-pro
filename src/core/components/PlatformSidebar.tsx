@@ -10,7 +10,8 @@ import {
   Utensils,
   DollarSign,
   Settings,
-  Bell
+  Bell,
+  Brain
 } from 'lucide-react';
 import {
   Sidebar,
@@ -65,6 +66,12 @@ export function PlatformSidebar() {
       url: `${platformBasePath}/faq-bot`,
       icon: Bot,
       enabled: true, // FAQ Bot is always enabled
+    },
+    {
+      title: 'Base de Conhecimento',
+      url: `${platformBasePath}/conhecimento`,
+      icon: Brain,
+      enabled: true,
     },
     {
       title: 'Agendamentos',

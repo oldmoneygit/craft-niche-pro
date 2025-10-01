@@ -264,6 +264,45 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_base: {
+        Row: {
+          active: boolean | null
+          category: string
+          content: string
+          created_at: string | null
+          id: string
+          keywords: string[] | null
+          tenant_id: string
+          title: string
+          updated_at: string | null
+          usage_count: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          category: string
+          content: string
+          created_at?: string | null
+          id?: string
+          keywords?: string[] | null
+          tenant_id: string
+          title: string
+          updated_at?: string | null
+          usage_count?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          category?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          keywords?: string[] | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string | null
+          usage_count?: number | null
+        }
+        Relationships: []
+      }
       meal_plans: {
         Row: {
           client_id: string
