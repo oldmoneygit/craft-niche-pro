@@ -5,6 +5,224 @@ import { useTenantId } from '@/hooks/useTenantId';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 
+const QUESTIONNAIRE_TEMPLATES = [
+  {
+    title: "Avaliação de Hábitos Alimentares Completa",
+    description: "Questionário completo para avaliar rotina alimentar do paciente",
+    questions: [
+      {
+        id: '1',
+        type: 'text',
+        question: 'Qual seu objetivo principal com a nutrição?',
+        required: true
+      },
+      {
+        id: '2',
+        type: 'textarea',
+        question: 'Descreva sua rotina alimentar típica (café, almoço, jantar, lanches)',
+        required: true
+      },
+      {
+        id: '3',
+        type: 'radio',
+        question: 'Quantas refeições você faz por dia?',
+        options: ['1-2 refeições', '3-4 refeições', '5-6 refeições', 'Mais de 6 refeições'],
+        required: true
+      },
+      {
+        id: '4',
+        type: 'checkbox',
+        question: 'Marque os alimentos que você consome diariamente:',
+        options: ['Frutas', 'Verduras/Legumes', 'Cereais integrais', 'Proteínas', 'Laticínios', 'Doces/Açúcar', 'Refrigerantes', 'Fast food'],
+        required: true
+      },
+      {
+        id: '5',
+        type: 'scale',
+        question: 'Em uma escala de 1 a 10, como você avalia sua alimentação atual?',
+        required: true
+      },
+      {
+        id: '6',
+        type: 'radio',
+        question: 'Você pratica atividade física regularmente?',
+        options: ['Sim, todos os dias', 'Sim, 3-4x por semana', 'Sim, 1-2x por semana', 'Não pratico'],
+        required: true
+      },
+      {
+        id: '7',
+        type: 'checkbox',
+        question: 'Marque se você tem alguma restrição alimentar:',
+        options: ['Lactose', 'Glúten', 'Vegetariano/Vegano', 'Alergia a frutos do mar', 'Alergia a oleaginosas', 'Diabetes', 'Nenhuma'],
+        required: false
+      },
+      {
+        id: '8',
+        type: 'textarea',
+        question: 'Existe algum alimento que você não gosta ou não consome?',
+        required: false
+      },
+      {
+        id: '9',
+        type: 'scale',
+        question: 'Quanta água você bebe por dia? (1=menos de 500ml, 10=mais de 3 litros)',
+        required: true
+      },
+      {
+        id: '10',
+        type: 'text',
+        question: 'Você toma algum suplemento ou medicação?',
+        required: false
+      }
+    ]
+  },
+  {
+    title: "Frequência Alimentar Rápida",
+    description: "Avaliação rápida de consumo alimentar semanal",
+    questions: [
+      {
+        id: '1',
+        type: 'radio',
+        question: 'Com que frequência você consome FRUTAS?',
+        options: ['Todos os dias', '3-5x por semana', '1-2x por semana', 'Raramente', 'Nunca'],
+        required: true
+      },
+      {
+        id: '2',
+        type: 'radio',
+        question: 'Com que frequência você consome VERDURAS/LEGUMES?',
+        options: ['Todos os dias', '3-5x por semana', '1-2x por semana', 'Raramente', 'Nunca'],
+        required: true
+      },
+      {
+        id: '3',
+        type: 'radio',
+        question: 'Com que frequência você consome FAST FOOD?',
+        options: ['Todos os dias', '3-5x por semana', '1-2x por semana', 'Raramente', 'Nunca'],
+        required: true
+      },
+      {
+        id: '4',
+        type: 'radio',
+        question: 'Com que frequência você consome DOCES/AÇÚCAR?',
+        options: ['Todos os dias', '3-5x por semana', '1-2x por semana', 'Raramente', 'Nunca'],
+        required: true
+      },
+      {
+        id: '5',
+        type: 'radio',
+        question: 'Com que frequência você consome REFRIGERANTES?',
+        options: ['Todos os dias', '3-5x por semana', '1-2x por semana', 'Raramente', 'Nunca'],
+        required: true
+      }
+    ]
+  },
+  {
+    title: "Recordatório 24 Horas Simplificado",
+    description: "O que o paciente consumiu nas últimas 24 horas",
+    questions: [
+      {
+        id: '1',
+        type: 'textarea',
+        question: 'CAFÉ DA MANHÃ - O que você comeu/bebeu?',
+        required: true
+      },
+      {
+        id: '2',
+        type: 'text',
+        question: 'CAFÉ DA MANHÃ - Que horas foi?',
+        required: true
+      },
+      {
+        id: '3',
+        type: 'textarea',
+        question: 'LANCHE DA MANHÃ - O que você comeu/bebeu?',
+        required: false
+      },
+      {
+        id: '4',
+        type: 'textarea',
+        question: 'ALMOÇO - O que você comeu/bebeu?',
+        required: true
+      },
+      {
+        id: '5',
+        type: 'text',
+        question: 'ALMOÇO - Que horas foi?',
+        required: true
+      },
+      {
+        id: '6',
+        type: 'textarea',
+        question: 'LANCHE DA TARDE - O que você comeu/bebeu?',
+        required: false
+      },
+      {
+        id: '7',
+        type: 'textarea',
+        question: 'JANTAR - O que você comeu/bebeu?',
+        required: true
+      },
+      {
+        id: '8',
+        type: 'text',
+        question: 'JANTAR - Que horas foi?',
+        required: true
+      },
+      {
+        id: '9',
+        type: 'textarea',
+        question: 'CEIA/LANCHE NOTURNO - O que você comeu/bebeu?',
+        required: false
+      }
+    ]
+  },
+  {
+    title: "Avaliação de Satisfação - Retorno",
+    description: "Para pacientes em acompanhamento avaliarem evolução",
+    questions: [
+      {
+        id: '1',
+        type: 'scale',
+        question: 'Como você avalia sua evolução desde a última consulta? (1=nenhuma evolução, 10=excelente evolução)',
+        required: true
+      },
+      {
+        id: '2',
+        type: 'radio',
+        question: 'Você conseguiu seguir o plano alimentar?',
+        options: ['Sim, 100%', 'Sim, na maior parte do tempo', 'Parcialmente', 'Pouco', 'Não consegui'],
+        required: true
+      },
+      {
+        id: '3',
+        type: 'checkbox',
+        question: 'Quais foram suas maiores dificuldades?',
+        options: ['Falta de tempo', 'Falta de planejamento', 'Ansiedade', 'Eventos sociais', 'Falta de ingredientes', 'Sabor das refeições', 'Quantidade de comida', 'Nenhuma dificuldade'],
+        required: true
+      },
+      {
+        id: '4',
+        type: 'textarea',
+        question: 'Conte como foi sua experiência seguindo o plano:',
+        required: false
+      },
+      {
+        id: '5',
+        type: 'scale',
+        question: 'Nível de satisfação com o atendimento (1=muito insatisfeito, 10=muito satisfeito)',
+        required: true
+      },
+      {
+        id: '6',
+        type: 'textarea',
+        question: 'Sugestões ou comentários adicionais:',
+        required: false
+      }
+    ]
+  }
+];
+
 interface Question {
   id: string;
   type: 'text' | 'textarea' | 'radio' | 'checkbox' | 'scale';
@@ -27,6 +245,7 @@ export const PlatformQuestionnaires = () => {
   const { toast } = useToast();
   const [questionnaires, setQuestionnaires] = useState<Questionnaire[]>([]);
   const [isCreating, setIsCreating] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -155,14 +374,107 @@ export const PlatformQuestionnaires = () => {
             Crie questionários personalizados para seus pacientes
           </p>
         </div>
-        <Button
-          onClick={() => setIsCreating(true)}
-          className="flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Novo Questionário
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setShowTemplates(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <ClipboardList className="w-4 h-4" />
+            Usar Template
+          </Button>
+          <Button
+            onClick={() => setIsCreating(true)}
+            className="flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Criar do Zero
+          </Button>
+        </div>
       </div>
+
+      {/* Modal de Templates */}
+      {showTemplates && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-background rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold">Escolha um Template</h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowTemplates(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {QUESTIONNAIRE_TEMPLATES.map((template, index) => (
+                <div 
+                  key={index}
+                  className="border-2 border-border rounded-lg p-4 hover:border-primary cursor-pointer transition"
+                  onClick={async () => {
+                    const { error } = await supabase.from('questionnaires').insert({
+                      tenant_id: tenantId,
+                      title: template.title,
+                      description: template.description,
+                      questions: template.questions as any
+                    });
+
+                    if (error) {
+                      toast({ 
+                        title: "Erro", 
+                        description: "Não foi possível criar", 
+                        variant: "destructive" 
+                      });
+                    } else {
+                      toast({ 
+                        title: "Template criado!", 
+                        description: `"${template.title}" adicionado aos seus questionários` 
+                      });
+                      setShowTemplates(false);
+                      fetchQuestionnaires();
+                    }
+                  }}
+                >
+                  <h4 className="font-semibold mb-2">{template.title}</h4>
+                  <p className="text-sm text-muted-foreground mb-3">{template.description}</p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      {template.questions.length} perguntas
+                    </span>
+                    <span className="text-primary font-medium">
+                      Usar Template →
+                    </span>
+                  </div>
+                  
+                  {/* Preview das perguntas */}
+                  <div className="mt-3 pt-3 border-t space-y-1">
+                    {template.questions.slice(0, 3).map((q, i) => (
+                      <p key={i} className="text-xs text-muted-foreground truncate">
+                        {i + 1}. {q.question}
+                      </p>
+                    ))}
+                    {template.questions.length > 3 && (
+                      <p className="text-xs text-muted-foreground/70">
+                        + {template.questions.length - 3} perguntas
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <Button
+              onClick={() => setShowTemplates(false)}
+              variant="outline"
+              className="mt-6 w-full"
+            >
+              Cancelar
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Modal Criar */}
       {isCreating && (
