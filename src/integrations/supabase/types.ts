@@ -91,6 +91,7 @@ export type Database = {
       appointments: {
         Row: {
           client_id: string
+          confirmation_requested_at: string | null
           created_at: string
           datetime: string
           id: string
@@ -107,6 +108,7 @@ export type Database = {
         }
         Insert: {
           client_id: string
+          confirmation_requested_at?: string | null
           created_at?: string
           datetime: string
           id?: string
@@ -123,6 +125,7 @@ export type Database = {
         }
         Update: {
           client_id?: string
+          confirmation_requested_at?: string | null
           created_at?: string
           datetime?: string
           id?: string
