@@ -95,10 +95,15 @@ export type Database = {
           datetime: string
           id: string
           notes: string | null
+          payment_date: string | null
+          payment_method: string | null
+          payment_notes: string | null
+          payment_status: string | null
           status: string
           tenant_id: string
           type: string
           updated_at: string
+          value: number | null
         }
         Insert: {
           client_id: string
@@ -106,10 +111,15 @@ export type Database = {
           datetime: string
           id?: string
           notes?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          payment_notes?: string | null
+          payment_status?: string | null
           status?: string
           tenant_id: string
           type: string
           updated_at?: string
+          value?: number | null
         }
         Update: {
           client_id?: string
@@ -117,10 +127,15 @@ export type Database = {
           datetime?: string
           id?: string
           notes?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          payment_notes?: string | null
+          payment_status?: string | null
           status?: string
           tenant_id?: string
           type?: string
           updated_at?: string
+          value?: number | null
         }
         Relationships: [
           {
@@ -732,10 +747,41 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      financial_summary: {
+        Row: {
+          month: string | null
+          paid_count: number | null
+          pending_count: number | null
+          tenant_id: string | null
+          total_appointments: number | null
+          total_expected: number | null
+          total_pending: number | null
+          total_received: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
-      [_ in never]: never
+      get_financial_stats: {
+        Args: { p_end_date: string; p_start_date: string; p_tenant_id: string }
+        Returns: {
+          average_value: number
+          paid_appointments: number
+          payment_rate: number
+          pending_appointments: number
+          total_appointments: number
+          total_pending: number
+          total_received: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

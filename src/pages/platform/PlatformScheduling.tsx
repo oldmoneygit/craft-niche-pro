@@ -56,6 +56,11 @@ export default function PlatformScheduling() {
     datetime: '',
     type: 'primeira_consulta' as 'primeira_consulta' | 'retorno',
     notes: '',
+    value: '',
+    payment_status: 'pending',
+    payment_method: '',
+    payment_date: '',
+    payment_notes: ''
   });
   const { toast } = useToast();
 
@@ -117,6 +122,11 @@ export default function PlatformScheduling() {
       datetime: '',
       type: 'primeira_consulta',
       notes: '',
+      value: '',
+      payment_status: 'pending',
+      payment_method: '',
+      payment_date: '',
+      payment_notes: ''
     });
     setEditingAppointment(null);
   };
@@ -137,6 +147,11 @@ export default function PlatformScheduling() {
           .update({
             ...validatedData,
             datetime: utcDateTime.toISOString(),
+            value: formData.value ? parseFloat(formData.value) : null,
+            payment_status: formData.payment_status,
+            payment_method: formData.payment_method || null,
+            payment_date: formData.payment_date || null,
+            payment_notes: formData.payment_notes || null
           })
           .eq('id', editingAppointment.id);
 
@@ -151,6 +166,11 @@ export default function PlatformScheduling() {
             type: validatedData.type,
             notes: validatedData.notes,
             tenant_id: tenant!.id,
+            value: formData.value ? parseFloat(formData.value) : null,
+            payment_status: formData.payment_status,
+            payment_method: formData.payment_method || null,
+            payment_date: formData.payment_date || null,
+            payment_notes: formData.payment_notes || null
           }]);
 
         if (error) throw error;
@@ -190,6 +210,11 @@ export default function PlatformScheduling() {
       datetime: formattedDate,
       type: appointment.type,
       notes: appointment.notes || '',
+      value: (appointment as any).value?.toString() || '',
+      payment_status: (appointment as any).payment_status || 'pending',
+      payment_method: (appointment as any).payment_method || '',
+      payment_date: (appointment as any).payment_date || '',
+      payment_notes: (appointment as any).payment_notes || ''
     });
     setIsDialogOpen(true);
   };
@@ -354,6 +379,99 @@ export default function PlatformScheduling() {
                     placeholder="Observações sobre a consulta..."
                   />
                 </div>
+
+                {/* Seção Financeira */}
+                <div className="border-t pt-4 mt-4">
+                  <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                    💰 Informações Financeiras
+                  </h4>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="value">Valor da Consulta</Label>
+                      <div className="relative mt-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                          R$
+                        </span>
+                        <Input
+                          id="value"
+                          type="number"
+                          step="0.01"
+                          value={formData.value}
+                          onChange={e => setFormData({...formData, value: e.target.value})}
+                          placeholder="0,00"
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="payment_status">Status do Pagamento</Label>
+                      <Select
+                        value={formData.payment_status}
+                        onValueChange={(value) => setFormData({...formData, payment_status: value})}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pendente</SelectItem>
+                          <SelectItem value="paid">Pago</SelectItem>
+                          <SelectItem value="cancelled">Cancelado</SelectItem>
+                          <SelectItem value="refunded">Reembolsado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {formData.payment_status === 'paid' && (
+                    <>
+                      <div className="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                          <Label htmlFor="payment_method">Forma de Pagamento</Label>
+                          <Select
+                            value={formData.payment_method}
+                            onValueChange={(value) => setFormData({...formData, payment_method: value})}
+                          >
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                              <SelectItem value="pix">PIX</SelectItem>
+                              <SelectItem value="cartao_debito">Cartão de Débito</SelectItem>
+                              <SelectItem value="cartao_credito">Cartão de Crédito</SelectItem>
+                              <SelectItem value="transferencia">Transferência</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="payment_date">Data do Pagamento</Label>
+                          <Input
+                            id="payment_date"
+                            type="date"
+                            value={formData.payment_date}
+                            onChange={e => setFormData({...formData, payment_date: e.target.value})}
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <Label htmlFor="payment_notes">Observações do Pagamento (opcional)</Label>
+                        <Textarea
+                          id="payment_notes"
+                          value={formData.payment_notes}
+                          onChange={e => setFormData({...formData, payment_notes: e.target.value})}
+                          placeholder="Ex: Recebido via PIX"
+                          rows={2}
+                          className="mt-1"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
                 
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="secondary" onClick={() => setIsDialogOpen(false)}>
@@ -462,6 +580,22 @@ export default function PlatformScheduling() {
                         {appointment.clients?.phone && <p>📱 {appointment.clients.phone}</p>}
                         {appointment.notes && <p>📝 {appointment.notes}</p>}
                       </div>
+                      {(appointment as any).value && (
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-sm font-bold text-foreground">
+                            R$ {((appointment as any).value as number).toFixed(2)}
+                          </span>
+                          <Badge className={
+                            (appointment as any).payment_status === 'paid' ? 'bg-green-100 text-green-800' :
+                            (appointment as any).payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                          }>
+                            {(appointment as any).payment_status === 'paid' ? '✓ Pago' :
+                             (appointment as any).payment_status === 'pending' ? '⏱ Pendente' :
+                             '✗ Cancelado'}
+                          </Badge>
+                        </div>
+                      )}
                       <div className="flex gap-2 mt-3">
                         {appointment.status === 'agendado' && (
                           <Button size="sm" className="action-success" onClick={() => updateStatus(appointment.id, 'confirmado')}>
