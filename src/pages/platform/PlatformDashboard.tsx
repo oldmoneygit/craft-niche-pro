@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 import DashboardTemplate from '@/core/layouts/DashboardTemplate';
-import { NutritionCard } from "@/components/ui/nutrition-card";
 import { 
   Calendar, 
   Clock, 
@@ -11,11 +10,12 @@ import {
   Users,
   Phone,
   CheckCircle,
-  XCircle
+  ChevronDown,
+  Send,
+  Activity
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from '@/hooks/useTenantId';
 
@@ -24,11 +24,21 @@ export default function PlatformDashboard() {
   const { setClientId, clientConfig, loading: configLoading } = useClientConfig();
   const { tenantId, loading: tenantLoading } = useTenantId();
   const navigate = useNavigate();
+  
   const [todayAppointments, setTodayAppointments] = useState<any[]>([]);
+  const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
   const [reminders, setReminders] = useState<any[]>([]);
-  const [inactiveClients, setInactiveClients] = useState<any[]>([]);
-  const [pendingConfirmations, setPendingConfirmations] = useState<any[]>([]);
+  const [confirmations, setConfirmations] = useState<any[]>([]);
+  const [sentReminders, setSentReminders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  const [expandedSections, setExpandedSections] = useState({
+    reminders: false,
+    sentReminders: false,
+    confirmations: false,
+    today: false,
+    upcoming: false
+  });
 
   useEffect(() => {
     if (clientId && clientId.trim()) {
@@ -46,6 +56,8 @@ export default function PlatformDashboard() {
       today.setHours(0, 0, 0, 0);
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
+      const next7Days = new Date(today);
+      next7Days.setDate(next7Days.getDate() + 7);
 
       // Consultas de hoje
       const { data: todayData } = await supabase
@@ -55,65 +67,54 @@ export default function PlatformDashboard() {
         .gte('datetime', today.toISOString())
         .lt('datetime', tomorrow.toISOString())
         .order('datetime', { ascending: true });
-
       setTodayAppointments(todayData || []);
 
-      // Lembretes pendentes (consultas nas próximas 72h)
+      // Próximas consultas (próximos 7 dias, exceto hoje)
+      const { data: upcomingData } = await supabase
+        .from('appointments')
+        .select('*, clients(name, phone)')
+        .eq('tenant_id', tenantId)
+        .gte('datetime', tomorrow.toISOString())
+        .lte('datetime', next7Days.toISOString())
+        .order('datetime', { ascending: true });
+      setUpcomingAppointments(upcomingData || []);
+
+      // Lembretes pendentes
       const in72h = new Date();
       in72h.setHours(in72h.getHours() + 72);
-      
       const { data: remindersData } = await supabase
         .from('appointments')
         .select('*, clients(name, phone)')
         .eq('tenant_id', tenantId)
         .gte('datetime', new Date().toISOString())
         .lte('datetime', in72h.toISOString())
-        .order('datetime', { ascending: true })
-        .limit(5);
-
+        .order('datetime', { ascending: true });
       setReminders(remindersData || []);
 
-      // Clientes inativos (30+ dias sem consulta)
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-      const { data: allClients } = await supabase
-        .from('clients')
-        .select('id, name, phone')
-        .eq('tenant_id', tenantId);
-
-      const inactiveList = [];
-      for (const client of allClients || []) {
-        const { data: lastAppointment } = await supabase
-          .from('appointments')
-          .select('datetime')
-          .eq('client_id', client.id)
-          .order('datetime', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (!lastAppointment || new Date(lastAppointment.datetime) < thirtyDaysAgo) {
-          inactiveList.push(client);
-          if (inactiveList.length >= 5) break;
-        }
-      }
-      setInactiveClients(inactiveList);
-
-      // Confirmações pendentes (consultas em 48h que não foram confirmadas)
+      // Confirmações pendentes (48h)
       const in48h = new Date();
       in48h.setHours(in48h.getHours() + 48);
-
-      const { data: pendingData } = await supabase
+      const { data: confirmData } = await supabase
         .from('appointments')
         .select('*, clients(name, phone)')
         .eq('tenant_id', tenantId)
         .gte('datetime', new Date().toISOString())
         .lte('datetime', in48h.toISOString())
         .neq('status', 'confirmado')
-        .order('datetime', { ascending: true })
-        .limit(5);
+        .order('datetime', { ascending: true });
+      setConfirmations(confirmData || []);
 
-      setPendingConfirmations(pendingData || []);
+      // Lembretes enviados (últimos 30 dias)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const { data: sentData } = await supabase
+        .from('appointment_reminders')
+        .select('*, appointments(*, clients(name, phone))')
+        .eq('tenant_id', tenantId)
+        .gte('sent_at', thirtyDaysAgo.toISOString())
+        .order('sent_at', { ascending: false })
+        .limit(10);
+      setSentReminders(sentData || []);
 
       setLoading(false);
     } catch (error) {
@@ -122,15 +123,8 @@ export default function PlatformDashboard() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      'agendado': 'bg-blue-100 text-blue-800',
-      'confirmado': 'bg-green-100 text-green-800',
-      'realizado': 'bg-emerald-100 text-emerald-800',
-      'cancelado': 'bg-red-100 text-red-800',
-      'faltou': 'bg-orange-100 text-orange-800'
-    };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
   const isLoading = loading || configLoading || tenantLoading;
@@ -138,11 +132,9 @@ export default function PlatformDashboard() {
   if (isLoading) {
     return (
       <DashboardTemplate title="Dashboard">
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-4">
           <div className="skeleton h-32 rounded-xl" />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {[1,2,3,4].map(i => <div key={i} className="skeleton h-64 rounded-xl" />)}
-          </div>
+          {[1,2,3,4].map(i => <div key={i} className="skeleton h-20 rounded-xl" />)}
         </div>
       </DashboardTemplate>
     );
@@ -163,248 +155,250 @@ export default function PlatformDashboard() {
 
   return (
     <DashboardTemplate title="Dashboard">
-      <div className="p-6 space-y-6 animate-fade-in">
-        {/* Hero Header com info do dia */}
-        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-2xl p-8 border-2 border-primary/20">
+      <div className="p-6 space-y-4 max-w-7xl mx-auto">
+        {/* Hero Header */}
+        <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-8 text-white shadow-xl">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold mb-2">
                 Bem-vindo de volta! 👋
               </h1>
-              <p className="text-lg text-muted-foreground">
-                Hoje você tem <strong className="text-primary">{todayAppointments.length} consultas agendadas</strong>
+              <p className="text-lg text-slate-300">
+                Hoje você tem <span className="font-bold text-white">{todayAppointments.length}</span> consultas agendadas
               </p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-muted-foreground">Hoje</p>
+              <p className="text-sm text-slate-400">Hoje</p>
               <p className="text-2xl font-bold">
-                {new Date().toLocaleDateString('pt-BR', { 
-                  day: '2-digit', 
-                  month: 'long'
-                })}
+                {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Consultas de Hoje - DESTAQUE */}
-        <Card className="border-2 border-primary/20">
-          <CardHeader className="bg-primary/5">
-            <CardTitle className="flex items-center gap-2 text-xl">
-              <Calendar className="w-6 h-6 text-primary" />
-              Consultas de Hoje ({todayAppointments.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            {todayAppointments.length === 0 ? (
-              <div className="text-center py-8">
-                <Calendar className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
-                <p className="text-muted-foreground">Nenhuma consulta agendada para hoje</p>
-                <Button 
-                  variant="outline" 
-                  className="mt-4"
-                  onClick={() => navigate(`/platform/${clientConfig?.subdomain}/agendamentos`)}
-                >
-                  Agendar Consulta
-                </Button>
+        {/* Confirmações Pendentes */}
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg overflow-hidden">
+          <div 
+            className="p-6 cursor-pointer flex items-center justify-between text-white"
+            onClick={() => toggleSection('confirmations')}
+          >
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-6 h-6" />
+              <div>
+                <h3 className="text-xl font-bold">Confirmações Pendentes ({confirmations.length})</h3>
+                <p className="text-sm text-blue-100">Consultas nas próximas 48h que ainda não foram confirmadas</p>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {todayAppointments.map(apt => (
-                  <div 
-                    key={apt.id} 
-                    className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition border-l-4 border-l-primary"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <span className="font-bold text-primary">
-                          {apt.clients?.name.split(' ').map((n: string) => n[0]).join('')}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="font-semibold">{apt.clients?.name}</p>
-                        <div className="flex items-center gap-3 mt-1">
-                          <span className="text-sm text-muted-foreground flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {new Date(apt.datetime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                          <span className="text-sm text-muted-foreground">•</span>
-                          <span className="text-sm text-muted-foreground">{apt.type}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={getStatusColor(apt.status)}>
-                        {apt.status}
-                      </Badge>
-                      <Button variant="ghost" size="sm" asChild>
-                        <a 
-                          href={`https://wa.me/55${apt.clients?.phone?.replace(/\D/g, '')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Phone className="w-4 h-4" />
-                        </a>
-                      </Button>
-                    </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge className="bg-white/20 text-white border-0">
+                {confirmations.length}
+              </Badge>
+              <ChevronDown className={`w-5 h-5 transition-transform ${expandedSections.confirmations ? 'rotate-180' : ''}`} />
+            </div>
+          </div>
+          {expandedSections.confirmations && confirmations.length > 0 && (
+            <div className="bg-blue-50 p-4 space-y-2">
+              {confirmations.map(apt => (
+                <div key={apt.id} className="bg-white rounded-lg p-4 flex items-center justify-between shadow-sm">
+                  <div>
+                    <p className="font-semibold text-gray-900">{apt.clients?.name}</p>
+                    <p className="text-sm text-gray-600">
+                      {new Date(apt.datetime).toLocaleDateString('pt-BR')} às {' '}
+                      {new Date(apt.datetime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                  <Button size="sm" className="bg-blue-500 hover:bg-blue-600">
+                    <Send className="w-4 h-4 mr-2" />
+                    Pedir Confirmação
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+          {expandedSections.confirmations && confirmations.length === 0 && (
+            <div className="bg-blue-50 p-4 text-center text-gray-600">
+              ✓ Todas as consultas estão confirmadas
+            </div>
+          )}
+        </div>
+
+        {/* Lembretes Pendentes */}
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl shadow-lg overflow-hidden">
+          <div 
+            className="p-6 cursor-pointer flex items-center justify-between text-white"
+            onClick={() => toggleSection('reminders')}
+          >
+            <div className="flex items-center gap-3">
+              <Bell className="w-6 h-6" />
+              <div>
+                <h3 className="text-xl font-bold">Lembretes Pendentes ({reminders.length})</h3>
+                <p className="text-sm text-orange-100">Consultas nas próximas 72h precisam de lembrete</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge className="bg-white/20 text-white border-0">
+                {reminders.length}
+              </Badge>
+              <ChevronDown className={`w-5 h-5 transition-transform ${expandedSections.reminders ? 'rotate-180' : ''}`} />
+            </div>
+          </div>
+          {expandedSections.reminders && reminders.length > 0 && (
+            <div className="bg-orange-50 p-4">
+              <div className="space-y-2 mb-4">
+                {reminders.map(apt => (
+                  <div key={apt.id} className="bg-white rounded-lg p-3 flex items-center justify-between text-sm">
+                    <span className="font-medium text-gray-900">{apt.clients?.name}</span>
+                    <span className="text-gray-600">
+                      {new Date(apt.datetime).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                    </span>
                   </div>
                 ))}
               </div>
-            )}
-          </CardContent>
-        </Card>
+              <Button 
+                className="w-full bg-orange-600 hover:bg-orange-700"
+                onClick={() => navigate(`/platform/${clientConfig?.subdomain}/lembretes`)}
+              >
+                <Bell className="w-4 h-4 mr-2" />
+                Enviar Lembretes
+              </Button>
+            </div>
+          )}
+          {expandedSections.reminders && reminders.length === 0 && (
+            <div className="bg-orange-50 p-4 text-center text-gray-600">
+              ✓ Todos os lembretes foram enviados
+            </div>
+          )}
+        </div>
 
-        {/* Grid de Ações Pendentes */}
+        {/* Lembretes Enviados */}
+        <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl shadow-lg overflow-hidden">
+          <div 
+            className="p-6 cursor-pointer flex items-center justify-between text-white"
+            onClick={() => toggleSection('sentReminders')}
+          >
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-6 h-6" />
+              <div>
+                <h3 className="text-xl font-bold">Lembretes Enviados (últimos 30 dias)</h3>
+                <p className="text-sm text-green-100">Histórico de lembretes já enviados</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge className="bg-white/20 text-white border-0">
+                {sentReminders.length}
+              </Badge>
+              <ChevronDown className={`w-5 h-5 transition-transform ${expandedSections.sentReminders ? 'rotate-180' : ''}`} />
+            </div>
+          </div>
+          {expandedSections.sentReminders && sentReminders.length > 0 && (
+            <div className="bg-green-50 p-4 space-y-2">
+              {sentReminders.map(reminder => (
+                <div key={reminder.id} className="bg-white rounded-lg p-3 flex items-center justify-between text-sm">
+                  <span className="font-medium text-gray-900">{reminder.appointments?.clients?.name}</span>
+                  <span className="text-gray-600">
+                    Enviado em {new Date(reminder.sent_at).toLocaleDateString('pt-BR')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+          {expandedSections.sentReminders && sentReminders.length === 0 && (
+            <div className="bg-green-50 p-4 text-center text-gray-600">
+              Nenhum lembrete enviado nos últimos 30 dias
+            </div>
+          )}
+        </div>
+
+        {/* Grid: Consultas de Hoje + Próximas Consultas */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Lembretes Pendentes */}
-          <NutritionCard
-            title="Lembretes a Enviar"
-            icon={Bell}
-            iconColor="text-amber-600"
-            variant="warning"
-            action={
-              <Badge variant="secondary" className="bg-amber-100 text-amber-800">
-                {reminders.length}
-              </Badge>
-            }
-          >
-            {reminders.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                ✓ Todos os lembretes foram enviados
-              </p>
-            ) : (
-              <>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {reminders.length} consultas precisam de lembrete
-                </p>
-                <div className="space-y-2 mb-4 max-h-40 overflow-y-auto">
-                  {reminders.slice(0, 3).map(r => (
-                    <div key={r.id} className="text-sm p-2 bg-muted rounded flex justify-between">
-                      <span>{r.clients?.name}</span>
-                      <span className="text-muted-foreground">
-                        {new Date(r.datetime).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={() => navigate(`/platform/${clientConfig?.subdomain}/lembretes`)}
-                >
-                  <Bell className="w-4 h-4 mr-2" />
-                  Enviar Lembretes
-                </Button>
-              </>
-            )}
-          </NutritionCard>
-
-          {/* Confirmações Pendentes */}
-          <NutritionCard
-            title="Confirmações Pendentes"
-            icon={CheckCircle}
-            iconColor="text-blue-600"
-            variant="info"
-            action={
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                {pendingConfirmations.length}
-              </Badge>
-            }
-          >
-            {pendingConfirmations.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                ✓ Todas as consultas confirmadas
-              </p>
-            ) : (
-              <>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {pendingConfirmations.length} consultas precisam de confirmação
-                </p>
-                <div className="space-y-2 mb-4 max-h-40 overflow-y-auto">
-                  {pendingConfirmations.slice(0, 3).map(c => (
-                    <div key={c.id} className="text-sm p-2 bg-muted rounded flex justify-between">
-                      <span>{c.clients?.name}</span>
-                      <span className="text-muted-foreground">
-                        {new Date(c.datetime).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={() => navigate(`/platform/${clientConfig?.subdomain}/agendamentos`)}
-                >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Ver Consultas
-                </Button>
-              </>
-            )}
-          </NutritionCard>
-
-          {/* Pacientes Inativos */}
-          <NutritionCard
-            title="Pacientes Inativos"
-            icon={AlertCircle}
-            iconColor="text-red-600"
-            variant="warning"
-            action={
-              <Badge variant="destructive">
-                {inactiveClients.length}
-              </Badge>
-            }
-          >
-            {inactiveClients.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                ✓ Todos os clientes estão ativos
-              </p>
-            ) : (
-              <>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {inactiveClients.length} clientes sem consulta há 30+ dias
-                </p>
-                <div className="space-y-2 mb-4 max-h-40 overflow-y-auto">
-                  {inactiveClients.slice(0, 3).map(c => (
-                    <div key={c.id} className="text-sm p-2 bg-muted rounded">
-                      {c.name}
-                    </div>
-                  ))}
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={() => navigate(`/platform/${clientConfig?.subdomain}/clientes`)}
-                >
-                  <Users className="w-4 h-4 mr-2" />
-                  Ver Clientes
-                </Button>
-              </>
-            )}
-          </NutritionCard>
-
-          {/* Feedbacks Pendentes */}
-          <NutritionCard
-            title="Feedbacks Semanais"
-            icon={XCircle}
-            iconColor="text-purple-600"
-            variant="info"
-            action={<Badge className="bg-purple-100 text-purple-800">0</Badge>}
-          >
-            <p className="text-sm text-muted-foreground mb-4">
-              Nenhum feedback semanal pendente
-            </p>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full"
-              onClick={() => navigate(`/platform/${clientConfig?.subdomain}/feedbacks-semanais`)}
+          {/* Consultas de Hoje */}
+          <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg overflow-hidden">
+            <div 
+              className="p-6 cursor-pointer flex items-center justify-between text-white"
+              onClick={() => toggleSection('today')}
             >
-              Enviar Feedbacks
-            </Button>
-          </NutritionCard>
+              <div className="flex items-center gap-3">
+                <Calendar className="w-6 h-6" />
+                <h3 className="text-xl font-bold">Consultas de Hoje</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge className="bg-white/20 text-white border-0">
+                  {todayAppointments.length}
+                </Badge>
+                <ChevronDown className={`w-5 h-5 transition-transform ${expandedSections.today ? 'rotate-180' : ''}`} />
+              </div>
+            </div>
+            {expandedSections.today && (
+              <div className="bg-blue-50 p-4 space-y-2">
+                {todayAppointments.length === 0 ? (
+                  <p className="text-center text-gray-600 py-4">Nenhuma consulta hoje</p>
+                ) : (
+                  todayAppointments.map(apt => (
+                    <div key={apt.id} className="bg-white rounded-lg p-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-gray-900">{apt.clients?.name}</p>
+                          <p className="text-sm text-gray-600">
+                            {new Date(apt.datetime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} • {apt.type}
+                          </p>
+                        </div>
+                        <Badge className={
+                          apt.status === 'realizado' ? 'bg-green-100 text-green-800' :
+                          apt.status === 'confirmado' ? 'bg-blue-100 text-blue-800' :
+                          'bg-gray-100 text-gray-800'
+                        }>
+                          {apt.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Próximas Consultas */}
+          <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl shadow-lg overflow-hidden">
+            <div 
+              className="p-6 cursor-pointer flex items-center justify-between text-white"
+              onClick={() => toggleSection('upcoming')}
+            >
+              <div className="flex items-center gap-3">
+                <Activity className="w-6 h-6" />
+                <h3 className="text-xl font-bold">Próximas Consultas</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge className="bg-white/20 text-white border-0">
+                  {upcomingAppointments.length}
+                </Badge>
+                <ChevronDown className={`w-5 h-5 transition-transform ${expandedSections.upcoming ? 'rotate-180' : ''}`} />
+              </div>
+            </div>
+            {expandedSections.upcoming && (
+              <div className="bg-purple-50 p-4 space-y-2">
+                {upcomingAppointments.length === 0 ? (
+                  <p className="text-center text-gray-600 py-4">Nenhuma consulta agendada</p>
+                ) : (
+                  upcomingAppointments.slice(0, 5).map(apt => (
+                    <div key={apt.id} className="bg-white rounded-lg p-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-gray-900">{apt.clients?.name}</p>
+                          <p className="text-sm text-gray-600">
+                            {new Date(apt.datetime).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} às {' '}
+                            {new Date(apt.datetime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                        <Badge className="bg-purple-100 text-purple-800">
+                          {apt.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </DashboardTemplate>
