@@ -33,7 +33,9 @@ export default function PlatformMealPlans() {
     if (!tenantId) return;
 
     setLoading(true);
-    const { data } = await supabase
+    console.log('Fetching plans for tenant:', tenantId);
+    
+    const { data, error } = await supabase
       .from('meal_plans')
       .select(`
         *,
@@ -41,6 +43,14 @@ export default function PlatformMealPlans() {
       `)
       .eq('tenant_id', tenantId)
       .order('created_at', { ascending: false });
+
+    console.log('Meal plans data:', data);
+    console.log('Meal plans error:', error);
+    
+    if (error) {
+      console.error('Error fetching plans:', error);
+      toast({ title: "Erro ao carregar planos", variant: "destructive" });
+    }
 
     setPlans((data as any[]) || []);
     setLoading(false);
