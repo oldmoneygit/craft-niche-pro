@@ -57,15 +57,9 @@ export function PlatformSidebar() {
     },
     {
       title: 'Agente IA',
-      url: `${platformBasePath}/ai-agent`,
+      url: `${platformBasePath}/ai-chat`,
       icon: Bot,
-      enabled: isModuleEnabled('aiAgent'),
-    },
-    {
-      title: 'FAQ Bot',
-      url: `${platformBasePath}/faq-bot`,
-      icon: Bot,
-      enabled: true, // FAQ Bot is always enabled
+      enabled: true,
     },
     {
       title: 'Base de Conhecimento',

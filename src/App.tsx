@@ -16,7 +16,7 @@ import PlatformChat from "./pages/platform/PlatformChat";
 import PlatformCommunication from "./pages/platform/PlatformCommunication";
 import PlatformQuestionnaires from "./pages/platform/PlatformQuestionnaires";
 import PlatformMealPlans from "./pages/platform/PlatformMealPlans";
-import PlatformFAQBot from "./pages/platform/PlatformFAQBot";
+import PlatformAIChat from "./pages/platform/PlatformAIChat";
 import PlatformScheduling from "./pages/platform/PlatformScheduling";
 import PlatformSettings from "./pages/platform/PlatformSettings";
 import PlatformReminderSettings from "./pages/platform/PlatformReminderSettings";
@@ -47,7 +47,7 @@ const App = () => (
               <Route path="/platform/:clientId/questionnaires" element={<PlatformProtectedRoute><PlatformQuestionnaires /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/meal-plans" element={<PlatformProtectedRoute><PlatformMealPlans /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/planos-alimentares" element={<PlatformProtectedRoute><PlatformMealPlans /></PlatformProtectedRoute>} />
-              <Route path="/platform/:clientId/faq-bot" element={<PlatformProtectedRoute><PlatformFAQBot /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/ai-chat" element={<PlatformProtectedRoute><PlatformAIChat /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/comunicacao" element={<PlatformProtectedRoute><PlatformCommunication /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/settings" element={<PlatformProtectedRoute><PlatformSettings /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/lembretes" element={<PlatformProtectedRoute><PlatformReminderSettings /></PlatformProtectedRoute>} />
