@@ -127,7 +127,7 @@ export function PlatformSidebar() {
     },
     {
       title: 'Financeiro',
-      url: `${platformBasePath}/financial`,
+      url: `${platformBasePath}/financeiro`,
       icon: DollarSign,
       enabled: true,
     },

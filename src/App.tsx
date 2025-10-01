@@ -64,7 +64,7 @@ const App = () => (
               <Route path="/platform/:clientId/settings" element={<PlatformProtectedRoute><PlatformSettings /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/lembretes" element={<PlatformProtectedRoute><PlatformReminderSettings /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/conhecimento" element={<PlatformProtectedRoute><PlatformKnowledge /></PlatformProtectedRoute>} />
-              <Route path="/platform/:clientId/financial" element={<PlatformProtectedRoute><PlatformFinancial /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/financeiro" element={<PlatformProtectedRoute><PlatformFinancial /></PlatformProtectedRoute>} />
               
               {/* Public Questionnaires */}
               <Route path="/questionnaire/:questionnaireId" element={<QuestionnairePublic />} />
