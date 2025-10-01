@@ -30,12 +30,14 @@ export default function PlatformDashboard() {
   const [reminders, setReminders] = useState<any[]>([]);
   const [confirmations, setConfirmations] = useState<any[]>([]);
   const [sentReminders, setSentReminders] = useState<any[]>([]);
+  const [inactiveClients, setInactiveClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   const [expandedSections, setExpandedSections] = useState({
     reminders: false,
     sentReminders: false,
     confirmations: false,
+    inactiveClients: false,
     today: false,
     upcoming: false
   });
@@ -49,6 +51,18 @@ export default function PlatformDashboard() {
   useEffect(() => {
     if (tenantId) fetchDashboardData();
   }, [tenantId]);
+
+  // Atualizar seções expandidas baseado em dados
+  useEffect(() => {
+    setExpandedSections({
+      reminders: reminders.length > 0,
+      sentReminders: sentReminders.length > 0,
+      confirmations: confirmations.length > 0,
+      inactiveClients: inactiveClients.length > 0,
+      today: todayAppointments.length > 0,
+      upcoming: upcomingAppointments.length > 0
+    });
+  }, [reminders, sentReminders, confirmations, inactiveClients, todayAppointments, upcomingAppointments]);
 
   const fetchDashboardData = async () => {
     try {
@@ -116,6 +130,29 @@ export default function PlatformDashboard() {
         .limit(10);
       setSentReminders(sentData || []);
 
+      // Clientes inativos (30+ dias sem consulta)
+      const { data: allClients } = await supabase
+        .from('clients')
+        .select('id, name, phone')
+        .eq('tenant_id', tenantId);
+
+      const inactiveList = [];
+      for (const client of allClients || []) {
+        const { data: lastAppointment } = await supabase
+          .from('appointments')
+          .select('datetime')
+          .eq('client_id', client.id)
+          .order('datetime', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (!lastAppointment || new Date(lastAppointment.datetime) < thirtyDaysAgo) {
+          inactiveList.push(client);
+          if (inactiveList.length >= 10) break;
+        }
+      }
+      setInactiveClients(inactiveList);
+
       setLoading(false);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -125,6 +162,12 @@ export default function PlatformDashboard() {
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const handleSendReminder = async (appointmentId: string, clientName: string) => {
+    // Placeholder para enviar lembrete individual
+    console.log('Enviando lembrete para:', clientName, appointmentId);
+    // TODO: Implementar envio de lembrete
   };
 
   const isLoading = loading || configLoading || tenantLoading;
@@ -246,11 +289,21 @@ export default function PlatformDashboard() {
             <div className="bg-orange-50 p-4">
               <div className="space-y-2 mb-4">
                 {reminders.map(apt => (
-                  <div key={apt.id} className="bg-white rounded-lg p-3 flex items-center justify-between text-sm">
-                    <span className="font-medium text-gray-900">{apt.clients?.name}</span>
-                    <span className="text-gray-600">
-                      {new Date(apt.datetime).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
-                    </span>
+                  <div key={apt.id} className="bg-white rounded-lg p-4 flex items-center justify-between shadow-sm">
+                    <div>
+                      <p className="font-semibold text-gray-900">{apt.clients?.name}</p>
+                      <p className="text-sm text-gray-600">
+                        {new Date(apt.datetime).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                      </p>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      className="bg-orange-500 hover:bg-orange-600"
+                      onClick={() => handleSendReminder(apt.id, apt.clients?.name)}
+                    >
+                      <Send className="w-4 h-4 mr-2" />
+                      Enviar Lembrete
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -259,7 +312,7 @@ export default function PlatformDashboard() {
                 onClick={() => navigate(`/platform/${clientConfig?.subdomain}/lembretes`)}
               >
                 <Bell className="w-4 h-4 mr-2" />
-                Enviar Lembretes
+                Enviar Todos os Lembretes
               </Button>
             </div>
           )}
@@ -305,6 +358,70 @@ export default function PlatformDashboard() {
           {expandedSections.sentReminders && sentReminders.length === 0 && (
             <div className="bg-green-50 p-4 text-center text-gray-600">
               Nenhum lembrete enviado nos últimos 30 dias
+            </div>
+          )}
+        </div>
+
+        {/* Clientes Inativos */}
+        <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg overflow-hidden">
+          <div 
+            className="p-6 cursor-pointer flex items-center justify-between text-white"
+            onClick={() => toggleSection('inactiveClients')}
+          >
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-6 h-6" />
+              <div>
+                <h3 className="text-xl font-bold">Pacientes Inativos ({inactiveClients.length})</h3>
+                <p className="text-sm text-red-100">Clientes sem consulta há mais de 30 dias</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge className="bg-white/20 text-white border-0">
+                {inactiveClients.length}
+              </Badge>
+              <ChevronDown className={`w-5 h-5 transition-transform ${expandedSections.inactiveClients ? 'rotate-180' : ''}`} />
+            </div>
+          </div>
+          {expandedSections.inactiveClients && inactiveClients.length > 0 && (
+            <div className="bg-red-50 p-4">
+              <div className="space-y-2 mb-4">
+                {inactiveClients.map(client => (
+                  <div key={client.id} className="bg-white rounded-lg p-4 flex items-center justify-between shadow-sm">
+                    <div>
+                      <p className="font-semibold text-gray-900">{client.name}</p>
+                      <p className="text-sm text-gray-600">{client.phone}</p>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="border-red-300 text-red-700 hover:bg-red-50"
+                      asChild
+                    >
+                      <a 
+                        href={`https://wa.me/55${client.phone?.replace(/\D/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Phone className="w-4 h-4 mr-2" />
+                        Entrar em Contato
+                      </a>
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <Button 
+                variant="outline"
+                className="w-full border-red-600 text-red-700 hover:bg-red-50"
+                onClick={() => navigate(`/platform/${clientConfig?.subdomain}/clientes`)}
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Ver Todos os Clientes
+              </Button>
+            </div>
+          )}
+          {expandedSections.inactiveClients && inactiveClients.length === 0 && (
+            <div className="bg-red-50 p-4 text-center text-gray-600">
+              ✓ Todos os clientes estão ativos
             </div>
           )}
         </div>
