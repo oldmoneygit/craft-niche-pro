@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface StatCardProps {
   title: string;
@@ -11,30 +12,72 @@ interface StatCardProps {
     value: number;
     isPositive: boolean;
   };
+  className?: string;
 }
 
-export function StatCard({ title, value, subtitle, icon: Icon, variant = "primary", trend }: StatCardProps) {
-  const variantClasses = {
-    primary: "from-primary to-primary/80",
-    success: "from-success to-success/80",
-    warning: "from-warning to-warning/80",
-    info: "from-secondary to-secondary/80"
+export function StatCard({ 
+  title, 
+  value, 
+  subtitle, 
+  icon: Icon, 
+  variant = "primary", 
+  trend,
+  className 
+}: StatCardProps) {
+  const variantStyles = {
+    primary: {
+      card: "bg-gradient-to-br from-primary to-primary/80 border-primary/20",
+      icon: "text-white/90",
+      text: "text-white",
+      subtitle: "text-white/80"
+    },
+    success: {
+      card: "bg-gradient-to-br from-green-500 to-emerald-600 border-green-500/20",
+      icon: "text-white/90",
+      text: "text-white",
+      subtitle: "text-white/80"
+    },
+    warning: {
+      card: "bg-gradient-to-br from-amber-500 to-orange-600 border-amber-500/20",
+      icon: "text-white/90",
+      text: "text-white",
+      subtitle: "text-white/80"
+    },
+    info: {
+      card: "bg-gradient-to-br from-blue-500 to-indigo-600 border-blue-500/20",
+      icon: "text-white/90",
+      text: "text-white",
+      subtitle: "text-white/80"
+    }
   };
 
+  const styles = variantStyles[variant];
+
   return (
-    <Card className={`bg-gradient-to-br ${variantClasses[variant]} text-white hover-lift border-0 shadow-lg`}>
+    <Card className={cn(
+      "hover-lift transition-all duration-300 border-2",
+      styles.card,
+      className
+    )}>
       <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-2">
-          <Icon className="w-8 h-8 opacity-80" />
-          <span className="text-sm opacity-90">{title}</span>
+        <div className="flex items-center justify-between mb-3">
+          <Icon className={cn("w-8 h-8", styles.icon)} />
+          <span className={cn("text-sm font-medium", styles.subtitle)}>{title}</span>
         </div>
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-3xl font-bold">{value}</p>
-            {subtitle && <p className="text-sm opacity-90 mt-1">{subtitle}</p>}
+            <p className={cn("text-4xl font-bold mb-1", styles.text)}>{value}</p>
+            {subtitle && (
+              <p className={cn("text-sm", styles.subtitle)}>{subtitle}</p>
+            )}
           </div>
           {trend && (
-            <div className={`text-sm ${trend.isPositive ? 'text-green-200' : 'text-red-200'}`}>
+            <div className={cn(
+              "text-sm font-semibold px-2 py-1 rounded-full",
+              trend.isPositive 
+                ? "bg-white/20 text-white" 
+                : "bg-black/20 text-white"
+            )}>
               {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
             </div>
           )}
