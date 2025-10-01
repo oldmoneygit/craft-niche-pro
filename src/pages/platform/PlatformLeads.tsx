@@ -3,9 +3,7 @@ import { Users, Phone, Calendar, Check, X, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from '@/hooks/useTenantId';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 import DashboardTemplate from '@/core/layouts/DashboardTemplate';
-import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 
 interface Lead {
   id: string;
@@ -25,9 +23,7 @@ interface Lead {
 
 export default function PlatformLeads() {
   const { tenantId } = useTenantId();
-  const { clientConfig } = useClientConfig();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('pending');
@@ -64,26 +60,43 @@ export default function PlatformLeads() {
     await updateLeadStatus(lead.id, 'contacted');
   };
 
-  const handleSchedule = async (lead: Lead) => {
-    if (!clientConfig?.subdomain) {
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar configuração",
-        variant: "destructive"
-      });
-      return;
+  const extractDateFromText = (text: string): string => {
+    // Tentar extrair data do texto "dia 02 às 15h" etc
+    const now = new Date();
+    let appointmentDate = new Date(now);
+    
+    // Regex básico para pegar "dia DD"
+    const dayMatch = text?.match(/dia (\d{1,2})/i);
+    if (dayMatch) {
+      appointmentDate.setDate(parseInt(dayMatch[1]));
+    } else {
+      // Próxima segunda-feira
+      const daysUntilMonday = (8 - appointmentDate.getDay()) % 7 || 7;
+      appointmentDate.setDate(appointmentDate.getDate() + daysUntilMonday);
     }
+    
+    // Regex para hora "às XXh" ou "XXh00"
+    const hourMatch = text?.match(/(\d{1,2})h/i);
+    if (hourMatch) {
+      appointmentDate.setHours(parseInt(hourMatch[1]), 0, 0, 0);
+    } else {
+      appointmentDate.setHours(14, 0, 0, 0); // padrão 14h
+    }
+    
+    return appointmentDate.toISOString();
+  };
 
+  const handleSchedule = async (lead: Lead) => {
     try {
       // Verificar se já existe cliente com esse telefone
-      const { data: existingClients } = await supabase
+      const { data: existingClient } = await supabase
         .from('clients')
         .select('id')
         .eq('tenant_id', tenantId)
         .eq('phone', lead.phone)
         .maybeSingle();
 
-      let clientId = existingClients?.id;
+      let clientId = existingClient?.id;
 
       if (!clientId) {
         // Criar cliente novo
@@ -98,41 +111,50 @@ export default function PlatformLeads() {
           .select()
           .single();
 
-        if (error) {
-          toast({
-            title: "Erro",
-            description: "Não foi possível criar cliente",
-            variant: "destructive"
-          });
-          return;
-        }
-
+        if (error) throw error;
         clientId = newClient.id;
       }
 
-      // Atualizar status do lead para "scheduled"
+      // Criar agendamento DIRETAMENTE
+      const preferredDate = extractDateFromText(lead.preferred_time_description || '');
+
+      const { error: appointmentError } = await supabase
+        .from('appointments')
+        .insert({
+          tenant_id: tenantId,
+          client_id: clientId,
+          datetime: preferredDate,
+          type: 'primeira_consulta',
+          status: 'agendado',
+          notes: `Lead convertido via IA - Horário preferido: ${lead.preferred_time_description}`
+        });
+
+      if (appointmentError) throw appointmentError;
+
+      // Atualizar status do lead
       await supabase
         .from('leads')
         .update({ status: 'scheduled' })
         .eq('id', lead.id);
 
-      // Navegar para agendamentos com dados pré-preenchidos
-      navigate(`/platform/${clientConfig.subdomain}/appointments`, {
-        state: {
-          prefilledClientId: clientId,
-          prefilledNotes: `Lead convertido - Horário preferido: ${lead.preferred_time_description}`
-        }
+      toast({
+        title: "✅ Consulta Agendada!",
+        description: `Agendamento criado para ${lead.name}. Envie confirmação pelo WhatsApp.`,
       });
 
-      toast({
-        title: "Redirecionando",
-        description: "Abrindo página de agendamentos..."
-      });
+      // Abrir WhatsApp com mensagem de confirmação
+      const confirmMessage = `Olá ${lead.name}! Sua consulta foi agendada conforme solicitado: ${lead.preferred_time_description}. Te espero! Qualquer dúvida, só chamar.`;
+      const whatsappLink = `https://wa.me/55${lead.phone.replace(/\D/g, '')}?text=${encodeURIComponent(confirmMessage)}`;
+      window.open(whatsappLink, '_blank');
+
+      // Atualizar lista
+      fetchLeads();
+
     } catch (error) {
-      console.error('Error scheduling lead:', error);
+      console.error('Error scheduling:', error);
       toast({
-        title: "Erro",
-        description: "Não foi possível processar o agendamento",
+        title: "Erro ao agendar",
+        description: "Não foi possível criar o agendamento. Tente novamente.",
         variant: "destructive"
       });
     }
