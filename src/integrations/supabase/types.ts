@@ -464,6 +464,90 @@ export type Database = {
           },
         ]
       }
+      questionnaire_responses: {
+        Row: {
+          answers: Json
+          client_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          public_token: string | null
+          questionnaire_id: string | null
+          status: string | null
+          tenant_id: string
+        }
+        Insert: {
+          answers: Json
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          public_token?: string | null
+          questionnaire_id?: string | null
+          status?: string | null
+          tenant_id: string
+        }
+        Update: {
+          answers?: Json
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          public_token?: string | null
+          questionnaire_id?: string | null
+          status?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questionnaire_responses_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questionnaire_responses_questionnaire_id_fkey"
+            columns: ["questionnaire_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaires"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questionnaires: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          description: string | null
+          id: string
+          questions: Json
+          tenant_id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          questions: Json
+          tenant_id: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          questions?: Json
+          tenant_id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       tenant_config: {
         Row: {
           ai_config: Json | null
