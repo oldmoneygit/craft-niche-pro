@@ -770,6 +770,20 @@ export type Database = {
       }
     }
     Functions: {
+      get_analytics_data: {
+        Args: { p_months?: number; p_tenant_id: string }
+        Returns: {
+          attendance_rate: number
+          avg_revenue_per_appointment: number
+          cancelled_appointments: number
+          completed_appointments: number
+          month: string
+          new_clients: number
+          no_show_appointments: number
+          total_appointments: number
+          total_revenue: number
+        }[]
+      }
       get_financial_stats: {
         Args: { p_end_date: string; p_start_date: string; p_tenant_id: string }
         Returns: {
@@ -780,6 +794,19 @@ export type Database = {
           total_appointments: number
           total_pending: number
           total_received: number
+        }[]
+      }
+      get_general_metrics: {
+        Args: { p_tenant_id: string }
+        Returns: {
+          active_clients: number
+          active_meal_plans: number
+          completed_appointments_all_time: number
+          completed_questionnaires: number
+          overall_attendance_rate: number
+          total_appointments_all_time: number
+          total_clients: number
+          total_revenue_all_time: number
         }[]
       }
     }
