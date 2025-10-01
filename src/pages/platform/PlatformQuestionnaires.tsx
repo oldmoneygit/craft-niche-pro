@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ClipboardList, Plus, Send, Eye, Trash2, Copy, X, Edit, FileText, Calendar } from 'lucide-react';
+import { ClipboardList, Plus, Send, Eye, Trash2, Copy, X, Edit, FileText, Calendar, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from '@/hooks/useTenantId';
 import { useToast } from '@/hooks/use-toast';
@@ -537,6 +537,308 @@ export const PlatformQuestionnaires = () => {
     });
   };
 
+  // TEMPLATE 1: Avaliação Inicial
+  const loadTemplate1_AvaliacaoInicial = () => {
+    setFormData({
+      title: 'Avaliação Nutricional Completa',
+      description: 'Questionário inicial para conhecer melhor você e criar um plano personalizado.',
+      questions: [
+        { id: '1', type: 'text', question: 'Qual seu nome completo?', required: true },
+        { id: '2', type: 'text', question: 'Qual sua idade?', required: true },
+        { id: '3', type: 'textarea', question: 'Descreva sua rotina diária (horários de trabalho, estudo, etc)', required: true },
+        {
+          id: '4',
+          type: 'radio',
+          question: 'Qual seu principal objetivo?',
+          options: ['Emagrecimento', 'Ganho de massa muscular', 'Melhora de saúde', 'Manutenção de peso'],
+          required: true
+        },
+        {
+          id: '5',
+          type: 'checkbox',
+          question: 'Quais refeições você costuma fazer?',
+          options: ['Café da manhã', 'Lanche da manhã', 'Almoço', 'Lanche da tarde', 'Jantar', 'Ceia'],
+          required: true
+        },
+        {
+          id: '6',
+          type: 'scale',
+          question: 'De 1 a 10, como você avalia sua alimentação atual?',
+          required: true
+        },
+        {
+          id: '7',
+          type: 'radio',
+          question: 'Você pratica atividade física?',
+          options: ['Não pratico', '1-2x por semana', '3-4x por semana', '5x ou mais por semana'],
+          required: true
+        },
+        {
+          id: '8',
+          type: 'checkbox',
+          question: 'Possui alguma restrição alimentar?',
+          options: ['Nenhuma', 'Intolerância à lactose', 'Alergia a glúten', 'Vegetariano', 'Vegano', 'Diabetes', 'Hipertensão'],
+          required: false
+        },
+        {
+          id: '9',
+          type: 'textarea',
+          question: 'Liste os alimentos que você NÃO gosta ou não come',
+          required: false
+        },
+        {
+          id: '10',
+          type: 'text',
+          question: 'Quantos litros de água você bebe por dia?',
+          required: true
+        },
+        {
+          id: '11',
+          type: 'radio',
+          question: 'Com que frequência você come fora de casa?',
+          options: ['Nunca', '1-2x por semana', '3-4x por semana', 'Diariamente'],
+          required: true
+        },
+        {
+          id: '12',
+          type: 'scale',
+          question: 'Qual sua motivação para continuar? (1 = Nenhuma, 10 = Muito motivado)',
+          required: true
+        },
+        {
+          id: '13',
+          type: 'textarea',
+          question: 'Tem alguma dúvida ou observação adicional?',
+          required: false
+        }
+      ]
+    });
+    setIsCreating(true);
+    toast({ title: "Template carregado", description: "Avaliação Inicial Completa" });
+  };
+
+  // TEMPLATE 3: Acompanhamento Mensal
+  const loadTemplate3_AcompanhamentoMensal = () => {
+    setFormData({
+      title: 'Acompanhamento Mensal',
+      description: 'Avaliação mensal da sua evolução e resultados.',
+      questions: [
+        { id: '1', type: 'text', question: 'Qual seu peso atual? (kg)', required: true },
+        {
+          id: '2',
+          type: 'radio',
+          question: 'Como você avalia seu progresso no último mês?',
+          options: ['Excelente', 'Bom', 'Regular', 'Pouco progresso', 'Nenhum progresso'],
+          required: true
+        },
+        {
+          id: '3',
+          type: 'scale',
+          question: 'Nível de satisfação com os resultados (1-10):',
+          required: true
+        },
+        {
+          id: '4',
+          type: 'textarea',
+          question: 'Quais foram suas maiores conquistas este mês?',
+          required: true
+        },
+        {
+          id: '5',
+          type: 'textarea',
+          question: 'Quais foram seus maiores desafios?',
+          required: true
+        },
+        {
+          id: '6',
+          type: 'radio',
+          question: 'Você notou mudanças na sua disposição?',
+          options: ['Sim, melhorou muito', 'Sim, melhorou um pouco', 'Sem mudanças', 'Piorou'],
+          required: true
+        },
+        {
+          id: '7',
+          type: 'radio',
+          question: 'Você notou mudanças no seu sono?',
+          options: ['Sim, melhorou muito', 'Sim, melhorou um pouco', 'Sem mudanças', 'Piorou'],
+          required: true
+        },
+        {
+          id: '8',
+          type: 'checkbox',
+          question: 'Em quais áreas você gostaria de focar no próximo mês?',
+          options: ['Perda de peso', 'Ganho de massa', 'Energia', 'Sono', 'Hidratação', 'Reduzir açúcar'],
+          required: true
+        },
+        {
+          id: '9',
+          type: 'scale',
+          question: 'Motivação para o próximo mês (1-10):',
+          required: true
+        },
+        {
+          id: '10',
+          type: 'textarea',
+          question: 'Observações finais:',
+          required: false
+        }
+      ]
+    });
+    setIsCreating(true);
+    toast({ title: "Template carregado", description: "Acompanhamento Mensal" });
+  };
+
+  // TEMPLATE 4: Hábitos de Sono
+  const loadTemplate4_AvaliacaoHabitosSono = () => {
+    setFormData({
+      title: 'Avaliação de Hábitos de Sono e Recuperação',
+      description: 'Entenda como seu sono e rotina noturna impactam seus resultados.',
+      questions: [
+        {
+          id: '1',
+          type: 'text',
+          question: 'Que horas você costuma dormir?',
+          required: true
+        },
+        {
+          id: '2',
+          type: 'text',
+          question: 'Que horas você costuma acordar?',
+          required: true
+        },
+        {
+          id: '3',
+          type: 'radio',
+          question: 'Quantas horas você dorme por noite em média?',
+          options: ['Menos de 5h', '5-6h', '6-7h', '7-8h', 'Mais de 8h'],
+          required: true
+        },
+        {
+          id: '4',
+          type: 'radio',
+          question: 'Como você classifica a qualidade do seu sono?',
+          options: ['Péssima', 'Ruim', 'Regular', 'Boa', 'Excelente'],
+          required: true
+        },
+        {
+          id: '5',
+          type: 'checkbox',
+          question: 'Você tem dificuldade para:',
+          options: ['Adormecer', 'Manter o sono', 'Acordar no meio da noite', 'Acordar cedo demais', 'Nenhuma dificuldade'],
+          required: true
+        },
+        {
+          id: '6',
+          type: 'radio',
+          question: 'Você usa telas (celular, TV) antes de dormir?',
+          options: ['Sim, sempre', 'Sim, às vezes', 'Raramente', 'Nunca'],
+          required: true
+        },
+        {
+          id: '7',
+          type: 'radio',
+          question: 'Você consome cafeína? Se sim, até que horas?',
+          options: ['Não consumo', 'Só pela manhã', 'Até meio-dia', 'Até 15h', 'Depois das 15h'],
+          required: true
+        },
+        {
+          id: '8',
+          type: 'textarea',
+          question: 'Descreva sua rotina antes de dormir:',
+          required: false
+        }
+      ]
+    });
+    setIsCreating(true);
+    toast({ title: "Template carregado", description: "Avaliação de Sono e Recuperação" });
+  };
+
+  // TEMPLATE 5: Saúde Intestinal
+  const loadTemplate5_SaudeIntestinal = () => {
+    setFormData({
+      title: 'Avaliação de Saúde Intestinal',
+      description: 'Questionário focado em sintomas digestivos e saúde intestinal.',
+      questions: [
+        {
+          id: '1',
+          type: 'radio',
+          question: 'Com que frequência você vai ao banheiro?',
+          options: ['Menos de 3x por semana', '3-6x por semana', '1x por dia', '2-3x por dia', 'Mais de 3x por dia'],
+          required: true
+        },
+        {
+          id: '2',
+          type: 'radio',
+          question: 'Como você descreveria suas fezes? (Escala de Bristol)',
+          options: ['Muito duras (tipo 1-2)', 'Normais (tipo 3-4)', 'Moles/pastosas (tipo 5-6)', 'Líquidas (tipo 7)'],
+          required: true
+        },
+        {
+          id: '3',
+          type: 'checkbox',
+          question: 'Você sente algum destes sintomas?',
+          options: ['Nenhum', 'Gases', 'Inchaço abdominal', 'Dor abdominal', 'Azia', 'Refluxo', 'Náusea'],
+          required: true
+        },
+        {
+          id: '4',
+          type: 'radio',
+          question: 'Com que frequência você sente gases/inchaço?',
+          options: ['Nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'],
+          required: true
+        },
+        {
+          id: '5',
+          type: 'checkbox',
+          question: 'Quais alimentos parecem piorar seus sintomas?',
+          options: ['Nenhum', 'Laticínios', 'Glúten/trigo', 'Leguminosas', 'Verduras cruas', 'Frituras', 'Doces'],
+          required: false
+        },
+        {
+          id: '6',
+          type: 'radio',
+          question: 'Você toma probióticos?',
+          options: ['Sim, regularmente', 'Sim, às vezes', 'Não'],
+          required: true
+        },
+        {
+          id: '7',
+          type: 'text',
+          question: 'Quantas porções de frutas/vegetais você come por dia?',
+          required: true
+        },
+        {
+          id: '8',
+          type: 'radio',
+          question: 'Você consome alimentos fermentados? (iogurte, kefir, kombucha)',
+          options: ['Sim, diariamente', 'Sim, algumas vezes por semana', 'Raramente', 'Nunca'],
+          required: true
+        },
+        {
+          id: '9',
+          type: 'radio',
+          question: 'Você já foi diagnosticado com alguma condição intestinal?',
+          options: ['Não', 'Síndrome do intestino irritável', 'Doença de Crohn', 'Colite', 'Intolerâncias', 'Outra'],
+          required: true
+        },
+        {
+          id: '10',
+          type: 'textarea',
+          question: 'Se sim, qual? Detalhe:',
+          required: false
+        },
+        {
+          id: '11',
+          type: 'textarea',
+          question: 'Observações sobre sua saúde intestinal:',
+          required: false
+        }
+      ]
+    });
+    setIsCreating(true);
+    toast({ title: "Template carregado", description: "Avaliação de Saúde Intestinal" });
+  };
+
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`Tem certeza que deseja deletar o questionário "${title}"?\n\nEsta ação não pode ser desfeita.`)) {
       return;
@@ -669,30 +971,59 @@ export const PlatformQuestionnaires = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            onClick={loadExampleQuestionnaire}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <ClipboardList className="w-4 h-4" />
-            Carregar Exemplo
-          </Button>
-          <Button
-            onClick={loadWeeklyFeedbackTemplate}
-            variant="outline"
-            className="flex items-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50"
-          >
-            <Calendar className="w-4 h-4" />
-            Feedback Semanal
-          </Button>
-          <Button
-            onClick={() => setShowTemplates(true)}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <ClipboardList className="w-4 h-4" />
-            Usar Template
-          </Button>
+          {/* Dropdown de templates */}
+          <div className="relative group">
+            <Button
+              variant="outline"
+              className="flex items-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50"
+            >
+              Templates Prontos
+              <ChevronDown className="w-4 h-4" />
+            </Button>
+            
+            <div className="absolute top-full left-0 mt-1 bg-background border rounded-lg shadow-lg min-w-[250px] hidden group-hover:block z-10">
+              <button
+                onClick={loadTemplate1_AvaliacaoInicial}
+                className="w-full text-left px-4 py-3 hover:bg-muted border-b"
+              >
+                <p className="font-medium">Avaliação Inicial Completa</p>
+                <p className="text-xs text-muted-foreground">13 perguntas</p>
+              </button>
+              
+              <button
+                onClick={loadWeeklyFeedbackTemplate}
+                className="w-full text-left px-4 py-3 hover:bg-muted border-b"
+              >
+                <p className="font-medium">Feedback Semanal</p>
+                <p className="text-xs text-muted-foreground">12 perguntas</p>
+              </button>
+              
+              <button
+                onClick={loadTemplate3_AcompanhamentoMensal}
+                className="w-full text-left px-4 py-3 hover:bg-muted border-b"
+              >
+                <p className="font-medium">Acompanhamento Mensal</p>
+                <p className="text-xs text-muted-foreground">10 perguntas</p>
+              </button>
+              
+              <button
+                onClick={loadTemplate4_AvaliacaoHabitosSono}
+                className="w-full text-left px-4 py-3 hover:bg-muted border-b"
+              >
+                <p className="font-medium">Hábitos de Sono e Recuperação</p>
+                <p className="text-xs text-muted-foreground">8 perguntas</p>
+              </button>
+              
+              <button
+                onClick={loadTemplate5_SaudeIntestinal}
+                className="w-full text-left px-4 py-3 hover:bg-muted"
+              >
+                <p className="font-medium">Saúde Intestinal</p>
+                <p className="text-xs text-muted-foreground">11 perguntas</p>
+              </button>
+            </div>
+          </div>
+
           <Button
             onClick={() => setIsCreating(true)}
             className="flex items-center gap-2"
