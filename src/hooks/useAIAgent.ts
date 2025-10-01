@@ -39,7 +39,9 @@ export const useAIAgent = () => {
   const detectSchedulingIntent = (message: string): boolean => {
     const schedulingKeywords = [
       'agendar', 'marcar', 'consulta', 'horário', 'disponível',
-      'livre', 'atendimento', 'quando', 'dia', 'hora'
+      'livre', 'atendimento', 'quando', 'dia', 'hora', 'horario',
+      'agenda', 'atende', 'marcação', 'queria', 'gostaria',
+      'poderia agendar', 'posso marcar', 'tem vaga', 'abre vaga'
     ];
     const lowerMessage = message.toLowerCase();
     return schedulingKeywords.some(kw => lowerMessage.includes(kw));

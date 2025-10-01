@@ -175,12 +175,14 @@ export default function PlatformAIChat() {
         return `Perfeito! Aqui estão os horários disponíveis:\n\n${availableSlots}\n\nQual você prefere? (pode digitar o número ou o dia/hora)`;
 
       case 'time':
+        // Aceitar qualquer resposta como horário preferido
         setSchedulingFlow({
           active: true,
           step: 'confirm',
           data: { ...data, preferredTime: message }
         });
-        return `Resumindo:\n\nNome: ${data.name}\nTelefone: ${data.phone}\nHorário: ${message}\n\nTudo certo? Digite SIM para confirmar ou CANCELAR para desistir.`;
+        
+        return `Perfeito! Vou resumir:\n\n📋 Nome: ${data.name}\n📱 Telefone: ${data.phone}\n📅 Horário preferido: ${message}\n\nTudo certo? Digite SIM para eu enviar sua solicitação ao nutricionista, ou CANCELAR para desistir.`;
 
       case 'confirm':
         if (message.toLowerCase().includes('sim')) {
@@ -194,7 +196,7 @@ export default function PlatformAIChat() {
 
           if (leadCreated) {
             setSchedulingFlow({ active: false, step: 'intent', data: {} });
-            return `✅ Solicitação enviada com sucesso!\n\nO nutricionista vai confirmar seu horário em breve pelo WhatsApp. Qualquer dúvida, estou aqui!`;
+            return `✅ Pronto! Sua solicitação foi enviada!\n\n📋 Resumo:\nNome: ${data.name}\nTelefone: ${data.phone}\nHorário: ${data.preferredTime}\n\nO nutricionista vai confirmar seu horário em breve pelo WhatsApp. Fique de olho no seu telefone! 📱\n\nPrecisa de mais alguma coisa?`;
           } else {
             return "Ops, tive um problema ao salvar. Por favor, tente novamente ou entre em contato diretamente.";
           }
@@ -222,22 +224,23 @@ export default function PlatformAIChat() {
     const currentInput = inputValue;
     setInputValue('');
 
-    // Processa com IA
     try {
       let aiResponse = '';
 
-      // Se está em fluxo de agendamento, processar passo a passo
+      // PRIORIDADE 1: Se está em fluxo de agendamento ativo, processar isso PRIMEIRO
       if (schedulingFlow.active) {
         aiResponse = await processSchedulingFlow(currentInput);
-      } else {
-        // Primeiro tenta buscar na base de conhecimento com IA
+      } 
+      // PRIORIDADE 2: Se detectou intenção de agendamento, iniciar fluxo
+      else if (detectSchedulingIntent(currentInput)) {
+        aiResponse = await handleSchedulingIntent();
+      }
+      // PRIORIDADE 3: Buscar na base de conhecimento
+      else {
         const result = await searchKnowledgeWithAI(currentInput, tenantId!);
         
         if (result && result.answer) {
           aiResponse = result.answer;
-        } else if (detectSchedulingIntent(currentInput)) {
-          // Se detectar intenção de agendamento e não tem resposta específica
-          aiResponse = await handleSchedulingIntent();
         } else {
           aiResponse = "Como posso ajudar? Posso responder dúvidas sobre nutrição ou ajudar com agendamento de consultas.";
         }
@@ -256,10 +259,10 @@ export default function PlatformAIChat() {
       }, 800);
 
     } catch (error) {
-      console.error('Error processing message:', error);
+      console.error('Error:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível processar a mensagem. Verifique a configuração da API key.",
+        description: "Não foi possível processar a mensagem",
         variant: "destructive"
       });
     }
