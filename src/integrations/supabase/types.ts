@@ -100,6 +100,8 @@ export type Database = {
           payment_method: string | null
           payment_notes: string | null
           payment_status: string | null
+          reminder_sent: string | null
+          reminder_type: string | null
           status: string
           tenant_id: string
           type: string
@@ -117,6 +119,8 @@ export type Database = {
           payment_method?: string | null
           payment_notes?: string | null
           payment_status?: string | null
+          reminder_sent?: string | null
+          reminder_type?: string | null
           status?: string
           tenant_id: string
           type: string
@@ -134,6 +138,8 @@ export type Database = {
           payment_method?: string | null
           payment_notes?: string | null
           payment_status?: string | null
+          reminder_sent?: string | null
+          reminder_type?: string | null
           status?: string
           tenant_id?: string
           type?: string
