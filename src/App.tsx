@@ -26,6 +26,7 @@ import PlatformReminderSettings from "./pages/platform/PlatformReminderSettings"
 import PlatformKnowledge from "./pages/platform/PlatformKnowledge";
 import PlatformWeeklyFeedbacks from "./pages/platform/PlatformWeeklyFeedbacks";
 import PlatformFinancial from "./pages/platform/PlatformFinancial";
+import PlatformReports from "./pages/platform/PlatformReports";
 import QuestionnairePublic from "./pages/QuestionnairePublic";
 import PublicQuestionnaireResponse from "./pages/public/PublicQuestionnaireResponse";
 import PublicMealPlanView from "./pages/public/PublicMealPlanView";
@@ -65,6 +66,7 @@ const App = () => (
               <Route path="/platform/:clientId/lembretes" element={<PlatformProtectedRoute><PlatformReminderSettings /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/conhecimento" element={<PlatformProtectedRoute><PlatformKnowledge /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/financeiro" element={<PlatformProtectedRoute><PlatformFinancial /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/relatorios" element={<PlatformProtectedRoute><PlatformReports /></PlatformProtectedRoute>} />
               
               {/* Public Questionnaires */}
               <Route path="/questionnaire/:questionnaireId" element={<QuestionnairePublic />} />

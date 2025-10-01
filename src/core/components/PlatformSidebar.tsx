@@ -98,9 +98,9 @@ export function PlatformSidebar() {
     },
     {
       title: 'Relatórios',
-      url: `${platformBasePath}/analytics`,
+      url: `${platformBasePath}/relatorios`,
       icon: BarChart3,
-      enabled: isModuleEnabled('analytics'),
+      enabled: true,
     },
   ];
 
