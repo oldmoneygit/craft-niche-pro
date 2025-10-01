@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ClipboardList, Plus, Send, Eye, Trash2, Copy, X } from 'lucide-react';
+import { ClipboardList, Plus, Send, Eye, Trash2, Copy, X, Edit } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from '@/hooks/useTenantId';
 import { useToast } from '@/hooks/use-toast';
@@ -247,6 +247,8 @@ export const PlatformQuestionnaires = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const [viewingQuestionnaire, setViewingQuestionnaire] = useState<Questionnaire | null>(null);
+  const [editingQuestionnaire, setEditingQuestionnaire] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -423,6 +425,92 @@ export const PlatformQuestionnaires = () => {
       title: "Template Carregado",
       description: "Questionário de exemplo pronto para usar"
     });
+  };
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`Tem certeza que deseja deletar o questionário "${title}"?\n\nEsta ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    try {
+      // Deletar todas as respostas relacionadas primeiro
+      const { error: responsesError } = await supabase
+        .from('questionnaire_responses')
+        .delete()
+        .eq('questionnaire_id', id);
+
+      if (responsesError) throw responsesError;
+
+      // Deletar o questionário
+      const { error } = await supabase
+        .from('questionnaires')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Deletado!",
+        description: "Questionário removido com sucesso"
+      });
+
+      fetchQuestionnaires();
+
+    } catch (error) {
+      console.error('Error deleting:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível deletar o questionário",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleEdit = (questionnaire: any) => {
+    setEditingQuestionnaire(questionnaire);
+    setFormData({
+      title: questionnaire.title,
+      description: questionnaire.description || '',
+      questions: questionnaire.questions
+    });
+    setIsEditing(true);
+  };
+
+  const handleUpdate = async () => {
+    if (!editingQuestionnaire || !tenantId || !formData.title || formData.questions.length === 0) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Preencha título e adicione pelo menos 1 pergunta",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from('questionnaires')
+      .update({
+        title: formData.title,
+        description: formData.description,
+        questions: formData.questions as any
+      })
+      .eq('id', editingQuestionnaire.id);
+
+    if (error) {
+      toast({ 
+        title: "Erro", 
+        description: "Não foi possível atualizar", 
+        variant: "destructive" 
+      });
+    } else {
+      toast({ 
+        title: "Atualizado!", 
+        description: "Questionário atualizado com sucesso" 
+      });
+      setFormData({ title: '', description: '', questions: [] });
+      setIsEditing(false);
+      setEditingQuestionnaire(null);
+      fetchQuestionnaires();
+    }
   };
 
   const generatePublicLink = async (questionnaireId: string) => {
@@ -702,17 +790,19 @@ export const PlatformQuestionnaires = () => {
         </div>
       )}
 
-      {/* Modal Criar */}
-      {isCreating && (
+      {/* Modal Criar/Editar */}
+      {(isCreating || isEditing) && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-background rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold">Criar Questionário</h3>
+              <h3 className="text-xl font-bold">{isEditing ? 'Editar Questionário' : 'Criar Questionário'}</h3>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => {
                   setIsCreating(false);
+                  setIsEditing(false);
+                  setEditingQuestionnaire(null);
                   setFormData({ title: '', description: '', questions: [] });
                 }}
               >
@@ -826,6 +916,8 @@ export const PlatformQuestionnaires = () => {
                 variant="outline"
                 onClick={() => {
                   setIsCreating(false);
+                  setIsEditing(false);
+                  setEditingQuestionnaire(null);
                   setFormData({ title: '', description: '', questions: [] });
                 }}
                 className="flex-1"
@@ -833,10 +925,10 @@ export const PlatformQuestionnaires = () => {
                 Cancelar
               </Button>
               <Button
-                onClick={handleCreate}
+                onClick={isEditing ? handleUpdate : handleCreate}
                 className="flex-1"
               >
-                Criar Questionário
+                {isEditing ? 'Atualizar Questionário' : 'Criar Questionário'}
               </Button>
             </div>
           </div>
@@ -846,31 +938,49 @@ export const PlatformQuestionnaires = () => {
       {/* Lista de Questionários */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {questionnaires.map(q => (
-          <div key={q.id} className="bg-card p-5 rounded-lg shadow border">
-            <h3 className="font-semibold text-lg mb-1">{q.title}</h3>
+          <div key={q.id} className="bg-card p-5 rounded-lg shadow border relative">
+            {/* Botão deletar no canto */}
+            <button
+              onClick={() => handleDelete(q.id, q.title)}
+              className="absolute top-3 right-3 p-2 text-destructive hover:bg-destructive/10 rounded-lg transition"
+              title="Deletar questionário"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+
+            <h3 className="font-semibold text-lg mb-1 pr-10">{q.title}</h3>
             {q.description && (
               <p className="text-sm text-muted-foreground mb-3">{q.description}</p>
             )}
             <p className="text-sm text-muted-foreground mb-4">
               {q.questions.length} pergunta{q.questions.length !== 1 ? 's' : ''}
             </p>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setViewingQuestionnaire(q)}
-                className="flex-1 flex items-center justify-center gap-2"
+                className="flex items-center justify-center gap-2"
               >
                 <Eye className="w-4 h-4" />
-                Visualizar
+                Ver
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleEdit(q)}
+                className="flex items-center justify-center gap-2"
+              >
+                <Edit className="w-4 h-4" />
+                Editar
               </Button>
               <Button
                 size="sm"
                 onClick={() => generatePublicLink(q.id)}
-                className="flex-1 flex items-center justify-center gap-2"
+                className="flex items-center justify-center gap-2"
               >
-                <Copy className="w-4 h-4" />
-                Copiar Link
+                <Send className="w-4 h-4" />
+                Enviar
               </Button>
             </div>
           </div>
