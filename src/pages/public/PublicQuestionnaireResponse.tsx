@@ -156,8 +156,12 @@ export default function PublicQuestionnaireResponse() {
     setError('');
 
     try {
+      console.log('🚀 Iniciando submissão...');
+      console.log('Response ID:', responseId);
+      console.log('Respondent data:', respondentData);
+
       // 1. ATUALIZAR respostas
-      const phoneClean = respondentData.phone.replace(/\D/g, ''); // Salvar só números
+      const phoneClean = respondentData.phone.replace(/\D/g, '');
       
       const { error: updateError } = await supabase
         .from('questionnaire_responses')
@@ -171,44 +175,72 @@ export default function PublicQuestionnaireResponse() {
         })
         .eq('id', responseId);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('❌ Erro ao atualizar resposta:', updateError);
+        throw new Error(`Erro ao salvar respostas: ${updateError.message}`);
+      }
+
+      console.log('✅ Respostas salvas');
 
       // 2. BUSCAR tenant_id da resposta
-      const { data: responseData } = await supabase
+      const { data: responseData, error: fetchError } = await supabase
         .from('questionnaire_responses')
         .select('tenant_id')
         .eq('id', responseId)
         .single();
 
-      if (!responseData) throw new Error('Tenant não encontrado');
+      if (fetchError || !responseData) {
+        console.error('❌ Erro ao buscar tenant:', fetchError);
+        throw new Error('Não foi possível identificar o nutricionista');
+      }
+
+      console.log('✅ Tenant encontrado:', responseData.tenant_id);
 
       // 3. BUSCAR cliente existente pelo TELEFONE
-      const { data: existingClient } = await supabase
+      const { data: existingClient, error: searchError } = await supabase
         .from('clients')
-        .select('id, email')
+        .select('id, email, name')
         .eq('tenant_id', responseData.tenant_id)
         .eq('phone', phoneClean)
         .maybeSingle();
 
+      if (searchError) {
+        console.error('❌ Erro ao buscar cliente:', searchError);
+        throw new Error('Erro ao verificar cliente existente');
+      }
+
       let clientId;
 
       if (existingClient) {
-        // CLIENTE EXISTE - vincular e atualizar email se fornecido
+        console.log('✅ Cliente encontrado:', existingClient.id);
         clientId = existingClient.id;
         
-        // Se email foi fornecido E é diferente do cadastrado, atualizar
-        if (respondentData.email && respondentData.email !== existingClient.email) {
-          await supabase
+        // Atualizar email/nome se mudaram
+        const needsUpdate = 
+          (respondentData.email && respondentData.email !== existingClient.email) ||
+          (respondentData.name !== existingClient.name);
+
+        if (needsUpdate) {
+          const { error: updateClientError } = await supabase
             .from('clients')
             .update({ 
-              email: respondentData.email,
-              name: respondentData.name // Atualizar nome também
+              email: respondentData.email || existingClient.email,
+              name: respondentData.name
             })
             .eq('id', clientId);
+
+          if (updateClientError) {
+            console.error('⚠️ Erro ao atualizar cliente:', updateClientError);
+            // Não bloquear o fluxo por isso
+          } else {
+            console.log('✅ Dados do cliente atualizados');
+          }
         }
 
       } else {
-        // CLIENTE NÃO EXISTE - criar novo
+        console.log('➕ Criando novo cliente...');
+        
+        // Criar novo cliente
         const { data: newClient, error: clientError } = await supabase
           .from('clients')
           .insert({
@@ -220,21 +252,34 @@ export default function PublicQuestionnaireResponse() {
           .select('id')
           .single();
 
-        if (clientError) throw clientError;
+        if (clientError) {
+          console.error('❌ Erro ao criar cliente:', clientError);
+          throw new Error(`Erro ao criar cadastro: ${clientError.message}`);
+        }
+
         clientId = newClient.id;
+        console.log('✅ Cliente criado:', clientId);
       }
 
       // 4. VINCULAR resposta ao cliente
-      await supabase
+      const { error: linkError } = await supabase
         .from('questionnaire_responses')
         .update({ client_id: clientId })
         .eq('id', responseId);
 
+      if (linkError) {
+        console.error('❌ Erro ao vincular:', linkError);
+        throw new Error('Erro ao vincular ao cadastro');
+      }
+
+      console.log('✅ Resposta vinculada ao cliente');
+      console.log('🎉 Submissão concluída com sucesso!');
+
       setSuccess(true);
 
     } catch (err: any) {
-      console.error('Error submitting:', err);
-      setError('Erro ao enviar respostas. Tente novamente.');
+      console.error('💥 Erro geral:', err);
+      setError(err.message || 'Erro ao enviar respostas. Tente novamente.');
       setSubmitting(false);
     }
   };
@@ -526,9 +571,14 @@ export default function PublicQuestionnaireResponse() {
             ))}
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-2">
-                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <p className="text-red-800 text-sm">{error}</p>
+              <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 flex items-start gap-3">
+                <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-red-800 font-medium">{error}</p>
+                  <p className="text-red-600 text-sm mt-1">
+                    Se o problema persistir, entre em contato com o nutricionista.
+                  </p>
+                </div>
               </div>
             )}
 
