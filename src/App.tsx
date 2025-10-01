@@ -23,6 +23,7 @@ import PlatformSettings from "./pages/platform/PlatformSettings";
 import PlatformReminderSettings from "./pages/platform/PlatformReminderSettings";
 import PlatformKnowledge from "./pages/platform/PlatformKnowledge";
 import QuestionnairePublic from "./pages/QuestionnairePublic";
+import PublicQuestionnaireResponse from "./pages/public/PublicQuestionnaireResponse";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
               
               {/* Public Questionnaires */}
               <Route path="/questionnaire/:questionnaireId" element={<QuestionnairePublic />} />
+              <Route path="/responder/:token" element={<PublicQuestionnaireResponse />} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
