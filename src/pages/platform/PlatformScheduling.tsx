@@ -51,6 +51,7 @@ export default function PlatformScheduling() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [quickPaymentModal, setQuickPaymentModal] = useState<{appointmentId: string, clientName: string} | null>(null);
   const [formData, setFormData] = useState({
     client_id: '',
     datetime: '',
@@ -273,6 +274,27 @@ export default function PlatformScheduling() {
 
   const getTypeLabel = (type: string) => {
     return type === 'primeira_consulta' ? 'Primeira Consulta' : 'Retorno';
+  };
+
+  const handleQuickPayment = async (appointmentId: string, value: number) => {
+    const { error } = await supabase
+      .from('appointments')
+      .update({
+        payment_status: 'paid',
+        payment_date: new Date().toISOString().split('T')[0],
+        payment_method: 'dinheiro'
+      })
+      .eq('id', appointmentId);
+
+    if (error) {
+      toast({ title: "Erro ao atualizar", variant: "destructive" });
+    } else {
+      toast({ 
+        title: "Pagamento registrado", 
+        description: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+      });
+      fetchAppointments();
+    }
   };
 
   if (tenantLoading) {
@@ -580,22 +602,56 @@ export default function PlatformScheduling() {
                         {appointment.clients?.phone && <p>📱 {appointment.clients.phone}</p>}
                         {appointment.notes && <p>📝 {appointment.notes}</p>}
                       </div>
-                      {(appointment as any).value && (
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="text-sm font-bold text-foreground">
-                            R$ {((appointment as any).value as number).toFixed(2)}
-                          </span>
-                          <Badge className={
-                            (appointment as any).payment_status === 'paid' ? 'bg-green-100 text-green-800' :
-                            (appointment as any).payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }>
-                            {(appointment as any).payment_status === 'paid' ? '✓ Pago' :
-                             (appointment as any).payment_status === 'pending' ? '⏱ Pendente' :
-                             '✗ Cancelado'}
-                          </Badge>
-                        </div>
-                      )}
+                      
+                      {/* Seção Financeira */}
+                      <div className="mt-3 pt-3 border-t">
+                        {(appointment as any).value ? (
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm font-bold text-foreground">
+                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((appointment as any).value)}
+                            </span>
+                            <Badge className={
+                              (appointment as any).payment_status === 'paid' ? 'bg-green-100 text-green-800' :
+                              (appointment as any).payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }>
+                              {(appointment as any).payment_status === 'paid' ? '✓ Pago' :
+                               (appointment as any).payment_status === 'pending' ? '⏱ Pendente' :
+                               '✗ Cancelado'}
+                            </Badge>
+                            
+                            {(appointment as any).payment_status === 'pending' && (
+                              <Button
+                                size="sm"
+                                variant="default"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleQuickPayment(appointment.id, (appointment as any).value);
+                                }}
+                                className="bg-green-500 hover:bg-green-600 text-white"
+                              >
+                                Marcar como Pago
+                              </Button>
+                            )}
+                          </div>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setQuickPaymentModal({ 
+                                appointmentId: appointment.id, 
+                                clientName: appointment.clients?.name || 'Cliente' 
+                              });
+                            }}
+                            className="text-blue-600 hover:text-blue-700 border-blue-300 hover:bg-blue-50"
+                          >
+                            + Adicionar Valor
+                          </Button>
+                        )}
+                      </div>
+                      
                       <div className="flex gap-2 mt-3">
                         {appointment.status === 'agendado' && (
                           <Button size="sm" className="action-success" onClick={() => updateStatus(appointment.id, 'confirmado')}>
@@ -627,6 +683,124 @@ export default function PlatformScheduling() {
           )}
         </div>
       </div>
+
+      {/* Modal rápido de adicionar valor */}
+      {quickPaymentModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h3 className="text-lg font-bold mb-4">Adicionar Valor da Consulta</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Cliente: <strong>{quickPaymentModal.clientName}</strong>
+            </p>
+            
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const value = parseFloat(formData.get('value') as string);
+              const paymentStatus = formData.get('payment_status') as string;
+              const paymentMethod = formData.get('payment_method') as string;
+              
+              if (!value || value <= 0) {
+                toast({ title: "Valor inválido", variant: "destructive" });
+                return;
+              }
+
+              const updateData: any = {
+                value,
+                payment_status: paymentStatus
+              };
+
+              if (paymentStatus === 'paid') {
+                updateData.payment_method = paymentMethod;
+                updateData.payment_date = new Date().toISOString().split('T')[0];
+              }
+
+              const { error } = await supabase
+                .from('appointments')
+                .update(updateData)
+                .eq('id', quickPaymentModal.appointmentId);
+
+              if (error) {
+                toast({ title: "Erro ao salvar", variant: "destructive" });
+              } else {
+                toast({ title: "Valor adicionado com sucesso" });
+                setQuickPaymentModal(null);
+                fetchAppointments();
+              }
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Valor *</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
+                    <input
+                      type="number"
+                      name="value"
+                      step="0.01"
+                      required
+                      placeholder="0,00"
+                      className="w-full border-2 rounded-lg p-2 pl-10 focus:border-primary focus:outline-none"
+                      autoFocus
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Status *</label>
+                  <select
+                    name="payment_status"
+                    className="w-full border-2 rounded-lg p-2 focus:border-primary focus:outline-none"
+                    onChange={(e) => {
+                      const methodField = document.querySelector('[name="payment_method"]') as HTMLSelectElement;
+                      if (methodField) {
+                        methodField.disabled = e.target.value !== 'paid';
+                        if (e.target.value !== 'paid') {
+                          methodField.value = '';
+                        }
+                      }
+                    }}
+                  >
+                    <option value="pending">Pendente</option>
+                    <option value="paid">Pago</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Forma de Pagamento</label>
+                  <select
+                    name="payment_method"
+                    className="w-full border-2 rounded-lg p-2 focus:border-primary focus:outline-none"
+                    disabled
+                  >
+                    <option value="">Selecione</option>
+                    <option value="dinheiro">Dinheiro</option>
+                    <option value="pix">PIX</option>
+                    <option value="cartao_debito">Cartão de Débito</option>
+                    <option value="cartao_credito">Cartão de Crédito</option>
+                    <option value="transferencia">Transferência</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setQuickPaymentModal(null)}
+                  className="flex-1 border-2 border-gray-300 rounded-lg py-2 hover:bg-gray-50 transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-green-500 text-white rounded-lg py-2 hover:bg-green-600 transition font-medium"
+                >
+                  Salvar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </DashboardTemplate>
   );
 }

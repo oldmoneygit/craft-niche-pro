@@ -13,6 +13,7 @@ export default function PlatformFinancial() {
   const [stats, setStats] = useState<any>(null);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
+  const [editPaymentModal, setEditPaymentModal] = useState<{appointmentId: string, clientName: string, currentValue: number, currentStatus: string} | null>(null);
   
   const [filters, setFilters] = useState({
     startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
@@ -286,14 +287,29 @@ export default function PlatformFinancial() {
                            'Reembolsado'}
                         </span>
                       </div>
-                      {apt.payment_status === 'pending' && (
+                      
+                      <div className="flex flex-col gap-2">
+                        {apt.payment_status === 'pending' && (
+                          <button
+                            onClick={() => handleMarkAsPaid(apt.id, apt.value)}
+                            className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition whitespace-nowrap"
+                          >
+                            Marcar como Pago
+                          </button>
+                        )}
+                        
                         <button
-                          onClick={() => handleMarkAsPaid(apt.id, apt.value)}
-                          className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition"
+                          onClick={() => setEditPaymentModal({
+                            appointmentId: apt.id,
+                            clientName: apt.clients?.name || 'Cliente',
+                            currentValue: apt.value,
+                            currentStatus: apt.payment_status
+                          })}
+                          className="px-3 py-1 border border-gray-300 text-gray-700 text-sm rounded hover:bg-gray-50 transition whitespace-nowrap"
                         >
-                          Marcar como Pago
+                          Editar
                         </button>
-                      )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -302,6 +318,128 @@ export default function PlatformFinancial() {
           </div>
         </div>
       </div>
+
+      {/* Modal de edição rápida de pagamento */}
+      {editPaymentModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card rounded-lg max-w-md w-full p-6 border">
+            <h3 className="text-lg font-bold mb-4">Editar Pagamento</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Cliente: <strong>{editPaymentModal.clientName}</strong>
+            </p>
+            
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const value = parseFloat(formData.get('value') as string);
+              const paymentStatus = formData.get('payment_status') as string;
+              const paymentMethod = formData.get('payment_method') as string;
+              
+              if (!value || value <= 0) {
+                toast({ title: "Valor inválido", variant: "destructive" });
+                return;
+              }
+
+              const updateData: any = {
+                value,
+                payment_status: paymentStatus
+              };
+
+              if (paymentStatus === 'paid') {
+                updateData.payment_method = paymentMethod || 'dinheiro';
+                updateData.payment_date = new Date().toISOString().split('T')[0];
+              }
+
+              const { error } = await supabase
+                .from('appointments')
+                .update(updateData)
+                .eq('id', editPaymentModal.appointmentId);
+
+              if (error) {
+                toast({ title: "Erro ao salvar", variant: "destructive" });
+              } else {
+                toast({ title: "Pagamento atualizado com sucesso" });
+                setEditPaymentModal(null);
+                fetchFinancialData();
+              }
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Valor *</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
+                    <input
+                      type="number"
+                      name="value"
+                      step="0.01"
+                      required
+                      defaultValue={editPaymentModal.currentValue}
+                      placeholder="0,00"
+                      className="w-full border-2 rounded-lg p-2 pl-10 focus:border-primary focus:outline-none bg-background"
+                      autoFocus
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Status *</label>
+                  <select
+                    name="payment_status"
+                    defaultValue={editPaymentModal.currentStatus}
+                    className="w-full border-2 rounded-lg p-2 focus:border-primary focus:outline-none bg-background"
+                    onChange={(e) => {
+                      const methodField = document.querySelector('[name="payment_method"]') as HTMLSelectElement;
+                      if (methodField) {
+                        methodField.disabled = e.target.value !== 'paid';
+                        if (e.target.value !== 'paid') {
+                          methodField.value = '';
+                        }
+                      }
+                    }}
+                  >
+                    <option value="pending">Pendente</option>
+                    <option value="paid">Pago</option>
+                    <option value="cancelled">Cancelado</option>
+                    <option value="refunded">Reembolsado</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Forma de Pagamento</label>
+                  <select
+                    name="payment_method"
+                    className="w-full border-2 rounded-lg p-2 focus:border-primary focus:outline-none bg-background"
+                    disabled={editPaymentModal.currentStatus !== 'paid'}
+                  >
+                    <option value="">Selecione</option>
+                    <option value="dinheiro">Dinheiro</option>
+                    <option value="pix">PIX</option>
+                    <option value="cartao_debito">Cartão de Débito</option>
+                    <option value="cartao_credito">Cartão de Crédito</option>
+                    <option value="transferencia">Transferência</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setEditPaymentModal(null)}
+                  className="flex-1 border-2 border-gray-300 rounded-lg py-2 hover:bg-gray-50 transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-primary text-white rounded-lg py-2 hover:bg-primary/90 transition font-medium"
+                >
+                  Salvar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </DashboardTemplate>
   );
 }
