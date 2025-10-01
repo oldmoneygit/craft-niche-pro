@@ -8,125 +8,66 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Gabriel Gandin Nutrition Theme - Vibrant Green & Wellness Colors */
-    --background: 0 0% 98%;
-    --foreground: 0 0% 9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
-
-    /* Vibrant Green Primary - Based on reference image */
-    --primary: 142 69% 58%;
+    /* Nutrition Health Design System */
+    --primary: 160 84% 39%;        /* Verde Esmeralda Saúde */
     --primary-foreground: 0 0% 100%;
-
-    /* Complementary Blue */
-    --secondary: 217 91% 60%;
+    
+    --secondary: 217 91% 60%;      /* Azul Confiança */
     --secondary-foreground: 0 0% 100%;
-
-    --muted: 210 40% 92%;
-    --muted-foreground: 215 16% 40%;
-
-    /* Purple Accent - made lighter for better contrast */
-    --accent: 142 69% 95%;
-    --accent-foreground: 0 0% 9%;
-
-    --success: 142 69% 58%;
+    
+    --accent: 258 90% 66%;         /* Roxo Inovação */
+    --accent-foreground: 0 0% 100%;
+    
+    --background: 0 0% 98%;
+    --foreground: 222 47% 11%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 160 84% 39%;
+    
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
-
-    --warning: 25 95% 53%;
+    
+    --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
-
+    
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-
-    /* Vibrant metric colors inspired by the reference */
-    --metric-blue: 217 91% 60%;
-    --metric-green: 142 69% 58%;
-    --metric-orange: 25 95% 53%;
-    --metric-purple: 262 84% 65%;
-
-    --border: 214 32% 85%;
-    --input: 214 32% 88%;
-    --ring: 142 69% 58%;
-
-    /* Green-focused gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(142 69% 58%) 0%, hsl(217 91% 60%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(262 84% 65%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(142 69% 58%) 0%, hsl(217 91% 60%) 35%, hsl(262 84% 65%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(210 40% 97%) 100%);
-    --gradient-soft: linear-gradient(90deg, hsl(142 69% 58%) 0%, hsl(217 91% 60%) 100%);
-
-    /* Green-focused shadows */
-    --shadow-card: 0 2px 8px hsl(142 69% 40% / 0.15), 0 0 0 1px hsl(214 32% 85%);
-    --shadow-hover: 0 4px 12px hsl(142 69% 40% / 0.2), 0 0 0 1px hsl(142 69% 58% / 0.3);
-    --shadow-glow: 0 0 20px hsl(142 69% 58% / 0.3), 0 0 40px hsl(217 91% 60% / 0.15);
-    --shadow-soft: 0 1px 3px hsl(142 69% 40% / 0.12), 0 1px 2px hsl(142 69% 40% / 0.08);
-    --shadow-neon: 0 0 20px hsl(142 69% 58% / 0.4);
-
+    
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    
     --radius: 0.75rem;
-
-    /* Subtle neutral sidebar with wellness touch */
+    
+    /* Sidebar */
     --sidebar-background: 220 13% 18%;
     --sidebar-foreground: 220 9% 85%;
     --sidebar-primary: 220 9% 85%;
     --sidebar-primary-foreground: 220 13% 18%;
-    --sidebar-accent: 142 25% 35%;
+    --sidebar-accent: 160 84% 35%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 220 13% 25%;
-    --sidebar-ring: 142 25% 35%;
+    --sidebar-ring: 160 84% 35%;
   }
 
   .dark {
-    /* Gabriel Gandin Dark Theme - Dark Green & Wellness */
-    --background: 0 0% 6%;
-    --foreground: 0 0% 95%;
-
-    --card: 217 32% 10%;
-    --card-foreground: 0 0% 95%;
-
-    --popover: 217 32% 10%;
-    --popover-foreground: 0 0% 95%;
-
-    --primary: 142 69% 68%;
+    --primary: 160 84% 39%;
     --primary-foreground: 0 0% 100%;
-
-    --secondary: 217 91% 70%;
-    --secondary-foreground: 0 0% 100%;
-
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --card: 217 33% 17%;
+    --card-foreground: 210 40% 98%;
+    --border: 217 33% 25%;
+    --input: 217 33% 25%;
+    --ring: 160 84% 39%;
     --muted: 217 32% 18%;
     --muted-foreground: 215 20% 70%;
-
-    --accent: 142 69% 20%;
-    --accent-foreground: 0 0% 95%;
-
-    --success: 142 69% 68%;
-    --success-foreground: 0 0% 100%;
-
-    --warning: 25 95% 63%;
-    --warning-foreground: 0 0% 100%;
-
-    --destructive: 0 84% 70%;
-    --destructive-foreground: 0 0% 100%;
-
-    --metric-blue: 217 91% 70%;
-    --metric-green: 142 69% 68%;
-    --metric-orange: 25 95% 63%;
-    --metric-purple: 262 84% 75%;
-
-    --border: 217 32% 22%;
-    --input: 217 32% 15%;
-    --ring: 142 69% 68%;
-    --sidebar-background: 220 13% 15%;
-    --sidebar-foreground: 220 9% 80%;
-    --sidebar-primary: 220 9% 80%;
-    --sidebar-primary-foreground: 220 13% 15%;
-    --sidebar-accent: 142 25% 40%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 13% 22%;
-    --sidebar-ring: 142 25% 40%;
   }
 }
 
