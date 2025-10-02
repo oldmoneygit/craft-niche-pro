@@ -981,9 +981,14 @@ export const AddFoodToMealModal = ({
                       variant="outline"
                       className="flex-1"
                       onClick={(e) => {
+                        console.log('🔴 VER DETALHES CLICADO', food.name);
+                        console.log('🔴 setSelectedFood existe?', typeof setSelectedFood);
+                        console.log('🔴 setView existe?', typeof setView);
+                        console.log('🔴 food object:', food);
                         e.stopPropagation();
                         setSelectedFood(food);
                         setView('food-details');
+                        console.log('🔴 Após setView - view deveria ser food-details');
                       }}
                     >
                       Ver detalhes
@@ -993,10 +998,16 @@ export const AddFoodToMealModal = ({
                     <Button
                       className="flex-1 bg-green-500 hover:bg-green-600"
                       onClick={async (e) => {
+                        console.log('🟢 ADICIONAR CLICADO', food.name);
+                        console.log('🟢 setSelectedFood existe?', typeof setSelectedFood);
+                        console.log('🟢 setView existe?', typeof setView);
+                        console.log('🟢 loadMeasures existe?', typeof loadMeasures);
+                        console.log('🟢 food object:', food);
                         e.stopPropagation();
                         setSelectedFood(food);
                         await loadMeasures(food);
                         setView('add-portion');
+                        console.log('🟢 Após setView - view deveria ser add-portion');
                       }}
                     >
                       Adicionar
