@@ -18,28 +18,41 @@ export const AIAssistant = ({ clientProfile, onApplyPlan }: AIAssistantProps) =>
   const { toast } = useToast();
 
   const handleGenerate = async () => {
+    if (!clientProfile) {
+      toast({
+        title: 'Cliente não selecionado',
+        description: 'Selecione um cliente primeiro',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setGenerating(true);
 
     try {
+      console.log('🎯 Iniciando geração para:', clientProfile.name);
+
       const aiPlan = await generateAIBasedMealPlan(clientProfile);
+
+      console.log('✅ Plano gerado com sucesso');
 
       const validation = validateAIPlan(aiPlan);
 
-      setGeneratedPlan({
-        ...aiPlan,
-        validation
-      });
+      setGeneratedPlan({ ...aiPlan, validation });
 
       toast({
-        title: validation.valid ? 'Sugestão gerada!' : 'Sugestão gerada com avisos',
+        title: validation.valid ? '✅ Sugestão gerada!' : '⚠️ Sugestão com avisos',
         description: validation.valid
           ? 'Revise as sugestões antes de aplicar'
           : 'Alguns avisos foram detectados. Revise cuidadosamente.'
       });
+
     } catch (error: any) {
+      console.error('❌ Erro ao gerar:', error);
+
       toast({
         title: 'Erro ao gerar sugestão',
-        description: error.message || 'Tente novamente',
+        description: error.message || 'Erro desconhecido. Verifique o console (F12).',
         variant: 'destructive'
       });
     } finally {

@@ -2,8 +2,21 @@ import Anthropic from '@anthropic-ai/sdk';
 import { ClientProfile } from '@/types/clientProfile';
 import { calculateBMR, calculateTDEE, calculateTargetCalories, calculateMacroDistribution } from './nutritionEngine';
 
+const getApiKey = (): string => {
+  const key = import.meta.env.VITE_ANTHROPIC_API_KEY;
+
+  if (!key) {
+    console.error('❌ VITE_ANTHROPIC_API_KEY não encontrada');
+    console.log('📋 Variáveis disponíveis:', Object.keys(import.meta.env));
+    throw new Error('Configure VITE_ANTHROPIC_API_KEY no arquivo .env');
+  }
+
+  console.log('✅ Chave API carregada:', key.substring(0, 20) + '...');
+  return key;
+};
+
 const anthropic = new Anthropic({
-  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
+  apiKey: getApiKey(),
   dangerouslyAllowBrowser: true
 });
 
@@ -140,21 +153,43 @@ LEMBRE-SE: Esta é uma SUGESTÃO inicial. O nutricionista revisará e ajustará 
 export const generateAIBasedMealPlan = async (
   profile: ClientProfile
 ): Promise<AIGeneratedMealPlan> => {
-  const bmr = calculateBMR(profile);
-  const tdee = calculateTDEE(profile);
-  const targetCalories = calculateTargetCalories(profile);
-  const macros = calculateMacroDistribution(targetCalories, profile);
+  console.log('🚀 Iniciando geração de plano com IA');
+  console.log('👤 Perfil:', profile);
 
-  const calculatedData = {
-    bmr,
-    tdee,
-    targetCalories,
-    macros
-  };
+  if (!profile.age || profile.age < 10 || profile.age > 120) {
+    throw new Error('Idade inválida ou não informada');
+  }
+
+  if (!profile.weight_kg || profile.weight_kg < 30 || profile.weight_kg > 300) {
+    throw new Error('Peso inválido ou não informado');
+  }
+
+  if (!profile.height_cm || profile.height_cm < 100 || profile.height_cm > 250) {
+    throw new Error('Altura inválida ou não informada');
+  }
+
+  if (!profile.goal) {
+    throw new Error('Objetivo nutricional não definido. Edite o cliente e selecione um objetivo.');
+  }
+
+  if (!profile.activity_level) {
+    throw new Error('Nível de atividade física não definido. Edite o cliente e selecione o nível de atividade.');
+  }
 
   try {
+    const bmr = calculateBMR(profile);
+    const tdee = calculateTDEE(profile);
+    const targetCalories = calculateTargetCalories(profile);
+    const macros = calculateMacroDistribution(targetCalories, profile);
+
+    const calculatedData = { bmr, tdee, targetCalories, macros };
+
+    console.log('📊 Cálculos científicos:', calculatedData);
+
+    console.log('🤖 Chamando Claude API...');
+
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 4096,
       temperature: 0.7,
       system: buildSystemPrompt(),
@@ -166,28 +201,60 @@ export const generateAIBasedMealPlan = async (
       ]
     });
 
+    console.log('✅ Resposta recebida da Claude API');
+
     const responseText = message.content[0].type === 'text'
       ? message.content[0].text
       : '';
 
+    console.log('📝 Resposta (primeiros 300 chars):', responseText.substring(0, 300));
+
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+
     if (!jsonMatch) {
-      throw new Error('Resposta da IA não contém JSON válido');
+      console.error('❌ Resposta não contém JSON válido');
+      console.log('Resposta completa:', responseText);
+      throw new Error('Claude retornou resposta em formato inválido. Tente novamente.');
     }
 
     const aiResponse = JSON.parse(jsonMatch[0]);
 
+    console.log('✅ JSON parseado com sucesso');
+    console.log('📋 Refeições sugeridas:', aiResponse.meals?.length || 0);
+
     return {
       targetCalories: calculatedData.targetCalories,
       macros: calculatedData.macros,
-      meals: aiResponse.meals,
-      reasoning: aiResponse.reasoning,
-      educationalNotes: aiResponse.educationalNotes
+      meals: aiResponse.meals || [],
+      reasoning: aiResponse.reasoning || 'Não fornecido',
+      educationalNotes: aiResponse.educationalNotes || 'Não fornecido'
     };
 
-  } catch (error) {
-    console.error('Erro ao chamar Claude API:', error);
-    throw new Error('Falha ao gerar sugestão com IA. Tente novamente.');
+  } catch (error: any) {
+    console.error('❌ Erro completo:', error);
+    console.error('Stack:', error.stack);
+
+    if (error.message?.includes('API key')) {
+      throw new Error('Chave da API Anthropic inválida ou não configurada. Verifique VITE_ANTHROPIC_API_KEY no .env');
+    }
+
+    if (error.message?.includes('fetch')) {
+      throw new Error('Erro de rede ao conectar com Claude API. Verifique sua conexão.');
+    }
+
+    if (error.message?.includes('timeout')) {
+      throw new Error('Timeout ao conectar com Claude API. Tente novamente.');
+    }
+
+    if (error.message?.includes('rate limit')) {
+      throw new Error('Limite de requisições atingido. Aguarde alguns minutos e tente novamente.');
+    }
+
+    if (error.message?.includes('invalid_request_error')) {
+      throw new Error('Erro na requisição à API. Verifique os dados do cliente.');
+    }
+
+    throw new Error(error.message || 'Erro desconhecido ao gerar sugestão');
   }
 };
 
