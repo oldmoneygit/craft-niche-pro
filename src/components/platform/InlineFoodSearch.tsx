@@ -15,20 +15,28 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFood, setSelectedFood] = useState<any>(null);
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'TACO' | 'OpenFoodFacts'>('all');
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { data: results, isLoading } = useQuery({
-    queryKey: ['inline-food-search', query],
+    queryKey: ['inline-food-search', query, sourceFilter],
     queryFn: async () => {
       if (query.length < 2) return [];
 
-      const { data } = await supabase
+      let searchQuery = supabase
         .from('foods')
         .select('id, name, brand, energy_kcal, protein_g, carbohydrate_g, lipid_g, food_categories(name), nutrition_sources(name, code)')
         .or(`name.ilike.%${query}%,brand.ilike.%${query}%`)
         .limit(10);
 
+      if (sourceFilter === 'TACO') {
+        searchQuery = searchQuery.or('nutrition_sources.code.eq.taco,nutrition_sources.code.eq.tbca');
+      } else if (sourceFilter === 'OpenFoodFacts') {
+        searchQuery = searchQuery.eq('nutrition_sources.code', 'openfoodfacts');
+      }
+
+      const { data } = await searchQuery;
       return data || [];
     },
     enabled: query.length >= 2
@@ -68,7 +76,46 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
 
   return (
     <>
-      <div className="relative">
+      <div className="relative space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground flex-shrink-0">Filtrar:</span>
+          <div className="flex gap-1.5">
+            <button
+              onClick={() => setSourceFilter('all')}
+              className={cn(
+                "px-2.5 py-1 rounded text-xs font-medium transition-all",
+                sourceFilter === 'all'
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted/50 hover:bg-muted text-muted-foreground"
+              )}
+            >
+              Todas
+            </button>
+            <button
+              onClick={() => setSourceFilter('TACO')}
+              className={cn(
+                "px-2.5 py-1 rounded text-xs font-medium transition-all",
+                sourceFilter === 'TACO'
+                  ? "bg-green-600 text-white"
+                  : "bg-muted/50 hover:bg-muted text-muted-foreground"
+              )}
+            >
+              TACO
+            </button>
+            <button
+              onClick={() => setSourceFilter('OpenFoodFacts')}
+              className={cn(
+                "px-2.5 py-1 rounded text-xs font-medium transition-all",
+                sourceFilter === 'OpenFoodFacts'
+                  ? "bg-blue-600 text-white"
+                  : "bg-muted/50 hover:bg-muted text-muted-foreground"
+              )}
+            >
+              OFF
+            </button>
+          </div>
+        </div>
+
         <div className={cn(
           "flex items-center gap-3 border-2 rounded-lg p-4 transition-all",
           "bg-gradient-to-r from-primary/5 to-primary/10",

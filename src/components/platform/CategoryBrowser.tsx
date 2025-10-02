@@ -13,13 +13,20 @@ interface CategoryBrowserProps {
 export const CategoryBrowser = ({ onSelectFood }: CategoryBrowserProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'TACO' | 'OpenFoodFacts'>('all');
 
   const { data: categories } = useQuery({
-    queryKey: ['food-categories-count'],
+    queryKey: ['food-categories-count', sourceFilter],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('foods')
-        .select('food_categories(name)');
+      let query = supabase.from('foods').select('food_categories(name), nutrition_sources(code)');
+
+      if (sourceFilter === 'TACO') {
+        query = query.or('nutrition_sources.code.eq.taco,nutrition_sources.code.eq.tbca');
+      } else if (sourceFilter === 'OpenFoodFacts') {
+        query = query.eq('nutrition_sources.code', 'openfoodfacts');
+      }
+
+      const { data } = await query;
 
       const counts: Record<string, number> = {};
       data?.forEach((item: any) => {
@@ -37,7 +44,7 @@ export const CategoryBrowser = ({ onSelectFood }: CategoryBrowserProps) => {
   });
 
   const { data: categoryFoods, isLoading: loadingFoods } = useQuery({
-    queryKey: ['category-foods-inline', selectedCategory],
+    queryKey: ['category-foods-inline', selectedCategory, sourceFilter],
     queryFn: async () => {
       if (!selectedCategory) return [];
 
@@ -49,13 +56,20 @@ export const CategoryBrowser = ({ onSelectFood }: CategoryBrowserProps) => {
 
       if (!categoryData) return [];
 
-      const { data } = await supabase
+      let query = supabase
         .from('foods')
         .select('id, name, brand, energy_kcal, protein_g, carbohydrate_g, lipid_g, nutrition_sources(name, code)')
         .eq('category_id', categoryData.id)
         .order('name')
         .limit(20);
 
+      if (sourceFilter === 'TACO') {
+        query = query.or('nutrition_sources.code.eq.taco,nutrition_sources.code.eq.tbca');
+      } else if (sourceFilter === 'OpenFoodFacts') {
+        query = query.eq('nutrition_sources.code', 'openfoodfacts');
+      }
+
+      const { data } = await query;
       return data || [];
     },
     enabled: !!selectedCategory
@@ -82,30 +96,94 @@ export const CategoryBrowser = ({ onSelectFood }: CategoryBrowserProps) => {
 
   return (
     <div className="border rounded-lg overflow-hidden">
-      <button
-        onClick={() => {
-          setIsOpen(!isOpen);
-          if (isOpen) setSelectedCategory(null);
-        }}
-        className={cn(
-          "w-full flex items-center justify-between p-4 transition-colors",
-          "hover:bg-muted/50",
-          isOpen && "bg-muted/30 border-b"
+      <div>
+        <button
+          onClick={() => {
+            setIsOpen(!isOpen);
+            if (isOpen) setSelectedCategory(null);
+          }}
+          className={cn(
+            "w-full flex items-center justify-between p-4 transition-colors",
+            "hover:bg-muted/50",
+            isOpen && "bg-muted/30 border-b"
+          )}
+        >
+          <div className="flex items-center gap-3">
+            <Grid3x3 className="w-5 h-5 text-primary" />
+            <span className="font-medium">Navegar por Categorias</span>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="text-xs">
+                {categories?.length || 0} categorias
+              </Badge>
+              {sourceFilter !== 'all' && (
+                <Badge
+                  variant={sourceFilter === 'TACO' ? 'default' : 'outline'}
+                  className="text-xs"
+                >
+                  {sourceFilter === 'TACO' ? '🇧🇷 TACO' : '🌍 OFF'}
+                </Badge>
+              )}
+            </div>
+          </div>
+          {isOpen ? (
+            <ChevronDown className="w-5 h-5 text-muted-foreground" />
+          ) : (
+            <ChevronRight className="w-5 h-5 text-muted-foreground" />
+          )}
+        </button>
+
+        {isOpen && (
+          <div className="px-4 py-3 border-b bg-muted/10">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground flex-shrink-0">Fonte:</span>
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={() => {
+                    setSourceFilter('all');
+                    setSelectedCategory(null);
+                  }}
+                  className={cn(
+                    "px-3 py-1.5 rounded-md text-xs font-medium transition-all",
+                    sourceFilter === 'all'
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                  )}
+                >
+                  Todas as Tabelas
+                </button>
+                <button
+                  onClick={() => {
+                    setSourceFilter('TACO');
+                    setSelectedCategory(null);
+                  }}
+                  className={cn(
+                    "px-3 py-1.5 rounded-md text-xs font-medium transition-all",
+                    sourceFilter === 'TACO'
+                      ? "bg-green-600 text-white shadow-sm"
+                      : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                  )}
+                >
+                  Tabela TACO
+                </button>
+                <button
+                  onClick={() => {
+                    setSourceFilter('OpenFoodFacts');
+                    setSelectedCategory(null);
+                  }}
+                  className={cn(
+                    "px-3 py-1.5 rounded-md text-xs font-medium transition-all",
+                    sourceFilter === 'OpenFoodFacts'
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                  )}
+                >
+                  OpenFoodFacts
+                </button>
+              </div>
+            </div>
+          </div>
         )}
-      >
-        <div className="flex items-center gap-3">
-          <Grid3x3 className="w-5 h-5 text-primary" />
-          <span className="font-medium">Navegar por Categorias</span>
-          <Badge variant="secondary" className="text-xs">
-            {categories?.length || 0} categorias
-          </Badge>
-        </div>
-        {isOpen ? (
-          <ChevronDown className="w-5 h-5 text-muted-foreground" />
-        ) : (
-          <ChevronRight className="w-5 h-5 text-muted-foreground" />
-        )}
-      </button>
+      </div>
 
       {isOpen && (
         <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x">
