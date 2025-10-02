@@ -24,7 +24,7 @@ const clientSchema = z.object({
   birth_date: z.string().optional(),
   weight_current: z.number().positive('Peso deve ser positivo').optional(),
   height: z.number().positive('Altura deve ser positiva').optional(),
-  goal: z.string().optional(),
+  goal: z.enum(['maintenance', 'weight_loss', 'muscle_gain', 'health']).optional(),
   allergies: z.string().optional(),
   age: z.number().optional(),
   gender: z.enum(['male', 'female', 'other']).optional(),
@@ -667,22 +667,105 @@ export default function PlatformClients() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="goal">Objetivo</Label>
-                <Textarea
-                  id="goal"
-                  value={formData.goal}
-                  onChange={(e) => setFormData(prev => ({ ...prev, goal: e.target.value }))}
-                  placeholder="Ex: Perder peso, ganhar massa muscular..."
-                  rows={3}
-                />
+                <Label htmlFor="goal">Objetivo Nutricional</Label>
+                <Select
+                  value={formData.goal || ''}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, goal: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o objetivo..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="maintenance">
+                      <div>
+                        <p className="font-medium">Manutenção de Peso</p>
+                        <p className="text-xs text-muted-foreground">Manter peso atual</p>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="weight_loss">
+                      <div>
+                        <p className="font-medium">Perda de Peso</p>
+                        <p className="text-xs text-muted-foreground">Déficit calórico controlado</p>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="muscle_gain">
+                      <div>
+                        <p className="font-medium">Ganho de Massa Muscular</p>
+                        <p className="text-xs text-muted-foreground">Superávit calórico</p>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="health">
+                      <div>
+                        <p className="font-medium">Saúde Geral</p>
+                        <p className="text-xs text-muted-foreground">Equilíbrio nutricional</p>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="allergies">Alergias/Restrições</Label>
+                <Label>Restrições Alimentares</Label>
+
+                {formData.dietary_restrictions && formData.dietary_restrictions.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData.dietary_restrictions.map((restriction, idx) => (
+                      <Badge key={idx} variant="secondary" className="gap-1">
+                        {restriction}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newRestrictions = formData.dietary_restrictions.filter((_, i) => i !== idx);
+                            setFormData(prev => ({ ...prev, dietary_restrictions: newRestrictions }));
+                          }}
+                          className="hover:bg-destructive/20 rounded-full"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+
+                <Select
+                  onValueChange={(value) => {
+                    const current = formData.dietary_restrictions || [];
+                    if (!current.includes(value)) {
+                      setFormData(prev => ({
+                        ...prev,
+                        dietary_restrictions: [...current, value]
+                      }));
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Adicionar restrição..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="vegetarian">Vegetariano</SelectItem>
+                    <SelectItem value="vegan">Vegano</SelectItem>
+                    <SelectItem value="lactose_intolerant">Intolerante à Lactose</SelectItem>
+                    <SelectItem value="gluten_free">Sem Glúten (Celíaco)</SelectItem>
+                    <SelectItem value="low_carb">Low Carb</SelectItem>
+                    <SelectItem value="diabetic">Diabético</SelectItem>
+                    <SelectItem value="hypertensive">Hipertenso (baixo sódio)</SelectItem>
+                    <SelectItem value="kosher">Kosher</SelectItem>
+                    <SelectItem value="halal">Halal</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <p className="text-xs text-muted-foreground">
+                  Selecione todas as restrições aplicáveis ao cliente
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="allergies">Alergias (texto livre)</Label>
                 <Textarea
                   id="allergies"
                   value={formData.allergies}
                   onChange={(e) => setFormData(prev => ({ ...prev, allergies: e.target.value }))}
-                  placeholder="Ex: Lactose, glúten..."
+                  placeholder="Ex: Amendoim, frutos do mar, etc..."
                   rows={2}
                 />
               </div>
