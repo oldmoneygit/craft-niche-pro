@@ -301,7 +301,7 @@ export const AddFoodToMealModal = ({
               }}
             >
               <IconComponent 
-                className="w-8 h-8 mb-2 text-foreground" 
+                className="w-10 h-10 mb-3 text-foreground" 
                 strokeWidth={1.5}
               />
               <h3 className="font-medium text-sm md:text-base mb-1">
