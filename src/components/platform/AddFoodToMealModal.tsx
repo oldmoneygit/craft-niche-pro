@@ -223,18 +223,25 @@ export const AddFoodToMealModal = ({
     enabled: !!selectedCategory && view === 'category-list',
   });
 
+  // Função para normalizar texto (remover acentos e pontuação)
+  const normalizeText = (text: string): string => {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // remove acentos
+      .replace(/[,.\-]/g, ' ') // remove pontuação
+      .replace(/\s+/g, ' ') // normaliza espaços
+      .trim();
+  };
+
   // Query 3: Buscar por texto (global)
   const { data: searchResults, isLoading: loadingSearch } = useQuery({
     queryKey: ['search-foods', searchTerm, sourceFilter],
     queryFn: async () => {
       if (searchTerm.length < 2) return [];
       
-      // Remover pontuação para busca mais flexível
-      const cleanTerm = searchTerm
-        .toLowerCase()
-        .replace(/[,.\-]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
+      // Normalizar termo de busca
+      const cleanTerm = normalizeText(searchTerm);
       
       let query: any = supabase
         .from('foods')
