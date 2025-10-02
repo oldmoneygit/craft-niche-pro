@@ -79,22 +79,37 @@ export const ServiceSubscriptionModal = ({
     e.preventDefault();
     setLoading(true);
 
-    try {
-      const { error } = await supabase
-        .from('service_subscriptions')
-        .insert({
-          tenant_id: tenantId,
-          client_id: clientId,
-          service_id: formData.service_id,
-          start_date: formData.start_date,
-          end_date: formData.end_date,
-          price: formData.price,
-          payment_status: formData.payment_status,
-          status: 'active',
-          notes: formData.notes
-        });
+    console.log('🔍 DEBUG - Iniciando contratação de serviço...');
+    console.log('📋 Dados do formulário:', formData);
+    console.log('🏢 Tenant ID:', tenantId);
+    console.log('👤 Client ID:', clientId);
 
-      if (error) throw error;
+    try {
+      const insertData = {
+        tenant_id: tenantId,
+        client_id: clientId,
+        service_id: formData.service_id,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        price: formData.price,
+        payment_status: formData.payment_status,
+        status: 'active',
+        notes: formData.notes || null
+      };
+
+      console.log('📤 Dados sendo enviados para o banco:', insertData);
+
+      const { data, error } = await supabase
+        .from('service_subscriptions')
+        .insert(insertData)
+        .select();
+
+      if (error) {
+        console.error('❌ Erro ao salvar:', error);
+        throw error;
+      }
+
+      console.log('✅ Serviço contratado com sucesso!', data);
 
       toast({
         title: '✓ Serviço contratado!',
@@ -116,9 +131,10 @@ export const ServiceSubscriptionModal = ({
       setSelectedService(null);
       
     } catch (error: any) {
+      console.error('❌ ERRO COMPLETO:', error);
       toast({
         title: 'Erro ao contratar serviço',
-        description: error.message,
+        description: error.message || 'Erro desconhecido ao salvar',
         variant: 'destructive'
       });
     } finally {
