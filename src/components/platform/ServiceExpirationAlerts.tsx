@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { AlertCircle, MessageCircle, RefreshCw, Clock } from 'lucide-react';
+import { AlertCircle, MessageCircle, RefreshCw, Clock, CheckCircle } from 'lucide-react';
 import { formatDate, formatCurrency, calculateDaysRemaining } from '@/lib/serviceCalculations';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -149,24 +149,31 @@ Responda esta mensagem para renovarmos.`;
   }
 
   if (expiringServices.length === 0) {
-    return null;
+    return (
+      <div className="text-center py-8">
+        <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+          <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+        </div>
+        <h3 className="text-lg font-semibold text-foreground mb-2">
+          Tudo em dia! 🎉
+        </h3>
+        <p className="text-muted-foreground">
+          Nenhum serviço vencendo nos próximos {daysThreshold} dias
+        </p>
+      </div>
+    );
   }
 
   return (
-    <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 rounded-lg border-2 border-orange-200 dark:border-orange-800 p-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-orange-100 dark:bg-orange-900/50 rounded-lg">
-            <AlertCircle className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-          </div>
-          <div>
-            <h3 className="font-bold text-lg text-foreground">
-              Serviços Próximos do Vencimento
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              {expiringServices.length} serviço(s) vencendo nos próximos {daysThreshold} dias
-            </p>
-          </div>
+        <div>
+          <h3 className="font-bold text-lg text-foreground mb-1">
+            {expiringServices.length} serviço(s) vencendo
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Próximos {daysThreshold} dias - envie lembretes de renovação
+          </p>
         </div>
         
         {expiringServices.length > 1 && (
@@ -175,7 +182,7 @@ Responda esta mensagem para renovarmos.`;
             className="bg-orange-500 hover:bg-orange-600 text-white"
           >
             <MessageCircle className="w-4 h-4 mr-2" />
-            Enviar Todos os Lembretes
+            Enviar Todos ({expiringServices.length})
           </Button>
         )}
       </div>

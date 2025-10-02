@@ -49,7 +49,8 @@ export default function PlatformDashboard() {
     inactiveClients: false,
     today: false,
     upcoming: false,
-    finance: false
+    finance: false,
+    expiringServices: true
   });
 
   const financialMetrics = useFinancialMetrics(tenantId);
@@ -81,7 +82,8 @@ export default function PlatformDashboard() {
       inactiveClients: inactiveClients.length > 0,
       today: todayAppointments.length > 0,
       upcoming: upcomingAppointments.length > 0,
-      finance: financialMetrics.upcomingRenewals.count > 0 || financialMetrics.pendingPayments.count > 0
+      finance: financialMetrics.upcomingRenewals.count > 0 || financialMetrics.pendingPayments.count > 0,
+      expiringServices: true
     });
   }, [reminders, sentReminders, confirmations, inactiveClients, todayAppointments, upcomingAppointments, financialMetrics]);
 
@@ -417,12 +419,31 @@ export default function PlatformDashboard() {
         </div>
 
         {/* ALERTAS DE VENCIMENTO DE SERVIÇOS */}
-        {tenantId && (
-          <ServiceExpirationAlerts 
-            tenantId={tenantId} 
-            daysThreshold={7} 
-          />
-        )}
+        <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-xl shadow-lg overflow-hidden">
+          <div 
+            className="p-6 cursor-pointer flex items-center justify-between text-white"
+            onClick={() => toggleSection('expiringServices')}
+          >
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-6 h-6" />
+              <div>
+                <h3 className="text-xl font-bold">Alertas de Vencimento de Serviços</h3>
+                <p className="text-sm text-orange-100">Serviços contratados próximos do vencimento (7 dias)</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <ChevronDown className={`w-5 h-5 transition-transform ${expandedSections.expiringServices ? 'rotate-180' : ''}`} />
+            </div>
+          </div>
+          {expandedSections.expiringServices && tenantId && (
+            <div className="bg-orange-50 p-4">
+              <ServiceExpirationAlerts 
+                tenantId={tenantId} 
+                daysThreshold={7} 
+              />
+            </div>
+          )}
+        </div>
 
         {/* Confirmações Pendentes */}
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg overflow-hidden">
