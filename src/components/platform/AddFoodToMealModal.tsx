@@ -976,27 +976,28 @@ export const AddFoodToMealModal = ({
                     C: {formatNutrient(food.carbohydrate_g)} | 
                     G: {formatNutrient(food.lipid_g)}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mt-3">
                     <Button
-                      size="sm"
                       variant="outline"
-                      onClick={() => {
+                      className="flex-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setSelectedFood(food);
                         setView('food-details');
                       }}
-                      className="flex-1"
                     >
                       Ver detalhes
-                      <ChevronRight className="w-4 h-4 ml-1" />
+                      <ChevronRight className="ml-2 h-4 w-4" />
                     </Button>
+                    
                     <Button
-                      size="sm"
-                      onClick={async () => {
+                      className="flex-1 bg-green-500 hover:bg-green-600"
+                      onClick={async (e) => {
+                        e.stopPropagation();
                         setSelectedFood(food);
                         await loadMeasures(food);
                         setView('add-portion');
                       }}
-                      className="flex-1"
                     >
                       Adicionar
                     </Button>
