@@ -27,15 +27,56 @@ export const AddFoodToMealModal = ({
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const [showCustomFoodModal, setShowCustomFoodModal] = useState(false);
+  const [showAllFoods, setShowAllFoods] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  // Buscar alimentos quando mudar a query
+  // Buscar categorias ao abrir o modal
   useEffect(() => {
-    if (searchQuery.length >= 2) {
+    if (isOpen) {
+      loadCategories();
+    }
+  }, [isOpen]);
+
+  // Buscar alimentos quando mudar a query ou filtros
+  useEffect(() => {
+    if (showAllFoods) {
+      loadAllFoods();
+    } else if (searchQuery.length >= 2) {
       searchFoods();
     } else {
       setFoods([]);
     }
-  }, [searchQuery]);
+  }, [searchQuery, showAllFoods, selectedCategory]);
+
+  const loadCategories = async () => {
+    const { data } = await supabase
+      .from('food_categories')
+      .select('*')
+      .order('name');
+    
+    setCategories(data || []);
+  };
+
+  const loadAllFoods = async () => {
+    setLoading(true);
+    let query = supabase
+      .from('foods')
+      .select(`
+        *,
+        food_categories (name, icon, color)
+      `)
+      .eq('active', true)
+      .order('name');
+
+    if (selectedCategory !== 'all') {
+      query = query.eq('category_id', selectedCategory);
+    }
+
+    const { data } = await query;
+    setFoods(data || []);
+    setLoading(false);
+  };
 
   const searchFoods = async () => {
     setLoading(true);
@@ -147,16 +188,50 @@ export const AddFoodToMealModal = ({
           </div>
 
           <div className="p-6">
-            {/* Busca */}
-            <div className="relative mb-6">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar alimento... (ex: arroz, frango, banana)"
-                className="pl-10"
-                autoFocus
-              />
+            {/* Busca e Filtros */}
+            <div className="space-y-4 mb-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowAllFoods(false);
+                  }}
+                  placeholder="Buscar alimento... (ex: arroz, frango, banana)"
+                  className="pl-10"
+                  autoFocus
+                />
+              </div>
+
+              {/* Toggle e Filtros */}
+              <div className="flex gap-3 items-center">
+                <Button
+                  onClick={() => {
+                    setShowAllFoods(!showAllFoods);
+                    setSearchQuery('');
+                  }}
+                  variant={showAllFoods ? "default" : "outline"}
+                  size="sm"
+                >
+                  {showAllFoods ? "Ocultar todos" : "Mostrar todos os alimentos"}
+                </Button>
+
+                {showAllFoods && (
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <option value="all">Todas as categorias</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
             </div>
 
             {/* Lista de Resultados */}
@@ -181,46 +256,47 @@ export const AddFoodToMealModal = ({
             )}
 
             {!selectedFood && foods.length > 0 && (
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {foods.map(food => (
-                  <button
-                    key={food.id}
-                    onClick={() => handleSelectFood(food)}
-                    className="w-full p-4 border-2 rounded-lg hover:border-primary transition-colors text-left"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-semibold">{food.name}</h3>
-                        {food.brand && (
-                          <p className="text-sm text-muted-foreground">Marca: {food.brand}</p>
-                        )}
-                        <div className="flex items-center gap-2 mt-2">
-                          <span 
-                            className="px-2 py-1 rounded text-xs font-medium"
-                            style={{ 
-                              backgroundColor: `${food.food_categories?.color}20`,
-                              color: food.food_categories?.color 
-                            }}
-                          >
-                            {food.food_categories?.name}
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {showAllFoods && selectedCategory === 'all' ? (
+                  // Agrupar por categoria quando mostrar todos
+                  categories.map(category => {
+                    const categoryFoods = foods.filter(f => f.category_id === category.id);
+                    if (categoryFoods.length === 0) return null;
+
+                    return (
+                      <div key={category.id} className="space-y-2">
+                        <div 
+                          className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-md sticky top-0 z-10"
+                          style={{ 
+                            backgroundColor: `${category.color}15`,
+                            borderLeft: `3px solid ${category.color}`
+                          }}
+                        >
+                          <span className="font-semibold text-sm" style={{ color: category.color }}>
+                            {category.name}
                           </span>
-                          {food.is_custom && (
-                            <span className="px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-700">
-                              Personalizado
-                            </span>
-                          )}
+                          <span className="text-xs text-muted-foreground">
+                            ({categoryFoods.length})
+                          </span>
+                        </div>
+                        <div className="space-y-2 pl-2">
+                          {categoryFoods.map(food => (
+                            <FoodCard key={food.id} food={food} onSelect={handleSelectFood} />
+                          ))}
                         </div>
                       </div>
-                      <div className="text-right ml-4">
-                        <p className="text-sm text-muted-foreground">Por 100g:</p>
-                        <p className="font-bold text-lg">{food.energy_kcal} kcal</p>
-                      </div>
-                    </div>
-                  </button>
-                ))}
+                    );
+                  })
+                ) : (
+                  // Lista simples quando buscar ou filtrar por categoria
+                  foods.map(food => (
+                    <FoodCard key={food.id} food={food} onSelect={handleSelectFood} />
+                  ))
+                )}
               </div>
             )}
 
+            {/* Detalhes do Alimento Selecionado */}
             {/* Detalhes do Alimento Selecionado */}
             {selectedFood && (
               <div className="space-y-6">
@@ -356,3 +432,40 @@ export const AddFoodToMealModal = ({
     </>
   );
 };
+
+// Componente auxiliar para o card de alimento
+const FoodCard = ({ food, onSelect }: { food: any; onSelect: (food: any) => void }) => (
+  <button
+    onClick={() => onSelect(food)}
+    className="w-full p-4 border-2 rounded-lg hover:border-primary transition-colors text-left"
+  >
+    <div className="flex items-start justify-between">
+      <div className="flex-1">
+        <h3 className="font-semibold">{food.name}</h3>
+        {food.brand && (
+          <p className="text-sm text-muted-foreground">Marca: {food.brand}</p>
+        )}
+        <div className="flex items-center gap-2 mt-2">
+          <span 
+            className="px-2 py-1 rounded text-xs font-medium"
+            style={{ 
+              backgroundColor: `${food.food_categories?.color}20`,
+              color: food.food_categories?.color 
+            }}
+          >
+            {food.food_categories?.name}
+          </span>
+          {food.is_custom && (
+            <span className="px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-700">
+              Personalizado
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="text-right ml-4">
+        <p className="text-sm text-muted-foreground">Por 100g:</p>
+        <p className="font-bold text-lg">{food.energy_kcal} kcal</p>
+      </div>
+    </div>
+  </button>
+);
