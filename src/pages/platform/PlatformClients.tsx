@@ -26,6 +26,13 @@ const clientSchema = z.object({
   height: z.number().positive('Altura deve ser positiva').optional(),
   goal: z.string().optional(),
   allergies: z.string().optional(),
+  age: z.number().optional(),
+  gender: z.enum(['male', 'female', 'other']).optional(),
+  height_cm: z.number().optional(),
+  weight_kg: z.number().optional(),
+  activity_level: z.enum(['sedentary', 'light', 'moderate', 'intense', 'very_intense']).optional(),
+  dietary_restrictions: z.array(z.string()).optional(),
+  notes: z.string().optional(),
 });
 
 export default function PlatformClients() {
@@ -55,6 +62,13 @@ export default function PlatformClients() {
     height: '',
     goal: '',
     allergies: '',
+    age: '',
+    gender: '',
+    height_cm: '',
+    weight_kg: '',
+    activity_level: '',
+    dietary_restrictions: [] as string[],
+    notes: '',
   });
   const { toast } = useToast();
 
@@ -215,6 +229,13 @@ export default function PlatformClients() {
         height: formData.height ? parseFloat(formData.height) : undefined,
         goal: formData.goal || undefined,
         allergies: formData.allergies || undefined,
+        age: formData.age ? parseInt(formData.age) : undefined,
+        gender: formData.gender || undefined,
+        height_cm: formData.height_cm ? parseFloat(formData.height_cm) : undefined,
+        weight_kg: formData.weight_kg ? parseFloat(formData.weight_kg) : undefined,
+        activity_level: formData.activity_level || undefined,
+        dietary_restrictions: formData.dietary_restrictions,
+        notes: formData.notes || undefined,
       });
 
       if (editingClient) {
@@ -229,6 +250,13 @@ export default function PlatformClients() {
           height: validatedData.height || null,
           goal: validatedData.goal || null,
           allergies: validatedData.allergies || null,
+          age: validatedData.age || null,
+          gender: validatedData.gender || null,
+          height_cm: validatedData.height_cm || null,
+          weight_kg: validatedData.weight_kg || null,
+          activity_level: validatedData.activity_level || null,
+          dietary_restrictions: validatedData.dietary_restrictions || [],
+          notes: validatedData.notes || null,
           tenant_id: tenant!.id,
         });
       }
@@ -258,6 +286,13 @@ export default function PlatformClients() {
       height: client.height?.toString() || '',
       goal: client.goal || '',
       allergies: client.allergies || '',
+      age: client.age?.toString() || '',
+      gender: client.gender || '',
+      height_cm: client.height_cm?.toString() || '',
+      weight_kg: client.weight_kg?.toString() || '',
+      activity_level: client.activity_level || '',
+      dietary_restrictions: client.dietary_restrictions || [],
+      notes: client.notes || '',
     });
     setIsDialogOpen(true);
   };
@@ -651,6 +686,89 @@ export default function PlatformClients() {
                   rows={2}
                 />
               </div>
+
+              <div className="border-t pt-4 mt-4">
+                <h3 className="text-lg font-semibold mb-4">Perfil Nutricional para IA</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="age">Idade (anos)</Label>
+                    <Input
+                      id="age"
+                      type="number"
+                      value={formData.age}
+                      onChange={(e) => setFormData(prev => ({ ...prev, age: e.target.value }))}
+                      placeholder="Ex: 35"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="gender">Sexo</Label>
+                    <Select value={formData.gender} onValueChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Masculino</SelectItem>
+                        <SelectItem value="female">Feminino</SelectItem>
+                        <SelectItem value="other">Outro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="height_cm">Altura (cm)</Label>
+                    <Input
+                      id="height_cm"
+                      type="number"
+                      step="0.1"
+                      value={formData.height_cm}
+                      onChange={(e) => setFormData(prev => ({ ...prev, height_cm: e.target.value }))}
+                      placeholder="Ex: 175"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="weight_kg">Peso (kg)</Label>
+                    <Input
+                      id="weight_kg"
+                      type="number"
+                      step="0.1"
+                      value={formData.weight_kg}
+                      onChange={(e) => setFormData(prev => ({ ...prev, weight_kg: e.target.value }))}
+                      placeholder="Ex: 85"
+                    />
+                  </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="activity_level">Nível de Atividade Física</Label>
+                    <Select value={formData.activity_level} onValueChange={(value) => setFormData(prev => ({ ...prev, activity_level: value }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sedentary">Sedentário (pouco ou nenhum exercício)</SelectItem>
+                        <SelectItem value="light">Leve (1-3x/semana)</SelectItem>
+                        <SelectItem value="moderate">Moderado (3-5x/semana)</SelectItem>
+                        <SelectItem value="intense">Intenso (6-7x/semana)</SelectItem>
+                        <SelectItem value="very_intense">Muito Intenso (atleta)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2 mt-4">
+                  <Label htmlFor="notes">Observações do Nutricionista</Label>
+                  <Textarea
+                    id="notes"
+                    value={formData.notes}
+                    onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                    placeholder="Adicione observações relevantes sobre o cliente, condições médicas, preferências alimentares, etc..."
+                    rows={4}
+                  />
+                </div>
+              </div>
+
               <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancelar
