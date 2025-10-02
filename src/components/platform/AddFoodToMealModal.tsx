@@ -618,7 +618,6 @@ export const AddFoodToMealModal = ({
     queryFn: async () => {
       if (searchTerm.length < 2) return [];
 
-      console.log('🔍 Buscando:', searchTerm, 'Filtro:', sourceFilter);
 
       let query = supabase
         .from('foods')
@@ -655,8 +654,6 @@ export const AddFoodToMealModal = ({
         console.error('Erro na busca:', error);
         return [];
       }
-
-      console.log('📦 Resultados:', data?.length || 0);
 
       return data || [];
     },
@@ -723,8 +720,6 @@ export const AddFoodToMealModal = ({
   // Buscar medidas quando seleciona alimento para adicionar porção
   const loadMeasures = async (food: any) => {
     try {
-      console.log('🥄 Carregando medidas para:', food.name, food.id);
-
       const { data: measuresData, error } = await supabase
         .from('food_measures')
         .select('*')
@@ -736,11 +731,9 @@ export const AddFoodToMealModal = ({
       }
 
       let measures = measuresData || [];
-      console.log('📏 Medidas encontradas:', measures.length);
 
       // Se não houver medidas, criar medidas padrão
       if (measures.length === 0) {
-        console.log('⚠️ Criando medidas padrão...');
 
         // Criar medida em gramas (100g como padrão)
         const defaultMeasures = [
@@ -787,7 +780,6 @@ export const AddFoodToMealModal = ({
         });
       }
 
-      console.log('✅ Medidas configuradas:', measures);
       setMeasures(measures);
       setSelectedMeasure(measures[0]);
       setQuantity(1);
@@ -833,25 +825,16 @@ export const AddFoodToMealModal = ({
       return;
     }
 
-    console.log('➕ Adicionando alimento:', {
-      food: selectedFood.name,
-      measure: selectedMeasure.measure_name,
-      quantity
-    });
-
     const nutrition = calculateItemNutrition(selectedFood, selectedMeasure, quantity);
-    console.log('📊 Nutrição calculada:', nutrition);
 
     const item = {
       food_id: selectedFood.id,
-      measure_id: selectedMeasure.id.startsWith('temp-') ? null : selectedMeasure.id, // Se for medida temporária, enviar null
+      measure_id: selectedMeasure.id.startsWith('temp-') ? null : selectedMeasure.id,
       quantity,
       food: selectedFood,
       measure: selectedMeasure,
       ...nutrition
     };
-
-    console.log('✅ Item completo:', item);
 
     onAddFood(item);
 
@@ -1190,13 +1173,6 @@ export const AddFoodToMealModal = ({
 
   // Resultados de Busca
   const SearchResultsView = () => {
-    console.log('🔍 SearchResultsView renderizado:', {
-      searchTerm,
-      loading: loadingSearch,
-      resultsCount: searchResults?.length || 0,
-      results: searchResults
-    });
-
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between mb-4">
@@ -1466,10 +1442,12 @@ export const AddFoodToMealModal = ({
     );
   };
 
+  if (!isOpen) return null;
+
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-        <div className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" style={{ zIndex: 9999 }}>
+        <div className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
           {/* Header */}
           <div className="border-b px-6 py-4 flex justify-between items-center shrink-0">
             <h2 className="text-2xl font-bold">Adicionar Alimento</h2>
@@ -1558,31 +1536,19 @@ export const AddFoodToMealModal = ({
 
           {/* Conteúdo Principal */}
           <div className="px-6 pb-6 overflow-y-auto flex-1">
-            {(() => {
-              console.log('🎯 Estado do modal:', {
-                searchTerm,
-                searchTermLength: searchTerm.length,
-                nutritionalFilter,
-                view,
-                hasSearchResults: !!searchResults,
-                searchResultsLength: searchResults?.length
-              });
-
-              if (searchTerm.length >= 2) {
-                return <SearchResultsView />;
-              } else if (nutritionalFilter) {
-                return <NutritionalFilterView />;
-              } else if (view === 'categories') {
-                return <CategoriesView />;
-              } else if (view === 'recent') {
-                return <RecentFoodsView />;
-              } else if (view === 'category-list') {
-                return <CategoryListView />;
-              } else if (view === 'add-portion') {
-                return <AddPortionView />;
-              }
-              return null;
-            })()}
+            {searchTerm.length >= 2 ? (
+              <SearchResultsView />
+            ) : nutritionalFilter ? (
+              <NutritionalFilterView />
+            ) : view === 'categories' ? (
+              <CategoriesView />
+            ) : view === 'recent' ? (
+              <RecentFoodsView />
+            ) : view === 'category-list' ? (
+              <CategoryListView />
+            ) : view === 'add-portion' ? (
+              <AddPortionView />
+            ) : null}
           </div>
         </div>
       </div>
