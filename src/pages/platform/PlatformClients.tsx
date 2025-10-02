@@ -8,11 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Edit, Trash2, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { ClientDetailsModal } from '@/components/platform/ClientDetailsModal';
+import { calculateDaysRemaining } from '@/lib/serviceCalculations';
 
 const clientSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -39,6 +41,7 @@ export default function PlatformClients() {
   const [selectedClientForDetails, setSelectedClientForDetails] = useState<any>(null);
   const [activeCount, setActiveCount] = useState(0);
   const [inactiveCount, setInactiveCount] = useState(0);
+  const [clientServices, setClientServices] = useState<Record<string, any[]>>({});
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -51,7 +54,7 @@ export default function PlatformClients() {
   });
   const { toast } = useToast();
 
-  // Calcular ativos vs inativos
+  // Calcular ativos vs inativos E buscar serviços
   useEffect(() => {
     const calculateActiveStatus = async () => {
       if (!clients.length) {
@@ -65,6 +68,7 @@ export default function PlatformClients() {
 
       let active = 0;
       let inactive = 0;
+      const servicesMap: Record<string, any[]> = {};
 
       for (const client of clients) {
         const { data: appointments } = await supabase
@@ -84,10 +88,23 @@ export default function PlatformClients() {
         } else {
           inactive++;
         }
+
+        // Buscar serviços ativos do cliente
+        const { data: activeServices } = await supabase
+          .from('service_subscriptions')
+          .select('*, services(name, modality)')
+          .eq('client_id', client.id)
+          .eq('status', 'active')
+          .order('start_date', { ascending: false });
+
+        if (activeServices) {
+          servicesMap[client.id] = activeServices;
+        }
       }
 
       setActiveCount(active);
       setInactiveCount(inactive);
+      setClientServices(servicesMap);
     };
 
     calculateActiveStatus();
@@ -370,12 +387,30 @@ export default function PlatformClients() {
                           <span className="text-sm text-gray-500">{calculateAge(client.birth_date)}</span>
                         )}
                       </div>
-                      <div className="flex items-center gap-1 text-sm text-gray-600">
+                      <div className="flex items-center gap-1 text-sm text-gray-600 mb-2">
                         <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         <span className="truncate">{client.email || 'Sem email'}</span>
                       </div>
+                      
+                      {/* Badges de Serviços Ativos */}
+                      {clientServices[client.id] && clientServices[client.id].length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {clientServices[client.id].map((sub: any) => {
+                            const daysRemaining = calculateDaysRemaining(sub.end_date);
+                            return (
+                              <Badge 
+                                key={sub.id}
+                                variant={daysRemaining > 14 ? 'default' : daysRemaining >= 7 ? 'secondary' : 'destructive'}
+                                className="text-xs"
+                              >
+                                {sub.services?.name} • {daysRemaining}d
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
 
