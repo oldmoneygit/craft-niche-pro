@@ -9,16 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import {
-  ArrowLeft,
-  Plus,
-  Trash2,
-  Target,
-  TrendingUp,
-  BarChart3,
-  Clock,
-  Save
-} from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Target, TrendingUp, ChartBar as BarChart3, Clock, Save } from 'lucide-react';
 import { InlineFoodSearch } from '@/components/platform/InlineFoodSearch';
 import { formatNutrient } from '@/lib/nutritionCalculations';
 
