@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -39,10 +39,10 @@ interface AddFoodToMealModalProps {
   onAddFood: (item: any) => void;
 }
 
-// Componente Popover para detalhes do alimento
+// Componente para detalhes do alimento
 const FoodDetailsPopover = ({ food, onAddClick }: { food: any; onAddClick: () => void }) => {
   return (
-    <div className="w-[400px] p-4 space-y-4">
+    <div className="p-4 space-y-4">
       {/* Header */}
       <div className="border-b pb-3">
         <div className="flex items-start justify-between">
@@ -1040,13 +1040,13 @@ export const AddFoodToMealModal = ({
                     G: {formatNutrient(food.lipid_g)}
                   </div>
                   <div className="mt-3">
-                    <Popover>
-                      <PopoverTrigger asChild>
+                    <Dialog>
+                      <DialogTrigger asChild>
                         <Button className="w-full">
                           Ver detalhes e adicionar
                         </Button>
-                      </PopoverTrigger>
-                      <PopoverContent side="right" align="center" className="p-0 w-[400px]">
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md p-0">
                         <FoodDetailsPopover 
                           food={food}
                           onAddClick={async () => {
@@ -1055,8 +1055,8 @@ export const AddFoodToMealModal = ({
                             setView('add-portion');
                           }}
                         />
-                      </PopoverContent>
-                    </Popover>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </CardContent>
               </Card>
