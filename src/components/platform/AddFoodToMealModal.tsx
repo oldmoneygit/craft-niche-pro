@@ -740,6 +740,7 @@ export const AddFoodToMealModal = ({
   const handleAddToMeal = async (food: any) => {
     setSelectedFood(food);
     await loadMeasures(food);
+    setSearchTerm('');
     setView('add-portion');
   };
 
