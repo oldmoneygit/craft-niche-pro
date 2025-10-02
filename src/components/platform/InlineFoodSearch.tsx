@@ -26,7 +26,7 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
 
       let searchQuery = supabase
         .from('foods')
-        .select('id, name, brand, energy_kcal, protein_g, carbohydrate_g, lipid_g, food_categories(name), nutrition_sources(name, code)')
+        .select('id, name, brand, energy_kcal, protein_g, carbohydrate_g, lipid_g, food_categories(name), nutrition_sources!inner(name, code)')
         .or(`name.ilike.%${query}%,brand.ilike.%${query}%`)
         .limit(10);
 
@@ -36,7 +36,14 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
         searchQuery = searchQuery.eq('nutrition_sources.code', 'openfoodfacts');
       }
 
-      const { data } = await searchQuery;
+      const { data, error } = await searchQuery;
+
+      if (error) {
+        console.error('Erro na busca:', error);
+      }
+
+      console.log('🔍 Busca:', query, '- Filtro:', sourceFilter, '- Resultados:', data?.length);
+
       return data || [];
     },
     enabled: query.length >= 2

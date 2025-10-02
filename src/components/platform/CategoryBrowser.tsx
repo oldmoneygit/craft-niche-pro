@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ChevronDown, ChevronRight, Grid3x3 } from 'lucide-react';
@@ -15,10 +15,23 @@ export const CategoryBrowser = ({ onSelectFood }: CategoryBrowserProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sourceFilter, setSourceFilter] = useState<'all' | 'TACO' | 'OpenFoodFacts'>('all');
 
+  useEffect(() => {
+    if (isOpen) {
+      supabase
+        .from('foods')
+        .select('nutrition_sources(code)')
+        .limit(100)
+        .then(({ data }) => {
+          const uniqueSources = [...new Set(data?.map(d => d.nutrition_sources?.code).filter(Boolean))];
+          console.log('🔍 VALORES REAIS do campo nutrition_sources.code no banco:', uniqueSources);
+        });
+    }
+  }, [isOpen]);
+
   const { data: categories } = useQuery({
     queryKey: ['food-categories-count', sourceFilter],
     queryFn: async () => {
-      let query = supabase.from('foods').select('food_categories(name), nutrition_sources(code)');
+      let query = supabase.from('foods').select('food_categories(name), nutrition_sources!inner(code)');
 
       if (sourceFilter === 'TACO') {
         query = query.or('nutrition_sources.code.eq.taco,nutrition_sources.code.eq.tbca');
@@ -26,7 +39,17 @@ export const CategoryBrowser = ({ onSelectFood }: CategoryBrowserProps) => {
         query = query.eq('nutrition_sources.code', 'openfoodfacts');
       }
 
-      const { data } = await query;
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Erro ao buscar categorias:', error);
+      }
+
+      console.log('📊 Filtro:', sourceFilter, '- Dados retornados:', data?.length, 'alimentos');
+      if (data && data.length > 0) {
+        const uniqueSources = [...new Set(data.map((d: any) => d.nutrition_sources?.code))];
+        console.log('📊 Fontes únicas:', uniqueSources);
+      }
 
       const counts: Record<string, number> = {};
       data?.forEach((item: any) => {
@@ -58,7 +81,7 @@ export const CategoryBrowser = ({ onSelectFood }: CategoryBrowserProps) => {
 
       let query = supabase
         .from('foods')
-        .select('id, name, brand, energy_kcal, protein_g, carbohydrate_g, lipid_g, nutrition_sources(name, code)')
+        .select('id, name, brand, energy_kcal, protein_g, carbohydrate_g, lipid_g, nutrition_sources!inner(name, code)')
         .eq('category_id', categoryData.id)
         .order('name')
         .limit(20);
@@ -69,7 +92,14 @@ export const CategoryBrowser = ({ onSelectFood }: CategoryBrowserProps) => {
         query = query.eq('nutrition_sources.code', 'openfoodfacts');
       }
 
-      const { data } = await query;
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Erro ao buscar alimentos da categoria:', error);
+      }
+
+      console.log('🍎 Alimentos da categoria:', selectedCategory, '- Filtro:', sourceFilter, '- Resultados:', data?.length);
+
       return data || [];
     },
     enabled: !!selectedCategory
