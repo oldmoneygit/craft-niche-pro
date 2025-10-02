@@ -399,18 +399,21 @@ export const AddFoodToMealModal = ({
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex-1">
-                        <h4 className="font-medium">{food.name}</h4>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-medium">{food.name}</h4>
+                          <Badge 
+                            variant={food.source?.includes('TACO') ? 'default' : 'secondary'} 
+                            className="text-xs"
+                          >
+                            {food.source?.includes('TACO') ? 'TACO' : 'OFF'}
+                          </Badge>
+                        </div>
                         {food.brand && (
                           <p className="text-sm text-muted-foreground">
                             Marca: {food.brand}
                           </p>
                         )}
                       </div>
-                      {food.source_info && (
-                        <Badge variant="secondary" className="ml-2">
-                          {food.source_info}
-                        </Badge>
-                      )}
                     </div>
                     <div className="text-sm text-muted-foreground mb-3">
                       {food.energy_kcal} kcal | 
@@ -462,7 +465,15 @@ export const AddFoodToMealModal = ({
 
         {/* Cabeçalho do Alimento */}
         <div className="border-b pb-4">
-          <h2 className="text-2xl font-bold mb-2">{foodDetails?.name}</h2>
+          <div className="flex items-center gap-2 mb-2">
+            <h2 className="text-2xl font-bold">{foodDetails?.name}</h2>
+            <Badge 
+              variant={(foodDetails as any)?.source?.includes('TACO') ? 'default' : 'secondary'} 
+              className="text-xs"
+            >
+              {(foodDetails as any)?.source?.includes('TACO') ? 'TACO' : 'OFF'}
+            </Badge>
+          </div>
           {foodDetails?.brand && (
             <p className="text-muted-foreground mb-1">
               Marca: {foodDetails.brand}
@@ -735,10 +746,18 @@ export const AddFoodToMealModal = ({
           <div className="grid gap-3 pr-4">
             {searchResults?.map((food) => (
               <Card key={food.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
+                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
-                      <h4 className="font-medium">{food.name}</h4>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-medium">{food.name}</h4>
+                        <Badge 
+                          variant={food.source?.includes('TACO') ? 'default' : 'secondary'} 
+                          className="text-xs"
+                        >
+                          {food.source?.includes('TACO') ? 'TACO' : 'OFF'}
+                        </Badge>
+                      </div>
                       {food.brand && (
                         <p className="text-sm text-muted-foreground">
                           Marca: {food.brand}
@@ -748,11 +767,6 @@ export const AddFoodToMealModal = ({
                         {food.food_categories?.name}
                       </Badge>
                     </div>
-                    {food.source_info && (
-                      <Badge variant="outline" className="ml-2">
-                        {food.source_info}
-                      </Badge>
-                    )}
                   </div>
                   <div className="text-sm text-muted-foreground mb-3">
                     {food.energy_kcal} kcal | 
