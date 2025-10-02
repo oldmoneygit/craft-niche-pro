@@ -223,42 +223,22 @@ export const AddFoodToMealModal = ({
     enabled: !!selectedCategory && view === 'category-list',
   });
 
-  // Função para normalizar texto (remover acentos e pontuação)
-  const normalizeText = (text: string): string => {
-    return text
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // remove acentos
-      .replace(/[,.\-]/g, ' ') // remove pontuação
-      .replace(/\s+/g, ' ') // normaliza espaços
-      .trim();
-  };
-
   // Query 3: Buscar por texto (global)
   const { data: searchResults, isLoading: loadingSearch } = useQuery({
     queryKey: ['search-foods', searchTerm, sourceFilter],
     queryFn: async () => {
       if (searchTerm.length < 2) return [];
       
-      // Quebrar em palavras e normalizar
-      const words = searchTerm
+      // Normalizar busca
+      const term = searchTerm
         .toLowerCase()
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .split(/[\s,.\-]+/)
-        .filter(w => w.length > 2);
+        .replace(/[\u0300-\u036f]/g, '');
       
-      if (words.length === 0) return [];
-      
-      // Buscar alimentos que contenham TODAS as palavras
       let query: any = supabase
         .from('foods')
-        .select('*');
-      
-      // Adicionar filtro para cada palavra
-      words.forEach(word => {
-        query = query.or(`name.ilike.%${word}%,brand.ilike.%${word}%`);
-      });
+        .select('*, food_categories(name)')
+        .or(`name.ilike.%${term}%,brand.ilike.%${term}%`);
       
       if (sourceFilter && sourceFilter !== 'all') {
         if (sourceFilter === 'TACO') {
@@ -270,20 +250,15 @@ export const AddFoodToMealModal = ({
       
       const { data } = await query.order('name').limit(50);
       
-      // Buscar categorias dos alimentos encontrados
-      if (data && data.length > 0) {
-        const categoryIds = [...new Set(data.map((f: any) => f.category_id).filter(Boolean))] as string[];
-        const { data: categories } = await supabase
-          .from('food_categories')
-          .select('id, name')
-          .in('id', categoryIds);
-        
-        const categoryMap = new Map(categories?.map(c => [c.id, c]) || []);
-        
-        return data.map((food: any) => ({
-          ...food,
-          food_categories: food.category_id ? categoryMap.get(food.category_id) : null
-        }));
+      // Filtro adicional no JavaScript para busca por palavras
+      if (data && term.includes(' ')) {
+        const words = term.split(/\s+/).filter(w => w.length > 2);
+        return data.filter((food: any) => {
+          const foodName = food.name.toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+          return words.every(word => foodName.includes(word));
+        });
       }
       
       return data || [];
