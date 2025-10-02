@@ -19,6 +19,28 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const normalizeSearchTerm = (term: string): string => {
+    return term
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[,.-]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  const buildSearchPattern = (term: string): string[] => {
+    const normalized = normalizeSearchTerm(term);
+    const words = normalized.split(' ').filter(w => w.length >= 2);
+
+    const patterns = [
+      `%${words.join('%')}%`,
+      ...words.map(w => `%${w}%`)
+    ];
+
+    return patterns;
+  };
+
   const { data: results, isLoading } = useQuery({
     queryKey: ['inline-food-search', query, sourceFilter],
     queryFn: async () => {
@@ -26,38 +48,59 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
 
       console.log('🔍 Buscando:', query, '- Filtro:', sourceFilter);
 
-      let searchQuery = supabase
-        .from('foods')
-        .select('id, name, brand, energy_kcal, protein_g, carbohydrate_g, lipid_g, source, category')
-        .or(`name.ilike.%${query}%,brand.ilike.%${query}%`)
-        .limit(50);
+      const patterns = buildSearchPattern(query);
+      console.log('📝 Padrões de busca:', patterns);
 
-      if (sourceFilter === 'TACO') {
-        searchQuery = searchQuery.or('source.ilike.%TACO%,source.ilike.%TBCA%');
-      } else if (sourceFilter === 'OpenFoodFacts') {
-        searchQuery = searchQuery.ilike('source', '%OpenFoodFacts%');
-      }
+      const searches = await Promise.all(
+        patterns.map(async (pattern) => {
+          let searchQuery = supabase
+            .from('foods')
+            .select('id, name, brand, energy_kcal, protein_g, carbohydrate_g, lipid_g, source, category')
+            .or(`name.ilike.${pattern},brand.ilike.${pattern}`)
+            .limit(20);
 
-      const { data, error } = await searchQuery;
+          if (sourceFilter === 'TACO') {
+            searchQuery = searchQuery.or('source.ilike.%TACO%,source.ilike.%TBCA%');
+          } else if (sourceFilter === 'OpenFoodFacts') {
+            searchQuery = searchQuery.ilike('source', '%OpenFoodFacts%');
+          }
 
-      if (error) {
-        console.error('❌ Erro na busca:', error);
-        return [];
-      }
+          const { data } = await searchQuery;
+          return data || [];
+        })
+      );
 
-      const sorted = (data || []).sort((a, b) => {
+      const allResults = searches.flat();
+      const uniqueResults = Array.from(
+        new Map(allResults.map(item => [item.id, item])).values()
+      );
+
+      const sorted = uniqueResults.sort((a, b) => {
         const aIsTACO = a.source?.toLowerCase().includes('taco') || a.source?.toLowerCase().includes('tbca');
         const bIsTACO = b.source?.toLowerCase().includes('taco') || b.source?.toLowerCase().includes('tbca');
 
         if (aIsTACO && !bIsTACO) return -1;
         if (!aIsTACO && bIsTACO) return 1;
 
+        const normalizedQuery = normalizeSearchTerm(query);
+        const queryWords = normalizedQuery.split(' ');
+
+        const scoreA = queryWords.filter(word =>
+          normalizeSearchTerm(a.name).includes(word)
+        ).length;
+
+        const scoreB = queryWords.filter(word =>
+          normalizeSearchTerm(b.name).includes(word)
+        ).length;
+
+        if (scoreA !== scoreB) return scoreB - scoreA;
+
         return a.name.localeCompare(b.name);
       });
 
       const limited = sorted.slice(0, 10);
 
-      console.log('✅ Resultados encontrados:', limited.length);
+      console.log('✅ Resultados:', limited.length, '- Únicos de', uniqueResults.length);
       console.log('📊 Distribuição:', {
         TACO: limited.filter(r => r.source?.toLowerCase().includes('taco')).length,
         OFF: limited.filter(r => r.source?.toLowerCase().includes('openfood')).length
