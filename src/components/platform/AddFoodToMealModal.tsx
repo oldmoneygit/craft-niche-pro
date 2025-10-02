@@ -71,7 +71,7 @@ const FoodUsageHistory = ({ foodId }: { foodId: string }) => {
 };
 
 // Componente para alimentos similares
-const SimilarFoods = ({ food }: { food: any }) => {
+const SimilarFoods = ({ food, onCompare }: { food: any; onCompare: (food: any) => void }) => {
   const [similarFoods, setSimilarFoods] = useState<any[]>([]);
 
   useEffect(() => {
@@ -80,11 +80,11 @@ const SimilarFoods = ({ food }: { food: any }) => {
       
       const { data } = await supabase
         .from('foods')
-        .select('id, name, energy_kcal, protein_g')
+        .select('id, name, energy_kcal, protein_g, carbohydrate_g, lipid_g, fiber_g, sodium_mg')
         .eq('category', food.category)
         .neq('id', food.id)
-        .order('name')
-        .limit(3);
+        .order('energy_kcal')
+        .limit(5);
       
       setSimilarFoods(data || []);
     };
@@ -96,14 +96,107 @@ const SimilarFoods = ({ food }: { food: any }) => {
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium">Alimentos Similares</p>
-      <div className="space-y-2">
-        {similarFoods.map((similar) => (
-          <div key={similar.id} className="flex justify-between items-center text-sm p-2 bg-muted/50 rounded">
-            <span className="text-muted-foreground">{similar.name}</span>
-            <span className="text-xs font-medium">{similar.energy_kcal} kcal</span>
-          </div>
+      <div className="space-y-1">
+        {similarFoods.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => onCompare(f)}
+            className="w-full text-left p-2 rounded hover:bg-muted transition-colors flex justify-between items-center group"
+          >
+            <span className="text-sm text-muted-foreground group-hover:text-foreground">
+              {f.name}
+            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">{f.energy_kcal}kcal</span>
+              <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </button>
         ))}
       </div>
+    </div>
+  );
+};
+
+// Componente para comparação de alimentos
+const FoodComparison = ({ originalFood, comparisonFood, onBack, onUse }: { 
+  originalFood: any; 
+  comparisonFood: any; 
+  onBack: () => void;
+  onUse: () => void;
+}) => {
+  const getDifference = (original: number, comparison: number) => {
+    const diff = comparison - original;
+    const percentage = original > 0 ? ((diff / original) * 100).toFixed(0) : '0';
+    return { diff, percentage, isHigher: diff > 0 };
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center gap-2 pb-3 border-b">
+        <Button variant="ghost" size="sm" onClick={onBack}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <h3 className="font-semibold">Comparação de Alimentos</h3>
+      </div>
+
+      {/* Grid de comparação */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Alimento original */}
+        <div className="space-y-2">
+          <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg">
+            <p className="text-xs text-muted-foreground mb-1">Original</p>
+            <p className="font-semibold text-sm">{originalFood.name}</p>
+          </div>
+        </div>
+
+        {/* Alimento comparado */}
+        <div className="space-y-2">
+          <div className="bg-green-50 dark:bg-green-950 p-3 rounded-lg">
+            <p className="text-xs text-muted-foreground mb-1">Comparar com</p>
+            <p className="font-semibold text-sm">{comparisonFood.name}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabela comparativa */}
+      <div className="space-y-2">
+        <p className="text-sm font-medium">Valores por 100g</p>
+        
+        {[
+          { label: 'Calorias', key: 'energy_kcal', unit: 'kcal' },
+          { label: 'Proteínas', key: 'protein_g', unit: 'g' },
+          { label: 'Carboidratos', key: 'carbohydrate_g', unit: 'g' },
+          { label: 'Gorduras', key: 'lipid_g', unit: 'g' },
+          { label: 'Fibras', key: 'fiber_g', unit: 'g' },
+          { label: 'Sódio', key: 'sodium_mg', unit: 'mg' }
+        ].map(({ label, key, unit }) => {
+          const original = originalFood[key] || 0;
+          const comparison = comparisonFood[key] || 0;
+          const { diff, percentage, isHigher } = getDifference(original, comparison);
+
+          return (
+            <div key={key} className="grid grid-cols-2 gap-4 py-2 border-b">
+              <div>
+                <p className="text-xs text-muted-foreground">{label}</p>
+                <p className="font-medium">{original.toFixed(1)}{unit}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">{label}</p>
+                <p className="font-medium">{comparison.toFixed(1)}{unit}</p>
+                <p className={`text-xs ${isHigher ? 'text-orange-600' : 'text-green-600'}`}>
+                  {isHigher ? '+' : ''}{percentage}%
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Botão para adicionar o comparado */}
+      <Button className="w-full" onClick={onUse}>
+        Usar {comparisonFood.name}
+      </Button>
     </div>
   );
 };
@@ -147,6 +240,28 @@ const NutritionistNotes = ({ foodId }: { foodId: string }) => {
 
 // Componente para detalhes do alimento
 const FoodDetailsPopover = ({ food, onAddClick }: { food: any; onAddClick: () => void }) => {
+  const [comparingFood, setComparingFood] = useState<any>(null);
+
+  const handleUseComparisonFood = async () => {
+    if (!comparingFood) return;
+    // Trocar o alimento pelo comparado e voltar
+    // Aqui você pode chamar onAddClick com o alimento comparado
+    setComparingFood(null);
+  };
+
+  if (comparingFood) {
+    return (
+      <div className="p-4">
+        <FoodComparison 
+          originalFood={food}
+          comparisonFood={comparingFood}
+          onBack={() => setComparingFood(null)}
+          onUse={handleUseComparisonFood}
+        />
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Header sticky */}
@@ -245,7 +360,7 @@ const FoodDetailsPopover = ({ food, onAddClick }: { food: any; onAddClick: () =>
               <FoodUsageHistory foodId={food.id} />
 
               {/* 4. ALIMENTOS SIMILARES */}
-              <SimilarFoods food={food} />
+              <SimilarFoods food={food} onCompare={setComparingFood} />
 
               {/* 5. OBSERVAÇÕES DO NUTRICIONISTA */}
               <NutritionistNotes foodId={food.id} />
