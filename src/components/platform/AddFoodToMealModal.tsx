@@ -266,8 +266,8 @@ const FoodDetailsPopover = ({ food, onAddClick }: { food: any; onAddClick: (sele
               <p className="text-sm text-muted-foreground">Marca: {food.brand}</p>
             )}
           </div>
-          <Badge variant={food.source?.includes('TACO') ? 'default' : 'secondary'}>
-            {food.source?.includes('TACO') ? 'TACO' : 'OFF'}
+          <Badge variant={food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'default' : 'secondary'}>
+            {food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'TACO' : food.nutrition_sources?.name || 'Outro'}
           </Badge>
         </div>
         {food.food_categories?.name && (
@@ -377,7 +377,7 @@ const FoodDetailsPopover = ({ food, onAddClick }: { food: any; onAddClick: (sele
                   
                   {/* Fonte */}
                   <div className="pt-2 border-t">
-                    <p className="text-xs text-muted-foreground">Fonte: {food.source}</p>
+                    <p className="text-xs text-muted-foreground">Fonte: {food.nutrition_sources?.name || 'Desconhecida'}</p>
                     {food.barcode && <p className="text-xs text-muted-foreground">Código: {food.barcode}</p>}
                   </div>
                 </div>
@@ -1012,11 +1012,11 @@ export const AddFoodToMealModal = ({
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-medium">{food.name}</h4>
-                          <Badge 
-                            variant={food.source?.includes('TACO') ? 'default' : 'secondary'} 
+                          <Badge
+                            variant={food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'default' : 'secondary'}
                             className="text-xs"
                           >
-                            {food.source?.includes('TACO') ? 'TACO' : 'OFF'}
+                            {food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'TACO' : food.nutrition_sources?.name || 'Outro'}
                           </Badge>
                         </div>
                         {food.brand && (
@@ -1189,12 +1189,20 @@ export const AddFoodToMealModal = ({
   );
 
   // Resultados de Busca
-  const SearchResultsView = () => (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-muted-foreground">
-          {searchResults?.length || 0} resultados para "{searchTerm}"
-        </p>
+  const SearchResultsView = () => {
+    console.log('🔍 SearchResultsView renderizado:', {
+      searchTerm,
+      loading: loadingSearch,
+      resultsCount: searchResults?.length || 0,
+      results: searchResults
+    });
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-muted-foreground">
+            {searchResults?.length || 0} resultados para "{searchTerm}"
+          </p>
         <Button
           variant="ghost"
           size="sm"
@@ -1246,11 +1254,11 @@ export const AddFoodToMealModal = ({
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-medium">{food.name}</h4>
-                          <Badge 
-                            variant={food.source?.includes('TACO') ? 'default' : 'secondary'} 
+                          <Badge
+                            variant={food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'default' : 'secondary'}
                             className="text-xs"
                           >
-                            {food.source?.includes('TACO') ? 'TACO' : 'OFF'}
+                            {food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'TACO' : food.nutrition_sources?.name || 'Outro'}
                           </Badge>
                         </div>
                         {food.brand && (
@@ -1356,7 +1364,8 @@ export const AddFoodToMealModal = ({
         </ScrollArea>
       )}
     </div>
-  );
+    );
+  };
 
   // Resultados de Filtro Nutricional
   const NutritionalFilterView = () => {
@@ -1406,11 +1415,11 @@ export const AddFoodToMealModal = ({
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-medium">{food.name}</h4>
-                          <Badge 
-                            variant={food.source?.includes('TACO') ? 'default' : 'secondary'} 
+                          <Badge
+                            variant={food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'default' : 'secondary'}
                             className="text-xs"
                           >
-                            {food.source?.includes('TACO') ? 'TACO' : 'OFF'}
+                            {food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'TACO' : food.nutrition_sources?.name || 'Outro'}
                           </Badge>
                         </div>
                         {food.brand && (
@@ -1549,19 +1558,31 @@ export const AddFoodToMealModal = ({
 
           {/* Conteúdo Principal */}
           <div className="px-6 pb-6 overflow-y-auto flex-1">
-            {searchTerm.length >= 2 ? (
-              <SearchResultsView />
-            ) : nutritionalFilter ? (
-              <NutritionalFilterView />
-            ) : view === 'categories' ? (
-              <CategoriesView />
-            ) : view === 'recent' ? (
-              <RecentFoodsView />
-            ) : view === 'category-list' ? (
-              <CategoryListView />
-            ) : view === 'add-portion' ? (
-              <AddPortionView />
-            ) : null}
+            {(() => {
+              console.log('🎯 Estado do modal:', {
+                searchTerm,
+                searchTermLength: searchTerm.length,
+                nutritionalFilter,
+                view,
+                hasSearchResults: !!searchResults,
+                searchResultsLength: searchResults?.length
+              });
+
+              if (searchTerm.length >= 2) {
+                return <SearchResultsView />;
+              } else if (nutritionalFilter) {
+                return <NutritionalFilterView />;
+              } else if (view === 'categories') {
+                return <CategoriesView />;
+              } else if (view === 'recent') {
+                return <RecentFoodsView />;
+              } else if (view === 'category-list') {
+                return <CategoryListView />;
+              } else if (view === 'add-portion') {
+                return <AddPortionView />;
+              }
+              return null;
+            })()}
           </div>
         </div>
       </div>
