@@ -112,7 +112,40 @@ export default function PlatformMealPlanEditor() {
     }
   }, [clientId]);
 
+  const searchFood = async (query: string, mode: 'exact' | 'partial' | 'generic') => {
+    let searchQuery = supabase
+      .from('foods')
+      .select('id, name, energy_kcal, protein_g, carbohydrate_g, lipid_g, source')
+      .limit(1);
+
+    if (mode === 'exact') {
+      searchQuery = searchQuery.ilike('name', query);
+    } else if (mode === 'partial') {
+      searchQuery = searchQuery.ilike('name', `%${query}%`);
+    } else {
+      searchQuery = searchQuery.ilike('name', `${query}%`);
+    }
+
+    const { data } = await searchQuery;
+    return data?.[0] || null;
+  };
+
+  const extractKeywords = (foodName: string): string[] => {
+    const stopWords = ['de', 'da', 'do', 'com', 'sem', 'em', 'a', 'o'];
+
+    const words = foodName
+      .toLowerCase()
+      .split(/[\s,]+/)
+      .filter(w => w.length > 2 && !stopWords.includes(w));
+
+    return words;
+  };
+
   const handleApplyGeneratedPlan = async (plan: any) => {
+    console.log('📋 Aplicando plano gerado pela IA');
+    console.log('🎯 Meta calórica:', plan.targetCalories);
+    console.log('🍽️ Refeições sugeridas:', plan.meals.length);
+
     setGoals({
       kcal: plan.targetCalories,
       protein: plan.macros.protein_g,
@@ -120,31 +153,57 @@ export default function PlatformMealPlanEditor() {
       fat: plan.macros.fat_g
     });
 
+    let totalAdded = 0;
+    let notFound: string[] = [];
+
     const newMeals = await Promise.all(
       plan.meals.map(async (aiMeal: any) => {
         const items = [];
 
-        for (const aiItem of aiMeal.items) {
-          const { data: foods } = await supabase
-            .from('foods')
-            .select('id, name, energy_kcal, protein_g, carbohydrate_g, lipid_g, source')
-            .ilike('name', `%${aiItem.food_name}%`)
-            .limit(1);
+        console.log(`\n🔍 Processando refeição: ${aiMeal.name}`);
 
-          if (foods && foods.length > 0) {
-            const food = foods[0];
+        for (const aiItem of aiMeal.items) {
+          const foodName = aiItem.food_name;
+          console.log(`  Buscando: "${foodName}"`);
+
+          let food = await searchFood(foodName, 'exact');
+
+          if (!food) {
+            const keywords = extractKeywords(foodName);
+            console.log(`  Tentando com keywords: ${keywords.join(', ')}`);
+
+            for (const keyword of keywords) {
+              food = await searchFood(keyword, 'partial');
+              if (food) break;
+            }
+          }
+
+          if (!food) {
+            const firstWord = foodName.split(' ')[0];
+            console.log(`  Última tentativa com: "${firstWord}"`);
+            food = await searchFood(firstWord, 'generic');
+          }
+
+          if (food) {
+            console.log(`  ✅ Encontrado: ${food.name}`);
 
             const { data: measures } = await supabase
               .from('food_measures')
               .select('*')
               .eq('food_id', food.id)
-              .limit(1);
+              .order('is_default', { ascending: false });
 
-            const measure = measures?.[0] || {
-              id: 'temp-' + Date.now(),
-              measure_name: aiItem.measure,
-              grams: 100
-            };
+            let measure = measures?.[0];
+
+            if (!measure) {
+              measure = {
+                id: `temp-${Date.now()}`,
+                measure_name: aiItem.measure || 'porção',
+                grams: 100
+              };
+            }
+
+            const quantityMultiplier = (aiItem.quantity * (measure.grams || 100)) / 100;
 
             items.push({
               id: Date.now().toString() + Math.random(),
@@ -153,11 +212,16 @@ export default function PlatformMealPlanEditor() {
               quantity: aiItem.quantity,
               food,
               measure,
-              kcal_total: aiItem.estimated_kcal,
-              protein_total: aiItem.estimated_protein,
-              carb_total: aiItem.estimated_carb,
-              fat_total: aiItem.estimated_fat
+              kcal_total: Math.round(food.energy_kcal * quantityMultiplier),
+              protein_total: Math.round(food.protein_g * quantityMultiplier * 10) / 10,
+              carb_total: Math.round(food.carbohydrate_g * quantityMultiplier * 10) / 10,
+              fat_total: Math.round(food.lipid_g * quantityMultiplier * 10) / 10
             });
+
+            totalAdded++;
+          } else {
+            console.log(`  ❌ Não encontrado: ${foodName}`);
+            notFound.push(foodName);
           }
         }
 
@@ -172,12 +236,22 @@ export default function PlatformMealPlanEditor() {
 
     setMeals(newMeals);
 
-    const totalItems = newMeals.reduce((sum, m) => sum + m.items.length, 0);
+    if (notFound.length > 0) {
+      toast({
+        title: `Plano aplicado com ${totalAdded} alimentos`,
+        description: `${notFound.length} alimentos não foram encontrados no banco. Adicione manualmente: ${notFound.slice(0, 3).join(', ')}${notFound.length > 3 ? '...' : ''}`,
+        variant: 'default'
+      });
+    } else {
+      toast({
+        title: 'Plano aplicado com sucesso!',
+        description: `${totalAdded} alimentos adicionados automaticamente`
+      });
+    }
 
-    toast({
-      title: 'Plano aplicado!',
-      description: `${totalItems} alimentos adicionados automaticamente`
-    });
+    console.log('\n📊 Resumo:');
+    console.log(`  ✅ Adicionados: ${totalAdded}`);
+    console.log(`  ❌ Não encontrados: ${notFound.length}`);
   };
 
   const getDefaultTimeForMeal = (name: string): string => {

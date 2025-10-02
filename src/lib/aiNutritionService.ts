@@ -137,17 +137,99 @@ DISTRIBUIÇÃO POR REFEIÇÃO:
 - Lanche da Tarde (15:00): ${Math.round(calculatedData.targetCalories * 0.10)} kcal
 - Jantar (19:00): ${Math.round(calculatedData.targetCalories * 0.25)} kcal
 
-INSTRUÇÕES:
-1. Sugira alimentos específicos e porções para CADA refeição
-2. Use alimentos brasileiros comuns da Tabela TACO quando possível
-3. Respeite RIGOROSAMENTE as restrições alimentares
-4. Bata as metas de macros o mais próximo possível
-5. Seja prático e realista
-6. Inclua variedade
+INSTRUÇÕES IMPORTANTES:
+1. Use EXATAMENTE esses nomes de alimentos da Tabela TACO (banco de dados brasileiro):
+
+   PÃES:
+   - "Pão, francês" (NÃO use "Pão francês")
+   - "Pão, forma, integral"
+   - "Pão, forma, trigo"
+
+   CEREAIS:
+   - "Arroz, integral, cozido"
+   - "Arroz, branco, cozido"
+   - "Macarrão, cozido"
+
+   LEGUMINOSAS:
+   - "Feijão, preto, cozido"
+   - "Feijão, carioca, cozido"
+
+   CARNES:
+   - "Frango, peito, grelhado"
+   - "Carne, bovina, magra"
+   - "Ovo, cozido"
+   - "Peixe, filé"
+
+   LATICÍNIOS:
+   - "Leite, vaca, integral"
+   - "Leite, vaca, desnatado"
+   - "Queijo, minas"
+   - "Iogurte, natural"
+
+   FRUTAS:
+   - "Banana, prata"
+   - "Maçã"
+   - "Laranja"
+   - "Mamão"
+
+   VEGETAIS:
+   - "Alface"
+   - "Tomate"
+   - "Cenoura, crua"
+   - "Brócolis, cozido"
+
+2. IMPORTANTE: As quantidades e porções devem SOMAR EXATAMENTE (ou muito próximo) as calorias alvo de cada refeição
+3. Cada refeição deve ter PELO MENOS 3-4 alimentos diferentes
+4. Distribua os macros proporcionalmente em cada refeição
+5. Use porções realistas (ex: 2 unidades de pão, 4 colheres de arroz, 1 filé de frango de 120g)
+6. Respeite RIGOROSAMENTE as restrições alimentares
 7. No "reasoning", explique POR QUÊ essas escolhas fazem sentido para este perfil
 8. No "educationalNotes", dê 3-4 dicas práticas que o nutricionista pode repassar ao cliente
 
-LEMBRE-SE: Esta é uma SUGESTÃO inicial. O nutricionista revisará e ajustará conforme necessário.`;
+EXEMPLO DE BOA RESPOSTA:
+{
+  "meals": [
+    {
+      "name": "Café da Manhã",
+      "time": "08:00",
+      "targetCalories": ${Math.round(calculatedData.targetCalories * 0.20)},
+      "items": [
+        {
+          "food_name": "Pão, francês",
+          "quantity": 2,
+          "measure": "unidade",
+          "estimated_kcal": 270,
+          "estimated_protein": 9,
+          "estimated_carb": 54,
+          "estimated_fat": 3
+        },
+        {
+          "food_name": "Ovo, cozido",
+          "quantity": 2,
+          "measure": "unidade",
+          "estimated_kcal": 140,
+          "estimated_protein": 12,
+          "estimated_carb": 1,
+          "estimated_fat": 10
+        },
+        {
+          "food_name": "Banana, prata",
+          "quantity": 1,
+          "measure": "unidade",
+          "estimated_kcal": 98,
+          "estimated_protein": 1,
+          "estimated_carb": 26,
+          "estimated_fat": 0
+        }
+      ]
+    }
+  ],
+  "reasoning": "...",
+  "educationalNotes": "..."
+}
+
+LEMBRE-SE: Esta é uma SUGESTÃO inicial. O nutricionista revisará e ajustará conforme necessário.
+Retorne APENAS JSON válido seguindo EXATAMENTE o formato acima.`;
 };
 
 export const generateAIBasedMealPlan = async (
