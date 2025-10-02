@@ -242,11 +242,6 @@ const NutritionistNotes = ({ foodId }: { foodId: string }) => {
 const FoodDetailsPopover = ({ food, onAddClick }: { food: any; onAddClick: (selectedFood: any) => void }) => {
   const [comparingFood, setComparingFood] = useState<any>(null);
 
-  const handleUseComparisonFood = () => {
-    if (!comparingFood) return;
-    onAddClick(comparingFood);
-  };
-
   if (comparingFood) {
     return (
       <div className="p-4">
@@ -254,7 +249,7 @@ const FoodDetailsPopover = ({ food, onAddClick }: { food: any; onAddClick: (sele
           originalFood={food}
           comparisonFood={comparingFood}
           onBack={() => setComparingFood(null)}
-          onUse={handleUseComparisonFood}
+          onUse={onAddClick}
         />
       </div>
     );
@@ -422,6 +417,7 @@ export const AddFoodToMealModal = ({
   const [selectedMeasure, setSelectedMeasure] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
   const [showCustomFoodModal, setShowCustomFoodModal] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
 
   // MAPEAMENTO DE ÍCONES COM EMOJIS
   const CATEGORY_ICONS: Record<string, string> = {
@@ -746,44 +742,53 @@ export const AddFoodToMealModal = ({
 
   // Buscar medidas quando seleciona alimento para adicionar porção
   const loadMeasures = async (food: any) => {
-    const { data: measuresData } = await supabase
-      .from('food_measures')
-      .select('*')
-      .eq('food_id', food.id)
-      .order('is_default', { ascending: false });
+    try {
+      const { data: measuresData, error } = await supabase
+        .from('food_measures')
+        .select('*')
+        .eq('food_id', food.id)
+        .order('is_default', { ascending: false });
 
-    let measures = measuresData || [];
+      if (error) {
+        console.error('Erro ao carregar medidas:', error);
+        return;
+      }
 
-    // Se não houver medidas, criar uma padrão em gramas
-    if (measures.length === 0) {
-      measures = [{
-        id: 'temp-gram-measure',
-        food_id: food.id,
-        measure_name: 'gramas (100g)',
-        grams: 100,
-        grams_equivalent: 100,
-        is_default: true,
-        created_at: new Date().toISOString()
-      }];
-    } else {
-      // Ordenar para garantir que gramas apareça primeiro
-      measures = measures.sort((a, b) => {
-        const aIsGram = a.measure_name.toLowerCase().includes('grama') || 
-                        a.measure_name.toLowerCase().includes('gram');
-        const bIsGram = b.measure_name.toLowerCase().includes('grama') || 
-                        b.measure_name.toLowerCase().includes('gram');
-        
-        if (aIsGram && !bIsGram) return -1;
-        if (!aIsGram && bIsGram) return 1;
-        if (a.is_default && !b.is_default) return -1;
-        if (!a.is_default && b.is_default) return 1;
-        return 0;
-      });
+      let measures = measuresData || [];
+
+      // Se não houver medidas, criar uma padrão em gramas
+      if (measures.length === 0) {
+        measures = [{
+          id: 'temp-gram-measure',
+          food_id: food.id,
+          measure_name: 'gramas (100g)',
+          grams: 100,
+          grams_equivalent: 100,
+          is_default: true,
+          created_at: new Date().toISOString()
+        }];
+      } else {
+        // Ordenar para garantir que gramas apareça primeiro
+        measures = measures.sort((a, b) => {
+          const aIsGram = a.measure_name.toLowerCase().includes('grama') || 
+                          a.measure_name.toLowerCase().includes('gram');
+          const bIsGram = b.measure_name.toLowerCase().includes('grama') || 
+                          b.measure_name.toLowerCase().includes('gram');
+          
+          if (aIsGram && !bIsGram) return -1;
+          if (!aIsGram && bIsGram) return 1;
+          if (a.is_default && !b.is_default) return -1;
+          if (!a.is_default && b.is_default) return 1;
+          return 0;
+        });
+      }
+
+      setMeasures(measures);
+      setSelectedMeasure(measures[0]);
+      setQuantity(1);
+    } catch (err) {
+      console.error('Erro ao carregar medidas:', err);
     }
-
-    setMeasures(measures);
-    setSelectedMeasure(measures[0]);
-    setQuantity(1);
   };
 
   const handleSelectFoodForDetails = async (food: any) => {
@@ -794,6 +799,20 @@ export const AddFoodToMealModal = ({
   const handleAddToMeal = async (food: any) => {
     setSelectedFood(food);
     await loadMeasures(food);
+    setView('add-portion');
+  };
+
+  const handleAddFoodFromDetails = async (food: any) => {
+    // 1. Fechar o dialog
+    setDetailsDialogOpen(false);
+    
+    // 2. Setar o alimento selecionado
+    setSelectedFood(food);
+    
+    // 3. Carregar as medidas
+    await loadMeasures(food);
+    
+    // 4. Mudar para a view de adicionar porção
     setView('add-portion');
   };
 
@@ -1344,26 +1363,23 @@ export const AddFoodToMealModal = ({
                     G: {formatNutrient(food.lipid_g)}
                   </div>
                   <div className="mt-3">
-                    <Dialog>
+                    <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
                       <DialogTrigger asChild>
-                        <Button className="w-full">
+                        <Button 
+                          className="w-full"
+                          onClick={() => setDetailsDialogOpen(true)}
+                        >
                           Ver detalhes e adicionar
                         </Button>
                       </DialogTrigger>
-                       <DialogContent className="max-w-md p-0 max-h-[90vh] overflow-y-auto">
+                      <DialogContent className="max-w-md p-0 max-h-[90vh] overflow-y-auto">
                         <DialogTitle className="sr-only">Detalhes do Alimento</DialogTitle>
                         <DialogDescription className="sr-only">
                           Informações nutricionais completas do alimento selecionado
                         </DialogDescription>
                         <FoodDetailsPopover 
                           food={food}
-                          onAddClick={async (selectedFood) => {
-                            setSelectedFood(selectedFood);
-                            await loadMeasures(selectedFood);
-                            setView('add-portion');
-                            // Fechar o dialog
-                            document.querySelector('[role="dialog"] button')?.dispatchEvent(new Event('click', { bubbles: true }));
-                          }}
+                          onAddClick={handleAddFoodFromDetails}
                         />
                       </DialogContent>
                     </Dialog>
