@@ -26,6 +26,7 @@ import { useTenantId } from '@/hooks/useTenantId';
 import { useWhatsAppMessaging } from '@/hooks/useWhatsAppMessaging';
 import { useFinancialMetrics } from '@/hooks/useFinancialMetrics';
 import { formatCurrency } from '@/lib/serviceCalculations';
+import { ServiceExpirationAlerts } from '@/components/platform/ServiceExpirationAlerts';
 
 export default function PlatformDashboard() {
   const { clientId } = useParams<{ clientId: string }>();
@@ -414,6 +415,14 @@ export default function PlatformDashboard() {
             </div>
           )}
         </div>
+
+        {/* ALERTAS DE VENCIMENTO DE SERVIÇOS */}
+        {tenantId && (
+          <ServiceExpirationAlerts 
+            tenantId={tenantId} 
+            daysThreshold={7} 
+          />
+        )}
 
         {/* Confirmações Pendentes */}
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg overflow-hidden">
