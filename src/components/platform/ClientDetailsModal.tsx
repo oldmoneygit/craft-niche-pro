@@ -337,7 +337,7 @@ export const ClientDetailsModal = ({ client, onClose, onUpdate }: ClientDetailsM
                               </div>
                             )}
                           </div>
-                        ))
+                        ))}
                       </div>
                     ) : (
                       <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
