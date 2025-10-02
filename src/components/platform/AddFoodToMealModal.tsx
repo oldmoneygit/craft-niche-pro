@@ -50,6 +50,7 @@ export const AddFoodToMealModal = ({
   const [selectedCategory, setSelectedCategory] = useState<FoodCategory | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
+  const [nutritionalFilter, setNutritionalFilter] = useState<string | null>(null);
   const [substitutionSort, setSubstitutionSort] = useState('energy_kcal');
   const [measures, setMeasures] = useState<any[]>([]);
   const [selectedMeasure, setSelectedMeasure] = useState<any>(null);
@@ -83,6 +84,7 @@ export const AddFoodToMealModal = ({
       setSelectedFood(null);
       setSelectedCategory(null);
       setSearchTerm('');
+      setNutritionalFilter(null);
       setMeasures([]);
       setSelectedMeasure(null);
       setQuantity(1);
@@ -256,6 +258,51 @@ export const AddFoodToMealModal = ({
       return result.data || [];
     },
     enabled: searchTerm.length >= 2,
+  });
+
+  // Query 3.5: Buscar por perfil nutricional
+  const { data: nutritionalResults, isLoading: loadingNutritional } = useQuery({
+    queryKey: ['nutritional-foods', nutritionalFilter, sourceFilter],
+    queryFn: async () => {
+      if (!nutritionalFilter) return [];
+      
+      let result: any;
+      
+      // Construir query base
+      const baseQuery = supabase
+        .from('foods')
+        .select('*, food_categories(name)');
+      
+      // Aplicar filtros nutricionais e de fonte
+      if (nutritionalFilter === 'protein') {
+        if (sourceFilter === 'all' || !sourceFilter) {
+          result = await (baseQuery as any).gte('protein_g', 20).order('name').limit(50);
+        } else if (sourceFilter === 'TACO') {
+          result = await (baseQuery as any).gte('protein_g', 20).like('source', '%TACO%').order('name').limit(50);
+        } else {
+          result = await (baseQuery as any).gte('protein_g', 20).eq('source', sourceFilter).order('name').limit(50);
+        }
+      } else if (nutritionalFilter === 'lowcarb') {
+        if (sourceFilter === 'all' || !sourceFilter) {
+          result = await (baseQuery as any).lte('carbohydrate_g', 10).order('name').limit(50);
+        } else if (sourceFilter === 'TACO') {
+          result = await (baseQuery as any).lte('carbohydrate_g', 10).like('source', '%TACO%').order('name').limit(50);
+        } else {
+          result = await (baseQuery as any).lte('carbohydrate_g', 10).eq('source', sourceFilter).order('name').limit(50);
+        }
+      } else if (nutritionalFilter === 'lowfat') {
+        if (sourceFilter === 'all' || !sourceFilter) {
+          result = await (baseQuery as any).lte('lipid_g', 5).order('name').limit(50);
+        } else if (sourceFilter === 'TACO') {
+          result = await (baseQuery as any).lte('lipid_g', 5).like('source', '%TACO%').order('name').limit(50);
+        } else {
+          result = await (baseQuery as any).lte('lipid_g', 5).eq('source', sourceFilter).order('name').limit(50);
+        }
+      }
+      
+      return result?.data || [];
+    },
+    enabled: !!nutritionalFilter,
   });
 
   // Query 4: Detalhes completos do alimento
@@ -920,6 +967,105 @@ export const AddFoodToMealModal = ({
     </div>
   );
 
+  // Resultados de Filtro Nutricional
+  const NutritionalFilterView = () => {
+    const filterLabels = {
+      protein: 'Rico em Proteína (>20g)',
+      lowcarb: 'Baixo Carboidrato (<10g)',
+      lowfat: 'Baixa Gordura (<5g)'
+    };
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-muted-foreground">
+            {nutritionalResults?.length || 0} alimentos - {filterLabels[nutritionalFilter as keyof typeof filterLabels]}
+          </p>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setNutritionalFilter(null);
+              setView('categories');
+            }}
+          >
+            Limpar filtro
+          </Button>
+        </div>
+
+        {loadingNutritional ? (
+          <div className="text-center py-8">
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+            <p className="text-muted-foreground mt-4">Buscando...</p>
+          </div>
+        ) : nutritionalResults && nutritionalResults.length === 0 ? (
+          <div className="text-center py-8">
+            <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">
+              Nenhum alimento encontrado com esse perfil nutricional
+            </p>
+          </div>
+        ) : (
+          <ScrollArea className="h-[500px]">
+            <div className="grid gap-3 pr-4">
+              {nutritionalResults?.map((food) => (
+                <Card key={food.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-medium">{food.name}</h4>
+                          <Badge 
+                            variant={food.source?.includes('TACO') ? 'default' : 'secondary'} 
+                            className="text-xs"
+                          >
+                            {food.source?.includes('TACO') ? 'TACO' : 'OFF'}
+                          </Badge>
+                        </div>
+                        {food.brand && (
+                          <p className="text-sm text-muted-foreground">
+                            Marca: {food.brand}
+                          </p>
+                        )}
+                        <Badge variant="secondary" className="mt-1">
+                          {food.food_categories?.name}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="text-sm text-muted-foreground mb-3">
+                      {food.energy_kcal} kcal | 
+                      P: {formatNutrient(food.protein_g)} | 
+                      C: {formatNutrient(food.carbohydrate_g)} | 
+                      G: {formatNutrient(food.lipid_g)}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSelectFoodForDetails(food)}
+                        className="flex-1"
+                      >
+                        Ver detalhes
+                        <ChevronRight className="w-4 h-4 ml-1" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleAddToMeal(food)}
+                        className="flex-1"
+                      >
+                        Adicionar
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </ScrollArea>
+        )}
+      </div>
+    );
+  };
+
   return (
     <>
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -934,6 +1080,36 @@ export const AddFoodToMealModal = ({
 
           {/* Barra de Busca + Filtro */}
           <div className="px-6 pt-4 pb-2 shrink-0">
+            {/* Filtros Nutricionais */}
+            {searchTerm.length < 2 && (view === 'categories' || view === 'recent') && (
+              <div className="flex gap-2 mb-3 overflow-x-auto pb-2">
+                <Button 
+                  variant={nutritionalFilter === 'protein' ? 'default' : 'outline'} 
+                  size="sm" 
+                  onClick={() => setNutritionalFilter(nutritionalFilter === 'protein' ? null : 'protein')}
+                  className="whitespace-nowrap"
+                >
+                  🥩 Rico em Proteína (&gt;20g)
+                </Button>
+                <Button 
+                  variant={nutritionalFilter === 'lowcarb' ? 'default' : 'outline'} 
+                  size="sm" 
+                  onClick={() => setNutritionalFilter(nutritionalFilter === 'lowcarb' ? null : 'lowcarb')}
+                  className="whitespace-nowrap"
+                >
+                  🥬 Baixo Carboidrato (&lt;10g)
+                </Button>
+                <Button 
+                  variant={nutritionalFilter === 'lowfat' ? 'default' : 'outline'} 
+                  size="sm" 
+                  onClick={() => setNutritionalFilter(nutritionalFilter === 'lowfat' ? null : 'lowfat')}
+                  className="whitespace-nowrap"
+                >
+                  🥗 Baixa Gordura (&lt;5g)
+                </Button>
+              </div>
+            )}
+            
             <div className="flex gap-3 mb-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -984,6 +1160,8 @@ export const AddFoodToMealModal = ({
           <div className="px-6 pb-6 overflow-y-auto flex-1">
             {searchTerm.length >= 2 ? (
               <SearchResultsView />
+            ) : nutritionalFilter ? (
+              <NutritionalFilterView />
             ) : view === 'categories' ? (
               <CategoriesView />
             ) : view === 'recent' ? (
