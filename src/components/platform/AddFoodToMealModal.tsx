@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Search, Plus, Package, ArrowLeft, ChevronRight, Clock, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -236,6 +237,99 @@ const NutritionistNotes = ({ foodId }: { foodId: string }) => {
         </div>
       )}
     </div>
+  );
+};
+
+// Componente para detalhes expandidos usando Portal (fora da hierarquia do modal)
+const FoodDetailsExpanded = ({ food, onClose, onAdd }: {
+  food: any;
+  onClose: () => void;
+  onAdd: () => void;
+}) => {
+  if (!food) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center"
+      onClick={onClose}
+    >
+      {/* Overlay escuro */}
+      <div className="absolute inset-0 bg-black/60" />
+
+      {/* Card centralizado */}
+      <div
+        className="relative bg-background rounded-lg shadow-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto m-4 z-[10000]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="sticky top-0 bg-background border-b p-4 flex justify-between items-center">
+          <div>
+            <h3 className="font-semibold text-lg">{food.name}</h3>
+            {food.brand && (
+              <p className="text-sm text-muted-foreground">Marca: {food.brand}</p>
+            )}
+          </div>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Conteúdo scrollável */}
+        <div className="p-4 space-y-4">
+          {/* Badges */}
+          <div className="flex gap-2">
+            <Badge variant="secondary">{food.food_categories?.name}</Badge>
+            <Badge
+              variant={food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'default' : 'secondary'}
+            >
+              {food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'TACO' : food.nutrition_sources?.name || 'Outro'}
+            </Badge>
+          </div>
+
+          {/* Macros principais */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-muted rounded-lg p-3">
+              <p className="text-xs text-muted-foreground">Calorias</p>
+              <p className="text-2xl font-bold">{food.energy_kcal?.toFixed(0) || '-'}</p>
+              <p className="text-xs">kcal/100g</p>
+            </div>
+            <div className="bg-muted rounded-lg p-3">
+              <p className="text-xs text-muted-foreground">Proteína</p>
+              <p className="text-2xl font-bold">{food.protein_g?.toFixed(1) || '-'}g</p>
+              <p className="text-xs">/100g</p>
+            </div>
+          </div>
+
+          {/* Info detalhada */}
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Informação Nutricional (100g)</p>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div>Carboidratos: <span className="font-medium">{food.carbohydrate_g?.toFixed(1) || '-'}g</span></div>
+              <div>Gorduras: <span className="font-medium">{food.lipid_g?.toFixed(1) || '-'}g</span></div>
+              <div>Fibras: <span className="font-medium">{food.fiber_g?.toFixed(1) || '-'}g</span></div>
+              <div>Sódio: <span className="font-medium">{food.sodium_mg?.toFixed(0) || '-'}mg</span></div>
+            </div>
+          </div>
+
+          {/* Informações adicionais */}
+          {food.description && (
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Descrição</p>
+              <p className="text-sm text-muted-foreground">{food.description}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer com botão */}
+        <div className="sticky bottom-0 bg-background border-t p-4">
+          <Button className="w-full" onClick={onAdd}>
+            <Plus className="w-4 h-4 mr-2" />
+            Adicionar ao Plano
+          </Button>
+        </div>
+      </div>
+    </div>,
+    document.body
   );
 };
 
@@ -1213,17 +1307,10 @@ export const AddFoodToMealModal = ({
         <ScrollArea className="h-[500px]">
           <div className="grid gap-3 pr-4">
             {searchResults?.map((food) => {
-              const isExpanded = expandedFoodId === food.id;
-
               return (
                 <Card
                   key={food.id}
-                  className={cn(
-                    "transition-all duration-300",
-                    isExpanded
-                      ? "ring-2 ring-primary bg-blue-50 dark:bg-blue-950/30"
-                      : "hover:shadow-md"
-                  )}
+                  className="transition-all duration-300 hover:shadow-md"
                 >
                   <CardContent className="p-4">
                     {/* Header compacto - sempre visível */}
@@ -1256,69 +1343,28 @@ export const AddFoodToMealModal = ({
                       G: {formatNutrient(food.lipid_g)}
                     </div>
 
-                    <div className="space-y-3">
-                      {/* Detalhes expandidos - mostrar APENAS quando expandedFoodId === food.id */}
-                      {isExpanded && (
-                        <div className="border-2 border-primary bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 space-y-4 animate-in slide-in-from-top-2">
-                          {/* Macros em destaque */}
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-background rounded-lg p-3 border">
-                              <p className="text-xs text-muted-foreground">Calorias</p>
-                              <p className="text-2xl font-bold">{food.energy_kcal?.toFixed(0) || '-'}</p>
-                              <p className="text-xs">kcal/100g</p>
-                            </div>
-                            <div className="bg-background rounded-lg p-3 border">
-                              <p className="text-xs text-muted-foreground">Proteína</p>
-                              <p className="text-2xl font-bold">{food.protein_g?.toFixed(1) || '-'}g</p>
-                              <p className="text-xs">/100g</p>
-                            </div>
-                          </div>
-
-                          {/* Info nutricional */}
-                          <div className="space-y-2">
-                            <p className="text-sm font-medium">Informação Nutricional (100g)</p>
-                            <div className="grid grid-cols-2 gap-2 text-sm">
-                              <div>Carboidratos: <span className="font-medium">{food.carbohydrate_g?.toFixed(1) || '-'}g</span></div>
-                              <div>Gorduras: <span className="font-medium">{food.lipid_g?.toFixed(1) || '-'}g</span></div>
-                              <div>Fibras: <span className="font-medium">{food.fiber_g?.toFixed(1) || '-'}g</span></div>
-                              <div>Sódio: <span className="font-medium">{food.sodium_mg?.toFixed(0) || '-'}mg</span></div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Botões de ação */}
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setExpandedFoodId(isExpanded ? null : food.id)}
-                          className="flex-1"
-                        >
-                          {isExpanded ? (
-                            <>
-                              <ArrowLeft className="w-4 h-4 mr-1" />
-                              Recolher
-                            </>
-                          ) : (
-                            <>
-                              Ver detalhes
-                              <ChevronRight className="w-4 h-4 ml-1" />
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={async () => {
-                            setSelectedFood(food);
-                            await loadMeasures(food);
-                            setView('add-portion');
-                          }}
-                          className="flex-1"
-                        >
-                          Adicionar
-                        </Button>
-                      </div>
+                    {/* Botões de ação */}
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setExpandedFoodId(food.id)}
+                        className="flex-1"
+                      >
+                        Ver detalhes
+                        <ChevronRight className="w-4 h-4 ml-1" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={async () => {
+                          setSelectedFood(food);
+                          await loadMeasures(food);
+                          setView('add-portion');
+                        }}
+                        className="flex-1"
+                      >
+                        Adicionar
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -1326,6 +1372,21 @@ export const AddFoodToMealModal = ({
             })}
           </div>
         </ScrollArea>
+      )}
+
+      {/* Renderizar portal FORA do map */}
+      {expandedFoodId && (
+        <FoodDetailsExpanded
+          food={searchResults?.find(f => f.id === expandedFoodId)}
+          onClose={() => setExpandedFoodId(null)}
+          onAdd={async () => {
+            const food = searchResults?.find(f => f.id === expandedFoodId);
+            setExpandedFoodId(null);
+            setSelectedFood(food);
+            await loadMeasures(food);
+            setView('add-portion');
+          }}
+        />
       )}
     </div>
     );
