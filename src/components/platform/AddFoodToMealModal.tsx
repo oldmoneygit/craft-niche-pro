@@ -229,33 +229,45 @@ export const AddFoodToMealModal = ({
     queryFn: async () => {
       if (searchTerm.length < 2) return [];
       
-      let result: any;
-      if (sourceFilter === 'all' || !sourceFilter) {
-        result = await supabase
-          .from('foods')
-          .select('*, food_categories(name)')
-          .or(`name.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%`)
-          .order('name')
-          .limit(50);
-      } else if (sourceFilter === 'TACO') {
-        result = await (supabase
-          .from('foods')
-          .select('*, food_categories(name)')
-          .or(`name.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%`) as any)
-          .like('source', '%TACO%')
-          .order('name')
-          .limit(50);
-      } else {
-        result = await (supabase
-          .from('foods')
-          .select('*, food_categories(name)')
-          .or(`name.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%`) as any)
-          .eq('source', sourceFilter)
-          .order('name')
-          .limit(50);
+      // Remover pontuação para busca mais flexível
+      const cleanTerm = searchTerm
+        .toLowerCase()
+        .replace(/[,.\-]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      
+      let query: any = supabase
+        .from('foods')
+        .select('*')
+        .or(`name.ilike.%${cleanTerm}%,brand.ilike.%${cleanTerm}%`);
+      
+      if (sourceFilter && sourceFilter !== 'all') {
+        if (sourceFilter === 'TACO') {
+          query = query.like('source', '%TACO%');
+        } else {
+          query = query.eq('source', sourceFilter);
+        }
       }
       
-      return result.data || [];
+      const { data } = await query.order('name').limit(50);
+      
+      // Buscar categorias dos alimentos encontrados
+      if (data && data.length > 0) {
+        const categoryIds = [...new Set(data.map((f: any) => f.category_id).filter(Boolean))] as string[];
+        const { data: categories } = await supabase
+          .from('food_categories')
+          .select('id, name')
+          .in('id', categoryIds);
+        
+        const categoryMap = new Map(categories?.map(c => [c.id, c]) || []);
+        
+        return data.map((food: any) => ({
+          ...food,
+          food_categories: food.category_id ? categoryMap.get(food.category_id) : null
+        }));
+      }
+      
+      return data || [];
     },
     enabled: searchTerm.length >= 2,
   });
