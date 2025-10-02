@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Search, Plus, Package, ArrowLeft, ChevronRight } from 'lucide-react';
+import { X, Search, Plus, Package, ArrowLeft, ChevronRight, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
@@ -20,8 +20,9 @@ import { AddCustomFoodModal } from './AddCustomFoodModal';
 import { FOOD_CATEGORIES } from '@/lib/foodCategories';
 import { getCategoryIcon } from '@/components/icons/FoodCategoryIcons';
 import { cn } from '@/lib/utils';
+import { useTenantId } from '@/hooks/useTenantId';
 
-type ModalView = 'categories' | 'category-list' | 'food-details' | 'add-portion';
+type ModalView = 'categories' | 'recent' | 'category-list' | 'food-details' | 'add-portion';
 
 interface FoodCategory {
   id: string;
@@ -43,6 +44,7 @@ export const AddFoodToMealModal = ({
   onAddFood 
 }: AddFoodToMealModalProps) => {
   const { toast } = useToast();
+  const { tenantId } = useTenantId();
   const [view, setView] = useState<ModalView>('categories');
   const [selectedFood, setSelectedFood] = useState<any>(null);
   const [selectedCategory, setSelectedCategory] = useState<FoodCategory | null>(null);
@@ -129,6 +131,60 @@ export const AddFoodToMealModal = ({
         .sort((a, b) => b.count - a.count);
     },
     enabled: isOpen,
+  });
+
+  // Query 1.5: Buscar alimentos recentes
+  const { data: recentFoods } = useQuery({
+    queryKey: ['recent-foods', tenantId],
+    queryFn: async () => {
+      if (!tenantId) return [];
+      
+      // Buscar meal_items recentes do tenant
+      const { data: mealItems } = await supabase
+        .from('meal_items')
+        .select(`
+          food_id,
+          created_at,
+          meal_id,
+          meal_plan_meals!inner (
+            meal_plan_id,
+            meal_plans!inner (
+              tenant_id
+            )
+          )
+        `)
+        .eq('meal_plan_meals.meal_plans.tenant_id', tenantId)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      
+      if (!mealItems || mealItems.length === 0) return [];
+      
+      // Remover duplicatas, mantendo o mais recente de cada food_id
+      const uniqueFoodIds = new Set<string>();
+      const uniqueItems = [];
+      
+      for (const item of mealItems) {
+        if (!uniqueFoodIds.has(item.food_id)) {
+          uniqueFoodIds.add(item.food_id);
+          uniqueItems.push(item);
+          if (uniqueItems.length >= 10) break;
+        }
+      }
+      
+      // Buscar detalhes dos alimentos
+      const foodIds = uniqueItems.map(item => item.food_id);
+      const { data: foods } = await supabase
+        .from('foods')
+        .select('*')
+        .in('id', foodIds);
+      
+      // Ordenar foods na mesma ordem dos uniqueItems
+      const foodsMap = new Map(foods?.map(f => [f.id, f]) || []);
+      return uniqueItems
+        .map(item => foodsMap.get(item.food_id))
+        .filter(Boolean);
+    },
+    enabled: isOpen && !!tenantId,
   });
 
   // Query 2: Buscar alimentos por categoria
@@ -354,6 +410,69 @@ export const AddFoodToMealModal = ({
           );
         })}
       </div>
+    );
+  };
+
+  // VIEW 1.5: Alimentos Recentes
+  const RecentFoodsView = () => {
+    if (!recentFoods || recentFoods.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <Clock className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">
+            Nenhum alimento adicionado ainda.
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Seus alimentos mais usados aparecerão aqui.
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <ScrollArea className="h-[500px]">
+        <div className="grid gap-3 pr-4">
+          {recentFoods.map((food: any) => (
+            <Card key={food.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium">{food.name}</h4>
+                      <Badge 
+                        variant={food.source?.includes('TACO') ? 'default' : 'secondary'} 
+                        className="text-xs"
+                      >
+                        {food.source?.includes('TACO') ? 'TACO' : 'OFF'}
+                      </Badge>
+                    </div>
+                    {food.brand && (
+                      <p className="text-sm text-muted-foreground">
+                        Marca: {food.brand}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="text-sm text-muted-foreground mb-3">
+                  {food.energy_kcal} kcal | 
+                  P: {formatNutrient(food.protein_g)} | 
+                  C: {formatNutrient(food.carbohydrate_g)} | 
+                  G: {formatNutrient(food.lipid_g)}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => handleAddToMeal(food)}
+                    className="flex-1"
+                  >
+                    Adicionar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </ScrollArea>
     );
   };
 
@@ -836,6 +955,29 @@ export const AddFoodToMealModal = ({
                 </SelectContent>
               </Select>
             </div>
+            
+            {/* Navegação Categorias / Recentes */}
+            {searchTerm.length < 2 && (view === 'categories' || view === 'recent') && (
+              <div className="flex gap-2 mb-4">
+                <Button
+                  variant={view === 'categories' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setView('categories')}
+                  className="flex-1"
+                >
+                  Categorias
+                </Button>
+                <Button
+                  variant={view === 'recent' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setView('recent')}
+                  className="flex-1"
+                >
+                  <Clock className="w-4 h-4 mr-2" />
+                  Recentes
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Conteúdo Principal */}
@@ -844,6 +986,8 @@ export const AddFoodToMealModal = ({
               <SearchResultsView />
             ) : view === 'categories' ? (
               <CategoriesView />
+            ) : view === 'recent' ? (
+              <RecentFoodsView />
             ) : view === 'category-list' ? (
               <CategoryListView />
             ) : view === 'food-details' ? (
