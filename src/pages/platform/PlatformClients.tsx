@@ -9,7 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Edit, Trash2, User } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Plus, Edit, Trash2, User, Filter, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,6 +43,9 @@ export default function PlatformClients() {
   const [activeCount, setActiveCount] = useState(0);
   const [inactiveCount, setInactiveCount] = useState(0);
   const [clientServices, setClientServices] = useState<Record<string, any[]>>({});
+  const [availableServices, setAvailableServices] = useState<any[]>([]);
+  const [selectedServiceFilter, setSelectedServiceFilter] = useState<string>('all');
+  const [expiringFilter, setExpiringFilter] = useState<number>(0); // 0 = todos, 7 = 7 dias, 14 = 14 dias, 30 = 30 dias
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -53,6 +57,26 @@ export default function PlatformClients() {
     allergies: '',
   });
   const { toast } = useToast();
+
+  // Buscar serviços disponíveis
+  useEffect(() => {
+    const fetchServices = async () => {
+      if (!tenant?.id) return;
+      
+      const { data } = await supabase
+        .from('services')
+        .select('id, name')
+        .eq('tenant_id', tenant.id)
+        .eq('active', true)
+        .order('name');
+      
+      if (data) {
+        setAvailableServices(data);
+      }
+    };
+    
+    fetchServices();
+  }, [tenant?.id]);
 
   // Calcular ativos vs inativos E buscar serviços
   useEffect(() => {
@@ -143,8 +167,25 @@ export default function PlatformClients() {
       (client.email && client.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (client.phone && client.phone.includes(searchTerm));
     
-    // Por simplicidade, não implementamos filtro ativo/inativo ainda
-    return matchesSearch;
+    if (!matchesSearch) return false;
+
+    // Filtro por serviço
+    const services = clientServices[client.id] || [];
+    if (selectedServiceFilter !== 'all') {
+      const hasService = services.some(s => s.service_id === selectedServiceFilter);
+      if (!hasService) return false;
+    }
+
+    // Filtro por expiração
+    if (expiringFilter > 0) {
+      const hasExpiring = services.some(s => {
+        const daysRemaining = calculateDaysRemaining(s.end_date);
+        return daysRemaining <= expiringFilter && daysRemaining > 0;
+      });
+      if (!hasExpiring) return false;
+    }
+
+    return true;
   });
 
   const resetForm = () => {
@@ -331,26 +372,91 @@ export default function PlatformClients() {
           </div>
         </div>
 
-        {/* Filtros */}
-        <div className="flex gap-2 mb-6">
-          <Button
-            onClick={() => setActiveFilter('all')}
-            className={activeFilter === 'all' ? 'bg-emerald-500 hover:bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
-          >
-            Todos
-          </Button>
-          <Button
-            onClick={() => setActiveFilter('active')}
-            className={activeFilter === 'active' ? 'bg-emerald-500 hover:bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
-          >
-            Ativos
-          </Button>
-          <Button
-            onClick={() => setActiveFilter('inactive')}
-            className={activeFilter === 'inactive' ? 'bg-emerald-500 hover:bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
-          >
-            Inativos
-          </Button>
+        {/* Filtros Avançados */}
+        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Filter className="w-4 h-4 text-gray-600" />
+            <h3 className="font-semibold text-gray-900">Filtros</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Filtro por Plano/Serviço */}
+            <div>
+              <Label className="text-sm text-gray-600 mb-2 block">Filtrar por Plano</Label>
+              <Select value={selectedServiceFilter} onValueChange={setSelectedServiceFilter}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Todos os planos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os planos</SelectItem>
+                  {availableServices.map(service => (
+                    <SelectItem key={service.id} value={service.id}>
+                      {service.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Filtro por Expiração */}
+            <div>
+              <Label className="text-sm text-gray-600 mb-2 block">Planos Expirando</Label>
+              <Select value={expiringFilter.toString()} onValueChange={(v) => setExpiringFilter(Number(v))}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Todos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Todos</SelectItem>
+                  <SelectItem value="7">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-red-500" />
+                      Até 7 dias
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="14">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-orange-500" />
+                      Até 14 dias
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="30">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-yellow-500" />
+                      Até 30 dias
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Badges de Filtros Ativos */}
+          {(selectedServiceFilter !== 'all' || expiringFilter > 0) && (
+            <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-200">
+              {selectedServiceFilter !== 'all' && (
+                <Badge variant="secondary" className="gap-1">
+                  Plano: {availableServices.find(s => s.id === selectedServiceFilter)?.name}
+                  <button
+                    onClick={() => setSelectedServiceFilter('all')}
+                    className="ml-1 hover:text-destructive"
+                  >
+                    ×
+                  </button>
+                </Badge>
+              )}
+              {expiringFilter > 0 && (
+                <Badge variant="secondary" className="gap-1">
+                  Expirando em {expiringFilter} dias
+                  <button
+                    onClick={() => setExpiringFilter(0)}
+                    className="ml-1 hover:text-destructive"
+                  >
+                    ×
+                  </button>
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Lista de Clientes */}
