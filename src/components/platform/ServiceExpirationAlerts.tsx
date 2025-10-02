@@ -39,41 +39,58 @@ export const ServiceExpirationAlerts = ({
     setLoading(true);
 
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const futureDate = new Date(today.getTime() + daysThreshold * 24 * 60 * 60 * 1000);
+
+    console.log('🔍 Buscando serviços expirando:', {
+      tenantId,
+      today: today.toISOString().split('T')[0],
+      futureDate: futureDate.toISOString().split('T')[0],
+      daysThreshold
+    });
 
     const { data, error } = await supabase
       .from('service_subscriptions')
-      .select(`
-        id,
-        end_date,
-        price,
-        client_id,
-        status,
-        client:clients!service_subscriptions_client_id_fkey (id, name, phone),
-        service:services!service_subscriptions_service_id_fkey (id, name)
-      `)
+      .select('*, clients(id, name, phone), services(id, name)')
       .eq('tenant_id', tenantId)
-      .in('status', ['active', 'expiring_soon'])
       .gte('end_date', today.toISOString().split('T')[0])
       .lte('end_date', futureDate.toISOString().split('T')[0])
       .order('end_date', { ascending: true });
 
+    console.log('📊 Resultado da busca:', { data, error, count: data?.length });
+
     if (error) {
-      console.error('Erro ao buscar serviços expirando:', error);
+      console.error('❌ Erro ao buscar serviços expirando:', error);
       setLoading(false);
       return;
     }
 
-    const processed = data?.map(sub => ({
-      id: sub.id,
-      client_id: sub.client_id,
-      client_name: (sub.client as any)?.name || 'Cliente',
-      client_phone: (sub.client as any)?.phone || '',
-      service_name: (sub.service as any)?.name || 'Serviço',
-      end_date: sub.end_date,
-      price: sub.price || 0,
-      days_remaining: calculateDaysRemaining(sub.end_date)
-    })) || [];
+    const processed = data?.map(sub => {
+      const daysRemaining = calculateDaysRemaining(sub.end_date);
+      const client = sub.clients as any;
+      const service = sub.services as any;
+      
+      console.log('📅 Serviço processado:', {
+        client: client?.name,
+        service: service?.name,
+        end_date: sub.end_date,
+        status: sub.status,
+        daysRemaining
+      });
+      
+      return {
+        id: sub.id,
+        client_id: sub.client_id,
+        client_name: client?.name || 'Cliente',
+        client_phone: client?.phone || '',
+        service_name: service?.name || 'Serviço',
+        end_date: sub.end_date,
+        price: sub.price || 0,
+        days_remaining: daysRemaining
+      };
+    }) || [];
+
+    console.log('✅ Serviços expirando processados:', processed.length, processed);
 
     setExpiringServices(processed);
     setLoading(false);
@@ -84,6 +101,7 @@ export const ServiceExpirationAlerts = ({
     );
 
     if (toUpdate && toUpdate.length > 0) {
+      console.log('🔄 Atualizando status de', toUpdate.length, 'serviços para expiring_soon');
       await supabase
         .from('service_subscriptions')
         .update({ status: 'expiring_soon' })
