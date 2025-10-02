@@ -190,28 +190,22 @@ export const AddFoodToMealModal = ({
     queryFn: async () => {
       if (!selectedCategory?.id) return [];
       
-      let result: any;
-      if (sourceFilter === 'all' || !sourceFilter) {
-        result = await supabase
-          .from('foods')
-          .select('*')
-          .eq('category_id', selectedCategory.id)
-          .order('name');
-      } else if (sourceFilter === 'TACO') {
-        result = await (supabase
-          .from('foods')
-          .select('*')
-          .eq('category_id', selectedCategory.id) as any)
-          .like('source', '%TACO%')
-          .order('name');
-      } else {
-        result = await (supabase
-          .from('foods')
-          .select('*')
-          .eq('category_id', selectedCategory.id) as any)
-          .eq('source', sourceFilter)
-          .order('name');
+      let query = (supabase
+        .from('foods')
+        .select('*') as any)
+        .eq('category', selectedCategory.name);
+      
+      if (sourceFilter && sourceFilter !== 'all') {
+        if (sourceFilter === 'TACO') {
+          query = query.like('source', '%TACO%');
+        } else {
+          query = query.eq('source', sourceFilter);
+        }
       }
+      
+      query = query.order('name').limit(500);
+      
+      const result = await query;
       
       return result.data || [];
     },
