@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 type ModalView = 'categories' | 'category-list' | 'food-details' | 'add-portion';
 
 interface FoodCategory {
+  id: string;
   name: string;
   count: number;
   slug: string;
@@ -90,46 +91,38 @@ export const AddFoodToMealModal = ({
   const { data: categoriesWithCount } = useQuery({
     queryKey: ['food-categories-count', sourceFilter],
     queryFn: async () => {
-      const { data: dbCategories } = await supabase
+      const { data: categories } = await supabase
         .from('food_categories')
         .select('*')
         .order('name');
-
-      // CRÍTICO: só filtrar se não for "all"
-      const { data: foods } = sourceFilter && sourceFilter !== 'all'
-        ? await supabase
-            .from('foods')
-            .select('category_id, food_categories(name)')
-            .eq('active', true)
-            .eq('source_info', sourceFilter)
-        : await supabase
-            .from('foods')
-            .select('category_id, food_categories(name)')
-            .eq('active', true);
-
-      if (!foods || !dbCategories) return [];
-
+      
+      if (!categories) return [];
+      
       // Contar alimentos por categoria
-      const grouped = foods.reduce((acc: Record<string, number>, item) => {
+      let foodsResult: any;
+      if (sourceFilter === 'all' || !sourceFilter) {
+        foodsResult = await supabase.from('foods').select('category_id');
+      } else {
+        foodsResult = await (supabase.from('foods').select('category_id') as any).eq('source', sourceFilter);
+      }
+      
+      const foods = foodsResult.data;
+      if (!foods) return [];
+      
+      const grouped = foods.reduce((acc: Record<string, number>, item: any) => {
         if (!item.category_id) return acc;
         acc[item.category_id] = (acc[item.category_id] || 0) + 1;
         return acc;
       }, {});
-
-      // Mapear com as categorias predefinidas
-      return dbCategories
-        .map((dbCat) => {
-          const predefinedCat = FOOD_CATEGORIES.find(
-            (cat) => cat.name.toLowerCase() === dbCat.name.toLowerCase()
-          );
-          
-          return {
-            name: dbCat.name,
-            slug: predefinedCat?.slug || dbCat.name.toLowerCase(),
-            count: grouped[dbCat.id] || 0,
-            db_category: dbCat,
-          };
-        })
+      
+      return categories
+        .map((cat: any) => ({
+          id: cat.id,
+          name: cat.name,
+          count: grouped[cat.id] || 0,
+          slug: cat.name.toLowerCase(),
+          db_category: cat,
+        }))
         .filter((cat) => cat.count > 0)
         .sort((a, b) => b.count - a.count);
     },
@@ -138,26 +131,27 @@ export const AddFoodToMealModal = ({
 
   // Query 2: Buscar alimentos por categoria
   const { data: categoryFoods, isLoading: loadingCategoryFoods } = useQuery({
-    queryKey: ['category-foods', selectedCategory?.db_category?.id, sourceFilter],
+    queryKey: ['category-foods', selectedCategory?.id, sourceFilter],
     queryFn: async () => {
-      if (!selectedCategory?.db_category?.id) return [];
-
-      const { data } = sourceFilter && sourceFilter !== 'all'
-        ? await supabase
-            .from('foods')
-            .select('*')
-            .eq('category_id', selectedCategory.db_category.id)
-            .eq('active', true)
-            .eq('source_info', sourceFilter)
-            .order('name')
-        : await supabase
-            .from('foods')
-            .select('*')
-            .eq('category_id', selectedCategory.db_category.id)
-            .eq('active', true)
-            .order('name');
-
-      return data || [];
+      if (!selectedCategory?.id) return [];
+      
+      let result: any;
+      if (sourceFilter === 'all' || !sourceFilter) {
+        result = await supabase
+          .from('foods')
+          .select('*')
+          .eq('category_id', selectedCategory.id)
+          .order('name');
+      } else {
+        result = await (supabase
+          .from('foods')
+          .select('*')
+          .eq('category_id', selectedCategory.id) as any)
+          .eq('source', sourceFilter)
+          .order('name');
+      }
+      
+      return result.data || [];
     },
     enabled: !!selectedCategory && view === 'category-list',
   });
@@ -167,25 +161,26 @@ export const AddFoodToMealModal = ({
     queryKey: ['search-foods', searchTerm, sourceFilter],
     queryFn: async () => {
       if (searchTerm.length < 2) return [];
-
-      const { data } = sourceFilter && sourceFilter !== 'all'
-        ? await supabase
-            .from('foods')
-            .select('*, food_categories(name, icon, color)')
-            .or(`name.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%`)
-            .eq('active', true)
-            .eq('source_info', sourceFilter)
-            .order('name')
-            .limit(50)
-        : await supabase
-            .from('foods')
-            .select('*, food_categories(name, icon, color)')
-            .or(`name.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%`)
-            .eq('active', true)
-            .order('name')
-            .limit(50);
-
-      return data || [];
+      
+      let result: any;
+      if (sourceFilter === 'all' || !sourceFilter) {
+        result = await supabase
+          .from('foods')
+          .select('*, food_categories(name)')
+          .or(`name.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%`)
+          .order('name')
+          .limit(50);
+      } else {
+        result = await (supabase
+          .from('foods')
+          .select('*, food_categories(name)')
+          .or(`name.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%`) as any)
+          .eq('source', sourceFilter)
+          .order('name')
+          .limit(50);
+      }
+      
+      return result.data || [];
     },
     enabled: searchTerm.length >= 2,
   });
@@ -806,9 +801,7 @@ export const AddFoodToMealModal = ({
                 <SelectContent>
                   <SelectItem value="all">Todas as tabelas</SelectItem>
                   <SelectItem value="TACO">Tabela TACO</SelectItem>
-                  <SelectItem value="IBGE">Tabela IBGE</SelectItem>
-                  <SelectItem value="Marcas">Tabela de Marcas</SelectItem>
-                  <SelectItem value="Custom">Meus Alimentos</SelectItem>
+                  <SelectItem value="OpenFoodFacts">OpenFoodFacts</SelectItem>
                 </SelectContent>
               </Select>
             </div>
