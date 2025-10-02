@@ -224,65 +224,44 @@ export const AddFoodToMealModal = ({
     queryFn: async () => {
       if (searchTerm.length < 2) return [];
       
-      console.log('🔍 Buscando:', searchTerm);
-      console.log('📊 Filtro:', sourceFilter);
-      
-      // Normalizar busca
-      const term = searchTerm
+      // Normalizar e quebrar em palavras
+      const words = searchTerm
         .toLowerCase()
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
+        .replace(/[\u0300-\u036f]/g, '')
+        .split(/[\s,]+/)
+        .filter(w => w.length >= 2);
       
-      console.log('🧹 Termo limpo:', term);
-      
-      // Se buscar na TACO, criar padrões alternativos para vírgulas
-      const searchPatterns = [
-        term,
-        term.replace(/\s+/g, ','), // "pao forma" vira "pao,forma"
-        term.replace(/\s+/g, ', ')  // "pao forma" vira "pao, forma"
-      ];
-      
-      console.log('🎯 Padrões:', searchPatterns);
-      
-      const orConditions = searchPatterns
-        .map(pattern => `name.ilike.%${pattern}%,brand.ilike.%${pattern}%`)
-        .join(',');
-      
-      console.log('📝 Query OR:', orConditions);
+      console.log('🔍 Buscando palavras:', words);
       
       let query: any = supabase
         .from('foods')
-        .select('*, food_categories(name)')
-        .or(orConditions);
+        .select('*, food_categories(name)');
       
+      // Aplicar filtro de fonte primeiro
       if (sourceFilter && sourceFilter !== 'all') {
         if (sourceFilter === 'TACO') {
           query = query.like('source', '%TACO%');
-          console.log('✅ Filtro TACO aplicado');
         } else {
           query = query.eq('source', sourceFilter);
         }
       }
       
-      const { data, error } = await query.order('name').limit(50);
+      const { data } = await query.limit(200);
       
-      console.log('📦 Resultados:', data?.length || 0);
-      if (error) console.error('❌ Erro:', error);
+      // Filtrar no JavaScript buscando todas as palavras
+      const filtered = data?.filter((food: any) => {
+        const foodName = food.name
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+        
+        return words.every(word => foodName.includes(word));
+      }) || [];
       
-      // Filtro adicional no JavaScript para busca por palavras
-      if (data && term.includes(' ')) {
-        const words = term.split(/\s+/).filter(w => w.length > 2);
-        const filtered = data.filter((food: any) => {
-          const foodName = food.name.toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '');
-          return words.every(word => foodName.includes(word));
-        });
-        console.log('🔎 Após filtro JS:', filtered.length);
-        return filtered;
-      }
+      console.log('📦 Resultados:', filtered.length);
       
-      return data || [];
+      return filtered.slice(0, 50);
     },
     enabled: searchTerm.length >= 2,
   });
