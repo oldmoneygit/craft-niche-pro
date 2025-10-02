@@ -240,13 +240,25 @@ export const AddFoodToMealModal = ({
     queryFn: async () => {
       if (searchTerm.length < 2) return [];
       
-      // Normalizar termo de busca
-      const cleanTerm = normalizeText(searchTerm);
+      // Quebrar em palavras e normalizar
+      const words = searchTerm
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .split(/[\s,.\-]+/)
+        .filter(w => w.length > 2);
       
+      if (words.length === 0) return [];
+      
+      // Buscar alimentos que contenham TODAS as palavras
       let query: any = supabase
         .from('foods')
-        .select('*')
-        .or(`name.ilike.%${cleanTerm}%,brand.ilike.%${cleanTerm}%`);
+        .select('*');
+      
+      // Adicionar filtro para cada palavra
+      words.forEach(word => {
+        query = query.or(`name.ilike.%${word}%,brand.ilike.%${word}%`);
+      });
       
       if (sourceFilter && sourceFilter !== 'all') {
         if (sourceFilter === 'TACO') {
