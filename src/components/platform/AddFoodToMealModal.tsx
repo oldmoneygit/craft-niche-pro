@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import {
   Select,
@@ -416,7 +417,6 @@ export const AddFoodToMealModal = ({
   const [selectedMeasure, setSelectedMeasure] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
   const [showCustomFoodModal, setShowCustomFoodModal] = useState(false);
-  const [expandedFoodId, setExpandedFoodId] = useState<string | null>(null);
 
   // MAPEAMENTO DE ÍCONES COM EMOJIS
   const CATEGORY_ICONS: Record<string, string> = {
@@ -1184,7 +1184,6 @@ export const AddFoodToMealModal = ({
           size="sm"
           onClick={() => {
             setSearchTerm('');
-            setExpandedFoodId(null);
             setView('categories');
           }}
         >
@@ -1212,17 +1211,10 @@ export const AddFoodToMealModal = ({
         <ScrollArea className="h-[500px]">
           <div className="grid gap-3 pr-4">
             {searchResults?.map((food) => {
-              const isExpanded = expandedFoodId === food.id;
-              
               return (
-                <Card 
-                  key={food.id} 
-                  className={cn(
-                    "transition-all duration-300",
-                    isExpanded 
-                      ? "ring-2 ring-primary bg-blue-50 dark:bg-blue-950/30" 
-                      : "hover:shadow-md"
-                  )}
+                <Card
+                  key={food.id}
+                  className="transition-all duration-300 hover:shadow-md"
                 >
                   <CardContent className="p-4">
                     {/* Header compacto - sempre visível */}
@@ -1255,71 +1247,79 @@ export const AddFoodToMealModal = ({
                       G: {formatNutrient(food.lipid_g)}
                     </div>
 
-                    {/* Detalhes expandidos */}
-                    {isExpanded && (
-                      <div className="border-t pt-4 mt-4 space-y-4 animate-in slide-in-from-top-2">
-                        {/* Macros principais em destaque */}
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="bg-background rounded-lg p-3 border">
-                            <p className="text-xs text-muted-foreground">Calorias</p>
-                            <p className="text-2xl font-bold">{food.energy_kcal?.toFixed(0) || '-'}</p>
-                            <p className="text-xs">kcal/100g</p>
-                          </div>
-                          <div className="bg-background rounded-lg p-3 border">
-                            <p className="text-xs text-muted-foreground">Proteína</p>
-                            <p className="text-2xl font-bold">{food.protein_g?.toFixed(1) || '-'}</p>
-                            <p className="text-xs">g/100g</p>
-                          </div>
-                        </div>
-
-                        {/* Grid nutricional */}
-                        <div className="space-y-2">
-                          <p className="text-sm font-medium">Informação Nutricional (100g)</p>
-                          <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div>Carboidratos: <span className="font-medium">{food.carbohydrate_g?.toFixed(1) || '-'}g</span></div>
-                            <div>Gorduras: <span className="font-medium">{food.lipid_g?.toFixed(1) || '-'}g</span></div>
-                            <div>Fibras: <span className="font-medium">{food.fiber_g?.toFixed(1) || '-'}g</span></div>
-                            <div>Sódio: <span className="font-medium">{food.sodium_mg?.toFixed(0) || '-'}mg</span></div>
-                          </div>
-                        </div>
-
-                        {/* Accordion com mais detalhes */}
-                        <Accordion type="single" collapsible>
-                          <AccordionItem value="details" className="border-none">
-                            <AccordionTrigger className="text-sm py-2">
-                              Ver informações completas
-                            </AccordionTrigger>
-                            <AccordionContent className="space-y-3 pt-2">
-                              <FoodUsageHistory foodId={food.id} />
-                              <SimilarFoods food={food} onCompare={(compFood) => {
-                                setExpandedFoodId(compFood.id);
-                              }} />
-                            </AccordionContent>
-                          </AccordionItem>
-                        </Accordion>
-                      </div>
-                    )}
-
                     {/* Botões de ação */}
                     <div className="flex gap-2 mt-3">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setExpandedFoodId(isExpanded ? null : food.id)}
-                        className="flex-1"
-                      >
-                        {isExpanded ? (
-                          <>
-                            <ArrowLeft className="w-4 h-4 mr-1" />
-                            Recolher
-                          </>
-                        ) : (
-                          <>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button size="sm" variant="outline" className="flex-1">
                             Ver detalhes
                             <ChevronRight className="w-4 h-4 ml-1" />
-                          </>
-                        )}
-                      </Button>
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-[90vw] sm:w-[400px] max-h-[80vh] overflow-y-auto p-4"
+                          side="left"
+                          align="start"
+                          sideOffset={8}
+                        >
+                          <div className="space-y-4">
+                            {/* Cabeçalho */}
+                            <div>
+                              <h3 className="font-bold text-lg mb-1">{food.name}</h3>
+                              {food.brand && (
+                                <p className="text-sm text-muted-foreground">Marca: {food.brand}</p>
+                              )}
+                              <div className="flex gap-2 mt-2">
+                                <Badge variant="secondary">{food.food_categories?.name}</Badge>
+                                <Badge
+                                  variant={food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'default' : 'secondary'}
+                                >
+                                  {food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'TACO' : food.nutrition_sources?.name || 'Outro'}
+                                </Badge>
+                              </div>
+                            </div>
+
+                            {/* Macros principais em destaque */}
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="bg-secondary/50 rounded-lg p-3 border">
+                                <p className="text-xs text-muted-foreground">Calorias</p>
+                                <p className="text-2xl font-bold">{food.energy_kcal?.toFixed(0) || '-'}</p>
+                                <p className="text-xs">kcal/100g</p>
+                              </div>
+                              <div className="bg-secondary/50 rounded-lg p-3 border">
+                                <p className="text-xs text-muted-foreground">Proteína</p>
+                                <p className="text-2xl font-bold">{food.protein_g?.toFixed(1) || '-'}</p>
+                                <p className="text-xs">g/100g</p>
+                              </div>
+                            </div>
+
+                            {/* Grid nutricional */}
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium">Informação Nutricional (100g)</p>
+                              <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div>Carboidratos: <span className="font-medium">{food.carbohydrate_g?.toFixed(1) || '-'}g</span></div>
+                                <div>Gorduras: <span className="font-medium">{food.lipid_g?.toFixed(1) || '-'}g</span></div>
+                                <div>Fibras: <span className="font-medium">{food.fiber_g?.toFixed(1) || '-'}g</span></div>
+                                <div>Sódio: <span className="font-medium">{food.sodium_mg?.toFixed(0) || '-'}mg</span></div>
+                              </div>
+                            </div>
+
+                            {/* Botão de adicionar */}
+                            <Button
+                              className="w-full"
+                              onClick={async () => {
+                                setSelectedFood(food);
+                                await loadMeasures(food);
+                                setView('add-portion');
+                              }}
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              Adicionar ao Plano
+                            </Button>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+
                       <Button
                         size="sm"
                         onClick={async () => {
@@ -1415,15 +1415,69 @@ export const AddFoodToMealModal = ({
                       G: {formatNutrient(food.lipid_g)}
                     </div>
                     <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setExpandedFoodId(expandedFoodId === food.id ? null : food.id)}
-                        className="flex-1"
-                      >
-                        Ver detalhes
-                        <ChevronRight className="w-4 h-4 ml-1" />
-                      </Button>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button size="sm" variant="outline" className="flex-1">
+                            Ver detalhes
+                            <ChevronRight className="w-4 h-4 ml-1" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-[90vw] sm:w-[400px] max-h-[80vh] overflow-y-auto p-4"
+                          side="left"
+                          align="start"
+                          sideOffset={8}
+                        >
+                          <div className="space-y-4">
+                            <div>
+                              <h3 className="font-bold text-lg mb-1">{food.name}</h3>
+                              {food.brand && (
+                                <p className="text-sm text-muted-foreground">Marca: {food.brand}</p>
+                              )}
+                              <div className="flex gap-2 mt-2">
+                                <Badge variant="secondary">{food.food_categories?.name}</Badge>
+                                <Badge
+                                  variant={food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'default' : 'secondary'}
+                                >
+                                  {food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'TACO' : food.nutrition_sources?.name || 'Outro'}
+                                </Badge>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="bg-secondary/50 rounded-lg p-3 border">
+                                <p className="text-xs text-muted-foreground">Calorias</p>
+                                <p className="text-2xl font-bold">{food.energy_kcal?.toFixed(0) || '-'}</p>
+                                <p className="text-xs">kcal/100g</p>
+                              </div>
+                              <div className="bg-secondary/50 rounded-lg p-3 border">
+                                <p className="text-xs text-muted-foreground">Proteína</p>
+                                <p className="text-2xl font-bold">{food.protein_g?.toFixed(1) || '-'}</p>
+                                <p className="text-xs">g/100g</p>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium">Informação Nutricional (100g)</p>
+                              <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div>Carboidratos: <span className="font-medium">{food.carbohydrate_g?.toFixed(1) || '-'}g</span></div>
+                                <div>Gorduras: <span className="font-medium">{food.lipid_g?.toFixed(1) || '-'}g</span></div>
+                                <div>Fibras: <span className="font-medium">{food.fiber_g?.toFixed(1) || '-'}g</span></div>
+                                <div>Sódio: <span className="font-medium">{food.sodium_mg?.toFixed(0) || '-'}mg</span></div>
+                              </div>
+                            </div>
+
+                            <Button
+                              className="w-full"
+                              onClick={() => handleAddToMeal(food)}
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              Adicionar ao Plano
+                            </Button>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+
                       <Button
                         size="sm"
                         onClick={() => handleAddToMeal(food)}
