@@ -224,11 +224,16 @@ export const AddFoodToMealModal = ({
     queryFn: async () => {
       if (searchTerm.length < 2) return [];
       
+      console.log('🔍 Buscando:', searchTerm);
+      console.log('📊 Filtro:', sourceFilter);
+      
       // Normalizar busca
       const term = searchTerm
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '');
+      
+      console.log('🧹 Termo limpo:', term);
       
       // Se buscar na TACO, criar padrões alternativos para vírgulas
       const searchPatterns = [
@@ -237,9 +242,13 @@ export const AddFoodToMealModal = ({
         term.replace(/\s+/g, ', ')  // "pao forma" vira "pao, forma"
       ];
       
+      console.log('🎯 Padrões:', searchPatterns);
+      
       const orConditions = searchPatterns
         .map(pattern => `name.ilike.%${pattern}%,brand.ilike.%${pattern}%`)
         .join(',');
+      
+      console.log('📝 Query OR:', orConditions);
       
       let query: any = supabase
         .from('foods')
@@ -249,22 +258,28 @@ export const AddFoodToMealModal = ({
       if (sourceFilter && sourceFilter !== 'all') {
         if (sourceFilter === 'TACO') {
           query = query.like('source', '%TACO%');
+          console.log('✅ Filtro TACO aplicado');
         } else {
           query = query.eq('source', sourceFilter);
         }
       }
       
-      const { data } = await query.order('name').limit(50);
+      const { data, error } = await query.order('name').limit(50);
+      
+      console.log('📦 Resultados:', data?.length || 0);
+      if (error) console.error('❌ Erro:', error);
       
       // Filtro adicional no JavaScript para busca por palavras
       if (data && term.includes(' ')) {
         const words = term.split(/\s+/).filter(w => w.length > 2);
-        return data.filter((food: any) => {
+        const filtered = data.filter((food: any) => {
           const foodName = food.name.toLowerCase()
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '');
           return words.every(word => foodName.includes(word));
         });
+        console.log('🔎 Após filtro JS:', filtered.length);
+        return filtered;
       }
       
       return data || [];
