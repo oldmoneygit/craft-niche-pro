@@ -13,13 +13,19 @@ import {
   ChevronDown,
   Send,
   Activity,
-  Loader2
+  Loader2,
+  DollarSign,
+  TrendingUp,
+  RefreshCw,
+  BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from '@/hooks/useTenantId';
 import { useWhatsAppMessaging } from '@/hooks/useWhatsAppMessaging';
+import { useFinancialMetrics } from '@/hooks/useFinancialMetrics';
+import { formatCurrency } from '@/lib/serviceCalculations';
 
 export default function PlatformDashboard() {
   const { clientId } = useParams<{ clientId: string }>();
@@ -41,8 +47,11 @@ export default function PlatformDashboard() {
     confirmations: false,
     inactiveClients: false,
     today: false,
-    upcoming: false
+    upcoming: false,
+    finance: false
   });
+
+  const financialMetrics = useFinancialMetrics(tenantId);
 
   const { 
     sendReminder, 
@@ -70,9 +79,10 @@ export default function PlatformDashboard() {
       confirmations: confirmations.length > 0,
       inactiveClients: inactiveClients.length > 0,
       today: todayAppointments.length > 0,
-      upcoming: upcomingAppointments.length > 0
+      upcoming: upcomingAppointments.length > 0,
+      finance: financialMetrics.upcomingRenewals.count > 0 || financialMetrics.pendingPayments.count > 0
     });
-  }, [reminders, sentReminders, confirmations, inactiveClients, todayAppointments, upcomingAppointments]);
+  }, [reminders, sentReminders, confirmations, inactiveClients, todayAppointments, upcomingAppointments, financialMetrics]);
 
   const fetchDashboardData = async () => {
     try {
@@ -253,6 +263,156 @@ export default function PlatformDashboard() {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* SEÇÃO FINANCEIRA */}
+        <div className="bg-gradient-to-br from-emerald-600 to-green-700 rounded-xl border-2 border-emerald-500 overflow-hidden shadow-lg">
+          <button
+            onClick={() => toggleSection('finance')}
+            className="w-full px-6 py-4 flex items-center justify-between text-white hover:bg-white/10 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <DollarSign className="w-6 h-6" />
+              <div className="text-left">
+                <h3 className="font-bold text-lg">Visão Financeira</h3>
+                <p className="text-sm text-emerald-100">
+                  Receita, previsões e indicadores financeiros
+                </p>
+              </div>
+            </div>
+            <ChevronDown
+              className={`w-5 h-5 transition-transform ${
+                expandedSections.finance ? 'rotate-180' : ''
+              }`}
+            />
+          </button>
+
+          {expandedSections.finance && (
+            <div className="p-6 bg-white space-y-6">
+              
+              {/* KPIs Principais */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                {/* MRR */}
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-green-700">MRR</p>
+                    <TrendingUp className="w-5 h-5 text-green-600" />
+                  </div>
+                  <p className="text-3xl font-bold text-green-900">
+                    {financialMetrics.loading ? (
+                      <span className="animate-pulse">...</span>
+                    ) : (
+                      formatCurrency(financialMetrics.mrr)
+                    )}
+                  </p>
+                  <p className="text-xs text-green-600 mt-1">Receita Recorrente Mensal</p>
+                </div>
+
+                {/* Próximo Mês */}
+                <div className="bg-gradient-to-br from-blue-50 to-sky-50 border-2 border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-blue-700">Próximo Mês</p>
+                    <Calendar className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <p className="text-3xl font-bold text-blue-900">
+                    {financialMetrics.loading ? (
+                      <span className="animate-pulse">...</span>
+                    ) : (
+                      formatCurrency(financialMetrics.nextMonthRevenue)
+                    )}
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">Previsão de Receita</p>
+                </div>
+
+                {/* Pagamentos Pendentes */}
+                <div className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-orange-700">Pendentes</p>
+                    <AlertCircle className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <p className="text-3xl font-bold text-orange-900">
+                    {financialMetrics.loading ? (
+                      <span className="animate-pulse">...</span>
+                    ) : (
+                      formatCurrency(financialMetrics.pendingPayments.total)
+                    )}
+                  </p>
+                  <p className="text-xs text-orange-600 mt-1">
+                    {financialMetrics.pendingPayments.count} pagamento(s)
+                  </p>
+                </div>
+
+                {/* Renovações Próximas */}
+                <div className="bg-gradient-to-br from-purple-50 to-fuchsia-50 border-2 border-purple-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-purple-700">Renovações</p>
+                    <RefreshCw className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <p className="text-3xl font-bold text-purple-900">
+                    {financialMetrics.loading ? (
+                      <span className="animate-pulse">...</span>
+                    ) : (
+                      formatCurrency(financialMetrics.upcomingRenewals.total)
+                    )}
+                  </p>
+                  <p className="text-xs text-purple-600 mt-1">
+                    {financialMetrics.upcomingRenewals.count} próximos 30 dias
+                  </p>
+                </div>
+              </div>
+
+              {/* Alertas Financeiros */}
+              <div className="space-y-3">
+                <h4 className="font-bold text-gray-900">Alertas e Ações</h4>
+                
+                {financialMetrics.upcomingRenewals.count > 0 && (
+                  <div className="flex items-center justify-between p-4 rounded-lg border-2 bg-purple-50 border-purple-200">
+                    <div className="flex items-center gap-3">
+                      <RefreshCw className="w-5 h-5 text-purple-600" />
+                      <div>
+                        <p className="font-medium text-gray-900">{financialMetrics.upcomingRenewals.count} renovações pendentes</p>
+                        <p className="text-sm text-gray-600">{formatCurrency(financialMetrics.upcomingRenewals.total)} em renovações nos próximos 30 dias</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {financialMetrics.pendingPayments.count > 0 && (
+                  <div className="flex items-center justify-between p-4 rounded-lg border-2 bg-orange-50 border-orange-200">
+                    <div className="flex items-center gap-3">
+                      <AlertCircle className="w-5 h-5 text-orange-600" />
+                      <div>
+                        <p className="font-medium text-gray-900">{financialMetrics.pendingPayments.count} pagamentos pendentes</p>
+                        <p className="text-sm text-gray-600">{formatCurrency(financialMetrics.pendingPayments.total)} aguardando confirmação</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between p-4 rounded-lg border-2 bg-green-50 border-green-200">
+                  <div className="flex items-center gap-3">
+                    <TrendingUp className="w-5 h-5 text-green-600" />
+                    <div>
+                      <p className="font-medium text-gray-900">Receita projetada</p>
+                      <p className="text-sm text-gray-600">{formatCurrency(financialMetrics.nextMonthRevenue)} esperado para próximo mês</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Botão para Página Completa */}
+              <div className="text-center pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => navigate(`/platform/${clientId}/finances`)}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-lg hover:shadow-lg transition-all font-medium"
+                >
+                  <BarChart3 className="w-5 h-5" />
+                  Ver Relatório Financeiro Completo
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Confirmações Pendentes */}
