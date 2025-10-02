@@ -13,7 +13,9 @@ import { ArrowLeft, Plus, Trash2, Target, TrendingUp, ChartBar as BarChart3, Clo
 import { InlineFoodSearch } from '@/components/platform/InlineFoodSearch';
 import { CategoryBrowser } from '@/components/platform/CategoryBrowser';
 import { QuickPortionDialog } from '@/components/platform/QuickPortionDialog';
+import { AIAssistant } from '@/components/platform/AIAssistant';
 import { formatNutrient } from '@/lib/nutritionCalculations';
+import { ClientProfile } from '@/types/clientProfile';
 
 interface Meal {
   id: string;
@@ -45,6 +47,7 @@ export default function PlatformMealPlanEditor() {
     food: any;
     mealId: string;
   } | null>(null);
+  const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
 
   const totals = meals.reduce((acc, meal) => {
     meal.items.forEach(item => {
@@ -75,6 +78,71 @@ export default function PlatformMealPlanEditor() {
 
   const handleRemoveMeal = (mealId: string) => {
     setMeals(meals.filter(m => m.id !== mealId));
+  };
+
+  useEffect(() => {
+    if (clientId) {
+      supabase
+        .from('clients')
+        .select('*')
+        .eq('id', clientId)
+        .single()
+        .then(({ data }) => {
+          if (data) {
+            setClientProfile({
+              id: data.id,
+              name: data.name,
+              age: data.age || 30,
+              gender: data.gender || 'other',
+              height_cm: data.height_cm || 170,
+              weight_kg: data.weight_kg || 70,
+              activity_level: data.activity_level || 'moderate',
+              goal: data.goal || 'maintenance',
+              dietary_restrictions: data.dietary_restrictions || [],
+              allergies: data.allergies || [],
+              dislikes: data.dislikes || [],
+              meal_preferences: data.meal_preferences || [],
+              budget: data.budget || 'medium',
+              medical_conditions: data.medical_conditions || [],
+              medications: data.medications || [],
+              notes: data.notes || ''
+            });
+          }
+        });
+    }
+  }, [clientId]);
+
+  const handleApplyGeneratedPlan = async (plan: any) => {
+    setGoals({
+      kcal: plan.targetCalories,
+      protein: plan.macros.protein_g,
+      carb: plan.macros.carb_g,
+      fat: plan.macros.fat_g
+    });
+
+    const newMeals = plan.meals.map((meal: any) => ({
+      id: Date.now().toString() + Math.random(),
+      name: meal.name,
+      time: getDefaultTimeForMeal(meal.name),
+      items: []
+    }));
+
+    setMeals(newMeals);
+
+    toast({
+      title: 'Plano base criado!',
+      description: 'Agora use os templates ou adicione alimentos manualmente'
+    });
+  };
+
+  const getDefaultTimeForMeal = (name: string): string => {
+    const lower = name.toLowerCase();
+    if (lower.includes('café')) return '08:00';
+    if (lower.includes('lanche') && lower.includes('manhã')) return '10:00';
+    if (lower.includes('almoço')) return '12:00';
+    if (lower.includes('lanche') && lower.includes('tarde')) return '15:00';
+    if (lower.includes('jantar')) return '19:00';
+    return '12:00';
   };
 
   const handleAddFoodToMeal = (mealId: string, item: any) => {
@@ -340,6 +408,13 @@ export default function PlatformMealPlanEditor() {
                 </div>
               </CardContent>
             </Card>
+
+            {clientProfile && (
+              <AIAssistant
+                clientProfile={clientProfile}
+                onApplyPlan={handleApplyGeneratedPlan}
+              />
+            )}
 
             <div className="space-y-4">
               {meals.map((meal) => (
