@@ -12,7 +12,8 @@ import {
   Settings,
   Bell,
   Brain,
-  UserPlus
+  UserPlus,
+  Package
 } from 'lucide-react';
 import {
   Sidebar,
@@ -108,6 +109,12 @@ export function PlatformSidebar() {
   
   // Nutrition-specific features
   if (clientConfig.businessType === 'nutrition') {
+    businessSpecificItems.push({
+      title: 'Serviços',
+      url: `${platformBasePath}/servicos`,
+      icon: Package,
+    });
+    
     if (isModuleEnabled('mealPlans')) {
       businessSpecificItems.push({
         title: 'Planos Alimentares',
