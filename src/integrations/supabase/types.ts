@@ -760,6 +760,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_service_subscriptions_client"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "service_subscriptions_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
