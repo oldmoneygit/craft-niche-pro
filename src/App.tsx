@@ -60,6 +60,7 @@ const App = () => (
               <Route path="/platform/:clientId/feedbacks-semanais" element={<PlatformProtectedRoute><PlatformWeeklyFeedbacks /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/meal-plans" element={<PlatformProtectedRoute><PlatformMealPlans /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/planos-alimentares" element={<PlatformProtectedRoute><PlatformMealPlans /></PlatformProtectedRoute>} />
+              <Route path="/platform/:clientId/planos-alimentares/novo" element={<PlatformProtectedRoute><PlatformMealPlanEditor /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/planos-alimentares/:planId" element={<PlatformProtectedRoute><PlatformMealPlanEditor /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/ai-chat" element={<PlatformProtectedRoute><PlatformAIChat /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/ai-agent" element={<PlatformProtectedRoute><PlatformAIChat /></PlatformProtectedRoute>} />

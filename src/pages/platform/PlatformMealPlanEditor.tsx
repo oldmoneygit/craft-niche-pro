@@ -114,11 +114,14 @@ export default function PlatformMealPlanEditor() {
     setSaving(true);
 
     try {
+      // Verificar se planId é válido (não é :planId da rota)
+      const isEditMode = planId && planId !== ':planId' && !planId.startsWith(':');
+      
       // Salvar plano
       const { data: plan, error: planError } = await supabase
         .from('meal_plans')
         .upsert({
-          id: planId || undefined,
+          ...(isEditMode ? { id: planId } : {}),
           tenant_id: tenantId,
           title: planData.title,
           client_id: planData.client_id,
@@ -139,7 +142,7 @@ export default function PlatformMealPlanEditor() {
       if (planError) throw planError;
 
       // Deletar refeições antigas se estiver editando
-      if (planId) {
+      if (isEditMode) {
         await supabase
           .from('meal_plan_meals')
           .delete()
