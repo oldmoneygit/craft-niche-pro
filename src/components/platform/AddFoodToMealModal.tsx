@@ -456,36 +456,61 @@ export const AddFoodToMealModal = ({
   const { data: categoriesWithCount } = useQuery({
     queryKey: ['categories-with-count', sourceFilter],
     queryFn: async () => {
-      // Buscar todos os alimentos ou filtrados por fonte
-      let foodsQuery: any = supabase.from('foods').select('category');
-      
-      if (sourceFilter && sourceFilter !== 'all') {
-        if (sourceFilter === 'TACO') {
-          foodsQuery = foodsQuery.like('source', '%TACO%');
-        } else {
-          foodsQuery = foodsQuery.eq('source', sourceFilter);
-        }
-      }
-      
-      const foodsResult = await foodsQuery;
-      const data = foodsResult.data;
-      
-      // Contar itens por categoria
-      const counts: Record<string, number> = {};
-      data?.forEach((item: any) => {
-        if (item.category) {
-          counts[item.category] = (counts[item.category] || 0) + 1;
-        }
-      });
-      
-      return Object.entries(counts)
-        .map(([name, count]) => ({ 
-          id: name,
-          name, 
-          count,
-          slug: name.toLowerCase(),
-          db_category: { name }
-        }))
+      // Buscar categorias existentes
+      const { data: categories } = await supabase
+        .from('food_categories')
+        .select('id, name')
+        .order('name');
+
+      if (!categories) return [];
+
+      // Para cada categoria, contar alimentos
+      const categoriesWithCounts = await Promise.all(
+        categories.map(async (category) => {
+          let query = supabase
+            .from('foods')
+            .select('id', { count: 'exact', head: true })
+            .eq('category_id', category.id)
+            .eq('active', true);
+
+          if (sourceFilter && sourceFilter !== 'all') {
+            if (sourceFilter === 'TACO') {
+              const { data: sources } = await supabase
+                .from('nutrition_sources')
+                .select('id')
+                .in('code', ['taco', 'tbca']);
+
+              if (sources && sources.length > 0) {
+                query = query.in('source_id', sources.map(s => s.id));
+              }
+            } else if (sourceFilter === 'OpenFoodFacts') {
+              const { data: source } = await supabase
+                .from('nutrition_sources')
+                .select('id')
+                .eq('code', 'openfoodfacts')
+                .maybeSingle();
+
+              if (source) {
+                query = query.eq('source_id', source.id);
+              }
+            }
+          }
+
+          const { count } = await query;
+
+          return {
+            id: category.id,
+            name: category.name,
+            count: count || 0,
+            slug: category.name.toLowerCase(),
+            db_category: category
+          };
+        })
+      );
+
+      // Filtrar categorias com alimentos e ordenar por contagem
+      return categoriesWithCounts
+        .filter(c => c.count > 0)
         .sort((a, b) => b.count - a.count);
     },
     enabled: isOpen,
@@ -533,7 +558,7 @@ export const AddFoodToMealModal = ({
       const foodIds = uniqueItems.map(item => item.food_id);
       const { data: foods } = await supabase
         .from('foods')
-        .select('*')
+        .select('*, food_categories(name), nutrition_sources(name, code)')
         .in('id', foodIds);
       
       // Ordenar foods na mesma ordem dos uniqueItems
@@ -550,24 +575,38 @@ export const AddFoodToMealModal = ({
     queryKey: ['category-foods', selectedCategory?.id, sourceFilter],
     queryFn: async () => {
       if (!selectedCategory?.id) return [];
-      
-      let query = (supabase
+
+      let query = supabase
         .from('foods')
-        .select('*') as any)
-        .eq('category', selectedCategory.name);
-      
+        .select('*, food_categories(name), nutrition_sources(name, code)')
+        .eq('category_id', selectedCategory.id)
+        .eq('active', true);
+
       if (sourceFilter && sourceFilter !== 'all') {
         if (sourceFilter === 'TACO') {
-          query = query.like('source', '%TACO%');
-        } else {
-          query = query.eq('source', sourceFilter);
+          const { data: sources } = await supabase
+            .from('nutrition_sources')
+            .select('id')
+            .in('code', ['taco', 'tbca']);
+
+          if (sources && sources.length > 0) {
+            query = query.in('source_id', sources.map(s => s.id));
+          }
+        } else if (sourceFilter === 'OpenFoodFacts') {
+          const { data: source } = await supabase
+            .from('nutrition_sources')
+            .select('id')
+            .eq('code', 'openfoodfacts')
+            .maybeSingle();
+
+          if (source) {
+            query = query.eq('source_id', source.id);
+          }
         }
       }
-      
-      query = query.order('name').limit(500);
-      
-      const result = await query;
-      
+
+      const result = await query.order('name').limit(500);
+
       return result.data || [];
     },
     enabled: !!selectedCategory && view === 'category-list',
@@ -578,64 +617,48 @@ export const AddFoodToMealModal = ({
     queryKey: ['search-foods', searchTerm, sourceFilter],
     queryFn: async () => {
       if (searchTerm.length < 2) return [];
-      
-      const words = searchTerm
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .split(/[\s,]+/)
-        .filter(w => w.length >= 2);
-      
-      console.log('🔍 Buscando palavras:', words);
-      
-      let allResults: any[] = [];
-      
-      // Se filtro específico, buscar apenas daquela fonte
+
+      console.log('🔍 Buscando:', searchTerm, 'Filtro:', sourceFilter);
+
+      let query = supabase
+        .from('foods')
+        .select('*, food_categories(name), nutrition_sources(name, code)')
+        .ilike('name', `%${searchTerm}%`)
+        .eq('active', true);
+
       if (sourceFilter && sourceFilter !== 'all') {
-        let query: any = supabase
-          .from('foods')
-          .select('*, food_categories(name)');
-        
         if (sourceFilter === 'TACO') {
-          query = query.like('source', '%TACO%');
-        } else {
-          query = query.eq('source', sourceFilter);
+          const { data: sources } = await supabase
+            .from('nutrition_sources')
+            .select('id')
+            .in('code', ['taco', 'tbca']);
+
+          if (sources && sources.length > 0) {
+            query = query.in('source_id', sources.map(s => s.id));
+          }
+        } else if (sourceFilter === 'OpenFoodFacts') {
+          const { data: source } = await supabase
+            .from('nutrition_sources')
+            .select('id')
+            .eq('code', 'openfoodfacts')
+            .maybeSingle();
+
+          if (source) {
+            query = query.eq('source_id', source.id);
+          }
         }
-        
-        const { data } = await query.limit(200);
-        allResults = data || [];
-      } 
-      // Se "Todas as tabelas", buscar de cada fonte separadamente
-      else {
-        const [tacoResult, offResult] = await Promise.all([
-          (supabase
-            .from('foods')
-            .select('*, food_categories(name)') as any)
-            .like('source', '%TACO%')
-            .limit(100),
-          (supabase
-            .from('foods')
-            .select('*, food_categories(name)') as any)
-            .eq('source', 'OpenFoodFacts')
-            .limit(100)
-        ]);
-        
-        allResults = [...(tacoResult.data || []), ...(offResult.data || [])];
       }
-      
-      // Filtrar no JavaScript
-      const filtered = allResults.filter((food: any) => {
-        const foodName = food.name
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '');
-        
-        return words.every(word => foodName.includes(word));
-      });
-      
-      console.log('📦 Resultados:', filtered.length);
-      
-      return filtered.slice(0, 50);
+
+      const { data, error } = await query.order('name').limit(50);
+
+      if (error) {
+        console.error('Erro na busca:', error);
+        return [];
+      }
+
+      console.log('📦 Resultados:', data?.length || 0);
+
+      return data || [];
     },
     enabled: searchTerm.length >= 2,
   });
@@ -645,42 +668,53 @@ export const AddFoodToMealModal = ({
     queryKey: ['nutritional-foods', nutritionalFilter, sourceFilter],
     queryFn: async () => {
       if (!nutritionalFilter) return [];
-      
-      let result: any;
-      
-      // Construir query base
-      const baseQuery = supabase
+
+      let query = supabase
         .from('foods')
-        .select('*, food_categories(name)');
-      
-      // Aplicar filtros nutricionais e de fonte
+        .select('*, food_categories(name), nutrition_sources(name, code)')
+        .eq('active', true);
+
+      // Aplicar filtros nutricionais
       if (nutritionalFilter === 'protein') {
-        if (sourceFilter === 'all' || !sourceFilter) {
-          result = await (baseQuery as any).gte('protein_g', 20).order('name').limit(50);
-        } else if (sourceFilter === 'TACO') {
-          result = await (baseQuery as any).gte('protein_g', 20).like('source', '%TACO%').order('name').limit(50);
-        } else {
-          result = await (baseQuery as any).gte('protein_g', 20).eq('source', sourceFilter).order('name').limit(50);
-        }
+        query = query.gte('protein_g', 20);
       } else if (nutritionalFilter === 'lowcarb') {
-        if (sourceFilter === 'all' || !sourceFilter) {
-          result = await (baseQuery as any).lte('carbohydrate_g', 10).order('name').limit(50);
-        } else if (sourceFilter === 'TACO') {
-          result = await (baseQuery as any).lte('carbohydrate_g', 10).like('source', '%TACO%').order('name').limit(50);
-        } else {
-          result = await (baseQuery as any).lte('carbohydrate_g', 10).eq('source', sourceFilter).order('name').limit(50);
-        }
+        query = query.lte('carbohydrate_g', 10);
       } else if (nutritionalFilter === 'lowfat') {
-        if (sourceFilter === 'all' || !sourceFilter) {
-          result = await (baseQuery as any).lte('lipid_g', 5).order('name').limit(50);
-        } else if (sourceFilter === 'TACO') {
-          result = await (baseQuery as any).lte('lipid_g', 5).like('source', '%TACO%').order('name').limit(50);
-        } else {
-          result = await (baseQuery as any).lte('lipid_g', 5).eq('source', sourceFilter).order('name').limit(50);
+        query = query.lte('lipid_g', 5);
+      }
+
+      // Aplicar filtro de fonte se necessário
+      if (sourceFilter && sourceFilter !== 'all') {
+        if (sourceFilter === 'TACO') {
+          const { data: sources } = await supabase
+            .from('nutrition_sources')
+            .select('id')
+            .in('code', ['taco', 'tbca']);
+
+          if (sources && sources.length > 0) {
+            query = query.in('source_id', sources.map(s => s.id));
+          }
+        } else if (sourceFilter === 'OpenFoodFacts') {
+          const { data: source } = await supabase
+            .from('nutrition_sources')
+            .select('id')
+            .eq('code', 'openfoodfacts')
+            .maybeSingle();
+
+          if (source) {
+            query = query.eq('source_id', source.id);
+          }
         }
       }
-      
-      return result?.data || [];
+
+      const { data, error } = await query.order('name').limit(50);
+
+      if (error) {
+        console.error('Erro na busca nutricional:', error);
+        return [];
+      }
+
+      return data || [];
     },
     enabled: !!nutritionalFilter,
   });
@@ -689,6 +723,8 @@ export const AddFoodToMealModal = ({
   // Buscar medidas quando seleciona alimento para adicionar porção
   const loadMeasures = async (food: any) => {
     try {
+      console.log('🥄 Carregando medidas para:', food.name, food.id);
+
       const { data: measuresData, error } = await supabase
         .from('food_measures')
         .select('*')
@@ -697,30 +733,52 @@ export const AddFoodToMealModal = ({
 
       if (error) {
         console.error('Erro ao carregar medidas:', error);
-        return;
       }
 
       let measures = measuresData || [];
+      console.log('📏 Medidas encontradas:', measures.length);
 
-      // Se não houver medidas, criar uma padrão em gramas
+      // Se não houver medidas, criar medidas padrão
       if (measures.length === 0) {
-        measures = [{
-          id: 'temp-gram-measure',
-          food_id: food.id,
-          measure_name: 'gramas (100g)',
-          grams: 100,
-          grams_equivalent: 100,
-          is_default: true,
-          created_at: new Date().toISOString()
-        }];
+        console.log('⚠️ Criando medidas padrão...');
+
+        // Criar medida em gramas (100g como padrão)
+        const defaultMeasures = [
+          {
+            id: `temp-gram-${food.id}`,
+            food_id: food.id,
+            measure_name: 'gramas',
+            grams: 100,
+            is_default: true,
+            created_at: new Date().toISOString()
+          },
+          {
+            id: `temp-gram-50-${food.id}`,
+            food_id: food.id,
+            measure_name: 'gramas',
+            grams: 50,
+            is_default: false,
+            created_at: new Date().toISOString()
+          },
+          {
+            id: `temp-gram-200-${food.id}`,
+            food_id: food.id,
+            measure_name: 'gramas',
+            grams: 200,
+            is_default: false,
+            created_at: new Date().toISOString()
+          }
+        ];
+
+        measures = defaultMeasures;
       } else {
-        // Ordenar para garantir que gramas apareça primeiro
+        // Ordenar para garantir que medidas padrão apareçam primeiro
         measures = measures.sort((a, b) => {
-          const aIsGram = a.measure_name.toLowerCase().includes('grama') || 
+          const aIsGram = a.measure_name.toLowerCase().includes('grama') ||
                           a.measure_name.toLowerCase().includes('gram');
-          const bIsGram = b.measure_name.toLowerCase().includes('grama') || 
+          const bIsGram = b.measure_name.toLowerCase().includes('grama') ||
                           b.measure_name.toLowerCase().includes('gram');
-          
+
           if (aIsGram && !bIsGram) return -1;
           if (!aIsGram && bIsGram) return 1;
           if (a.is_default && !b.is_default) return -1;
@@ -729,11 +787,31 @@ export const AddFoodToMealModal = ({
         });
       }
 
+      console.log('✅ Medidas configuradas:', measures);
       setMeasures(measures);
       setSelectedMeasure(measures[0]);
       setQuantity(1);
     } catch (err) {
       console.error('Erro ao carregar medidas:', err);
+      toast({
+        title: 'Erro ao carregar medidas',
+        description: 'Usando medida padrão em gramas',
+        variant: 'destructive'
+      });
+
+      // Fallback para medida em gramas
+      const fallbackMeasure = {
+        id: `temp-gram-${food.id}`,
+        food_id: food.id,
+        measure_name: 'gramas',
+        grams: 100,
+        is_default: true,
+        created_at: new Date().toISOString()
+      };
+
+      setMeasures([fallbackMeasure]);
+      setSelectedMeasure(fallbackMeasure);
+      setQuantity(1);
     }
   };
 
@@ -746,24 +824,40 @@ export const AddFoodToMealModal = ({
 
 
   const handleFinalAdd = () => {
-    if (!selectedFood || !selectedMeasure) return;
+    if (!selectedFood || !selectedMeasure) {
+      toast({
+        title: 'Erro',
+        description: 'Selecione um alimento e uma medida',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    console.log('➕ Adicionando alimento:', {
+      food: selectedFood.name,
+      measure: selectedMeasure.measure_name,
+      quantity
+    });
 
     const nutrition = calculateItemNutrition(selectedFood, selectedMeasure, quantity);
+    console.log('📊 Nutrição calculada:', nutrition);
 
     const item = {
       food_id: selectedFood.id,
-      measure_id: selectedMeasure.id,
+      measure_id: selectedMeasure.id.startsWith('temp-') ? null : selectedMeasure.id, // Se for medida temporária, enviar null
       quantity,
       food: selectedFood,
       measure: selectedMeasure,
       ...nutrition
     };
 
+    console.log('✅ Item completo:', item);
+
     onAddFood(item);
 
     toast({
       title: '✓ Alimento adicionado',
-      description: `${quantity} ${selectedMeasure.measure_name} de ${selectedFood.name}`
+      description: `${quantity} ${selectedMeasure.measure_name} (${nutrition.grams_total.toFixed(0)}g) de ${selectedFood.name}`
     });
 
     // Reset e fechar

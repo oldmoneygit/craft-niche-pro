@@ -43,12 +43,108 @@ export default function PlatformMealPlanEditor() {
   const [activeMealIndex, setActiveMealIndex] = useState<number | null>(null);
   const [showAddFoodModal, setShowAddFoodModal] = useState(false);
 
-  // Carregar clientes
+  // Carregar clientes e plano existente se estiver editando
   useEffect(() => {
     if (tenantId) {
       fetchClients();
+
+      // Se temos planId e não é a rota parametrizada, carregar o plano
+      if (planId && planId !== ':planId' && !planId.startsWith(':')) {
+        loadExistingPlan();
+      }
     }
-  }, [tenantId]);
+  }, [tenantId, planId]);
+
+  const loadExistingPlan = async () => {
+    if (!planId) return;
+
+    console.log('📥 Carregando plano existente:', planId);
+    setLoading(true);
+
+    try {
+      // Carregar dados do plano
+      const { data: plan, error: planError } = await supabase
+        .from('meal_plans')
+        .select('*')
+        .eq('id', planId)
+        .maybeSingle();
+
+      if (planError) throw planError;
+      if (!plan) {
+        toast({
+          title: 'Plano não encontrado',
+          variant: 'destructive'
+        });
+        navigate(-1);
+        return;
+      }
+
+      // Preencher dados do plano
+      setPlanData({
+        title: plan.title || '',
+        client_id: plan.client_id || '',
+        calorie_target: plan.calorie_target || 2000,
+        protein_target_g: plan.protein_target_g || 150,
+        carb_target_g: plan.carb_target_g || 250,
+        fat_target_g: plan.fat_target_g || 65,
+        goal: plan.goal || ''
+      });
+
+      // Carregar refeições do plano
+      const { data: mealsData, error: mealsError } = await supabase
+        .from('meal_plan_meals')
+        .select(`
+          *,
+          meal_items (
+            *,
+            foods (*),
+            food_measures (*)
+          )
+        `)
+        .eq('meal_plan_id', planId)
+        .order('order_index');
+
+      if (mealsError) throw mealsError;
+
+      if (mealsData && mealsData.length > 0) {
+        // Transformar dados carregados no formato esperado
+        const loadedMeals = mealsData.map((meal: any) => ({
+          name: meal.name,
+          time: meal.time || '',
+          order_index: meal.order_index,
+          items: (meal.meal_items || []).map((item: any) => ({
+            food_id: item.food_id,
+            measure_id: item.measure_id,
+            quantity: item.quantity,
+            grams_total: item.grams_total,
+            kcal_total: item.kcal_total,
+            protein_total: item.protein_total,
+            carb_total: item.carb_total,
+            fat_total: item.fat_total,
+            food: item.foods,
+            measure: item.food_measures || {
+              id: 'temp-gram',
+              measure_name: 'gramas',
+              grams: item.grams_total / item.quantity
+            }
+          }))
+        }));
+
+        setMeals(loadedMeals);
+        console.log('✅ Plano carregado com sucesso:', loadedMeals);
+      }
+
+    } catch (error: any) {
+      console.error('Erro ao carregar plano:', error);
+      toast({
+        title: 'Erro ao carregar plano',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchClients = async () => {
     const { data } = await supabase
@@ -103,9 +199,24 @@ export default function PlatformMealPlanEditor() {
   };
 
   const handleSave = async () => {
+    console.log('💾 Iniciando salvamento do plano...');
+
+    // Validações
     if (!planData.title || !planData.client_id) {
       toast({
-        title: 'Preencha todos os campos obrigatórios',
+        title: 'Campos obrigatórios',
+        description: 'Preencha o título e selecione um cliente',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // Verificar se há pelo menos uma refeição com itens
+    const hasItems = meals.some(meal => meal.items.length > 0);
+    if (!hasItems) {
+      toast({
+        title: 'Plano vazio',
+        description: 'Adicione pelo menos um alimento a uma refeição',
         variant: 'destructive'
       });
       return;
@@ -116,41 +227,65 @@ export default function PlatformMealPlanEditor() {
     try {
       // Verificar se planId é válido (não é :planId da rota)
       const isEditMode = planId && planId !== ':planId' && !planId.startsWith(':');
-      
+      console.log('Modo de edição:', isEditMode);
+
       // Salvar plano
+      const planPayload = {
+        ...(isEditMode ? { id: planId } : {}),
+        tenant_id: tenantId,
+        title: planData.title,
+        client_id: planData.client_id,
+        calorie_target: planData.calorie_target,
+        protein_target_g: planData.protein_target_g,
+        carb_target_g: planData.carb_target_g,
+        fat_target_g: planData.fat_target_g,
+        goal: planData.goal,
+        active: true,
+        name: planData.title,
+        start_date: new Date().toISOString().split('T')[0],
+        end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        plan_data: { breakfast: [], lunch: [], dinner: [], snacks: [] }
+      };
+
+      console.log('📝 Salvando plano:', planPayload);
+
       const { data: plan, error: planError } = await supabase
         .from('meal_plans')
-        .upsert({
-          ...(isEditMode ? { id: planId } : {}),
-          tenant_id: tenantId,
-          title: planData.title,
-          client_id: planData.client_id,
-          calorie_target: planData.calorie_target,
-          protein_target_g: planData.protein_target_g,
-          carb_target_g: planData.carb_target_g,
-          fat_target_g: planData.fat_target_g,
-          goal: planData.goal,
-          active: true,
-          name: planData.title,
-          start_date: new Date().toISOString().split('T')[0],
-          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          plan_data: { breakfast: [], lunch: [], dinner: [], snacks: [] }
-        })
+        .upsert(planPayload)
         .select()
         .single();
 
-      if (planError) throw planError;
+      if (planError) {
+        console.error('Erro ao salvar plano:', planError);
+        throw planError;
+      }
+
+      console.log('✅ Plano salvo:', plan.id);
 
       // Deletar refeições antigas se estiver editando
       if (isEditMode) {
-        await supabase
+        console.log('🗑️ Removendo refeições antigas...');
+        const { error: deleteError } = await supabase
           .from('meal_plan_meals')
           .delete()
           .eq('meal_plan_id', planId);
+
+        if (deleteError) {
+          console.error('Erro ao deletar refeições antigas:', deleteError);
+        }
       }
 
       // Salvar refeições
+      console.log('🍽️ Salvando', meals.length, 'refeições...');
       for (const meal of meals) {
+        // Pular refeições sem itens
+        if (meal.items.length === 0) {
+          console.log('⏭️ Pulando refeição vazia:', meal.name);
+          continue;
+        }
+
+        console.log('📥 Salvando refeição:', meal.name, 'com', meal.items.length, 'itens');
+
         const { data: mealData, error: mealError } = await supabase
           .from('meal_plan_meals')
           .insert({
@@ -162,28 +297,40 @@ export default function PlatformMealPlanEditor() {
           .select()
           .single();
 
-        if (mealError) throw mealError;
+        if (mealError) {
+          console.error('Erro ao salvar refeição:', mealError);
+          throw mealError;
+        }
+
+        console.log('✅ Refeição salva:', mealData.id);
 
         // Salvar itens da refeição
-        if (meal.items.length > 0) {
-          const { error: itemsError } = await supabase
-            .from('meal_items')
-            .insert(
-              meal.items.map((item: any) => ({
-                meal_id: mealData.id,
-                food_id: item.food_id,
-                measure_id: item.measure_id,
-                quantity: item.quantity,
-                grams_total: item.grams_total,
-                kcal_total: item.kcal_total,
-                protein_total: item.protein_total,
-                carb_total: item.carb_total,
-                fat_total: item.fat_total
-              }))
-            );
+        const itemsToInsert = meal.items.map((item: any) => {
+          const itemData = {
+            meal_id: mealData.id,
+            food_id: item.food_id,
+            measure_id: item.measure_id, // Pode ser null para medidas temporárias
+            quantity: item.quantity,
+            grams_total: item.grams_total,
+            kcal_total: item.kcal_total,
+            protein_total: item.protein_total,
+            carb_total: item.carb_total,
+            fat_total: item.fat_total
+          };
+          console.log('📦 Item a inserir:', itemData);
+          return itemData;
+        });
 
-          if (itemsError) throw itemsError;
+        const { error: itemsError } = await supabase
+          .from('meal_items')
+          .insert(itemsToInsert);
+
+        if (itemsError) {
+          console.error('Erro ao salvar itens:', itemsError);
+          throw itemsError;
         }
+
+        console.log('✅ Itens salvos:', itemsToInsert.length);
       }
 
       toast({
@@ -191,12 +338,14 @@ export default function PlatformMealPlanEditor() {
         description: 'O plano alimentar foi salvo e está disponível para o cliente.'
       });
 
+      console.log('🎉 Salvamento completo!');
       navigate(-1);
 
     } catch (error: any) {
+      console.error('❌ Erro ao salvar plano:', error);
       toast({
         title: 'Erro ao salvar plano',
-        description: error.message,
+        description: error.message || 'Ocorreu um erro desconhecido',
         variant: 'destructive'
       });
     } finally {
