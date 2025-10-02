@@ -218,7 +218,6 @@ export const AddFoodToMealModal = ({
     queryFn: async () => {
       if (searchTerm.length < 2) return [];
       
-      // Normalizar e quebrar em palavras
       const words = searchTerm
         .toLowerCase()
         .normalize('NFD')
@@ -228,30 +227,50 @@ export const AddFoodToMealModal = ({
       
       console.log('🔍 Buscando palavras:', words);
       
-      let query: any = supabase
-        .from('foods')
-        .select('*, food_categories(name)');
+      let allResults: any[] = [];
       
-      // Aplicar filtro de fonte primeiro
+      // Se filtro específico, buscar apenas daquela fonte
       if (sourceFilter && sourceFilter !== 'all') {
+        let query: any = supabase
+          .from('foods')
+          .select('*, food_categories(name)');
+        
         if (sourceFilter === 'TACO') {
           query = query.like('source', '%TACO%');
         } else {
           query = query.eq('source', sourceFilter);
         }
+        
+        const { data } = await query.limit(200);
+        allResults = data || [];
+      } 
+      // Se "Todas as tabelas", buscar de cada fonte separadamente
+      else {
+        const [tacoResult, offResult] = await Promise.all([
+          (supabase
+            .from('foods')
+            .select('*, food_categories(name)') as any)
+            .like('source', '%TACO%')
+            .limit(100),
+          (supabase
+            .from('foods')
+            .select('*, food_categories(name)') as any)
+            .eq('source', 'OpenFoodFacts')
+            .limit(100)
+        ]);
+        
+        allResults = [...(tacoResult.data || []), ...(offResult.data || [])];
       }
       
-      const { data } = await query.limit(200);
-      
-      // Filtrar no JavaScript buscando todas as palavras
-      const filtered = data?.filter((food: any) => {
+      // Filtrar no JavaScript
+      const filtered = allResults.filter((food: any) => {
         const foodName = food.name
           .toLowerCase()
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '');
         
         return words.every(word => foodName.includes(word));
-      }) || [];
+      });
       
       console.log('📦 Resultados:', filtered.length);
       
