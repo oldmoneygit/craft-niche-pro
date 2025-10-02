@@ -42,16 +42,18 @@ interface AddFoodToMealModalProps {
 
 // Componente para histórico de uso do alimento
 const FoodUsageHistory = ({ foodId }: { foodId: string }) => {
-  const { data: usageCount } = useQuery({
-    queryKey: ['food-usage', foodId],
-    queryFn: async () => {
+  const [usageCount, setUsageCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchUsage = async () => {
       const { count } = await supabase
         .from('meal_items')
         .select('*', { count: 'exact', head: true })
         .eq('food_id', foodId);
-      return count || 0;
-    },
-  });
+      setUsageCount(count || 0);
+    };
+    fetchUsage();
+  }, [foodId]);
 
   if (!usageCount) return null;
 
@@ -70,10 +72,11 @@ const FoodUsageHistory = ({ foodId }: { foodId: string }) => {
 
 // Componente para alimentos similares
 const SimilarFoods = ({ food }: { food: any }) => {
-  const { data: similarFoods } = useQuery({
-    queryKey: ['similar-foods', food.category, food.id],
-    queryFn: async () => {
-      if (!food.category) return [];
+  const [similarFoods, setSimilarFoods] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchSimilar = async () => {
+      if (!food.category) return;
       
       const { data } = await supabase
         .from('foods')
@@ -83,11 +86,12 @@ const SimilarFoods = ({ food }: { food: any }) => {
         .order('name')
         .limit(3);
       
-      return data || [];
-    },
-  });
+      setSimilarFoods(data || []);
+    };
+    fetchSimilar();
+  }, [food.category, food.id]);
 
-  if (!similarFoods || similarFoods.length === 0) return null;
+  if (similarFoods.length === 0) return null;
 
   return (
     <div className="space-y-2">
@@ -104,30 +108,10 @@ const SimilarFoods = ({ food }: { food: any }) => {
   );
 };
 
-// Componente para observações do nutricionista
-const NutritionistNotes = ({ foodId, initialNotes }: { foodId: string; initialNotes?: string }) => {
-  const [notes, setNotes] = useState(initialNotes || '');
+// Componente para observações do nutricionista (placeholder)
+const NutritionistNotes = ({ foodId }: { foodId: string }) => {
+  const [notes, setNotes] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const { toast } = useToast();
-
-  const handleSave = async () => {
-    try {
-      const { error } = await supabase
-        .from('foods')
-        .update({ nutritionist_notes: notes })
-        .eq('id', foodId);
-
-      if (error) throw error;
-
-      toast({ description: 'Observações salvas com sucesso!' });
-      setIsEditing(false);
-    } catch (error) {
-      toast({ 
-        variant: 'destructive',
-        description: 'Erro ao salvar observações' 
-      });
-    }
-  };
 
   return (
     <div className="space-y-2">
@@ -141,7 +125,7 @@ const NutritionistNotes = ({ foodId, initialNotes }: { foodId: string; initialNo
             placeholder="Adicione observações sobre este alimento..."
           />
           <div className="flex gap-2">
-            <Button size="sm" onClick={handleSave}>Salvar</Button>
+            <Button size="sm" onClick={() => setIsEditing(false)}>Salvar</Button>
             <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>Cancelar</Button>
           </div>
         </div>
@@ -262,7 +246,7 @@ const FoodDetailsPopover = ({ food, onAddClick }: { food: any; onAddClick: () =>
             <SimilarFoods food={food} />
 
             {/* 5. OBSERVAÇÕES DO NUTRICIONISTA */}
-            <NutritionistNotes foodId={food.id} initialNotes={food.nutritionist_notes} />
+            <NutritionistNotes foodId={food.id} />
 
             {/* Campos nutricionais detalhados */}
             <div className="space-y-2 pt-2 border-t">
@@ -661,6 +645,7 @@ export const AddFoodToMealModal = ({
         food_id: food.id,
         measure_name: 'gramas (100g)',
         grams: 100,
+        grams_equivalent: 100,
         is_default: true,
         created_at: new Date().toISOString()
       }];
