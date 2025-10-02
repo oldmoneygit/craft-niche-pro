@@ -17,13 +17,55 @@ export const CategoryBrowser = ({ onSelectFood }: CategoryBrowserProps) => {
 
   useEffect(() => {
     if (isOpen) {
+      console.log('🔍 INICIANDO DIAGNÓSTICO DO BANCO DE DADOS...');
+
+      // Teste 1: Buscar alimentos SEM filtro
       supabase
         .from('foods')
-        .select('nutrition_sources(code)')
-        .limit(100)
-        .then(({ data }) => {
-          const uniqueSources = [...new Set(data?.map(d => d.nutrition_sources?.code).filter(Boolean))];
-          console.log('🔍 VALORES REAIS do campo nutrition_sources.code no banco:', uniqueSources);
+        .select('id, name, food_categories(name), source_id, nutrition_sources(code, name)')
+        .limit(10)
+        .then(({ data, error }) => {
+          console.log('📊 TESTE 1 - Primeiros 10 alimentos:', data);
+          console.log('❌ Erro:', error);
+
+          if (data && data.length > 0) {
+            const firstFood = data[0];
+            console.log('🔬 ESTRUTURA do primeiro alimento:', {
+              id: firstFood.id,
+              name: firstFood.name,
+              food_categories: firstFood.food_categories,
+              source_id: firstFood.source_id,
+              nutrition_sources: firstFood.nutrition_sources
+            });
+          }
+        });
+
+      // Teste 2: Contar total de alimentos
+      supabase
+        .from('foods')
+        .select('*', { count: 'exact', head: true })
+        .then(({ count, error }) => {
+          console.log('📊 TESTE 2 - Total de alimentos no banco:', count);
+          console.log('❌ Erro:', error);
+        });
+
+      // Teste 3: Ver todas as categorias únicas
+      supabase
+        .from('foods')
+        .select('food_categories(name)')
+        .then(({ data, error }) => {
+          const categories = [...new Set(data?.map(d => d.food_categories?.name).filter(Boolean))];
+          console.log('📊 TESTE 3 - Categorias únicas no banco:', categories);
+          console.log('❌ Erro:', error);
+        });
+
+      // Teste 4: Ver todas as fontes únicas
+      supabase
+        .from('nutrition_sources')
+        .select('id, code, name')
+        .then(({ data, error }) => {
+          console.log('📊 TESTE 4 - Fontes de nutrição disponíveis:', data);
+          console.log('❌ Erro:', error);
         });
     }
   }, [isOpen]);
