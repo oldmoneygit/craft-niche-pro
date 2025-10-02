@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Sparkles, Brain, Loader2, AlertTriangle } from 'lucide-react';
+import { Sparkles, Brain, Loader as Loader2, TriangleAlert as AlertTriangle } from 'lucide-react';
 import { ClientProfile } from '@/types/clientProfile';
 import { generateAIBasedMealPlan, validateAIPlan } from '@/lib/aiNutritionService';
 import { useToast } from '@/hooks/use-toast';
