@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ChevronDown, ChevronRight, Grid3x3 } from 'lucide-react';
@@ -15,95 +15,43 @@ export const CategoryBrowser = ({ onSelectFood }: CategoryBrowserProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sourceFilter, setSourceFilter] = useState<'all' | 'TACO' | 'OpenFoodFacts'>('all');
 
-  useEffect(() => {
-    if (isOpen) {
-      console.log('🔍 INICIANDO DIAGNÓSTICO DO BANCO DE DADOS...');
-
-      // Teste 1: Buscar alimentos SEM filtro
-      supabase
-        .from('foods')
-        .select('id, name, food_categories(name), source_id, nutrition_sources(code, name)')
-        .limit(10)
-        .then(({ data, error }) => {
-          console.log('📊 TESTE 1 - Primeiros 10 alimentos:', data);
-          console.log('❌ Erro:', error);
-
-          if (data && data.length > 0) {
-            const firstFood = data[0];
-            console.log('🔬 ESTRUTURA do primeiro alimento:', {
-              id: firstFood.id,
-              name: firstFood.name,
-              food_categories: firstFood.food_categories,
-              source_id: firstFood.source_id,
-              nutrition_sources: firstFood.nutrition_sources
-            });
-          }
-        });
-
-      // Teste 2: Contar total de alimentos
-      supabase
-        .from('foods')
-        .select('*', { count: 'exact', head: true })
-        .then(({ count, error }) => {
-          console.log('📊 TESTE 2 - Total de alimentos no banco:', count);
-          console.log('❌ Erro:', error);
-        });
-
-      // Teste 3: Ver todas as categorias únicas
-      supabase
-        .from('foods')
-        .select('food_categories(name)')
-        .then(({ data, error }) => {
-          const categories = [...new Set(data?.map(d => d.food_categories?.name).filter(Boolean))];
-          console.log('📊 TESTE 3 - Categorias únicas no banco:', categories);
-          console.log('❌ Erro:', error);
-        });
-
-      // Teste 4: Ver todas as fontes únicas
-      supabase
-        .from('nutrition_sources')
-        .select('id, code, name')
-        .then(({ data, error }) => {
-          console.log('📊 TESTE 4 - Fontes de nutrição disponíveis:', data);
-          console.log('❌ Erro:', error);
-        });
-    }
-  }, [isOpen]);
-
   const { data: categories } = useQuery({
     queryKey: ['food-categories-count', sourceFilter],
     queryFn: async () => {
-      let query = supabase.from('foods').select('food_categories(name), nutrition_sources!inner(code)');
+      console.log('🔍 Buscando categorias com filtro:', sourceFilter);
+
+      let query = supabase.from('foods').select('category, source');
 
       if (sourceFilter === 'TACO') {
-        query = query.or('nutrition_sources.code.eq.taco,nutrition_sources.code.eq.tbca');
+        query = query.or('source.ilike.%TACO%,source.ilike.%TBCA%');
       } else if (sourceFilter === 'OpenFoodFacts') {
-        query = query.eq('nutrition_sources.code', 'openfoodfacts');
+        query = query.ilike('source', '%OpenFoodFacts%');
       }
 
       const { data, error } = await query;
 
       if (error) {
-        console.error('Erro ao buscar categorias:', error);
+        console.error('❌ Erro ao buscar categorias:', error);
+        return [];
       }
 
-      console.log('📊 Filtro:', sourceFilter, '- Dados retornados:', data?.length, 'alimentos');
-      if (data && data.length > 0) {
-        const uniqueSources = [...new Set(data.map((d: any) => d.nutrition_sources?.code))];
-        console.log('📊 Fontes únicas:', uniqueSources);
-      }
+      console.log('✅ Total de alimentos encontrados:', data?.length);
+      console.log('✅ Primeiras 3 fontes:', data?.slice(0, 3).map(d => d.source));
 
       const counts: Record<string, number> = {};
       data?.forEach((item: any) => {
-        const categoryName = item.food_categories?.name;
-        if (categoryName) {
-          counts[categoryName] = (counts[categoryName] || 0) + 1;
+        if (item.category) {
+          counts[item.category] = (counts[item.category] || 0) + 1;
         }
       });
 
-      return Object.entries(counts)
+      const result = Object.entries(counts)
         .map(([name, count]) => ({ name, count }))
         .sort((a, b) => b.count - a.count);
+
+      console.log('✅ Categorias encontradas:', result.length);
+
+      return result;
     },
     enabled: isOpen
   });
@@ -113,34 +61,29 @@ export const CategoryBrowser = ({ onSelectFood }: CategoryBrowserProps) => {
     queryFn: async () => {
       if (!selectedCategory) return [];
 
-      const { data: categoryData } = await supabase
-        .from('food_categories')
-        .select('id')
-        .eq('name', selectedCategory)
-        .single();
-
-      if (!categoryData) return [];
+      console.log('🔍 Buscando alimentos da categoria:', selectedCategory, 'com filtro:', sourceFilter);
 
       let query = supabase
         .from('foods')
-        .select('id, name, brand, energy_kcal, protein_g, carbohydrate_g, lipid_g, nutrition_sources!inner(name, code)')
-        .eq('category_id', categoryData.id)
+        .select('id, name, brand, energy_kcal, protein_g, carbohydrate_g, lipid_g, source')
+        .eq('category', selectedCategory)
         .order('name')
         .limit(20);
 
       if (sourceFilter === 'TACO') {
-        query = query.or('nutrition_sources.code.eq.taco,nutrition_sources.code.eq.tbca');
+        query = query.or('source.ilike.%TACO%,source.ilike.%TBCA%');
       } else if (sourceFilter === 'OpenFoodFacts') {
-        query = query.eq('nutrition_sources.code', 'openfoodfacts');
+        query = query.ilike('source', '%OpenFoodFacts%');
       }
 
       const { data, error } = await query;
 
       if (error) {
-        console.error('Erro ao buscar alimentos da categoria:', error);
+        console.error('❌ Erro ao buscar alimentos:', error);
+        return [];
       }
 
-      console.log('🍎 Alimentos da categoria:', selectedCategory, '- Filtro:', sourceFilter, '- Resultados:', data?.length);
+      console.log('✅ Alimentos encontrados:', data?.length);
 
       return data || [];
     },

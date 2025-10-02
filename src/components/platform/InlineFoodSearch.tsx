@@ -24,25 +24,28 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
     queryFn: async () => {
       if (query.length < 2) return [];
 
+      console.log('🔍 Buscando:', query, '- Filtro:', sourceFilter);
+
       let searchQuery = supabase
         .from('foods')
-        .select('id, name, brand, energy_kcal, protein_g, carbohydrate_g, lipid_g, food_categories(name), nutrition_sources!inner(name, code)')
+        .select('id, name, brand, energy_kcal, protein_g, carbohydrate_g, lipid_g, source, category')
         .or(`name.ilike.%${query}%,brand.ilike.%${query}%`)
         .limit(10);
 
       if (sourceFilter === 'TACO') {
-        searchQuery = searchQuery.or('nutrition_sources.code.eq.taco,nutrition_sources.code.eq.tbca');
+        searchQuery = searchQuery.or('source.ilike.%TACO%,source.ilike.%TBCA%');
       } else if (sourceFilter === 'OpenFoodFacts') {
-        searchQuery = searchQuery.eq('nutrition_sources.code', 'openfoodfacts');
+        searchQuery = searchQuery.ilike('source', '%OpenFoodFacts%');
       }
 
       const { data, error } = await searchQuery;
 
       if (error) {
-        console.error('Erro na busca:', error);
+        console.error('❌ Erro na busca:', error);
+        return [];
       }
 
-      console.log('🔍 Busca:', query, '- Filtro:', sourceFilter, '- Resultados:', data?.length);
+      console.log('✅ Resultados encontrados:', data?.length);
 
       return data || [];
     },
