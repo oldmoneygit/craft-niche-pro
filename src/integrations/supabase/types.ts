@@ -1210,6 +1210,10 @@ export type Database = {
       }
     }
     Functions: {
+      ensure_gram_measure: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_analytics_data: {
         Args: { p_months?: number; p_tenant_id: string }
         Returns: {

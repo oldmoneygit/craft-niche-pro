@@ -64,11 +64,38 @@ export const AddFoodToMealModal = ({
       .eq('food_id', food.id)
       .order('is_default', { ascending: false });
 
-    setMeasures(measuresData || []);
+    let measures = measuresData || [];
     
-    // Selecionar medida padrão automaticamente
-    const defaultMeasure = measuresData?.find(m => m.is_default) || measuresData?.[0];
-    setSelectedMeasure(defaultMeasure);
+    // Se não houver medidas, criar uma padrão em gramas
+    if (measures.length === 0) {
+      measures = [{
+        id: 'temp-gram-measure',
+        food_id: food.id,
+        measure_name: 'gramas (100g)',
+        grams: 100,
+        is_default: true,
+        created_at: new Date().toISOString()
+      }];
+    } else {
+      // Ordenar para garantir que gramas apareça primeiro
+      measures = measures.sort((a, b) => {
+        const aIsGram = a.measure_name.toLowerCase().includes('grama') || 
+                        a.measure_name.toLowerCase().includes('gram');
+        const bIsGram = b.measure_name.toLowerCase().includes('grama') || 
+                        b.measure_name.toLowerCase().includes('gram');
+        
+        if (aIsGram && !bIsGram) return -1;
+        if (!aIsGram && bIsGram) return 1;
+        if (a.is_default && !b.is_default) return -1;
+        if (!a.is_default && b.is_default) return 1;
+        return 0;
+      });
+    }
+    
+    setMeasures(measures);
+    
+    // Selecionar primeira medida (que agora será gramas se existir)
+    setSelectedMeasure(measures[0]);
     setQuantity(1);
   };
 
