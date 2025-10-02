@@ -17,7 +17,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { AddCustomFoodModal } from './AddCustomFoodModal';
-import { FOOD_CATEGORIES, getCategoryIcon } from '@/lib/foodCategories';
+import { FOOD_CATEGORIES } from '@/lib/foodCategories';
+import { getCategoryIcon } from '@/components/icons/FoodCategoryIcons';
 import { cn } from '@/lib/utils';
 
 type ModalView = 'categories' | 'category-list' | 'food-details' | 'add-portion';
@@ -25,7 +26,6 @@ type ModalView = 'categories' | 'category-list' | 'food-details' | 'add-portion'
 interface FoodCategory {
   name: string;
   count: number;
-  icon: string;
   slug: string;
   db_category: any;
 }
@@ -105,7 +105,6 @@ export const AddFoodToMealModal = ({
           return {
             name: dbCat.name,
             slug: predefinedCat?.slug || dbCat.name.toLowerCase(),
-            icon: predefinedCat?.icon || '🍽️',
             count: grouped[dbCat.id] || 0,
             db_category: dbCat,
           };
@@ -281,114 +280,131 @@ export const AddFoodToMealModal = ({
   if (!isOpen) return null;
 
   // VIEW 1: Grid de Categorias
-  const CategoriesView = () => (
-    <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {categoriesWithCount?.map((category) => (
-        <Card
-          key={category.slug}
-          className={cn(
-            "cursor-pointer transition-all duration-300 hover:shadow-lg",
-            "border-2 border-border bg-card hover:bg-accent/50",
-            "flex flex-col items-center justify-center text-center",
-            "min-h-[120px] p-6"
-          )}
-          onClick={() => {
-            setSelectedCategory(category);
-            setView('category-list');
-          }}
-        >
-          <div className="text-4xl mb-3">{category.icon}</div>
-          <h3 className="font-medium text-base mb-1">{category.name}</h3>
-          <p className="text-sm text-muted-foreground">{category.count} itens</p>
-        </Card>
-      ))}
-    </div>
-  );
+  const CategoriesView = () => {
+    return (
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
+        {categoriesWithCount?.map((category) => {
+          const IconComponent = getCategoryIcon(category.name);
+          
+          return (
+            <Card
+              key={category.slug}
+              className={cn(
+                "cursor-pointer transition-all duration-300",
+                "border border-border bg-zinc-100 hover:bg-background",
+                "flex flex-col items-center justify-center text-center",
+                "min-h-[100px] md:min-h-[120px] p-4 rounded-lg"
+              )}
+              onClick={() => {
+                setSelectedCategory(category);
+                setView('category-list');
+              }}
+            >
+              <IconComponent 
+                className="w-8 h-8 mb-2 text-foreground" 
+                strokeWidth={1.5}
+              />
+              <h3 className="font-medium text-sm md:text-base mb-1">
+                {category.name}
+              </h3>
+              <p className="text-xs md:text-sm text-muted-foreground">
+                {category.count} itens
+              </p>
+            </Card>
+          );
+        })}
+      </div>
+    );
+  };
 
   // VIEW 2: Lista de Alimentos da Categoria
-  const CategoryListView = () => (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3 mb-6">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setView('categories');
-            setSelectedCategory(null);
-          }}
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar
-        </Button>
-        <div>
-          <h3 className="font-semibold text-lg flex items-center gap-2">
-            <span className="text-2xl">{selectedCategory?.icon}</span> 
-            {selectedCategory?.name}
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            {categoryFoods?.length || 0} alimentos
-          </p>
+  const CategoryListView = () => {
+    const IconComponent = selectedCategory ? getCategoryIcon(selectedCategory.name) : Package;
+    
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setView('categories');
+              setSelectedCategory(null);
+            }}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
+          </Button>
+          <div>
+            <h3 className="font-semibold text-lg flex items-center gap-2">
+              <IconComponent className="w-6 h-6" strokeWidth={1.5} />
+              {selectedCategory?.name}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {categoryFoods?.length || 0} alimentos
+            </p>
+          </div>
         </div>
-      </div>
 
-      {loadingCategoryFoods ? (
-        <div className="text-center py-8">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-          <p className="text-muted-foreground mt-4">Carregando...</p>
-        </div>
-      ) : (
-        <ScrollArea className="h-[500px]">
-          <div className="grid gap-3 pr-4">
-            {categoryFoods?.map((food) => (
-              <Card key={food.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex-1">
-                      <h4 className="font-medium">{food.name}</h4>
-                      {food.brand && (
-                        <p className="text-sm text-muted-foreground">
-                          Marca: {food.brand}
-                        </p>
+        {loadingCategoryFoods ? (
+          <div className="text-center py-8">
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+            <p className="text-muted-foreground mt-4">Carregando...</p>
+          </div>
+        ) : (
+          <ScrollArea className="h-[500px]">
+            <div className="grid gap-3 pr-4">
+              {categoryFoods?.map((food) => (
+                <Card key={food.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <h4 className="font-medium">{food.name}</h4>
+                        {food.brand && (
+                          <p className="text-sm text-muted-foreground">
+                            Marca: {food.brand}
+                          </p>
+                        )}
+                      </div>
+                      {food.source_info && (
+                        <Badge variant="secondary" className="ml-2">
+                          {food.source_info}
+                        </Badge>
                       )}
                     </div>
-                    {food.source_info && (
-                      <Badge variant="secondary" className="ml-2">
-                        {food.source_info}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="text-sm text-muted-foreground mb-3">
-                    {food.energy_kcal} kcal | 
-                    P: {formatNutrient(food.protein_g)} | 
-                    C: {formatNutrient(food.carbohydrate_g)} | 
-                    G: {formatNutrient(food.lipid_g)}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleSelectFoodForDetails(food)}
-                      className="flex-1"
-                    >
-                      Ver detalhes
-                      <ChevronRight className="w-4 h-4 ml-1" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => handleAddToMeal(food)}
-                      className="flex-1"
-                    >
-                      Adicionar
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </ScrollArea>
-      )}
-    </div>
-  );
+                    <div className="text-sm text-muted-foreground mb-3">
+                      {food.energy_kcal} kcal | 
+                      P: {formatNutrient(food.protein_g)} | 
+                      C: {formatNutrient(food.carbohydrate_g)} | 
+                      G: {formatNutrient(food.lipid_g)}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSelectFoodForDetails(food)}
+                        className="flex-1"
+                      >
+                        Ver detalhes
+                        <ChevronRight className="w-4 h-4 ml-1" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleAddToMeal(food)}
+                        className="flex-1"
+                      >
+                        Adicionar
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </ScrollArea>
+        )}
+      </div>
+    );
+  };
 
   // VIEW 3: Detalhes do Alimento + Substituições
   const FoodDetailsView = () => (
