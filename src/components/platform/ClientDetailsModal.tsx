@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
-import { X, User, Phone, Mail, Calendar, UtensilsCrossed, ClipboardList, Eye, Send, Edit, Package, Plus, RefreshCw, Trash2, CheckCircle } from 'lucide-react';
+import { X, User, Phone, Mail, Calendar, UtensilsCrossed, ClipboardList, Eye, Send, Edit, Package, Plus, RefreshCw, Trash2, CheckCircle, MessageCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ServiceSubscriptionModal } from '@/components/platform/ServiceSubscriptionModal';
 import { RenewServiceModal } from '@/components/platform/RenewServiceModal';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
+import { calculateProgress as calculateNutritionProgress } from '@/lib/nutritionCalculations';
 import { 
   formatCurrency, 
   formatDate, 
@@ -32,6 +36,12 @@ export const ClientDetailsModal = ({ client, onClose, onUpdate }: ClientDetailsM
   
   const [activeTab, setActiveTab] = useState<'info' | 'services' | 'plan' | 'questionnaires' | 'appointments'>('info');
   const [activeMealPlan, setActiveMealPlan] = useState<any>(null);
+  const [planNutrition, setPlanNutrition] = useState({
+    kcal: 0,
+    protein: 0,
+    carb: 0,
+    fat: 0
+  });
   const [questionnaires, setQuestionnaires] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [activeSubscriptions, setActiveSubscriptions] = useState<any[]>([]);
@@ -50,15 +60,55 @@ export const ClientDetailsModal = ({ client, onClose, onUpdate }: ClientDetailsM
 
     // Buscar plano, questionários, consultas
 
-    // Buscar plano ativo
+    // Buscar plano ativo com refeições e itens
     const { data: mealPlanData } = await supabase
       .from('meal_plans')
-      .select('*')
+      .select(`
+        *,
+        meal_plan_meals (
+          id,
+          name,
+          time,
+          order_index,
+          meal_items (
+            id,
+            quantity,
+            grams_total,
+            kcal_total,
+            protein_total,
+            carb_total,
+            fat_total,
+            foods (name),
+            food_measures (measure_name, grams)
+          )
+        )
+      `)
       .eq('client_id', client.id)
       .eq('active', true)
       .maybeSingle();
 
     setActiveMealPlan(mealPlanData);
+
+    // Calcular totais do plano
+    if (mealPlanData?.meal_plan_meals) {
+      const totals = mealPlanData.meal_plan_meals.reduce((acc: any, meal: any) => {
+        const mealTotals = meal.meal_items?.reduce((mAcc: any, item: any) => ({
+          kcal: mAcc.kcal + (item.kcal_total || 0),
+          protein: mAcc.protein + (item.protein_total || 0),
+          carb: mAcc.carb + (item.carb_total || 0),
+          fat: mAcc.fat + (item.fat_total || 0)
+        }), { kcal: 0, protein: 0, carb: 0, fat: 0 });
+        
+        return {
+          kcal: acc.kcal + mealTotals.kcal,
+          protein: acc.protein + mealTotals.protein,
+          carb: acc.carb + mealTotals.carb,
+          fat: acc.fat + mealTotals.fat
+        };
+      }, { kcal: 0, protein: 0, carb: 0, fat: 0 });
+      
+      setPlanNutrition(totals);
+    }
 
     // Buscar questionários respondidos
     const { data: questionnairesData } = await supabase
@@ -392,61 +442,187 @@ export const ClientDetailsModal = ({ client, onClose, onUpdate }: ClientDetailsM
 
                 {/* Tab: Plano Alimentar */}
                 {activeTab === 'plan' && (
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-bold text-foreground flex items-center gap-2">
-                        <UtensilsCrossed className="w-5 h-5" />
-                        Plano Alimentar
-                      </h3>
-                      <button
-                        onClick={() => navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/novo`)}
-                        className="text-sm text-green-600 hover:text-green-700"
-                      >
-                        + Criar Novo
-                      </button>
-                    </div>
-
+                  <div className="space-y-6">
                     {activeMealPlan ? (
-                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-2 border-green-200 dark:border-green-800 rounded-lg p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <p className="font-semibold text-foreground">{activeMealPlan.title}</p>
-                            {activeMealPlan.calories_target && (
-                              <p className="text-sm text-muted-foreground mt-1">
-                                Meta: {activeMealPlan.calories_target} kcal/dia
-                              </p>
+                      <>
+                        {/* Header do Plano */}
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-bold text-xl">{activeMealPlan.title}</h3>
+                            {activeMealPlan.goal && (
+                              <p className="text-sm text-muted-foreground capitalize">{activeMealPlan.goal}</p>
                             )}
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Criado em {new Date(activeMealPlan.created_at).toLocaleDateString('pt-BR')}</p>
                           </div>
                           <div className="flex gap-2">
-                            <button
-                              onClick={() => navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/${activeMealPlan.id}`)}
-                              className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 rounded"
-                              title="Editar"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button
+                            <Button
                               onClick={handleSendPlan}
-                              className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-950 rounded"
-                              title="Enviar"
+                              variant="outline"
+                              size="sm"
                             >
-                              <Send className="w-4 h-4" />
-                            </button>
+                              <MessageCircle className="w-4 h-4 mr-2" />
+                              Enviar WhatsApp
+                            </Button>
+                            <Button
+                              onClick={() => navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/${activeMealPlan.id}`)}
+                              variant="outline"
+                              size="sm"
+                            >
+                              <Edit className="w-4 h-4 mr-2" />
+                              Editar
+                            </Button>
                           </div>
                         </div>
-                      </div>
+
+                        {/* Dashboard Nutricional */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Círculo de Calorias */}
+                          <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border-2 border-green-200 dark:border-green-800 p-6">
+                            <h4 className="font-semibold mb-4 text-center">Calorias Diárias</h4>
+                            <div className="w-48 h-48 mx-auto mb-4">
+                              <CircularProgressbar
+                                value={calculateNutritionProgress(planNutrition.kcal, activeMealPlan.calorie_target || 2000)}
+                                text={`${planNutrition.kcal.toFixed(0)}`}
+                                styles={buildStyles({
+                                  textSize: '16px',
+                                  pathColor: '#10b981',
+                                  textColor: '#10b981',
+                                  trailColor: '#d1fae5'
+                                })}
+                              />
+                            </div>
+                            <p className="text-center text-sm text-muted-foreground">
+                              Meta: {activeMealPlan.calorie_target || 2000} kcal
+                            </p>
+                            <p className="text-center text-xs text-muted-foreground mt-1">
+                              {calculateNutritionProgress(planNutrition.kcal, activeMealPlan.calorie_target || 2000)}% da meta
+                            </p>
+                          </div>
+
+                          {/* Macronutrientes */}
+                          <div className="bg-card rounded-lg border-2 p-6">
+                            <h4 className="font-semibold mb-4">Macronutrientes</h4>
+                            
+                            <div className="space-y-4">
+                              {/* Proteínas */}
+                              <div>
+                                <div className="flex justify-between text-sm mb-1">
+                                  <span className="font-medium">Proteínas</span>
+                                  <span className="font-bold">
+                                    {planNutrition.protein.toFixed(1)}g / {activeMealPlan.protein_target_g || 150}g
+                                  </span>
+                                </div>
+                                <div className="w-full bg-secondary rounded-full h-3">
+                                  <div
+                                    className="bg-blue-500 h-3 rounded-full transition-all"
+                                    style={{ width: `${Math.min(calculateNutritionProgress(planNutrition.protein, activeMealPlan.protein_target_g || 150), 100)}%` }}
+                                  />
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {calculateNutritionProgress(planNutrition.protein, activeMealPlan.protein_target_g || 150)}%
+                                </p>
+                              </div>
+
+                              {/* Carboidratos */}
+                              <div>
+                                <div className="flex justify-between text-sm mb-1">
+                                  <span className="font-medium">Carboidratos</span>
+                                  <span className="font-bold">
+                                    {planNutrition.carb.toFixed(1)}g / {activeMealPlan.carb_target_g || 250}g
+                                  </span>
+                                </div>
+                                <div className="w-full bg-secondary rounded-full h-3">
+                                  <div
+                                    className="bg-orange-500 h-3 rounded-full transition-all"
+                                    style={{ width: `${Math.min(calculateNutritionProgress(planNutrition.carb, activeMealPlan.carb_target_g || 250), 100)}%` }}
+                                  />
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {calculateNutritionProgress(planNutrition.carb, activeMealPlan.carb_target_g || 250)}%
+                                </p>
+                              </div>
+
+                              {/* Gorduras */}
+                              <div>
+                                <div className="flex justify-between text-sm mb-1">
+                                  <span className="font-medium">Gorduras</span>
+                                  <span className="font-bold">
+                                    {planNutrition.fat.toFixed(1)}g / {activeMealPlan.fat_target_g || 65}g
+                                  </span>
+                                </div>
+                                <div className="w-full bg-secondary rounded-full h-3">
+                                  <div
+                                    className="bg-yellow-500 h-3 rounded-full transition-all"
+                                    style={{ width: `${Math.min(calculateNutritionProgress(planNutrition.fat, activeMealPlan.fat_target_g || 65), 100)}%` }}
+                                  />
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {calculateNutritionProgress(planNutrition.fat, activeMealPlan.fat_target_g || 65)}%
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Refeições do Plano */}
+                        <div className="space-y-3">
+                          <h4 className="font-semibold">Refeições do Dia</h4>
+                          {activeMealPlan.meal_plan_meals?.map((meal: any) => {
+                            const mealTotals = meal.meal_items?.reduce((acc: any, item: any) => ({
+                              kcal: acc.kcal + (item.kcal_total || 0),
+                              protein: acc.protein + (item.protein_total || 0),
+                              carb: acc.carb + (item.carb_total || 0),
+                              fat: acc.fat + (item.fat_total || 0)
+                            }), { kcal: 0, protein: 0, carb: 0, fat: 0 }) || { kcal: 0, protein: 0, carb: 0, fat: 0 };
+
+                            return (
+                              <div key={meal.id} className="bg-muted/50 rounded-lg border p-4">
+                                <div className="flex justify-between items-start mb-3">
+                                  <div>
+                                    <h5 className="font-semibold">{meal.name}</h5>
+                                    {meal.time && (
+                                      <p className="text-sm text-muted-foreground">{meal.time}</p>
+                                    )}
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="font-bold">{mealTotals.kcal.toFixed(0)} kcal</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      P: {mealTotals.protein.toFixed(0)}g | 
+                                      C: {mealTotals.carb.toFixed(0)}g | 
+                                      G: {mealTotals.fat.toFixed(0)}g
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                  {meal.meal_items?.map((item: any) => (
+                                    <div key={item.id} className="text-sm">
+                                      • {item.quantity} {item.food_measures?.measure_name} de {item.foods?.name}
+                                      <span className="text-muted-foreground ml-2">
+                                        ({item.grams_total?.toFixed(0)}g)
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
                     ) : (
-                      <div className="bg-muted border-2 border-dashed border-border rounded-lg p-6 text-center">
-                        <UtensilsCrossed className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-                        <p className="text-muted-foreground text-sm">Nenhum plano ativo</p>
-                        <button
-                          onClick={() => navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/novo`)}
-                          className="mt-2 text-sm text-green-600 hover:text-green-700 font-medium"
+                      <div className="text-center py-12">
+                        <UtensilsCrossed className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold mb-2">
+                          Nenhum plano alimentar ativo
+                        </h3>
+                        <p className="text-muted-foreground mb-4">
+                          Crie um plano nutricional personalizado para este cliente
+                        </p>
+                        <Button
+                          onClick={() => navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/novo?client=${client.id}`)}
                         >
-                          Criar primeiro plano
-                        </button>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Criar Plano Alimentar
+                        </Button>
                       </div>
                     )}
                   </div>
