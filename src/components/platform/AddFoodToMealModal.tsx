@@ -416,6 +416,7 @@ export const AddFoodToMealModal = ({
   const [selectedMeasure, setSelectedMeasure] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
   const [showCustomFoodModal, setShowCustomFoodModal] = useState(false);
+  const [dialogFood, setDialogFood] = useState<any>(null);
 
   // MAPEAMENTO DE ÍCONES COM EMOJIS
   const CATEGORY_ICONS: Record<string, string> = {
@@ -1165,9 +1166,9 @@ export const AddFoodToMealModal = ({
                     G: {formatNutrient(food.lipid_g)}
                   </div>
                   <div className="mt-3">
-                    <Dialog>
+                    <Dialog open={dialogFood?.id === food.id} onOpenChange={(open) => !open && setDialogFood(null)}>
                       <DialogTrigger asChild>
-                        <Button className="w-full">
+                        <Button className="w-full" onClick={() => setDialogFood(food)}>
                           Ver detalhes e adicionar
                         </Button>
                       </DialogTrigger>
@@ -1176,14 +1177,18 @@ export const AddFoodToMealModal = ({
                         <DialogDescription className="sr-only">
                           Informações nutricionais completas do alimento selecionado
                         </DialogDescription>
-                        <FoodDetailsPopover 
-                          food={food}
-                          onAddClick={async (selectedFood) => {
-                            setSelectedFood(selectedFood);
-                            await loadMeasures(selectedFood);
-                            setView('add-portion');
-                          }}
-                        />
+                        {dialogFood && (
+                          <FoodDetailsPopover 
+                            food={dialogFood}
+                            onAddClick={async (selectedFood) => {
+                              setDialogFood(null);
+                              await new Promise(resolve => setTimeout(resolve, 100));
+                              setSelectedFood(selectedFood);
+                              await loadMeasures(selectedFood);
+                              setView('add-portion');
+                            }}
+                          />
+                        )}
                       </DialogContent>
                     </Dialog>
                   </div>
@@ -1268,12 +1273,13 @@ export const AddFoodToMealModal = ({
                       G: {formatNutrient(food.lipid_g)}
                     </div>
                     <div className="flex gap-2">
-                      <Dialog>
+                      <Dialog open={dialogFood?.id === food.id} onOpenChange={(open) => !open && setDialogFood(null)}>
                         <DialogTrigger asChild>
                           <Button
                             size="sm"
                             variant="outline"
                             className="flex-1"
+                            onClick={() => setDialogFood(food)}
                           >
                             Ver detalhes
                             <ChevronRight className="w-4 h-4 ml-1" />
@@ -1284,14 +1290,18 @@ export const AddFoodToMealModal = ({
                           <DialogDescription className="sr-only">
                             Informações nutricionais completas do alimento selecionado
                           </DialogDescription>
-                          <FoodDetailsPopover 
-                            food={food}
-                            onAddClick={async (selectedFood) => {
-                              setSelectedFood(selectedFood);
-                              await loadMeasures(selectedFood);
-                              setView('add-portion');
-                            }}
-                          />
+                          {dialogFood && (
+                            <FoodDetailsPopover 
+                              food={dialogFood}
+                              onAddClick={async (selectedFood) => {
+                                setDialogFood(null);
+                                await new Promise(resolve => setTimeout(resolve, 100));
+                                setSelectedFood(selectedFood);
+                                await loadMeasures(selectedFood);
+                                setView('add-portion');
+                              }}
+                            />
+                          )}
                         </DialogContent>
                       </Dialog>
                       <Button
