@@ -93,43 +93,38 @@ export const AddFoodToMealModal = ({
 
   // Query 1: Buscar categorias com contadores
   const { data: categoriesWithCount } = useQuery({
-    queryKey: ['food-categories-count', sourceFilter],
+    queryKey: ['categories-with-count', sourceFilter],
     queryFn: async () => {
-      const { data: categories } = await supabase
-        .from('food_categories')
-        .select('*')
-        .order('name');
+      // Buscar todos os alimentos ou filtrados por fonte
+      let foodsQuery: any = supabase.from('foods').select('category');
       
-      if (!categories) return [];
-      
-      // Contar alimentos por categoria
-      let foodsResult: any;
-      if (sourceFilter === 'all' || !sourceFilter) {
-        foodsResult = await supabase.from('foods').select('category_id');
-      } else if (sourceFilter === 'TACO') {
-        foodsResult = await (supabase.from('foods').select('category_id') as any).like('source', '%TACO%');
-      } else {
-        foodsResult = await (supabase.from('foods').select('category_id') as any).eq('source', sourceFilter);
+      if (sourceFilter && sourceFilter !== 'all') {
+        if (sourceFilter === 'TACO') {
+          foodsQuery = foodsQuery.like('source', '%TACO%');
+        } else {
+          foodsQuery = foodsQuery.eq('source', sourceFilter);
+        }
       }
       
-      const foods = foodsResult.data;
-      if (!foods) return [];
+      const foodsResult = await foodsQuery;
+      const data = foodsResult.data;
       
-      const grouped = foods.reduce((acc: Record<string, number>, item: any) => {
-        if (!item.category_id) return acc;
-        acc[item.category_id] = (acc[item.category_id] || 0) + 1;
-        return acc;
-      }, {});
+      // Contar itens por categoria
+      const counts: Record<string, number> = {};
+      data?.forEach((item: any) => {
+        if (item.category) {
+          counts[item.category] = (counts[item.category] || 0) + 1;
+        }
+      });
       
-      return categories
-        .map((cat: any) => ({
-          id: cat.id,
-          name: cat.name,
-          count: grouped[cat.id] || 0,
-          slug: cat.name.toLowerCase(),
-          db_category: cat,
+      return Object.entries(counts)
+        .map(([name, count]) => ({ 
+          id: name,
+          name, 
+          count,
+          slug: name.toLowerCase(),
+          db_category: { name }
         }))
-        .filter((cat) => cat.count > 0)
         .sort((a, b) => b.count - a.count);
     },
     enabled: isOpen,
@@ -235,10 +230,21 @@ export const AddFoodToMealModal = ({
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '');
       
+      // Se buscar na TACO, criar padrões alternativos para vírgulas
+      const searchPatterns = [
+        term,
+        term.replace(/\s+/g, ','), // "pao forma" vira "pao,forma"
+        term.replace(/\s+/g, ', ')  // "pao forma" vira "pao, forma"
+      ];
+      
+      const orConditions = searchPatterns
+        .map(pattern => `name.ilike.%${pattern}%,brand.ilike.%${pattern}%`)
+        .join(',');
+      
       let query: any = supabase
         .from('foods')
         .select('*, food_categories(name)')
-        .or(`name.ilike.%${term}%,brand.ilike.%${term}%`);
+        .or(orConditions);
       
       if (sourceFilter && sourceFilter !== 'all') {
         if (sourceFilter === 'TACO') {
