@@ -412,7 +412,6 @@ export const AddFoodToMealModal = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [nutritionalFilter, setNutritionalFilter] = useState<string | null>(null);
-  const [substitutionSort, setSubstitutionSort] = useState('energy_kcal');
   const [measures, setMeasures] = useState<any[]>([]);
   const [selectedMeasure, setSelectedMeasure] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
@@ -685,59 +684,6 @@ export const AddFoodToMealModal = ({
     enabled: !!nutritionalFilter,
   });
 
-  // Query 4: Detalhes completos do alimento
-  const { data: foodDetails } = useQuery({
-    queryKey: ['food-details', selectedFood?.id],
-    queryFn: async () => {
-      if (!selectedFood) return null;
-
-      const { data } = await supabase
-        .from('foods')
-        .select('*, food_categories(name, icon, color)')
-        .eq('id', selectedFood.id)
-        .single();
-
-      return data;
-    },
-    enabled: !!selectedFood && view === 'food-details',
-  });
-
-  // Função para calcular score de similaridade nutricional
-  const calculateNutritionalScore = (food1: any, food2: any) => {
-    const proteinDiff = Math.abs((food1.protein_g || 0) - (food2.protein_g || 0));
-    const carbDiff = Math.abs((food1.carbohydrate_g || 0) - (food2.carbohydrate_g || 0));
-    const fatDiff = Math.abs((food1.lipid_g || 0) - (food2.lipid_g || 0));
-    const calorieDiff = Math.abs((food1.energy_kcal || 0) - (food2.energy_kcal || 0));
-    
-    return proteinDiff + carbDiff + fatDiff + (calorieDiff / 10);
-  };
-
-  // Query 5: Sugestões de substituição
-  const { data: substitutions } = useQuery({
-    queryKey: ['substitutions', foodDetails?.category_id, foodDetails?.id],
-    queryFn: async () => {
-      if (!foodDetails?.category_id) return [];
-
-      const { data } = await supabase
-        .from('foods')
-        .select('id, name, brand, energy_kcal, protein_g, carbohydrate_g, lipid_g')
-        .eq('category_id', foodDetails.category_id)
-        .eq('active', true)
-        .neq('id', foodDetails.id)
-        .limit(50);
-
-      // Ordenar por score de similaridade nutricional
-      const sortedData = (data || []).map(food => ({
-        ...food,
-        similarityScore: calculateNutritionalScore(foodDetails, food)
-      }))
-      .sort((a, b) => a.similarityScore - b.similarityScore)
-      .slice(0, 10);
-
-      return sortedData;
-    },
-    enabled: !!foodDetails && view === 'food-details',
-  });
 
   // Buscar medidas quando seleciona alimento para adicionar porção
   const loadMeasures = async (food: any) => {
@@ -788,11 +734,6 @@ export const AddFoodToMealModal = ({
     } catch (err) {
       console.error('Erro ao carregar medidas:', err);
     }
-  };
-
-  const handleSelectFoodForDetails = async (food: any) => {
-    setSelectedFood(food);
-    setView('food-details');
   };
 
   const handleAddToMeal = async (food: any) => {
@@ -996,15 +937,32 @@ export const AddFoodToMealModal = ({
                       G: {formatNutrient(food.lipid_g)}
                     </div>
                     <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleSelectFoodForDetails(food)}
-                        className="flex-1"
-                      >
-                        Ver detalhes
-                        <ChevronRight className="w-4 h-4 ml-1" />
-                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex-1"
+                          >
+                            Ver detalhes
+                            <ChevronRight className="w-4 h-4 ml-1" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-md p-0 max-h-[90vh] overflow-y-auto">
+                          <DialogTitle className="sr-only">Detalhes do Alimento</DialogTitle>
+                          <DialogDescription className="sr-only">
+                            Informações nutricionais completas do alimento selecionado
+                          </DialogDescription>
+                          <FoodDetailsPopover 
+                            food={food}
+                            onAddClick={async (selectedFood) => {
+                              setSelectedFood(selectedFood);
+                              await loadMeasures(selectedFood);
+                              setView('add-portion');
+                            }}
+                          />
+                        </DialogContent>
+                      </Dialog>
                       <Button
                         size="sm"
                         onClick={() => handleAddToMeal(food)}
@@ -1023,160 +981,18 @@ export const AddFoodToMealModal = ({
     );
   };
 
-  // VIEW 3: Detalhes do Alimento + Substituições
-  const FoodDetailsView = () => (
-    <ScrollArea className="h-[600px] pr-4">
-      <div className="space-y-6">
-        {/* Botão Voltar */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setView('category-list')}
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar para lista
-        </Button>
+  // VIEW 3 removida - agora usamos FoodDetailsPopover em todos os fluxos
 
-        {/* Cabeçalho do Alimento */}
-        <div className="border-b pb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <h2 className="text-2xl font-bold">{foodDetails?.name}</h2>
-            <Badge 
-              variant={(foodDetails as any)?.source?.includes('TACO') ? 'default' : 'secondary'} 
-              className="text-xs"
-            >
-              {(foodDetails as any)?.source?.includes('TACO') ? 'TACO' : 'OFF'}
-            </Badge>
-          </div>
-          {foodDetails?.brand && (
-            <p className="text-muted-foreground mb-1">
-              Marca: {foodDetails.brand}
-            </p>
-          )}
-          <p className="text-sm text-muted-foreground">
-            Grupo alimentar: {foodDetails?.food_categories?.name}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            1 Porção = 100g
-          </p>
-        </div>
-
-        {/* Tabela Nutricional Completa */}
-        <div className="border-b pb-6">
-          <h3 className="font-semibold text-lg mb-4">📊 Tabela Nutricional (por 100g)</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div className="bg-accent/20 p-3 rounded-lg">
-              <p className="text-sm text-muted-foreground">Energia</p>
-              <p className="font-medium text-lg">{foodDetails?.energy_kcal || 0} kcal</p>
-            </div>
-            <div className="bg-accent/20 p-3 rounded-lg">
-              <p className="text-sm text-muted-foreground">Carboidratos</p>
-              <p className="font-medium text-lg">{formatNutrient(foodDetails?.carbohydrate_g)}</p>
-            </div>
-            <div className="bg-accent/20 p-3 rounded-lg">
-              <p className="text-sm text-muted-foreground">Proteínas</p>
-              <p className="font-medium text-lg">{formatNutrient(foodDetails?.protein_g)}</p>
-            </div>
-            <div className="bg-accent/20 p-3 rounded-lg">
-              <p className="text-sm text-muted-foreground">Lipídeos</p>
-              <p className="font-medium text-lg">{formatNutrient(foodDetails?.lipid_g)}</p>
-            </div>
-            {foodDetails?.fiber_g !== null && foodDetails?.fiber_g !== undefined && (
-              <div className="bg-accent/20 p-3 rounded-lg">
-                <p className="text-sm text-muted-foreground">Fibra Alimentar</p>
-                <p className="font-medium text-lg">{formatNutrient(foodDetails.fiber_g)}</p>
-              </div>
-            )}
-            {foodDetails?.sodium_mg !== null && foodDetails?.sodium_mg !== undefined && (
-              <div className="bg-accent/20 p-3 rounded-lg">
-                <p className="text-sm text-muted-foreground">Sódio</p>
-                <p className="font-medium text-lg">{foodDetails.sodium_mg}mg</p>
-              </div>
-            )}
-            {foodDetails?.saturated_fat_g !== null && foodDetails?.saturated_fat_g !== undefined && (
-              <div className="bg-accent/20 p-3 rounded-lg">
-                <p className="text-sm text-muted-foreground">Gordura Saturada</p>
-                <p className="font-medium text-lg">{formatNutrient(foodDetails.saturated_fat_g)}</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Sugestões de Substituição */}
-        <div className="pb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-semibold text-lg">📋 Sugestões de Substituição</h3>
-            <Select value={substitutionSort} onValueChange={setSubstitutionSort}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Ordenar por..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="energy_kcal">Energia</SelectItem>
-                <SelectItem value="protein_g">Proteínas</SelectItem>
-                <SelectItem value="carbohydrate_g">Carboidratos</SelectItem>
-                <SelectItem value="lipid_g">Lipídeos</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <p className="text-sm text-muted-foreground mb-4">
-            (baseado no mesmo grupo alimentar)
-          </p>
-          <div className="grid gap-3">
-            {substitutions?.map((sub) => (
-              <Card key={sub.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-center">
-                    <div className="flex-1">
-                      <p className="font-medium mb-1">{sub.name}</p>
-                      {sub.brand && (
-                        <p className="text-xs text-muted-foreground mb-1">
-                          {sub.brand}
-                        </p>
-                      )}
-                      <p className="text-sm text-muted-foreground">
-                        {sub.energy_kcal} kcal | 
-                        P: {formatNutrient(sub.protein_g)} | 
-                        C: {formatNutrient(sub.carbohydrate_g)} | 
-                        L: {formatNutrient(sub.lipid_g)}
-                      </p>
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={() => handleAddToMeal(sub)}
-                    >
-                      Adicionar
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Botão Principal */}
-        <div className="sticky bottom-0 bg-background pt-4 border-t">
-          <Button
-            className="w-full"
-            size="lg"
-            onClick={() => handleAddToMeal(foodDetails)}
-          >
-            Adicionar este alimento
-          </Button>
-        </div>
-      </div>
-    </ScrollArea>
-  );
-
-  // VIEW 4: Adicionar Porção
+  // VIEW 3: Adicionar Porção
   const AddPortionView = () => (
     <div className="space-y-6">
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => setView('food-details')}
+        onClick={() => setView('category-list')}
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
-        Voltar aos detalhes
+        Voltar à lista
       </Button>
 
       {/* Info do Alimento */}
@@ -1452,15 +1268,32 @@ export const AddFoodToMealModal = ({
                       G: {formatNutrient(food.lipid_g)}
                     </div>
                     <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleSelectFoodForDetails(food)}
-                        className="flex-1"
-                      >
-                        Ver detalhes
-                        <ChevronRight className="w-4 h-4 ml-1" />
-                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex-1"
+                          >
+                            Ver detalhes
+                            <ChevronRight className="w-4 h-4 ml-1" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-md p-0 max-h-[90vh] overflow-y-auto">
+                          <DialogTitle className="sr-only">Detalhes do Alimento</DialogTitle>
+                          <DialogDescription className="sr-only">
+                            Informações nutricionais completas do alimento selecionado
+                          </DialogDescription>
+                          <FoodDetailsPopover 
+                            food={food}
+                            onAddClick={async (selectedFood) => {
+                              setSelectedFood(selectedFood);
+                              await loadMeasures(selectedFood);
+                              setView('add-portion');
+                            }}
+                          />
+                        </DialogContent>
+                      </Dialog>
                       <Button
                         size="sm"
                         onClick={() => handleAddToMeal(food)}
@@ -1581,8 +1414,6 @@ export const AddFoodToMealModal = ({
               <RecentFoodsView />
             ) : view === 'category-list' ? (
               <CategoryListView />
-            ) : view === 'food-details' ? (
-              <FoodDetailsView />
             ) : view === 'add-portion' ? (
               <AddPortionView />
             ) : null}
@@ -1596,7 +1427,7 @@ export const AddFoodToMealModal = ({
         onClose={() => setShowCustomFoodModal(false)}
         onSuccess={(food) => {
           setShowCustomFoodModal(false);
-          handleSelectFoodForDetails(food);
+          handleAddToMeal(food);
         }}
         searchQuery={searchTerm}
       />
