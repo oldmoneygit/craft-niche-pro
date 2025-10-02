@@ -102,6 +102,8 @@ export const AddFoodToMealModal = ({
       let foodsResult: any;
       if (sourceFilter === 'all' || !sourceFilter) {
         foodsResult = await supabase.from('foods').select('category_id');
+      } else if (sourceFilter === 'TACO') {
+        foodsResult = await (supabase.from('foods').select('category_id') as any).like('source', '%TACO%');
       } else {
         foodsResult = await (supabase.from('foods').select('category_id') as any).eq('source', sourceFilter);
       }
@@ -142,6 +144,13 @@ export const AddFoodToMealModal = ({
           .select('*')
           .eq('category_id', selectedCategory.id)
           .order('name');
+      } else if (sourceFilter === 'TACO') {
+        result = await (supabase
+          .from('foods')
+          .select('*')
+          .eq('category_id', selectedCategory.id) as any)
+          .like('source', '%TACO%')
+          .order('name');
       } else {
         result = await (supabase
           .from('foods')
@@ -168,6 +177,14 @@ export const AddFoodToMealModal = ({
           .from('foods')
           .select('*, food_categories(name)')
           .or(`name.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%`)
+          .order('name')
+          .limit(50);
+      } else if (sourceFilter === 'TACO') {
+        result = await (supabase
+          .from('foods')
+          .select('*, food_categories(name)')
+          .or(`name.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%`) as any)
+          .like('source', '%TACO%')
           .order('name')
           .limit(50);
       } else {
