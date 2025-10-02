@@ -122,7 +122,7 @@ const FoodComparison = ({ originalFood, comparisonFood, onBack, onUse }: {
   originalFood: any; 
   comparisonFood: any; 
   onBack: () => void;
-  onUse: () => void;
+  onUse: (food: any) => void;
 }) => {
   const getDifference = (original: number, comparison: number) => {
     const diff = comparison - original;
@@ -194,7 +194,7 @@ const FoodComparison = ({ originalFood, comparisonFood, onBack, onUse }: {
       </div>
 
       {/* Botão para adicionar o comparado */}
-      <Button className="w-full" onClick={onUse}>
+      <Button className="w-full" onClick={() => onUse(comparisonFood)}>
         Usar {comparisonFood.name}
       </Button>
     </div>
@@ -239,14 +239,12 @@ const NutritionistNotes = ({ foodId }: { foodId: string }) => {
 };
 
 // Componente para detalhes do alimento
-const FoodDetailsPopover = ({ food, onAddClick }: { food: any; onAddClick: () => void }) => {
+const FoodDetailsPopover = ({ food, onAddClick }: { food: any; onAddClick: (selectedFood: any) => void }) => {
   const [comparingFood, setComparingFood] = useState<any>(null);
 
-  const handleUseComparisonFood = async () => {
+  const handleUseComparisonFood = () => {
     if (!comparingFood) return;
-    // Trocar o alimento pelo comparado e voltar
-    // Aqui você pode chamar onAddClick com o alimento comparado
-    setComparingFood(null);
+    onAddClick(comparingFood);
   };
 
   if (comparingFood) {
@@ -397,7 +395,7 @@ const FoodDetailsPopover = ({ food, onAddClick }: { food: any; onAddClick: () =>
         <Button 
           className="w-full" 
           size="lg"
-          onClick={onAddClick}
+          onClick={() => onAddClick(food)}
         >
           Adicionar ao Plano
         </Button>
@@ -1352,17 +1350,19 @@ export const AddFoodToMealModal = ({
                           Ver detalhes e adicionar
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-md p-0 max-h-[90vh] overflow-y-auto">
+                       <DialogContent className="max-w-md p-0 max-h-[90vh] overflow-y-auto">
                         <DialogTitle className="sr-only">Detalhes do Alimento</DialogTitle>
                         <DialogDescription className="sr-only">
                           Informações nutricionais completas do alimento selecionado
                         </DialogDescription>
                         <FoodDetailsPopover 
                           food={food}
-                          onAddClick={async () => {
-                            setSelectedFood(food);
-                            await loadMeasures(food);
+                          onAddClick={async (selectedFood) => {
+                            setSelectedFood(selectedFood);
+                            await loadMeasures(selectedFood);
                             setView('add-portion');
+                            // Fechar o dialog
+                            document.querySelector('[role="dialog"] button')?.dispatchEvent(new Event('click', { bubbles: true }));
                           }}
                         />
                       </DialogContent>
