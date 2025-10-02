@@ -442,7 +442,7 @@ export const AddFoodToMealModal = ({
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div className="bg-accent/20 p-3 rounded-lg">
               <p className="text-sm text-muted-foreground">Energia</p>
-              <p className="font-medium text-lg">{foodDetails?.energy_kcal} kcal</p>
+              <p className="font-medium text-lg">{foodDetails?.energy_kcal || 0} kcal</p>
             </div>
             <div className="bg-accent/20 p-3 rounded-lg">
               <p className="text-sm text-muted-foreground">Carboidratos</p>
@@ -456,19 +456,19 @@ export const AddFoodToMealModal = ({
               <p className="text-sm text-muted-foreground">Lipídeos</p>
               <p className="font-medium text-lg">{formatNutrient(foodDetails?.lipid_g)}</p>
             </div>
-            {foodDetails?.fiber_g && (
+            {foodDetails?.fiber_g !== null && foodDetails?.fiber_g !== undefined && (
               <div className="bg-accent/20 p-3 rounded-lg">
                 <p className="text-sm text-muted-foreground">Fibra Alimentar</p>
                 <p className="font-medium text-lg">{formatNutrient(foodDetails.fiber_g)}</p>
               </div>
             )}
-            {foodDetails?.sodium_mg && (
+            {foodDetails?.sodium_mg !== null && foodDetails?.sodium_mg !== undefined && (
               <div className="bg-accent/20 p-3 rounded-lg">
                 <p className="text-sm text-muted-foreground">Sódio</p>
                 <p className="font-medium text-lg">{foodDetails.sodium_mg}mg</p>
               </div>
             )}
-            {foodDetails?.saturated_fat_g && (
+            {foodDetails?.saturated_fat_g !== null && foodDetails?.saturated_fat_g !== undefined && (
               <div className="bg-accent/20 p-3 rounded-lg">
                 <p className="text-sm text-muted-foreground">Gordura Saturada</p>
                 <p className="font-medium text-lg">{formatNutrient(foodDetails.saturated_fat_g)}</p>

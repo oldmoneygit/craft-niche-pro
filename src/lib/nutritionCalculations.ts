@@ -88,6 +88,9 @@ export const validateNutritionValues = (data: {
 };
 
 // Formatar nutrientes para exibição
-export const formatNutrient = (value: number, unit: string = 'g'): string => {
+export const formatNutrient = (value: number | null | undefined, unit: string = 'g'): string => {
+  if (value === null || value === undefined || isNaN(value)) {
+    return `0${unit}`;
+  }
   return `${value.toFixed(1)}${unit}`;
 };
