@@ -11,6 +11,8 @@ import { Progress } from '@/components/ui/progress';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ArrowLeft, Plus, Trash2, Target, TrendingUp, ChartBar as BarChart3, Clock, Save } from 'lucide-react';
 import { InlineFoodSearch } from '@/components/platform/InlineFoodSearch';
+import { CategoryBrowser } from '@/components/platform/CategoryBrowser';
+import { QuickPortionDialog } from '@/components/platform/QuickPortionDialog';
 import { formatNutrient } from '@/lib/nutritionCalculations';
 
 interface Meal {
@@ -39,6 +41,10 @@ export default function PlatformMealPlanEditor() {
     fat: 67
   });
   const [saving, setSaving] = useState(false);
+  const [selectedFoodForPortion, setSelectedFoodForPortion] = useState<{
+    food: any;
+    mealId: string;
+  } | null>(null);
 
   const totals = meals.reduce((acc, meal) => {
     meal.items.forEach(item => {
@@ -422,6 +428,14 @@ export default function PlatformMealPlanEditor() {
                       onAddFood={(item) => handleAddFoodToMeal(meal.id, item)}
                       placeholder="Buscar e adicionar alimento... (⌘K)"
                     />
+
+                    <div className="pt-2">
+                      <CategoryBrowser
+                        onSelectFood={(food) => {
+                          setSelectedFoodForPortion({ food, mealId: meal.id });
+                        }}
+                      />
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -453,6 +467,18 @@ export default function PlatformMealPlanEditor() {
           </SheetContent>
         </Sheet>
       </div>
+
+      {selectedFoodForPortion && (
+        <QuickPortionDialog
+          food={selectedFoodForPortion.food}
+          isOpen={!!selectedFoodForPortion}
+          onClose={() => setSelectedFoodForPortion(null)}
+          onConfirm={(item) => {
+            handleAddFoodToMeal(selectedFoodForPortion.mealId, item);
+            setSelectedFoodForPortion(null);
+          }}
+        />
+      )}
     </div>
   );
 }

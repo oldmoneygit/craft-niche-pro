@@ -70,10 +70,13 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
     <>
       <div className="relative">
         <div className={cn(
-          "flex items-center gap-3 border rounded-lg p-3 transition-all",
-          "bg-muted/30 hover:bg-muted/50 focus-within:bg-background focus-within:ring-2 focus-within:ring-primary"
+          "flex items-center gap-3 border-2 rounded-lg p-4 transition-all",
+          "bg-gradient-to-r from-primary/5 to-primary/10",
+          "border-primary/30 hover:border-primary/50",
+          "focus-within:bg-background focus-within:ring-2 focus-within:ring-primary focus-within:border-primary",
+          "shadow-sm hover:shadow-md"
         )}>
-          <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          <Search className="w-5 h-5 text-primary flex-shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -84,7 +87,7 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
               setIsOpen(true);
             }}
             onFocus={() => query.length >= 2 && setIsOpen(true)}
-            className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
+            className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground font-medium"
             data-food-search
           />
           {query && (
@@ -98,9 +101,12 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
               <X className="w-4 h-4" />
             </button>
           )}
-          <kbd className="hidden sm:inline-flex px-2 py-1 text-xs bg-background border rounded font-mono">
-            ⌘K
-          </kbd>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="h-6 w-px bg-border" />
+            <kbd className="hidden sm:inline-flex px-2 py-1 text-xs bg-background/80 border rounded font-mono shadow-sm">
+              ⌘K
+            </kbd>
+          </div>
         </div>
 
         {isOpen && query.length >= 2 && (
