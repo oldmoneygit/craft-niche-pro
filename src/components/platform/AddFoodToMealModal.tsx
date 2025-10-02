@@ -980,7 +980,10 @@ export const AddFoodToMealModal = ({
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleSelectFoodForDetails(food)}
+                      onClick={() => {
+                        setSelectedFood(food);
+                        setView('food-details');
+                      }}
                       className="flex-1"
                     >
                       Ver detalhes
@@ -988,7 +991,11 @@ export const AddFoodToMealModal = ({
                     </Button>
                     <Button
                       size="sm"
-                      onClick={() => handleAddToMeal(food)}
+                      onClick={async () => {
+                        setSelectedFood(food);
+                        await loadMeasures(food);
+                        setView('add-portion');
+                      }}
                       className="flex-1"
                     >
                       Adicionar
