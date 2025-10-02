@@ -322,9 +322,19 @@ export const AddFoodToMealModal = ({
     enabled: !!selectedFood && view === 'food-details',
   });
 
+  // Função para calcular score de similaridade nutricional
+  const calculateNutritionalScore = (food1: any, food2: any) => {
+    const proteinDiff = Math.abs((food1.protein_g || 0) - (food2.protein_g || 0));
+    const carbDiff = Math.abs((food1.carbohydrate_g || 0) - (food2.carbohydrate_g || 0));
+    const fatDiff = Math.abs((food1.lipid_g || 0) - (food2.lipid_g || 0));
+    const calorieDiff = Math.abs((food1.energy_kcal || 0) - (food2.energy_kcal || 0));
+    
+    return proteinDiff + carbDiff + fatDiff + (calorieDiff / 10);
+  };
+
   // Query 5: Sugestões de substituição
   const { data: substitutions } = useQuery({
-    queryKey: ['substitutions', foodDetails?.category_id, substitutionSort],
+    queryKey: ['substitutions', foodDetails?.category_id, foodDetails?.id],
     queryFn: async () => {
       if (!foodDetails?.category_id) return [];
 
@@ -334,10 +344,17 @@ export const AddFoodToMealModal = ({
         .eq('category_id', foodDetails.category_id)
         .eq('active', true)
         .neq('id', foodDetails.id)
-        .order(substitutionSort, { ascending: true })
-        .limit(10);
+        .limit(50);
 
-      return data || [];
+      // Ordenar por score de similaridade nutricional
+      const sortedData = (data || []).map(food => ({
+        ...food,
+        similarityScore: calculateNutritionalScore(foodDetails, food)
+      }))
+      .sort((a, b) => a.similarityScore - b.similarityScore)
+      .slice(0, 10);
+
+      return sortedData;
     },
     enabled: !!foodDetails && view === 'food-details',
   });
