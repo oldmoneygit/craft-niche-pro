@@ -1039,15 +1039,14 @@ export const AddFoodToMealModal = ({
                     C: {formatNutrient(food.carbohydrate_g)} | 
                     G: {formatNutrient(food.lipid_g)}
                   </div>
-                  <div className="flex gap-2 mt-3">
+                  <div className="mt-3">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" className="flex-1">
-                          Ver detalhes
-                          <ChevronRight className="ml-2 h-4 w-4" />
+                        <Button className="w-full">
+                          Ver detalhes e adicionar
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent side="left" align="start" className="p-0 w-auto">
+                      <PopoverContent side="right" align="center" className="p-0 w-[400px]">
                         <FoodDetailsPopover 
                           food={food}
                           onAddClick={async () => {
@@ -1058,18 +1057,6 @@ export const AddFoodToMealModal = ({
                         />
                       </PopoverContent>
                     </Popover>
-
-                    <Button
-                      className="flex-1"
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        setSelectedFood(food);
-                        await loadMeasures(food);
-                        setView('add-portion');
-                      }}
-                    >
-                      Adicionar
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
