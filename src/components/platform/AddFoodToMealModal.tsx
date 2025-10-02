@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -37,6 +38,68 @@ interface AddFoodToMealModalProps {
   onClose: () => void;
   onAddFood: (item: any) => void;
 }
+
+// Componente Popover para detalhes do alimento
+const FoodDetailsPopover = ({ food, onAddClick }: { food: any; onAddClick: () => void }) => {
+  return (
+    <div className="w-[400px] p-4 space-y-4">
+      {/* Header */}
+      <div className="border-b pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h3 className="font-semibold text-lg">{food.name}</h3>
+            {food.brand && (
+              <p className="text-sm text-muted-foreground">Marca: {food.brand}</p>
+            )}
+          </div>
+          <Badge variant={food.source?.includes('TACO') ? 'default' : 'secondary'}>
+            {food.source?.includes('TACO') ? 'TACO' : 'OFF'}
+          </Badge>
+        </div>
+        {food.food_categories?.name && (
+          <Badge variant="outline" className="mt-2">{food.food_categories.name}</Badge>
+        )}
+      </div>
+
+      {/* Macros principais */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-muted rounded-lg p-3">
+          <p className="text-xs text-muted-foreground">Calorias</p>
+          <p className="text-2xl font-bold">{food.energy_kcal?.toFixed(0) || '-'}</p>
+          <p className="text-xs">kcal/100g</p>
+        </div>
+        <div className="bg-muted rounded-lg p-3">
+          <p className="text-xs text-muted-foreground">Proteína</p>
+          <p className="text-2xl font-bold">{food.protein_g?.toFixed(1) || '-'}</p>
+          <p className="text-xs">g/100g</p>
+        </div>
+      </div>
+
+      {/* Grid nutricional completo */}
+      <div className="space-y-2">
+        <p className="text-sm font-medium">Informação Nutricional (100g)</p>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div>Carboidratos: <span className="font-medium">{food.carbohydrate_g?.toFixed(1) || '-'}g</span></div>
+          <div>Gorduras: <span className="font-medium">{food.lipid_g?.toFixed(1) || '-'}g</span></div>
+          <div>Fibras: <span className="font-medium">{food.fiber_g?.toFixed(1) || '-'}g</span></div>
+          <div>Sódio: <span className="font-medium">{food.sodium_mg?.toFixed(0) || '-'}mg</span></div>
+          {food.saturated_fat_g && (
+            <div className="col-span-2">Gordura Saturada: <span className="font-medium">{food.saturated_fat_g.toFixed(1)}g</span></div>
+          )}
+        </div>
+      </div>
+
+      {/* Botão adicionar */}
+      <Button 
+        className="w-full" 
+        size="lg"
+        onClick={onAddClick}
+      >
+        Adicionar ao Plano
+      </Button>
+    </div>
+  );
+};
 
 export const AddFoodToMealModal = ({ 
   isOpen, 
@@ -977,37 +1040,32 @@ export const AddFoodToMealModal = ({
                     G: {formatNutrient(food.lipid_g)}
                   </div>
                   <div className="flex gap-2 mt-3">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className="flex-1">
+                          Ver detalhes
+                          <ChevronRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent side="left" align="start" className="p-0 w-auto">
+                        <FoodDetailsPopover 
+                          food={food}
+                          onAddClick={async () => {
+                            setSelectedFood(food);
+                            await loadMeasures(food);
+                            setView('add-portion');
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
+
                     <Button
-                      variant="outline"
                       className="flex-1"
-                      onClick={(e) => {
-                        console.log('🔴 VER DETALHES CLICADO', food.name);
-                        console.log('🔴 setSelectedFood existe?', typeof setSelectedFood);
-                        console.log('🔴 setView existe?', typeof setView);
-                        console.log('🔴 food object:', food);
-                        e.stopPropagation();
-                        setSelectedFood(food);
-                        setView('food-details');
-                        console.log('🔴 Após setView - view deveria ser food-details');
-                      }}
-                    >
-                      Ver detalhes
-                      <ChevronRight className="ml-2 h-4 w-4" />
-                    </Button>
-                    
-                    <Button
-                      className="flex-1 bg-green-500 hover:bg-green-600"
                       onClick={async (e) => {
-                        console.log('🟢 ADICIONAR CLICADO', food.name);
-                        console.log('🟢 setSelectedFood existe?', typeof setSelectedFood);
-                        console.log('🟢 setView existe?', typeof setView);
-                        console.log('🟢 loadMeasures existe?', typeof loadMeasures);
-                        console.log('🟢 food object:', food);
                         e.stopPropagation();
                         setSelectedFood(food);
                         await loadMeasures(food);
                         setView('add-portion');
-                        console.log('🟢 Após setView - view deveria ser add-portion');
                       }}
                     >
                       Adicionar
