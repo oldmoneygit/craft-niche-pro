@@ -120,18 +120,63 @@ export default function PlatformMealPlanEditor() {
       fat: plan.macros.fat_g
     });
 
-    const newMeals = plan.meals.map((meal: any) => ({
-      id: Date.now().toString() + Math.random(),
-      name: meal.name,
-      time: getDefaultTimeForMeal(meal.name),
-      items: []
-    }));
+    const newMeals = await Promise.all(
+      plan.meals.map(async (aiMeal: any) => {
+        const items = [];
+
+        for (const aiItem of aiMeal.items) {
+          const { data: foods } = await supabase
+            .from('foods')
+            .select('id, name, energy_kcal, protein_g, carbohydrate_g, lipid_g, source')
+            .ilike('name', `%${aiItem.food_name}%`)
+            .limit(1);
+
+          if (foods && foods.length > 0) {
+            const food = foods[0];
+
+            const { data: measures } = await supabase
+              .from('food_measures')
+              .select('*')
+              .eq('food_id', food.id)
+              .limit(1);
+
+            const measure = measures?.[0] || {
+              id: 'temp-' + Date.now(),
+              measure_name: aiItem.measure,
+              grams: 100
+            };
+
+            items.push({
+              id: Date.now().toString() + Math.random(),
+              food_id: food.id,
+              measure_id: measure.id,
+              quantity: aiItem.quantity,
+              food,
+              measure,
+              kcal_total: aiItem.estimated_kcal,
+              protein_total: aiItem.estimated_protein,
+              carb_total: aiItem.estimated_carb,
+              fat_total: aiItem.estimated_fat
+            });
+          }
+        }
+
+        return {
+          id: Date.now().toString() + Math.random(),
+          name: aiMeal.name,
+          time: aiMeal.time,
+          items
+        };
+      })
+    );
 
     setMeals(newMeals);
 
+    const totalItems = newMeals.reduce((sum, m) => sum + m.items.length, 0);
+
     toast({
-      title: 'Plano base criado!',
-      description: 'Agora use os templates ou adicione alimentos manualmente'
+      title: 'Plano aplicado!',
+      description: `${totalItems} alimentos adicionados automaticamente`
     });
   };
 

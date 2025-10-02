@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Sparkles, Brain, Loader as Loader2, TriangleAlert as AlertTriangle } from 'lucide-react';
+import { Sparkles, Brain, Loader2, AlertTriangle } from 'lucide-react';
 import { ClientProfile } from '@/types/clientProfile';
-import { generateMealPlan } from '@/lib/mealPlanGenerator';
+import { generateAIBasedMealPlan, validateAIPlan } from '@/lib/aiNutritionService';
 import { useToast } from '@/hooks/use-toast';
 
 interface AIAssistantProps {
@@ -21,17 +21,25 @@ export const AIAssistant = ({ clientProfile, onApplyPlan }: AIAssistantProps) =>
     setGenerating(true);
 
     try {
-      const plan = await generateMealPlan(clientProfile);
-      setGeneratedPlan(plan);
+      const aiPlan = await generateAIBasedMealPlan(clientProfile);
+
+      const validation = validateAIPlan(aiPlan);
+
+      setGeneratedPlan({
+        ...aiPlan,
+        validation
+      });
 
       toast({
-        title: 'Plano gerado com sucesso!',
-        description: 'Revise as sugestões antes de aplicar'
+        title: validation.valid ? 'Sugestão gerada!' : 'Sugestão gerada com avisos',
+        description: validation.valid
+          ? 'Revise as sugestões antes de aplicar'
+          : 'Alguns avisos foram detectados. Revise cuidadosamente.'
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
-        title: 'Erro ao gerar plano',
-        description: 'Tente novamente',
+        title: 'Erro ao gerar sugestão',
+        description: error.message || 'Tente novamente',
         variant: 'destructive'
       });
     } finally {
@@ -106,6 +114,20 @@ export const AIAssistant = ({ clientProfile, onApplyPlan }: AIAssistantProps) =>
 
         {generatedPlan && (
           <div className="space-y-3 pt-3 border-t">
+            {generatedPlan.validation && generatedPlan.validation.warnings.length > 0 && (
+              <Alert variant="destructive">
+                <AlertTriangle className="w-4 h-4" />
+                <AlertDescription>
+                  <p className="font-semibold mb-2">Avisos de Validação:</p>
+                  <ul className="text-xs space-y-1">
+                    {generatedPlan.validation.warnings.map((warning: string, i: number) => (
+                      <li key={i}>{warning}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
+
             <div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-3 space-y-2">
               <h4 className="font-semibold text-sm">Sugestão Gerada</h4>
               <div className="text-sm space-y-1">
@@ -116,10 +138,38 @@ export const AIAssistant = ({ clientProfile, onApplyPlan }: AIAssistantProps) =>
               </div>
             </div>
 
-            <div className="text-xs text-muted-foreground bg-muted/30 p-3 rounded">
-              <strong>Justificativa:</strong>
-              <p className="mt-1 whitespace-pre-line">{generatedPlan.reasoning}</p>
-            </div>
+            {generatedPlan.reasoning && (
+              <div className="text-xs bg-blue-50 dark:bg-blue-950/20 p-3 rounded">
+                <strong>Por que essas escolhas?</strong>
+                <p className="mt-1 whitespace-pre-line">{generatedPlan.reasoning}</p>
+              </div>
+            )}
+
+            {generatedPlan.educationalNotes && (
+              <div className="text-xs bg-green-50 dark:bg-green-950/20 p-3 rounded">
+                <strong>Orientações para o cliente:</strong>
+                <p className="mt-1 whitespace-pre-line">{generatedPlan.educationalNotes}</p>
+              </div>
+            )}
+
+            {generatedPlan.meals && generatedPlan.meals.length > 0 && (
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                <p className="text-xs font-semibold">Refeições Sugeridas:</p>
+                {generatedPlan.meals.map((meal: any, idx: number) => (
+                  <div key={idx} className="border rounded p-2 text-xs">
+                    <p className="font-semibold">{meal.name} - {meal.time}</p>
+                    <ul className="mt-1 space-y-1 text-muted-foreground">
+                      {meal.items.map((item: any, itemIdx: number) => (
+                        <li key={itemIdx}>
+                          • {item.quantity} {item.measure} de {item.food_name}
+                          ({item.estimated_kcal} kcal)
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <Button
               onClick={() => onApplyPlan(generatedPlan)}
