@@ -1,11 +1,34 @@
 import { useState, useEffect } from 'react';
-import { X, Search, Plus, Package } from 'lucide-react';
+import { X, Search, Plus, Package, ArrowLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
 import { calculateItemNutrition, formatNutrient } from '@/lib/nutritionCalculations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { AddCustomFoodModal } from './AddCustomFoodModal';
+import { FOOD_CATEGORIES, getCategoryIcon } from '@/lib/foodCategories';
+import { cn } from '@/lib/utils';
+
+type ModalView = 'categories' | 'category-list' | 'food-details' | 'add-portion';
+
+interface FoodCategory {
+  name: string;
+  count: number;
+  icon: string;
+  slug: string;
+  db_category: any;
+}
 
 interface AddFoodToMealModalProps {
   isOpen: boolean;
@@ -19,86 +42,163 @@ export const AddFoodToMealModal = ({
   onAddFood 
 }: AddFoodToMealModalProps) => {
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [foods, setFoods] = useState<any[]>([]);
+  const [view, setView] = useState<ModalView>('categories');
   const [selectedFood, setSelectedFood] = useState<any>(null);
+  const [selectedCategory, setSelectedCategory] = useState<FoodCategory | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sourceFilter, setSourceFilter] = useState<string>('all');
+  const [substitutionSort, setSubstitutionSort] = useState('energy_kcal');
   const [measures, setMeasures] = useState<any[]>([]);
   const [selectedMeasure, setSelectedMeasure] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(false);
   const [showCustomFoodModal, setShowCustomFoodModal] = useState(false);
-  const [showAllFoods, setShowAllFoods] = useState(false);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  // Buscar categorias ao abrir o modal
+  // Reset ao fechar
   useEffect(() => {
-    if (isOpen) {
-      loadCategories();
+    if (!isOpen) {
+      setView('categories');
+      setSelectedFood(null);
+      setSelectedCategory(null);
+      setSearchTerm('');
+      setMeasures([]);
+      setSelectedMeasure(null);
+      setQuantity(1);
     }
   }, [isOpen]);
 
-  // Buscar alimentos quando mudar a query ou filtros
-  useEffect(() => {
-    if (showAllFoods) {
-      loadAllFoods();
-    } else if (searchQuery.length >= 2) {
-      searchFoods();
-    } else {
-      setFoods([]);
-    }
-  }, [searchQuery, showAllFoods, selectedCategory]);
+  // Query 1: Buscar categorias com contadores
+  const { data: categoriesWithCount } = useQuery({
+    queryKey: ['food-categories-count', sourceFilter],
+    queryFn: async () => {
+      const { data: dbCategories } = await supabase
+        .from('food_categories')
+        .select('*')
+        .order('name');
 
-  const loadCategories = async () => {
-    const { data } = await supabase
-      .from('food_categories')
-      .select('*')
-      .order('name');
-    
-    setCategories(data || []);
-  };
+      let query = supabase
+        .from('foods')
+        .select('category_id, food_categories(name)')
+        .eq('active', true);
 
-  const loadAllFoods = async () => {
-    setLoading(true);
-    let query = supabase
-      .from('foods')
-      .select(`
-        *,
-        food_categories (name, icon, color)
-      `)
-      .eq('active', true)
-      .order('name');
+      if (sourceFilter !== 'all') {
+        query = query.eq('source_info', sourceFilter);
+      }
 
-    if (selectedCategory !== 'all') {
-      query = query.eq('category_id', selectedCategory);
-    }
+      const { data: foods } = await query;
 
-    const { data } = await query;
-    setFoods(data || []);
-    setLoading(false);
-  };
+      if (!foods || !dbCategories) return [];
 
-  const searchFoods = async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from('foods')
-      .select(`
-        *,
-        food_categories (name, icon, color)
-      `)
-      .or(`name.ilike.%${searchQuery}%,brand.ilike.%${searchQuery}%`)
-      .eq('active', true)
-      .order('name')
-      .limit(20);
+      // Contar alimentos por categoria
+      const grouped = foods.reduce((acc: Record<string, number>, item) => {
+        if (!item.category_id) return acc;
+        acc[item.category_id] = (acc[item.category_id] || 0) + 1;
+        return acc;
+      }, {});
 
-    setFoods(data || []);
-    setLoading(false);
-  };
+      // Mapear com as categorias predefinidas
+      return dbCategories
+        .map((dbCat) => {
+          const predefinedCat = FOOD_CATEGORIES.find(
+            (cat) => cat.name.toLowerCase() === dbCat.name.toLowerCase()
+          );
+          
+          return {
+            name: dbCat.name,
+            slug: predefinedCat?.slug || dbCat.name.toLowerCase(),
+            icon: predefinedCat?.icon || '🍽️',
+            count: grouped[dbCat.id] || 0,
+            db_category: dbCat,
+          };
+        })
+        .filter((cat) => cat.count > 0)
+        .sort((a, b) => b.count - a.count);
+    },
+    enabled: isOpen,
+  });
 
-  // Quando seleciona um alimento, buscar suas medidas
-  const handleSelectFood = async (food: any) => {
-    setSelectedFood(food);
-    
+  // Query 2: Buscar alimentos por categoria
+  const { data: categoryFoods, isLoading: loadingCategoryFoods } = useQuery({
+    queryKey: ['category-foods', selectedCategory?.db_category?.id, sourceFilter],
+    queryFn: async () => {
+      if (!selectedCategory?.db_category?.id) return [];
+
+      let query = supabase
+        .from('foods')
+        .select('*')
+        .eq('category_id', selectedCategory.db_category.id)
+        .eq('active', true);
+
+      if (sourceFilter !== 'all') {
+        query = query.eq('source_info', sourceFilter);
+      }
+
+      const { data } = await query.order('name');
+      return data || [];
+    },
+    enabled: !!selectedCategory && view === 'category-list',
+  });
+
+  // Query 3: Buscar por texto (global)
+  const { data: searchResults, isLoading: loadingSearch } = useQuery({
+    queryKey: ['search-foods', searchTerm, sourceFilter],
+    queryFn: async () => {
+      if (searchTerm.length < 2) return [];
+
+      let query = supabase
+        .from('foods')
+        .select('*, food_categories(name, icon, color)')
+        .or(`name.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%`)
+        .eq('active', true);
+
+      if (sourceFilter !== 'all') {
+        query = query.eq('source_info', sourceFilter);
+      }
+
+      const { data } = await query.order('name').limit(50);
+      return data || [];
+    },
+    enabled: searchTerm.length >= 2,
+  });
+
+  // Query 4: Detalhes completos do alimento
+  const { data: foodDetails } = useQuery({
+    queryKey: ['food-details', selectedFood?.id],
+    queryFn: async () => {
+      if (!selectedFood) return null;
+
+      const { data } = await supabase
+        .from('foods')
+        .select('*, food_categories(name, icon, color)')
+        .eq('id', selectedFood.id)
+        .single();
+
+      return data;
+    },
+    enabled: !!selectedFood && view === 'food-details',
+  });
+
+  // Query 5: Sugestões de substituição
+  const { data: substitutions } = useQuery({
+    queryKey: ['substitutions', foodDetails?.category_id, substitutionSort],
+    queryFn: async () => {
+      if (!foodDetails?.category_id) return [];
+
+      const { data } = await supabase
+        .from('foods')
+        .select('id, name, brand, energy_kcal, protein_g, carbohydrate_g, lipid_g')
+        .eq('category_id', foodDetails.category_id)
+        .eq('active', true)
+        .neq('id', foodDetails.id)
+        .order(substitutionSort, { ascending: true })
+        .limit(10);
+
+      return data || [];
+    },
+    enabled: !!foodDetails && view === 'food-details',
+  });
+
+  // Buscar medidas quando seleciona alimento para adicionar porção
+  const loadMeasures = async (food: any) => {
     const { data: measuresData } = await supabase
       .from('food_measures')
       .select('*')
@@ -106,7 +206,7 @@ export const AddFoodToMealModal = ({
       .order('is_default', { ascending: false });
 
     let measures = measuresData || [];
-    
+
     // Se não houver medidas, criar uma padrão em gramas
     if (measures.length === 0) {
       measures = [{
@@ -132,15 +232,24 @@ export const AddFoodToMealModal = ({
         return 0;
       });
     }
-    
+
     setMeasures(measures);
-    
-    // Selecionar primeira medida (que agora será gramas se existir)
     setSelectedMeasure(measures[0]);
     setQuantity(1);
   };
 
-  const handleAdd = () => {
+  const handleSelectFoodForDetails = async (food: any) => {
+    setSelectedFood(food);
+    setView('food-details');
+  };
+
+  const handleAddToMeal = async (food: any) => {
+    setSelectedFood(food);
+    await loadMeasures(food);
+    setView('add-portion');
+  };
+
+  const handleFinalAdd = () => {
     if (!selectedFood || !selectedMeasure) return;
 
     const nutrition = calculateItemNutrition(selectedFood, selectedMeasure, quantity);
@@ -155,18 +264,14 @@ export const AddFoodToMealModal = ({
     };
 
     onAddFood(item);
-    
+
     toast({
       title: '✓ Alimento adicionado',
       description: `${quantity} ${selectedMeasure.measure_name} de ${selectedFood.name}`
     });
 
-    // Reset
-    setSelectedFood(null);
-    setMeasures([]);
-    setSelectedMeasure(null);
-    setQuantity(1);
-    setSearchQuery('');
+    // Reset e fechar
+    onClose();
   };
 
   const calculatedNutrition = selectedFood && selectedMeasure 
@@ -175,246 +280,509 @@ export const AddFoodToMealModal = ({
 
   if (!isOpen) return null;
 
+  // VIEW 1: Grid de Categorias
+  const CategoriesView = () => (
+    <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {categoriesWithCount?.map((category) => (
+        <Card
+          key={category.slug}
+          className={cn(
+            "cursor-pointer transition-all duration-300 hover:shadow-lg",
+            "border-2 border-border bg-card hover:bg-accent/50",
+            "flex flex-col items-center justify-center text-center",
+            "min-h-[120px] p-6"
+          )}
+          onClick={() => {
+            setSelectedCategory(category);
+            setView('category-list');
+          }}
+        >
+          <div className="text-4xl mb-3">{category.icon}</div>
+          <h3 className="font-medium text-base mb-1">{category.name}</h3>
+          <p className="text-sm text-muted-foreground">{category.count} itens</p>
+        </Card>
+      ))}
+    </div>
+  );
+
+  // VIEW 2: Lista de Alimentos da Categoria
+  const CategoryListView = () => (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3 mb-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setView('categories');
+            setSelectedCategory(null);
+          }}
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Voltar
+        </Button>
+        <div>
+          <h3 className="font-semibold text-lg flex items-center gap-2">
+            <span className="text-2xl">{selectedCategory?.icon}</span> 
+            {selectedCategory?.name}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            {categoryFoods?.length || 0} alimentos
+          </p>
+        </div>
+      </div>
+
+      {loadingCategoryFoods ? (
+        <div className="text-center py-8">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+          <p className="text-muted-foreground mt-4">Carregando...</p>
+        </div>
+      ) : (
+        <ScrollArea className="h-[500px]">
+          <div className="grid gap-3 pr-4">
+            {categoryFoods?.map((food) => (
+              <Card key={food.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex-1">
+                      <h4 className="font-medium">{food.name}</h4>
+                      {food.brand && (
+                        <p className="text-sm text-muted-foreground">
+                          Marca: {food.brand}
+                        </p>
+                      )}
+                    </div>
+                    {food.source_info && (
+                      <Badge variant="secondary" className="ml-2">
+                        {food.source_info}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="text-sm text-muted-foreground mb-3">
+                    {food.energy_kcal} kcal | 
+                    P: {formatNutrient(food.protein_g)} | 
+                    C: {formatNutrient(food.carbohydrate_g)} | 
+                    G: {formatNutrient(food.lipid_g)}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleSelectFoodForDetails(food)}
+                      className="flex-1"
+                    >
+                      Ver detalhes
+                      <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddToMeal(food)}
+                      className="flex-1"
+                    >
+                      Adicionar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </ScrollArea>
+      )}
+    </div>
+  );
+
+  // VIEW 3: Detalhes do Alimento + Substituições
+  const FoodDetailsView = () => (
+    <ScrollArea className="h-[600px] pr-4">
+      <div className="space-y-6">
+        {/* Botão Voltar */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setView('category-list')}
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Voltar para lista
+        </Button>
+
+        {/* Cabeçalho do Alimento */}
+        <div className="border-b pb-4">
+          <h2 className="text-2xl font-bold mb-2">{foodDetails?.name}</h2>
+          {foodDetails?.brand && (
+            <p className="text-muted-foreground mb-1">
+              Marca: {foodDetails.brand}
+            </p>
+          )}
+          <p className="text-sm text-muted-foreground">
+            Grupo alimentar: {foodDetails?.food_categories?.name}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            1 Porção = 100g
+          </p>
+        </div>
+
+        {/* Tabela Nutricional Completa */}
+        <div className="border-b pb-6">
+          <h3 className="font-semibold text-lg mb-4">📊 Tabela Nutricional (por 100g)</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="bg-accent/20 p-3 rounded-lg">
+              <p className="text-sm text-muted-foreground">Energia</p>
+              <p className="font-medium text-lg">{foodDetails?.energy_kcal} kcal</p>
+            </div>
+            <div className="bg-accent/20 p-3 rounded-lg">
+              <p className="text-sm text-muted-foreground">Carboidratos</p>
+              <p className="font-medium text-lg">{formatNutrient(foodDetails?.carbohydrate_g)}</p>
+            </div>
+            <div className="bg-accent/20 p-3 rounded-lg">
+              <p className="text-sm text-muted-foreground">Proteínas</p>
+              <p className="font-medium text-lg">{formatNutrient(foodDetails?.protein_g)}</p>
+            </div>
+            <div className="bg-accent/20 p-3 rounded-lg">
+              <p className="text-sm text-muted-foreground">Lipídeos</p>
+              <p className="font-medium text-lg">{formatNutrient(foodDetails?.lipid_g)}</p>
+            </div>
+            {foodDetails?.fiber_g && (
+              <div className="bg-accent/20 p-3 rounded-lg">
+                <p className="text-sm text-muted-foreground">Fibra Alimentar</p>
+                <p className="font-medium text-lg">{formatNutrient(foodDetails.fiber_g)}</p>
+              </div>
+            )}
+            {foodDetails?.sodium_mg && (
+              <div className="bg-accent/20 p-3 rounded-lg">
+                <p className="text-sm text-muted-foreground">Sódio</p>
+                <p className="font-medium text-lg">{foodDetails.sodium_mg}mg</p>
+              </div>
+            )}
+            {foodDetails?.saturated_fat_g && (
+              <div className="bg-accent/20 p-3 rounded-lg">
+                <p className="text-sm text-muted-foreground">Gordura Saturada</p>
+                <p className="font-medium text-lg">{formatNutrient(foodDetails.saturated_fat_g)}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Sugestões de Substituição */}
+        <div className="pb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-semibold text-lg">📋 Sugestões de Substituição</h3>
+            <Select value={substitutionSort} onValueChange={setSubstitutionSort}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Ordenar por..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="energy_kcal">Energia</SelectItem>
+                <SelectItem value="protein_g">Proteínas</SelectItem>
+                <SelectItem value="carbohydrate_g">Carboidratos</SelectItem>
+                <SelectItem value="lipid_g">Lipídeos</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            (baseado no mesmo grupo alimentar)
+          </p>
+          <div className="grid gap-3">
+            {substitutions?.map((sub) => (
+              <Card key={sub.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex-1">
+                      <p className="font-medium mb-1">{sub.name}</p>
+                      {sub.brand && (
+                        <p className="text-xs text-muted-foreground mb-1">
+                          {sub.brand}
+                        </p>
+                      )}
+                      <p className="text-sm text-muted-foreground">
+                        {sub.energy_kcal} kcal | 
+                        P: {formatNutrient(sub.protein_g)} | 
+                        C: {formatNutrient(sub.carbohydrate_g)} | 
+                        L: {formatNutrient(sub.lipid_g)}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddToMeal(sub)}
+                    >
+                      Adicionar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Botão Principal */}
+        <div className="sticky bottom-0 bg-background pt-4 border-t">
+          <Button
+            className="w-full"
+            size="lg"
+            onClick={() => handleAddToMeal(foodDetails)}
+          >
+            Adicionar este alimento
+          </Button>
+        </div>
+      </div>
+    </ScrollArea>
+  );
+
+  // VIEW 4: Adicionar Porção
+  const AddPortionView = () => (
+    <div className="space-y-6">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setView('food-details')}
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Voltar aos detalhes
+      </Button>
+
+      {/* Info do Alimento */}
+      <div className="bg-accent/20 border-2 border-accent rounded-lg p-4">
+        <h3 className="font-bold text-lg mb-2">{selectedFood?.name}</h3>
+        {selectedFood?.brand && (
+          <p className="text-sm text-muted-foreground mb-3">Marca: {selectedFood.brand}</p>
+        )}
+        <div className="grid grid-cols-4 gap-3 text-sm">
+          <div>
+            <p className="text-muted-foreground font-medium">Calorias</p>
+            <p className="font-bold">{selectedFood?.energy_kcal} kcal</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground font-medium">Proteínas</p>
+            <p className="font-bold">{formatNutrient(selectedFood?.protein_g)}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground font-medium">Carbos</p>
+            <p className="font-bold">{formatNutrient(selectedFood?.carbohydrate_g)}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground font-medium">Gorduras</p>
+            <p className="font-bold">{formatNutrient(selectedFood?.lipid_g)}</p>
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground mt-2">Valores por 100g</p>
+      </div>
+
+      {/* Medida */}
+      <div>
+        <label className="block text-sm font-medium mb-2">
+          Medida
+        </label>
+        <select
+          value={selectedMeasure?.id || ''}
+          onChange={(e) => {
+            const measure = measures.find(m => m.id === e.target.value);
+            setSelectedMeasure(measure);
+          }}
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          {measures.map(measure => (
+            <option key={measure.id} value={measure.id}>
+              {measure.measure_name} ({measure.grams}g)
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Quantidade */}
+      <div>
+        <label className="block text-sm font-medium mb-2">
+          Quantidade
+        </label>
+        <Input
+          type="number"
+          step="0.5"
+          min="0.1"
+          value={quantity}
+          onChange={(e) => setQuantity(parseFloat(e.target.value) || 1)}
+        />
+      </div>
+
+      {/* Preview dos Valores Calculados */}
+      {calculatedNutrition && (
+        <div className="bg-primary/10 border-2 border-primary/20 rounded-lg p-4">
+          <p className="text-sm font-medium mb-3">
+            Total: {quantity} {selectedMeasure?.measure_name} = {calculatedNutrition.grams_total.toFixed(0)}g
+          </p>
+          <div className="grid grid-cols-4 gap-3 text-sm">
+            <div>
+              <p className="text-muted-foreground">Calorias</p>
+              <p className="font-bold">{calculatedNutrition.kcal_total.toFixed(0)} kcal</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Proteínas</p>
+              <p className="font-bold">{formatNutrient(calculatedNutrition.protein_total)}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Carbos</p>
+              <p className="font-bold">{formatNutrient(calculatedNutrition.carb_total)}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Gorduras</p>
+              <p className="font-bold">{formatNutrient(calculatedNutrition.fat_total)}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Botões */}
+      <div className="flex gap-3">
+        <Button onClick={onClose} variant="outline" className="flex-1">
+          Cancelar
+        </Button>
+        <Button onClick={handleFinalAdd} className="flex-1">
+          Adicionar à Refeição
+        </Button>
+      </div>
+    </div>
+  );
+
+  // Resultados de Busca
+  const SearchResultsView = () => (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm text-muted-foreground">
+          {searchResults?.length || 0} resultados para "{searchTerm}"
+        </p>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setSearchTerm('');
+            setView('categories');
+          }}
+        >
+          Limpar busca
+        </Button>
+      </div>
+
+      {loadingSearch ? (
+        <div className="text-center py-8">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+          <p className="text-muted-foreground mt-4">Buscando...</p>
+        </div>
+      ) : searchResults && searchResults.length === 0 ? (
+        <div className="text-center py-8">
+          <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground mb-4">
+            Nenhum alimento encontrado para "{searchTerm}"
+          </p>
+          <Button onClick={() => setShowCustomFoodModal(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Adicionar este alimento ao banco
+          </Button>
+        </div>
+      ) : (
+        <ScrollArea className="h-[500px]">
+          <div className="grid gap-3 pr-4">
+            {searchResults?.map((food) => (
+              <Card key={food.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex-1">
+                      <h4 className="font-medium">{food.name}</h4>
+                      {food.brand && (
+                        <p className="text-sm text-muted-foreground">
+                          Marca: {food.brand}
+                        </p>
+                      )}
+                      <Badge variant="secondary" className="mt-1">
+                        {food.food_categories?.name}
+                      </Badge>
+                    </div>
+                    {food.source_info && (
+                      <Badge variant="outline" className="ml-2">
+                        {food.source_info}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="text-sm text-muted-foreground mb-3">
+                    {food.energy_kcal} kcal | 
+                    P: {formatNutrient(food.protein_g)} | 
+                    C: {formatNutrient(food.carbohydrate_g)} | 
+                    G: {formatNutrient(food.lipid_g)}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleSelectFoodForDetails(food)}
+                      className="flex-1"
+                    >
+                      Ver detalhes
+                      <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddToMeal(food)}
+                      className="flex-1"
+                    >
+                      Adicionar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </ScrollArea>
+      )}
+    </div>
+  );
+
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-background rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div className="bg-background rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="sticky top-0 bg-background border-b px-6 py-4 flex justify-between items-center">
+          <div className="border-b px-6 py-4 flex justify-between items-center shrink-0">
             <h2 className="text-2xl font-bold">Adicionar Alimento</h2>
             <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
               <X className="w-6 h-6" />
             </button>
           </div>
 
-          <div className="p-6">
-            {/* Busca e Filtros */}
-            <div className="space-y-4 mb-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
+          {/* Barra de Busca + Filtro */}
+          <div className="px-6 pt-4 pb-2 shrink-0">
+            <div className="flex gap-3 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setShowAllFoods(false);
-                  }}
-                  placeholder="Buscar alimento... (ex: arroz, frango, banana)"
+                  placeholder="Pesquisar alimento..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
-                  autoFocus
                 />
               </div>
-
-              {/* Toggle e Filtros */}
-              <div className="flex gap-3 items-center">
-                <Button
-                  onClick={() => {
-                    setShowAllFoods(!showAllFoods);
-                    setSearchQuery('');
-                  }}
-                  variant={showAllFoods ? "default" : "outline"}
-                  size="sm"
-                >
-                  {showAllFoods ? "Ocultar todos" : "Mostrar todos os alimentos"}
-                </Button>
-
-                {showAllFoods && (
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <option value="all">Todas as categorias</option>
-                    {categories.map(cat => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
+              <Select value={sourceFilter} onValueChange={setSourceFilter}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as tabelas</SelectItem>
+                  <SelectItem value="TACO">Tabela TACO</SelectItem>
+                  <SelectItem value="IBGE">Tabela IBGE</SelectItem>
+                  <SelectItem value="Marcas">Tabela de Marcas</SelectItem>
+                  <SelectItem value="Custom">Meus Alimentos</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+          </div>
 
-            {/* Lista de Resultados */}
-            {loading && (
-              <div className="text-center py-8">
-                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-                <p className="text-muted-foreground mt-4">Buscando alimentos...</p>
-              </div>
-            )}
-
-            {!loading && searchQuery && foods.length === 0 && (
-              <div className="text-center py-8">
-                <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground mb-4">
-                  Nenhum alimento encontrado para "{searchQuery}"
-                </p>
-                <Button onClick={() => setShowCustomFoodModal(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Adicionar este alimento ao banco
-                </Button>
-              </div>
-            )}
-
-            {!selectedFood && foods.length > 0 && (
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {showAllFoods && selectedCategory === 'all' ? (
-                  // Agrupar por categoria quando mostrar todos
-                  categories.map(category => {
-                    const categoryFoods = foods.filter(f => f.category_id === category.id);
-                    if (categoryFoods.length === 0) return null;
-
-                    return (
-                      <div key={category.id} className="space-y-2">
-                        <div 
-                          className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-md sticky top-0 z-10"
-                          style={{ 
-                            backgroundColor: `${category.color}15`,
-                            borderLeft: `3px solid ${category.color}`
-                          }}
-                        >
-                          <span className="font-semibold text-sm" style={{ color: category.color }}>
-                            {category.name}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            ({categoryFoods.length})
-                          </span>
-                        </div>
-                        <div className="space-y-2 pl-2">
-                          {categoryFoods.map(food => (
-                            <FoodCard key={food.id} food={food} onSelect={handleSelectFood} />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  // Lista simples quando buscar ou filtrar por categoria
-                  foods.map(food => (
-                    <FoodCard key={food.id} food={food} onSelect={handleSelectFood} />
-                  ))
-                )}
-              </div>
-            )}
-
-            {/* Detalhes do Alimento Selecionado */}
-            {/* Detalhes do Alimento Selecionado */}
-            {selectedFood && (
-              <div className="space-y-6">
-                {/* Info do Alimento */}
-                <div className="bg-accent/20 border-2 border-accent rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="font-bold text-lg">{selectedFood.name}</h3>
-                      {selectedFood.brand && (
-                        <p className="text-sm text-muted-foreground">Marca: {selectedFood.brand}</p>
-                      )}
-                    </div>
-                    <Button
-                      onClick={() => {
-                        setSelectedFood(null);
-                        setMeasures([]);
-                      }}
-                      variant="ghost"
-                      size="sm"
-                    >
-                      Trocar alimento
-                    </Button>
-                  </div>
-
-                  <div className="grid grid-cols-4 gap-3 text-sm">
-                    <div>
-                      <p className="text-muted-foreground font-medium">Calorias</p>
-                      <p className="font-bold">{selectedFood.energy_kcal} kcal</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground font-medium">Proteínas</p>
-                      <p className="font-bold">{formatNutrient(selectedFood.protein_g)}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground font-medium">Carbos</p>
-                      <p className="font-bold">{formatNutrient(selectedFood.carbohydrate_g)}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground font-medium">Gorduras</p>
-                      <p className="font-bold">{formatNutrient(selectedFood.lipid_g)}</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">Valores por 100g</p>
-                </div>
-
-                {/* Medida */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Medida
-                  </label>
-                  <select
-                    value={selectedMeasure?.id || ''}
-                    onChange={(e) => {
-                      const measure = measures.find(m => m.id === e.target.value);
-                      setSelectedMeasure(measure);
-                    }}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  >
-                    {measures.map(measure => (
-                      <option key={measure.id} value={measure.id}>
-                        {measure.measure_name} ({measure.grams}g)
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Quantidade */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Quantidade
-                  </label>
-                  <Input
-                    type="number"
-                    step="0.5"
-                    min="0.1"
-                    value={quantity}
-                    onChange={(e) => setQuantity(parseFloat(e.target.value) || 1)}
-                  />
-                </div>
-
-                {/* Preview dos Valores Calculados */}
-                {calculatedNutrition && (
-                  <div className="bg-primary/10 border-2 border-primary/20 rounded-lg p-4">
-                    <p className="text-sm font-medium mb-3">
-                      Total: {quantity} {selectedMeasure?.measure_name} = {calculatedNutrition.grams_total.toFixed(0)}g
-                    </p>
-                    <div className="grid grid-cols-4 gap-3 text-sm">
-                      <div>
-                        <p className="text-muted-foreground">Calorias</p>
-                        <p className="font-bold">{calculatedNutrition.kcal_total.toFixed(0)} kcal</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Proteínas</p>
-                        <p className="font-bold">{formatNutrient(calculatedNutrition.protein_total)}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Carbos</p>
-                        <p className="font-bold">{formatNutrient(calculatedNutrition.carb_total)}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Gorduras</p>
-                        <p className="font-bold">{formatNutrient(calculatedNutrition.fat_total)}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Botões */}
-                <div className="flex gap-3">
-                  <Button onClick={onClose} variant="outline" className="flex-1">
-                    Cancelar
-                  </Button>
-                  <Button onClick={handleAdd} className="flex-1">
-                    Adicionar à Refeição
-                  </Button>
-                </div>
-              </div>
-            )}
+          {/* Conteúdo Principal */}
+          <div className="px-6 pb-6 overflow-y-auto flex-1">
+            {searchTerm.length >= 2 ? (
+              <SearchResultsView />
+            ) : view === 'categories' ? (
+              <CategoriesView />
+            ) : view === 'category-list' ? (
+              <CategoryListView />
+            ) : view === 'food-details' ? (
+              <FoodDetailsView />
+            ) : view === 'add-portion' ? (
+              <AddPortionView />
+            ) : null}
           </div>
         </div>
       </div>
@@ -425,47 +793,10 @@ export const AddFoodToMealModal = ({
         onClose={() => setShowCustomFoodModal(false)}
         onSuccess={(food) => {
           setShowCustomFoodModal(false);
-          handleSelectFood(food);
+          handleSelectFoodForDetails(food);
         }}
-        searchQuery={searchQuery}
+        searchQuery={searchTerm}
       />
     </>
   );
 };
-
-// Componente auxiliar para o card de alimento
-const FoodCard = ({ food, onSelect }: { food: any; onSelect: (food: any) => void }) => (
-  <button
-    onClick={() => onSelect(food)}
-    className="w-full p-4 border-2 rounded-lg hover:border-primary transition-colors text-left"
-  >
-    <div className="flex items-start justify-between">
-      <div className="flex-1">
-        <h3 className="font-semibold">{food.name}</h3>
-        {food.brand && (
-          <p className="text-sm text-muted-foreground">Marca: {food.brand}</p>
-        )}
-        <div className="flex items-center gap-2 mt-2">
-          <span 
-            className="px-2 py-1 rounded text-xs font-medium"
-            style={{ 
-              backgroundColor: `${food.food_categories?.color}20`,
-              color: food.food_categories?.color 
-            }}
-          >
-            {food.food_categories?.name}
-          </span>
-          {food.is_custom && (
-            <span className="px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-700">
-              Personalizado
-            </span>
-          )}
-        </div>
-      </div>
-      <div className="text-right ml-4">
-        <p className="text-sm text-muted-foreground">Por 100g:</p>
-        <p className="font-bold text-lg">{food.energy_kcal} kcal</p>
-      </div>
-    </div>
-  </button>
-);
