@@ -16,6 +16,7 @@ import { QuickPortionDialog } from '@/components/platform/QuickPortionDialog';
 import { AIAssistant } from '@/components/platform/AIAssistant';
 import { formatNutrient } from '@/lib/nutritionCalculations';
 import { ClientProfile } from '@/types/clientProfile';
+import { smartFoodSearch } from '@/lib/smartFoodSearch';
 
 interface Meal {
   id: string;
@@ -112,39 +113,9 @@ export default function PlatformMealPlanEditor() {
     }
   }, [clientId]);
 
-  const searchFood = async (query: string, mode: 'exact' | 'partial' | 'generic') => {
-    let searchQuery = supabase
-      .from('foods')
-      .select('id, name, energy_kcal, protein_g, carbohydrate_g, lipid_g, source')
-      .limit(1);
-
-    if (mode === 'exact') {
-      searchQuery = searchQuery.ilike('name', query);
-    } else if (mode === 'partial') {
-      searchQuery = searchQuery.ilike('name', `%${query}%`);
-    } else {
-      searchQuery = searchQuery.ilike('name', `${query}%`);
-    }
-
-    const { data } = await searchQuery;
-    return data?.[0] || null;
-  };
-
-  const extractKeywords = (foodName: string): string[] => {
-    const stopWords = ['de', 'da', 'do', 'com', 'sem', 'em', 'a', 'o'];
-
-    const words = foodName
-      .toLowerCase()
-      .split(/[\s,]+/)
-      .filter(w => w.length > 2 && !stopWords.includes(w));
-
-    return words;
-  };
-
   const handleApplyGeneratedPlan = async (plan: any) => {
-    console.log('📋 Aplicando plano gerado pela IA');
-    console.log('🎯 Meta calórica:', plan.targetCalories);
-    console.log('🍽️ Refeições sugeridas:', plan.meals.length);
+    console.log('\n🚀 APLICANDO PLANO DA IA');
+    console.log('🎯 Meta:', plan.targetCalories, 'kcal');
 
     setGoals({
       kcal: plan.targetCalories,
@@ -154,79 +125,60 @@ export default function PlatformMealPlanEditor() {
     });
 
     let totalAdded = 0;
-    let notFound: string[] = [];
+    let totalNotFound = 0;
+    const notFoundList: string[] = [];
 
     const newMeals = await Promise.all(
       plan.meals.map(async (aiMeal: any) => {
+        console.log(`\n📋 Refeição: ${aiMeal.name} (${aiMeal.targetCalories} kcal)`);
+
         const items = [];
 
-        console.log(`\n🔍 Processando refeição: ${aiMeal.name}`);
-
         for (const aiItem of aiMeal.items) {
-          const foodName = aiItem.food_name;
-          console.log(`  Buscando: "${foodName}"`);
-
-          let food = await searchFood(foodName, 'exact');
-
-          if (!food) {
-            const keywords = extractKeywords(foodName);
-            console.log(`  Tentando com keywords: ${keywords.join(', ')}`);
-
-            for (const keyword of keywords) {
-              food = await searchFood(keyword, 'partial');
-              if (food) break;
-            }
-          }
-
-          if (!food) {
-            const firstWord = foodName.split(' ')[0];
-            console.log(`  Última tentativa com: "${firstWord}"`);
-            food = await searchFood(firstWord, 'generic');
-          }
+          const food = await smartFoodSearch(aiItem.food_name);
 
           if (food) {
-            console.log(`  ✅ Encontrado: ${food.name}`);
-
             const { data: measures } = await supabase
               .from('food_measures')
               .select('*')
               .eq('food_id', food.id)
               .order('is_default', { ascending: false });
 
-            let measure = measures?.[0];
+            const measure = measures?.[0] || {
+              id: `temp-${Date.now()}`,
+              measure_name: aiItem.measure || 'porção',
+              grams: 100
+            };
 
-            if (!measure) {
-              measure = {
-                id: `temp-${Date.now()}`,
-                measure_name: aiItem.measure || 'porção',
-                grams: 100
-              };
-            }
+            const gramsTotal = aiItem.quantity * (measure.grams || 100);
+            const multiplier = gramsTotal / 100;
 
-            const quantityMultiplier = (aiItem.quantity * (measure.grams || 100)) / 100;
-
-            items.push({
-              id: Date.now().toString() + Math.random(),
+            const item = {
+              id: `${Date.now()}-${Math.random()}`,
               food_id: food.id,
               measure_id: measure.id,
               quantity: aiItem.quantity,
               food,
               measure,
-              kcal_total: Math.round(food.energy_kcal * quantityMultiplier),
-              protein_total: Math.round(food.protein_g * quantityMultiplier * 10) / 10,
-              carb_total: Math.round(food.carbohydrate_g * quantityMultiplier * 10) / 10,
-              fat_total: Math.round(food.lipid_g * quantityMultiplier * 10) / 10
-            });
+              kcal_total: Math.round(food.energy_kcal * multiplier),
+              protein_total: Math.round(food.protein_g * multiplier * 10) / 10,
+              carb_total: Math.round(food.carbohydrate_g * multiplier * 10) / 10,
+              fat_total: Math.round(food.lipid_g * multiplier * 10) / 10
+            };
 
+            items.push(item);
             totalAdded++;
+
+            console.log(`  ✅ ${food.name}: ${item.kcal_total} kcal`);
           } else {
-            console.log(`  ❌ Não encontrado: ${foodName}`);
-            notFound.push(foodName);
+            totalNotFound++;
+            notFoundList.push(aiItem.food_name);
+            console.log(`  ❌ "${aiItem.food_name}"`);
           }
         }
 
         return {
-          id: Date.now().toString() + Math.random(),
+          id: `${Date.now()}-${Math.random()}`,
           name: aiMeal.name,
           time: aiMeal.time,
           items
@@ -236,10 +188,14 @@ export default function PlatformMealPlanEditor() {
 
     setMeals(newMeals);
 
-    if (notFound.length > 0) {
+    console.log('\n📊 RESUMO FINAL:');
+    console.log(`  ✅ Adicionados: ${totalAdded}`);
+    console.log(`  ❌ Não encontrados: ${totalNotFound}`);
+
+    if (totalNotFound > 0) {
       toast({
-        title: `Plano aplicado com ${totalAdded} alimentos`,
-        description: `${notFound.length} alimentos não foram encontrados no banco. Adicione manualmente: ${notFound.slice(0, 3).join(', ')}${notFound.length > 3 ? '...' : ''}`,
+        title: `Plano parcialmente aplicado`,
+        description: `${totalAdded} alimentos adicionados. ${totalNotFound} não encontrados: ${notFoundList.slice(0, 2).join(', ')}...`,
         variant: 'default'
       });
     } else {
@@ -248,10 +204,6 @@ export default function PlatformMealPlanEditor() {
         description: `${totalAdded} alimentos adicionados automaticamente`
       });
     }
-
-    console.log('\n📊 Resumo:');
-    console.log(`  ✅ Adicionados: ${totalAdded}`);
-    console.log(`  ❌ Não encontrados: ${notFound.length}`);
   };
 
   const getDefaultTimeForMeal = (name: string): string => {

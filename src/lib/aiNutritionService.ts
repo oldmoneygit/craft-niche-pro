@@ -228,6 +228,35 @@ EXEMPLO DE BOA RESPOSTA:
   "educationalNotes": "..."
 }
 
+ALIMENTOS DISPONÍVEIS NO BANCO (USE ESTES NOMES EXATOS):
+- Arroz, branco, cozido (130 kcal/100g)
+- Arroz, integral, cozido (123 kcal/100g)
+- Feijão, preto, cozido (77 kcal/100g)
+- Feijão, carioca, cozido (76 kcal/100g)
+- Pão, francês (300 kcal/100g)
+- Pão, forma, integral (253 kcal/100g)
+- Frango, peito, grelhado (159 kcal/100g)
+- Carne, bovina, sem gordura (219 kcal/100g)
+- Ovo, cozido (155 kcal/100g)
+- Leite, vaca, integral (61 kcal/100g)
+- Leite, vaca, desnatado (35 kcal/100g)
+- Banana, prata (98 kcal/100g)
+- Maçã (52 kcal/100g)
+- Laranja (45 kcal/100g)
+- Mamão (40 kcal/100g)
+- Alface (15 kcal/100g)
+- Tomate (18 kcal/100g)
+- Cenoura, crua (43 kcal/100g)
+- Brócolis, cozido (25 kcal/100g)
+- Aveia, flocos (394 kcal/100g)
+- Azeite de oliva (884 kcal/100g)
+- Batata, cozida (85 kcal/100g)
+- Macarrão, cozido (111 kcal/100g)
+- Iogurte, natural (51 kcal/100g)
+- Queijo, minas (264 kcal/100g)
+
+IMPORTANTE: Use SOMENTE estes nomes de alimentos listados acima, exatamente como escrito.
+
 LEMBRE-SE: Esta é uma SUGESTÃO inicial. O nutricionista revisará e ajustará conforme necessário.
 Retorne APENAS JSON válido seguindo EXATAMENTE o formato acima.`;
 };
