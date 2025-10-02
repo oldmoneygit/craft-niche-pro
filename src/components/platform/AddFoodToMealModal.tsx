@@ -53,6 +53,26 @@ export const AddFoodToMealModal = ({
   const [quantity, setQuantity] = useState(1);
   const [showCustomFoodModal, setShowCustomFoodModal] = useState(false);
 
+  // MAPEAMENTO DE ÍCONES COM EMOJIS
+  const CATEGORY_ICONS: Record<string, string> = {
+    'Cereais e Derivados': '🌾',
+    'Frutas e derivados': '🍎',
+    'Leite e derivados': '🥛',
+    'Verduras, hortaliças e derivados': '🥬',
+    'Leguminosas e derivados': '🫘',
+    'Produtos açucarados': '🍯',
+    'Bebidas (alcoólicas e não alcoólicas)': '🥤',
+    'Carnes e Derivados': '🥩',
+    'Ovos e derivados': '🥚',
+    'Pescados e frutos do mar': '🐟',
+    'Suplementos': '💊',
+    'Alimentos preparados': '🍱',
+    'Gorduras e óleos': '🫒',
+    'Miscelâneas': '🍽️',
+    'Nozes e sementes': '🥜',
+    'Outros alimentos industrializados': '📦',
+  };
+
   // Reset ao fechar
   useEffect(() => {
     if (!isOpen) {
@@ -75,16 +95,17 @@ export const AddFoodToMealModal = ({
         .select('*')
         .order('name');
 
-      let query = supabase
-        .from('foods')
-        .select('category_id, food_categories(name)')
-        .eq('active', true);
-
-      if (sourceFilter !== 'all') {
-        query = query.eq('source_info', sourceFilter);
-      }
-
-      const { data: foods } = await query;
+      // CRÍTICO: só filtrar se não for "all"
+      const { data: foods } = sourceFilter && sourceFilter !== 'all'
+        ? await supabase
+            .from('foods')
+            .select('category_id, food_categories(name)')
+            .eq('active', true)
+            .eq('source_info', sourceFilter)
+        : await supabase
+            .from('foods')
+            .select('category_id, food_categories(name)')
+            .eq('active', true);
 
       if (!foods || !dbCategories) return [];
 
@@ -121,17 +142,21 @@ export const AddFoodToMealModal = ({
     queryFn: async () => {
       if (!selectedCategory?.db_category?.id) return [];
 
-      let query = supabase
-        .from('foods')
-        .select('*')
-        .eq('category_id', selectedCategory.db_category.id)
-        .eq('active', true);
+      const { data } = sourceFilter && sourceFilter !== 'all'
+        ? await supabase
+            .from('foods')
+            .select('*')
+            .eq('category_id', selectedCategory.db_category.id)
+            .eq('active', true)
+            .eq('source_info', sourceFilter)
+            .order('name')
+        : await supabase
+            .from('foods')
+            .select('*')
+            .eq('category_id', selectedCategory.db_category.id)
+            .eq('active', true)
+            .order('name');
 
-      if (sourceFilter !== 'all') {
-        query = query.eq('source_info', sourceFilter);
-      }
-
-      const { data } = await query.order('name');
       return data || [];
     },
     enabled: !!selectedCategory && view === 'category-list',
@@ -143,17 +168,23 @@ export const AddFoodToMealModal = ({
     queryFn: async () => {
       if (searchTerm.length < 2) return [];
 
-      let query = supabase
-        .from('foods')
-        .select('*, food_categories(name, icon, color)')
-        .or(`name.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%`)
-        .eq('active', true);
+      const { data } = sourceFilter && sourceFilter !== 'all'
+        ? await supabase
+            .from('foods')
+            .select('*, food_categories(name, icon, color)')
+            .or(`name.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%`)
+            .eq('active', true)
+            .eq('source_info', sourceFilter)
+            .order('name')
+            .limit(50)
+        : await supabase
+            .from('foods')
+            .select('*, food_categories(name, icon, color)')
+            .or(`name.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%`)
+            .eq('active', true)
+            .order('name')
+            .limit(50);
 
-      if (sourceFilter !== 'all') {
-        query = query.eq('source_info', sourceFilter);
-      }
-
-      const { data } = await query.order('name').limit(50);
       return data || [];
     },
     enabled: searchTerm.length >= 2,
@@ -284,8 +315,6 @@ export const AddFoodToMealModal = ({
     return (
       <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
         {categoriesWithCount?.map((category) => {
-          const IconComponent = getCategoryIcon(category.name);
-          
           return (
             <Card
               key={category.slug}
@@ -300,10 +329,9 @@ export const AddFoodToMealModal = ({
                 setView('category-list');
               }}
             >
-              <IconComponent 
-                className="w-10 h-10 mb-3 text-foreground" 
-                strokeWidth={1.5}
-              />
+              <div className="text-4xl mb-2">
+                {CATEGORY_ICONS[category.name] || '🍽️'}
+              </div>
               <h3 className="font-medium text-sm md:text-base mb-1">
                 {category.name}
               </h3>
@@ -319,8 +347,6 @@ export const AddFoodToMealModal = ({
 
   // VIEW 2: Lista de Alimentos da Categoria
   const CategoryListView = () => {
-    const IconComponent = selectedCategory ? getCategoryIcon(selectedCategory.name) : Package;
-    
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-3 mb-6">
@@ -337,7 +363,9 @@ export const AddFoodToMealModal = ({
           </Button>
           <div>
             <h3 className="font-semibold text-lg flex items-center gap-2">
-              <IconComponent className="w-6 h-6" strokeWidth={1.5} />
+              <span className="text-2xl">
+                {selectedCategory ? CATEGORY_ICONS[selectedCategory.name] || '🍽️' : '🍽️'}
+              </span>
               {selectedCategory?.name}
             </h3>
             <p className="text-sm text-muted-foreground">
