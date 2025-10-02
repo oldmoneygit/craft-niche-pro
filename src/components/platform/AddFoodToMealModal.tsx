@@ -148,9 +148,9 @@ const NutritionistNotes = ({ foodId }: { foodId: string }) => {
 // Componente para detalhes do alimento
 const FoodDetailsPopover = ({ food, onAddClick }: { food: any; onAddClick: () => void }) => {
   return (
-    <div className="p-4 space-y-4">
-      {/* Header */}
-      <div className="border-b pb-3">
+    <>
+      {/* Header sticky */}
+      <div className="sticky top-0 bg-background z-10 p-4 border-b">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <h3 className="font-semibold text-lg">{food.name}</h3>
@@ -167,124 +167,127 @@ const FoodDetailsPopover = ({ food, onAddClick }: { food: any; onAddClick: () =>
         )}
       </div>
 
-      {/* Macros principais */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="bg-muted rounded-lg p-3">
-          <p className="text-xs text-muted-foreground">Calorias</p>
-          <p className="text-2xl font-bold">{food.energy_kcal?.toFixed(0) || '-'}</p>
-          <p className="text-xs">kcal/100g</p>
+      {/* Conteúdo scrollável */}
+      <div className="p-4 space-y-4">
+        {/* Macros principais */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-muted rounded-lg p-3">
+            <p className="text-xs text-muted-foreground">Calorias</p>
+            <p className="text-2xl font-bold">{food.energy_kcal?.toFixed(0) || '-'}</p>
+            <p className="text-xs">kcal/100g</p>
+          </div>
+          <div className="bg-muted rounded-lg p-3">
+            <p className="text-xs text-muted-foreground">Proteína</p>
+            <p className="text-2xl font-bold">{food.protein_g?.toFixed(1) || '-'}</p>
+            <p className="text-xs">g/100g</p>
+          </div>
         </div>
-        <div className="bg-muted rounded-lg p-3">
-          <p className="text-xs text-muted-foreground">Proteína</p>
-          <p className="text-2xl font-bold">{food.protein_g?.toFixed(1) || '-'}</p>
-          <p className="text-xs">g/100g</p>
+
+        {/* Grid nutricional completo */}
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Informação Nutricional (100g)</p>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div>Carboidratos: <span className="font-medium">{food.carbohydrate_g?.toFixed(1) || '-'}g</span></div>
+            <div>Gorduras: <span className="font-medium">{food.lipid_g?.toFixed(1) || '-'}g</span></div>
+            <div>Fibras: <span className="font-medium">{food.fiber_g?.toFixed(1) || '-'}g</span></div>
+            <div>Sódio: <span className="font-medium">{food.sodium_mg?.toFixed(0) || '-'}mg</span></div>
+            {food.saturated_fat_g && (
+              <div className="col-span-2">Gordura Saturada: <span className="font-medium">{food.saturated_fat_g.toFixed(1)}g</span></div>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Grid nutricional completo */}
-      <div className="space-y-2">
-        <p className="text-sm font-medium">Informação Nutricional (100g)</p>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>Carboidratos: <span className="font-medium">{food.carbohydrate_g?.toFixed(1) || '-'}g</span></div>
-          <div>Gorduras: <span className="font-medium">{food.lipid_g?.toFixed(1) || '-'}g</span></div>
-          <div>Fibras: <span className="font-medium">{food.fiber_g?.toFixed(1) || '-'}g</span></div>
-          <div>Sódio: <span className="font-medium">{food.sodium_mg?.toFixed(0) || '-'}mg</span></div>
-          {food.saturated_fat_g && (
-            <div className="col-span-2">Gordura Saturada: <span className="font-medium">{food.saturated_fat_g.toFixed(1)}g</span></div>
-          )}
-        </div>
-      </div>
-
-      {/* Accordion com detalhes completos */}
-      <Accordion type="single" collapsible>
-        <AccordionItem value="details" className="border-none">
-          <AccordionTrigger className="text-sm text-muted-foreground hover:text-foreground py-2">
-            <div className="flex items-center gap-2">
-              <Info className="h-4 w-4" />
-              Ver informações detalhadas
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="space-y-4 pt-3">
-            {/* 1. ALERTAS NUTRICIONAIS */}
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Alertas Nutricionais</p>
-              {(() => {
-                const alerts = [];
-                if ((food.sodium_mg || 0) > 400) alerts.push({ type: 'warning', text: 'Alto teor de sódio', icon: '⚠️' });
-                if ((food.sugar_g || 0) > 15) alerts.push({ type: 'warning', text: 'Alto teor de açúcar', icon: '⚠️' });
-                if ((food.saturated_fat_g || 0) > 5) alerts.push({ type: 'warning', text: 'Alto teor de gordura saturada', icon: '⚠️' });
-                if ((food.protein_g || 0) > 20) alerts.push({ type: 'success', text: 'Alto teor de proteína', icon: '✓' });
-                if ((food.fiber_g || 0) > 6) alerts.push({ type: 'success', text: 'Alto teor de fibras', icon: '✓' });
-                
-                if (alerts.length === 0) return <p className="text-xs text-muted-foreground">Nenhum alerta nutricional</p>;
-                
-                return alerts.map((alert, i) => (
-                  <div key={i} className={`flex items-center gap-2 text-sm ${alert.type === 'warning' ? 'text-orange-600' : 'text-green-600'}`}>
-                    <span>{alert.icon}</span>
-                    <span>{alert.text}</span>
-                  </div>
-                ));
-              })()}
-            </div>
-
-            {/* 2. % VALOR DIÁRIO (VD) */}
-            <div className="space-y-2">
-              <p className="text-sm font-medium">% Valor Diário (100g)</p>
-              <div className="grid gap-1 text-sm">
-                {food.protein_g && <div className="flex justify-between"><span className="text-muted-foreground">Proteína:</span><span className="font-medium">{((food.protein_g / 75) * 100).toFixed(0)}% VD</span></div>}
-                {food.carbohydrate_g && <div className="flex justify-between"><span className="text-muted-foreground">Carboidratos:</span><span className="font-medium">{((food.carbohydrate_g / 300) * 100).toFixed(0)}% VD</span></div>}
-                {food.fiber_g && <div className="flex justify-between"><span className="text-muted-foreground">Fibras:</span><span className="font-medium">{((food.fiber_g / 25) * 100).toFixed(0)}% VD</span></div>}
-                {food.sodium_mg && <div className="flex justify-between"><span className="text-muted-foreground">Sódio:</span><span className="font-medium">{((food.sodium_mg / 2400) * 100).toFixed(0)}% VD</span></div>}
+        {/* Accordion com detalhes completos */}
+        <Accordion type="single" collapsible>
+          <AccordionItem value="details" className="border-none">
+            <AccordionTrigger className="text-sm text-muted-foreground hover:text-foreground py-2">
+              <div className="flex items-center gap-2">
+                <Info className="h-4 w-4" />
+                Ver informações detalhadas
               </div>
-              <p className="text-xs text-muted-foreground italic">Baseado em dieta de 2000 kcal</p>
-            </div>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-4 pt-3">
+              {/* 1. ALERTAS NUTRICIONAIS */}
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Alertas Nutricionais</p>
+                {(() => {
+                  const alerts = [];
+                  if ((food.sodium_mg || 0) > 400) alerts.push({ type: 'warning', text: 'Alto teor de sódio', icon: '⚠️' });
+                  if ((food.sugar_g || 0) > 15) alerts.push({ type: 'warning', text: 'Alto teor de açúcar', icon: '⚠️' });
+                  if ((food.saturated_fat_g || 0) > 5) alerts.push({ type: 'warning', text: 'Alto teor de gordura saturada', icon: '⚠️' });
+                  if ((food.protein_g || 0) > 20) alerts.push({ type: 'success', text: 'Alto teor de proteína', icon: '✓' });
+                  if ((food.fiber_g || 0) > 6) alerts.push({ type: 'success', text: 'Alto teor de fibras', icon: '✓' });
+                  
+                  if (alerts.length === 0) return <p className="text-xs text-muted-foreground">Nenhum alerta nutricional</p>;
+                  
+                  return alerts.map((alert, i) => (
+                    <div key={i} className={`flex items-center gap-2 text-sm ${alert.type === 'warning' ? 'text-orange-600' : 'text-green-600'}`}>
+                      <span>{alert.icon}</span>
+                      <span>{alert.text}</span>
+                    </div>
+                  ));
+                })()}
+              </div>
 
-            {/* 3. HISTÓRICO DE USO */}
-            <FoodUsageHistory foodId={food.id} />
+              {/* 2. % VALOR DIÁRIO (VD) */}
+              <div className="space-y-2">
+                <p className="text-sm font-medium">% Valor Diário (100g)</p>
+                <div className="grid gap-1 text-sm">
+                  {food.protein_g && <div className="flex justify-between"><span className="text-muted-foreground">Proteína:</span><span className="font-medium">{((food.protein_g / 75) * 100).toFixed(0)}% VD</span></div>}
+                  {food.carbohydrate_g && <div className="flex justify-between"><span className="text-muted-foreground">Carboidratos:</span><span className="font-medium">{((food.carbohydrate_g / 300) * 100).toFixed(0)}% VD</span></div>}
+                  {food.fiber_g && <div className="flex justify-between"><span className="text-muted-foreground">Fibras:</span><span className="font-medium">{((food.fiber_g / 25) * 100).toFixed(0)}% VD</span></div>}
+                  {food.sodium_mg && <div className="flex justify-between"><span className="text-muted-foreground">Sódio:</span><span className="font-medium">{((food.sodium_mg / 2400) * 100).toFixed(0)}% VD</span></div>}
+                </div>
+                <p className="text-xs text-muted-foreground italic">Baseado em dieta de 2000 kcal</p>
+              </div>
 
-            {/* 4. ALIMENTOS SIMILARES */}
-            <SimilarFoods food={food} />
+              {/* 3. HISTÓRICO DE USO */}
+              <FoodUsageHistory foodId={food.id} />
 
-            {/* 5. OBSERVAÇÕES DO NUTRICIONISTA */}
-            <NutritionistNotes foodId={food.id} />
+              {/* 4. ALIMENTOS SIMILARES */}
+              <SimilarFoods food={food} />
 
-            {/* Campos nutricionais detalhados */}
-            <div className="space-y-2 pt-2 border-t">
-              <p className="text-sm font-medium">Informações Adicionais</p>
-              <div className="grid gap-2 text-sm">
-                {food.energy_kcal && <div className="flex justify-between"><span className="text-muted-foreground">Energia:</span><span className="font-medium">{food.energy_kcal} kcal</span></div>}
-                {food.energy_kj && <div className="flex justify-between"><span className="text-muted-foreground">Energia (kJ):</span><span className="font-medium">{food.energy_kj} kJ</span></div>}
-                {food.water_g && <div className="flex justify-between"><span className="text-muted-foreground">Água:</span><span className="font-medium">{food.water_g}g</span></div>}
-                {food.cholesterol_mg && <div className="flex justify-between"><span className="text-muted-foreground">Colesterol:</span><span className="font-medium">{food.cholesterol_mg}mg</span></div>}
-                {food.calcium_mg && <div className="flex justify-between"><span className="text-muted-foreground">Cálcio:</span><span className="font-medium">{food.calcium_mg}mg</span></div>}
-                {food.iron_mg && <div className="flex justify-between"><span className="text-muted-foreground">Ferro:</span><span className="font-medium">{food.iron_mg}mg</span></div>}
-                {food.magnesium_mg && <div className="flex justify-between"><span className="text-muted-foreground">Magnésio:</span><span className="font-medium">{food.magnesium_mg}mg</span></div>}
-                {food.phosphorus_mg && <div className="flex justify-between"><span className="text-muted-foreground">Fósforo:</span><span className="font-medium">{food.phosphorus_mg}mg</span></div>}
-                {food.potassium_mg && <div className="flex justify-between"><span className="text-muted-foreground">Potássio:</span><span className="font-medium">{food.potassium_mg}mg</span></div>}
-                {food.zinc_mg && <div className="flex justify-between"><span className="text-muted-foreground">Zinco:</span><span className="font-medium">{food.zinc_mg}mg</span></div>}
-                {food.vitamin_a_mcg && <div className="flex justify-between"><span className="text-muted-foreground">Vitamina A:</span><span className="font-medium">{food.vitamin_a_mcg}mcg</span></div>}
-                {food.vitamin_c_mg && <div className="flex justify-between"><span className="text-muted-foreground">Vitamina C:</span><span className="font-medium">{food.vitamin_c_mg}mg</span></div>}
-                
-                {/* Fonte */}
-                <div className="pt-2 border-t">
-                  <p className="text-xs text-muted-foreground">Fonte: {food.source}</p>
-                  {food.barcode && <p className="text-xs text-muted-foreground">Código: {food.barcode}</p>}
+              {/* 5. OBSERVAÇÕES DO NUTRICIONISTA */}
+              <NutritionistNotes foodId={food.id} />
+
+              {/* Campos nutricionais detalhados */}
+              <div className="space-y-2 pt-2 border-t">
+                <p className="text-sm font-medium">Informações Adicionais</p>
+                <div className="grid gap-2 text-sm">
+                  {food.energy_kcal && <div className="flex justify-between"><span className="text-muted-foreground">Energia:</span><span className="font-medium">{food.energy_kcal} kcal</span></div>}
+                  {food.energy_kj && <div className="flex justify-between"><span className="text-muted-foreground">Energia (kJ):</span><span className="font-medium">{food.energy_kj} kJ</span></div>}
+                  {food.water_g && <div className="flex justify-between"><span className="text-muted-foreground">Água:</span><span className="font-medium">{food.water_g}g</span></div>}
+                  {food.cholesterol_mg && <div className="flex justify-between"><span className="text-muted-foreground">Colesterol:</span><span className="font-medium">{food.cholesterol_mg}mg</span></div>}
+                  {food.calcium_mg && <div className="flex justify-between"><span className="text-muted-foreground">Cálcio:</span><span className="font-medium">{food.calcium_mg}mg</span></div>}
+                  {food.iron_mg && <div className="flex justify-between"><span className="text-muted-foreground">Ferro:</span><span className="font-medium">{food.iron_mg}mg</span></div>}
+                  {food.magnesium_mg && <div className="flex justify-between"><span className="text-muted-foreground">Magnésio:</span><span className="font-medium">{food.magnesium_mg}mg</span></div>}
+                  {food.phosphorus_mg && <div className="flex justify-between"><span className="text-muted-foreground">Fósforo:</span><span className="font-medium">{food.phosphorus_mg}mg</span></div>}
+                  {food.potassium_mg && <div className="flex justify-between"><span className="text-muted-foreground">Potássio:</span><span className="font-medium">{food.potassium_mg}mg</span></div>}
+                  {food.zinc_mg && <div className="flex justify-between"><span className="text-muted-foreground">Zinco:</span><span className="font-medium">{food.zinc_mg}mg</span></div>}
+                  {food.vitamin_a_mcg && <div className="flex justify-between"><span className="text-muted-foreground">Vitamina A:</span><span className="font-medium">{food.vitamin_a_mcg}mcg</span></div>}
+                  {food.vitamin_c_mg && <div className="flex justify-between"><span className="text-muted-foreground">Vitamina C:</span><span className="font-medium">{food.vitamin_c_mg}mg</span></div>}
+                  
+                  {/* Fonte */}
+                  <div className="pt-2 border-t">
+                    <p className="text-xs text-muted-foreground">Fonte: {food.source}</p>
+                    {food.barcode && <p className="text-xs text-muted-foreground">Código: {food.barcode}</p>}
+                  </div>
                 </div>
               </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
-      {/* Botão adicionar */}
-      <Button 
-        className="w-full" 
-        size="lg"
-        onClick={onAddClick}
-      >
-        Adicionar ao Plano
-      </Button>
-    </div>
+        {/* Botão adicionar */}
+        <Button 
+          className="w-full" 
+          size="lg"
+          onClick={onAddClick}
+        >
+          Adicionar ao Plano
+        </Button>
+      </div>
+    </>
   );
 };
 
@@ -1234,7 +1237,7 @@ export const AddFoodToMealModal = ({
                           Ver detalhes e adicionar
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-md p-0">
+                      <DialogContent className="max-w-md p-0 max-h-[90vh] overflow-y-auto">
                         <DialogTitle className="sr-only">Detalhes do Alimento</DialogTitle>
                         <DialogDescription className="sr-only">
                           Informações nutricionais completas do alimento selecionado
