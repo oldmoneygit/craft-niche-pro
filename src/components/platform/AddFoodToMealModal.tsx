@@ -954,13 +954,9 @@ export const AddFoodToMealModal = ({
                           <DialogDescription className="sr-only">
                             Informações nutricionais completas do alimento selecionado
                           </DialogDescription>
-                          <FoodDetailsPopover 
+                          <FoodDetailsPopover
                             food={food}
-                            onAddClick={async (selectedFood) => {
-                              setSelectedFood(selectedFood);
-                              await loadMeasures(selectedFood);
-                              setView('add-portion');
-                            }}
+                            onAddClick={() => handleAddToMeal(food)}
                           />
                         </DialogContent>
                       </Dialog>
