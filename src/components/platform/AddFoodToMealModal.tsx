@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -1047,6 +1047,10 @@ export const AddFoodToMealModal = ({
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="max-w-md p-0">
+                        <DialogTitle className="sr-only">Detalhes do Alimento</DialogTitle>
+                        <DialogDescription className="sr-only">
+                          Informações nutricionais completas do alimento selecionado
+                        </DialogDescription>
                         <FoodDetailsPopover 
                           food={food}
                           onAddClick={async () => {
