@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Search, Plus, Package, ArrowLeft, ChevronRight, Clock } from 'lucide-react';
+import { X, Search, Plus, Package, ArrowLeft, ChevronRight, Clock, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import {
   Select,
   SelectContent,
@@ -88,6 +89,41 @@ const FoodDetailsPopover = ({ food, onAddClick }: { food: any; onAddClick: () =>
           )}
         </div>
       </div>
+
+      {/* Accordion com detalhes completos */}
+      <Accordion type="single" collapsible>
+        <AccordionItem value="details" className="border-none">
+          <AccordionTrigger className="text-sm text-muted-foreground hover:text-foreground py-2">
+            <div className="flex items-center gap-2">
+              <Info className="h-4 w-4" />
+              Ver informações detalhadas
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-3 pt-2">
+            {/* Todos os campos do banco */}
+            <div className="grid gap-2 text-sm">
+              {food.energy_kcal && <div className="flex justify-between"><span className="text-muted-foreground">Energia:</span><span className="font-medium">{food.energy_kcal} kcal</span></div>}
+              {food.energy_kj && <div className="flex justify-between"><span className="text-muted-foreground">Energia (kJ):</span><span className="font-medium">{food.energy_kj} kJ</span></div>}
+              {food.water_g && <div className="flex justify-between"><span className="text-muted-foreground">Água:</span><span className="font-medium">{food.water_g}g</span></div>}
+              {food.cholesterol_mg && <div className="flex justify-between"><span className="text-muted-foreground">Colesterol:</span><span className="font-medium">{food.cholesterol_mg}mg</span></div>}
+              {food.calcium_mg && <div className="flex justify-between"><span className="text-muted-foreground">Cálcio:</span><span className="font-medium">{food.calcium_mg}mg</span></div>}
+              {food.iron_mg && <div className="flex justify-between"><span className="text-muted-foreground">Ferro:</span><span className="font-medium">{food.iron_mg}mg</span></div>}
+              {food.magnesium_mg && <div className="flex justify-between"><span className="text-muted-foreground">Magnésio:</span><span className="font-medium">{food.magnesium_mg}mg</span></div>}
+              {food.phosphorus_mg && <div className="flex justify-between"><span className="text-muted-foreground">Fósforo:</span><span className="font-medium">{food.phosphorus_mg}mg</span></div>}
+              {food.potassium_mg && <div className="flex justify-between"><span className="text-muted-foreground">Potássio:</span><span className="font-medium">{food.potassium_mg}mg</span></div>}
+              {food.zinc_mg && <div className="flex justify-between"><span className="text-muted-foreground">Zinco:</span><span className="font-medium">{food.zinc_mg}mg</span></div>}
+              {food.vitamin_a_mcg && <div className="flex justify-between"><span className="text-muted-foreground">Vitamina A:</span><span className="font-medium">{food.vitamin_a_mcg}mcg</span></div>}
+              {food.vitamin_c_mg && <div className="flex justify-between"><span className="text-muted-foreground">Vitamina C:</span><span className="font-medium">{food.vitamin_c_mg}mg</span></div>}
+              
+              {/* Fonte */}
+              <div className="pt-2 border-t">
+                <p className="text-xs text-muted-foreground">Fonte: {food.source}</p>
+                {food.barcode && <p className="text-xs text-muted-foreground">Código: {food.barcode}</p>}
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {/* Botão adicionar */}
       <Button 
