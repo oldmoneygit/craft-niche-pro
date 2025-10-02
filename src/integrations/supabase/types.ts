@@ -680,6 +680,128 @@ export type Database = {
         }
         Relationships: []
       }
+      service_notifications: {
+        Row: {
+          id: string
+          message_content: string | null
+          notification_type: string | null
+          sent_at: string | null
+          subscription_id: string | null
+          whatsapp_sent: boolean | null
+        }
+        Insert: {
+          id?: string
+          message_content?: string | null
+          notification_type?: string | null
+          sent_at?: string | null
+          subscription_id?: string | null
+          whatsapp_sent?: boolean | null
+        }
+        Update: {
+          id?: string
+          message_content?: string | null
+          notification_type?: string | null
+          sent_at?: string | null
+          subscription_id?: string | null
+          whatsapp_sent?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_notifications_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "service_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_subscriptions: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          end_date: string
+          id: string
+          notes: string | null
+          payment_status: string | null
+          price: number | null
+          service_id: string
+          start_date: string
+          status: string | null
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          end_date: string
+          id?: string
+          notes?: string | null
+          payment_status?: string | null
+          price?: number | null
+          service_id: string
+          start_date: string
+          status?: string | null
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          end_date?: string
+          id?: string
+          notes?: string | null
+          payment_status?: string | null
+          price?: number | null
+          service_id?: string
+          start_date?: string
+          status?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          description: string | null
+          duration_days: number | null
+          duration_type: string | null
+          id: string
+          modality: string | null
+          name: string
+          price: number
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          duration_days?: number | null
+          duration_type?: string | null
+          id?: string
+          modality?: string | null
+          name: string
+          price: number
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          duration_days?: number | null
+          duration_type?: string | null
+          id?: string
+          modality?: string | null
+          name?: string
+          price?: number
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       tenant_config: {
         Row: {
           ai_config: Json | null
