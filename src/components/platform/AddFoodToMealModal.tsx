@@ -417,7 +417,6 @@ export const AddFoodToMealModal = ({
   const [selectedMeasure, setSelectedMeasure] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
   const [showCustomFoodModal, setShowCustomFoodModal] = useState(false);
-  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
 
   // MAPEAMENTO DE ÍCONES COM EMOJIS
   const CATEGORY_ICONS: Record<string, string> = {
@@ -802,19 +801,6 @@ export const AddFoodToMealModal = ({
     setView('add-portion');
   };
 
-  const handleAddFoodFromDetails = async (food: any) => {
-    // 1. Fechar o dialog
-    setDetailsDialogOpen(false);
-    
-    // 2. Setar o alimento selecionado
-    setSelectedFood(food);
-    
-    // 3. Carregar as medidas
-    await loadMeasures(food);
-    
-    // 4. Mudar para a view de adicionar porção
-    setView('add-portion');
-  };
 
   const handleFinalAdd = () => {
     if (!selectedFood || !selectedMeasure) return;
@@ -1363,12 +1349,9 @@ export const AddFoodToMealModal = ({
                     G: {formatNutrient(food.lipid_g)}
                   </div>
                   <div className="mt-3">
-                    <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+                    <Dialog>
                       <DialogTrigger asChild>
-                        <Button 
-                          className="w-full"
-                          onClick={() => setDetailsDialogOpen(true)}
-                        >
+                        <Button className="w-full">
                           Ver detalhes e adicionar
                         </Button>
                       </DialogTrigger>
@@ -1379,7 +1362,11 @@ export const AddFoodToMealModal = ({
                         </DialogDescription>
                         <FoodDetailsPopover 
                           food={food}
-                          onAddClick={handleAddFoodFromDetails}
+                          onAddClick={async (selectedFood) => {
+                            setSelectedFood(selectedFood);
+                            await loadMeasures(selectedFood);
+                            setView('add-portion');
+                          }}
                         />
                       </DialogContent>
                     </Dialog>
