@@ -4,9 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Clock, Users } from "lucide-react";
+import { Search, Clock, Users, Trash2, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Template {
   id: string;
@@ -19,12 +29,13 @@ interface Template {
   tags: string[] | null;
   times_used: number;
   created_at: string;
+  clients_using?: { id: string; name: string }[];
 }
 
 interface TemplateLibraryModalProps {
   open: boolean;
   onClose: () => void;
-  onSelectTemplate: (templateId: string) => void;
+  onSelectTemplate: (templateId: string, templateName: string) => void;
 }
 
 export function TemplateLibraryModal({ 
@@ -35,6 +46,8 @@ export function TemplateLibraryModal({
   const [templates, setTemplates] = useState<Template[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -70,9 +83,28 @@ export function TemplateLibraryModal({
 
       if (error) throw error;
 
-      setTemplates(data || []);
+      // Para cada template, buscar quantos clientes estão usando
+      const templatesWithClients = await Promise.all(
+        (data || []).map(async (template) => {
+          const { data: plans } = await supabase
+            .from('meal_plans')
+            .select(`
+              id,
+              clients!inner(id, name)
+            `)
+            .eq('template_id', template.id)
+            .eq('tenant_id', profile.tenant_id);
 
-      if (!data || data.length === 0) {
+          return {
+            ...template,
+            clients_using: plans?.map(p => p.clients).filter(Boolean) || []
+          };
+        })
+      );
+
+      setTemplates(templatesWithClients);
+
+      if (!templatesWithClients || templatesWithClients.length === 0) {
         toast({
           title: "Nenhum template encontrado",
           description: "Crie seu primeiro template salvando um plano existente."
@@ -91,127 +123,210 @@ export function TemplateLibraryModal({
     }
   };
 
+  const handleDeleteTemplate = async () => {
+    if (!templateToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('meal_plan_templates')
+        .delete()
+        .eq('id', templateToDelete);
+
+      if (error) throw error;
+
+      toast({
+        title: "Template deletado",
+        description: "O template foi removido da biblioteca. Os planos dos clientes não foram afetados."
+      });
+
+      setTemplates(templates.filter(t => t.id !== templateToDelete));
+      setTemplateToDelete(null);
+
+    } catch (error: any) {
+      console.error('Erro ao deletar template:', error);
+      toast({
+        title: "Erro ao deletar",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const filteredTemplates = templates.filter(t => 
     t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     t.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     t.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const handleSelectTemplate = (templateId: string) => {
-    onSelectTemplate(templateId);
+  const handleSelectTemplate = (templateId: string, templateName: string) => {
+    onSelectTemplate(templateId, templateName);
     onClose();
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-3xl max-h-[80vh]">
-        <DialogHeader>
-          <DialogTitle>Biblioteca de Templates</DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-3xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Biblioteca de Templates</DialogTitle>
+          </DialogHeader>
 
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar templates..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar templates..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
 
-        <div className="space-y-3 overflow-y-auto max-h-[50vh] pr-2">
-          {isLoading && (
-            <p className="text-center text-muted-foreground py-8">
-              Carregando templates...
-            </p>
-          )}
-
-          {!isLoading && filteredTemplates.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-2">
-                {searchTerm 
-                  ? 'Nenhum template encontrado para esta busca'
-                  : 'Nenhum template salvo ainda'
-                }
+          <div className="space-y-3 overflow-y-auto max-h-[50vh] pr-2">
+            {isLoading && (
+              <p className="text-center text-muted-foreground py-8">
+                Carregando templates...
               </p>
-              {!searchTerm && (
-                <p className="text-sm text-muted-foreground">
-                  Salve um plano existente como template para começar
+            )}
+
+            {!isLoading && filteredTemplates.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-2">
+                  {searchTerm 
+                    ? 'Nenhum template encontrado para esta busca'
+                    : 'Nenhum template salvo ainda'
+                  }
                 </p>
-              )}
-            </div>
-          )}
+                {!searchTerm && (
+                  <p className="text-sm text-muted-foreground">
+                    Salve um plano existente como template para começar
+                  </p>
+                )}
+              </div>
+            )}
 
-          {filteredTemplates.map((template) => (
-            <Card 
-              key={template.id}
-              className="cursor-pointer hover:border-primary transition-colors"
-              onClick={() => handleSelectTemplate(template.id)}
+            {filteredTemplates.map((template) => (
+              <Card 
+                key={template.id}
+                className="hover:border-primary/50 transition-colors"
+              >
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start gap-4">
+                    <div 
+                      className="flex-1 min-w-0 cursor-pointer"
+                      onClick={() => handleSelectTemplate(template.id, template.name)}
+                    >
+                      <h3 className="font-semibold text-lg mb-1 truncate">
+                        {template.name}
+                      </h3>
+                      {template.description && (
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                          {template.description}
+                        </p>
+                      )}
+
+                      {template.tags && template.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {template.tags.map((tag) => (
+                            <Badge key={tag} variant="secondary" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm mb-3">
+                        <div>
+                          <p className="text-muted-foreground text-xs">Calorias</p>
+                          <p className="font-semibold">{template.reference_calories} kcal</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground text-xs">Proteínas</p>
+                          <p className="font-semibold">{template.reference_protein.toFixed(1)}g</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground text-xs">Carboidratos</p>
+                          <p className="font-semibold">{template.reference_carbs.toFixed(1)}g</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground text-xs">Gorduras</p>
+                          <p className="font-semibold">{template.reference_fat.toFixed(1)}g</p>
+                        </div>
+                      </div>
+
+                      {template.clients_using && template.clients_using.length > 0 && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground border-t pt-2 mt-2">
+                          <Users className="h-4 w-4" />
+                          <span>
+                            Usado por: {template.clients_using.map(c => c.name).join(', ')}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTemplateToDelete(template.id);
+                        }}
+                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                      
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Users className="h-3 w-3" />
+                        <span>{template.times_used}x usado</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        <span>{new Date(template.created_at).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={onClose}>
+              Fechar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!templateToDelete} onOpenChange={() => setTemplateToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-destructive" />
+              Deletar Template?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O template será removido da biblioteca.
+              <br /><br />
+              <strong>Importante:</strong> Os planos alimentares dos clientes que usam este template não serão afetados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteTemplate}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start gap-4">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-lg mb-1 truncate">
-                      {template.name}
-                    </h3>
-                    {template.description && (
-                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                        {template.description}
-                      </p>
-                    )}
-
-                    {template.tags && template.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {template.tags.map((tag) => (
-                          <Badge key={tag} variant="secondary" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
-                      <div>
-                        <p className="text-muted-foreground text-xs">Calorias</p>
-                        <p className="font-semibold">{template.reference_calories} kcal</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">Proteínas</p>
-                        <p className="font-semibold">{template.reference_protein.toFixed(1)}g</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">Carboidratos</p>
-                        <p className="font-semibold">{template.reference_carbs.toFixed(1)}g</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">Gorduras</p>
-                        <p className="font-semibold">{template.reference_fat.toFixed(1)}g</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col items-end gap-2 shrink-0">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Users className="h-3 w-3" />
-                      <span>{template.times_used}x usado</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      <span>{new Date(template.created_at).toLocaleDateString('pt-BR')}</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <div className="flex justify-end">
-          <Button variant="outline" onClick={onClose}>
-            Fechar
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+              {isDeleting ? 'Deletando...' : 'Deletar Template'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 import PlatformPageWrapper from '@/core/layouts/PlatformPageWrapper';
 import { TemplateLibraryModal } from '@/components/platform/TemplateLibraryModal';
+import { SelectClientForTemplateModal } from '@/components/platform/SelectClientForTemplateModal';
 
 export default function PlatformMealPlans() {
   const { tenantId } = useTenantId();
@@ -16,6 +17,8 @@ export default function PlatformMealPlans() {
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [selectedTemplateName, setSelectedTemplateName] = useState<string>("");
   const [showTemplatesDropdown, setShowTemplatesDropdown] = useState(false);
 
   useEffect(() => {
@@ -32,9 +35,19 @@ export default function PlatformMealPlans() {
     return () => window.removeEventListener('focus', handleFocus);
   }, [tenantId]);
 
-  const handleApplyTemplate = async (templateId: string) => {
-    navigate(`/platform/planos-alimentares/novo?templateId=${templateId}`);
+  const handleApplyTemplate = async (templateId: string, templateName: string) => {
+    setSelectedTemplateId(templateId);
+    setSelectedTemplateName(templateName);
   };
+
+  const handleSelectClient = (clientId: string) => {
+    if (selectedTemplateId) {
+      navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/novo?templateId=${selectedTemplateId}&client=${clientId}`);
+      setSelectedTemplateId(null);
+      setSelectedTemplateName("");
+    }
+  };
+
 
   const fetchPlans = async () => {
     if (!tenantId) return;
@@ -276,7 +289,17 @@ export default function PlatformMealPlans() {
       <TemplateLibraryModal
         open={showTemplateLibrary}
         onClose={() => setShowTemplateLibrary(false)}
-        onSelectTemplate={handleApplyTemplate}
+        onSelectTemplate={(templateId, templateName) => handleApplyTemplate(templateId, templateName)}
+      />
+
+      <SelectClientForTemplateModal
+        open={!!selectedTemplateId}
+        onClose={() => {
+          setSelectedTemplateId(null);
+          setSelectedTemplateName("");
+        }}
+        onSelectClient={handleSelectClient}
+        templateName={selectedTemplateName}
       />
 
     </PlatformPageWrapper>
