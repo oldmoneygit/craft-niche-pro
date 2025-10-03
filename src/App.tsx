@@ -20,6 +20,7 @@ import PlatformQuestionnaireResponses from "./pages/platform/PlatformQuestionnai
 import PlatformMealPlans from "./pages/platform/PlatformMealPlans";
 import PlatformMealPlanEditor from "./pages/platform/PlatformMealPlanEditor";
 import PlatformMealPlanViewer from "./pages/platform/PlatformMealPlanViewer";
+import PlatformTemplateEditor from "./pages/platform/PlatformTemplateEditor";
 import PlatformAIChat from "./pages/platform/PlatformAIChat";
 import PlatformScheduling from "./pages/platform/PlatformScheduling";
 import PlatformSettings from "./pages/platform/PlatformSettings";
@@ -62,6 +63,8 @@ const App = () => (
               <Route path="/platform/:clientId/meal-plans" element={<PlatformProtectedRoute><PlatformMealPlans /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/planos-alimentares" element={<PlatformProtectedRoute><PlatformMealPlans /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/planos-alimentares/novo" element={<PlatformProtectedRoute><PlatformMealPlanEditor /></PlatformProtectedRoute>} />
+              <Route path="/platform/templates/:templateId/editar" element={<PlatformProtectedRoute><PlatformTemplateEditor /></PlatformProtectedRoute>} />
+              <Route path="/platform/templates/:templateId/visualizar" element={<PlatformProtectedRoute><PlatformMealPlanViewer /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/planos-alimentares/:planId" element={<PlatformProtectedRoute><PlatformMealPlanViewer /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/ai-chat" element={<PlatformProtectedRoute><PlatformAIChat /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/ai-agent" element={<PlatformProtectedRoute><PlatformAIChat /></PlatformProtectedRoute>} />

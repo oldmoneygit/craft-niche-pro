@@ -35,7 +35,7 @@ interface Template {
 interface TemplateLibraryModalProps {
   open: boolean;
   onClose: () => void;
-  onSelectTemplate: (templateId: string, templateName: string) => void;
+  onSelectTemplate: (templateId: string) => void;
 }
 
 export function TemplateLibraryModal({ 
@@ -161,9 +161,8 @@ export function TemplateLibraryModal({
     t.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const handleSelectTemplate = (templateId: string, templateName: string) => {
-    onSelectTemplate(templateId, templateName);
-    onClose();
+  const handleSelectTemplate = (templateId: string) => {
+    onSelectTemplate(templateId);
   };
 
   return (
@@ -216,7 +215,7 @@ export function TemplateLibraryModal({
                   <div className="flex justify-between items-start gap-4">
                     <div 
                       className="flex-1 min-w-0 cursor-pointer"
-                      onClick={() => handleSelectTemplate(template.id, template.name)}
+                      onClick={() => handleSelectTemplate(template.id)}
                     >
                       <h3 className="font-semibold text-lg mb-1 truncate">
                         {template.name}

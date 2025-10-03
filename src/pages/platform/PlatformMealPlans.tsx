@@ -8,6 +8,7 @@ import { useClientConfig } from '@/core/contexts/ClientConfigContext';
 import PlatformPageWrapper from '@/core/layouts/PlatformPageWrapper';
 import { TemplateLibraryModal } from '@/components/platform/TemplateLibraryModal';
 import { SelectClientForTemplateModal } from '@/components/platform/SelectClientForTemplateModal';
+import { TemplatePreviewModal } from '@/components/platform/TemplatePreviewModal';
 
 export default function PlatformMealPlans() {
   const { tenantId } = useTenantId();
@@ -18,6 +19,7 @@ export default function PlatformMealPlans() {
   const [loading, setLoading] = useState(true);
   const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [showTemplatePreview, setShowTemplatePreview] = useState(false);
   const [selectedTemplateName, setSelectedTemplateName] = useState<string>("");
   const [showTemplatesDropdown, setShowTemplatesDropdown] = useState(false);
 
@@ -35,9 +37,20 @@ export default function PlatformMealPlans() {
     return () => window.removeEventListener('focus', handleFocus);
   }, [tenantId]);
 
-  const handleApplyTemplate = async (templateId: string, templateName: string) => {
+  const handleSelectFromLibrary = (templateId: string) => {
+    setSelectedTemplateId(templateId);
+    setShowTemplateLibrary(false);
+    setShowTemplatePreview(true);
+  };
+
+  const handleUseTemplate = (templateId: string, templateName: string) => {
     setSelectedTemplateId(templateId);
     setSelectedTemplateName(templateName);
+    setShowTemplatePreview(false);
+  };
+
+  const handleEditTemplate = (templateId: string) => {
+    navigate(`/platform/templates/${templateId}/editar`);
   };
 
   const handleSelectClient = (clientId: string) => {
@@ -45,6 +58,7 @@ export default function PlatformMealPlans() {
       navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/novo?templateId=${selectedTemplateId}&client=${clientId}`);
       setSelectedTemplateId(null);
       setSelectedTemplateName("");
+      setShowTemplatePreview(false);
     }
   };
 
@@ -289,11 +303,22 @@ export default function PlatformMealPlans() {
       <TemplateLibraryModal
         open={showTemplateLibrary}
         onClose={() => setShowTemplateLibrary(false)}
-        onSelectTemplate={(templateId, templateName) => handleApplyTemplate(templateId, templateName)}
+        onSelectTemplate={handleSelectFromLibrary}
+      />
+
+      <TemplatePreviewModal
+        open={showTemplatePreview}
+        onClose={() => {
+          setShowTemplatePreview(false);
+          setSelectedTemplateId(null);
+        }}
+        templateId={selectedTemplateId}
+        onUseTemplate={handleUseTemplate}
+        onEditTemplate={handleEditTemplate}
       />
 
       <SelectClientForTemplateModal
-        open={!!selectedTemplateId}
+        open={!!selectedTemplateId && !showTemplatePreview}
         onClose={() => {
           setSelectedTemplateId(null);
           setSelectedTemplateName("");
