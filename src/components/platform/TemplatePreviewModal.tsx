@@ -40,7 +40,16 @@ export function TemplatePreviewModal({
       const { data, error } = await supabase
         .from('meal_plan_templates')
         .select(`
-          *,
+          id,
+          name,
+          description,
+          reference_calories,
+          reference_protein,
+          reference_carbs,
+          reference_fat,
+          tags,
+          times_used,
+          created_at,
           meal_plan_template_meals (
             id,
             name,
@@ -60,7 +69,7 @@ export function TemplatePreviewModal({
                 lipid_g,
                 source
               ),
-              food_measures:measure_id (
+              measures:food_measures!meal_plan_template_foods_measure_id_fkey (
                 id,
                 name,
                 grams
@@ -95,7 +104,7 @@ export function TemplatePreviewModal({
 
   const calculateMealTotals = (foods: any[]) => {
     return foods.reduce((totals, food) => {
-      const grams = food.quantity * (food.food_measures?.grams || 100);
+      const grams = food.quantity * (food.measures?.grams || 100);
       const multiplier = grams / 100;
 
       return {
@@ -222,7 +231,7 @@ export function TemplatePreviewModal({
 
                         <div className="space-y-2">
                           {meal.meal_plan_template_foods?.map((food: any) => {
-                            const grams = food.quantity * (food.food_measures?.grams || 100);
+                            const grams = food.quantity * (food.measures?.grams || 100);
                             const kcal = ((food.foods?.energy_kcal || 0) * grams) / 100;
 
                             return (
@@ -233,7 +242,7 @@ export function TemplatePreviewModal({
                                 <div className="flex-1">
                                   <p className="font-medium">{food.foods?.name}</p>
                                   <p className="text-sm text-muted-foreground">
-                                    {food.quantity} {food.food_measures?.name} ({grams.toFixed(0)}g)
+                                    {food.quantity} {food.measures?.name} ({grams.toFixed(0)}g)
                                   </p>
                                 </div>
                                 <div className="text-right">
