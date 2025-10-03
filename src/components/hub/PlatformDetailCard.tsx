@@ -1,28 +1,43 @@
-import { Platform, VERTICAL_COLORS } from '@/types/hub';
+import { Platform, VERTICAL_COLORS, VERTICAL_STYLES, VERTICAL_STYLES_LIGHT } from '@/types/hub';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoveVertical as MoreVertical, TrendingUp, Users, FileText, DollarSign } from 'lucide-react';
+import { MoreVertical, TrendingUp, Users, FileText, DollarSign } from 'lucide-react';
 import { PlatformStatusBadge } from './PlatformStatusBadge';
+import { useTheme } from 'next-themes';
 
 interface PlatformDetailCardProps {
   platform: Platform;
 }
 
 export function PlatformDetailCard({ platform }: PlatformDetailCardProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark' || theme === 'system';
+
   const verticalColor = VERTICAL_COLORS[platform.vertical];
+  const darkStyles = VERTICAL_STYLES[platform.vertical];
+  const lightStyles = VERTICAL_STYLES_LIGHT[platform.vertical];
+
+  const currentStyles = isDark ? darkStyles : { ...lightStyles, color: verticalColor };
 
   return (
     <Card
-      className="relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border"
+      className="relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
       style={{
-        borderLeftColor: verticalColor,
-        borderLeftWidth: '4px'
+        background: `linear-gradient(135deg, ${currentStyles.bgStart} 0%, ${currentStyles.bgEnd} 100%)`,
+        borderLeft: `4px solid ${verticalColor}`,
+        borderColor: currentStyles.borderColor
       }}
     >
       <div
-        className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-5 -translate-y-1/2 translate-x-1/2"
-        style={{ backgroundColor: verticalColor }}
+        className="absolute top-0 right-0 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"
+        style={{
+          width: '200px',
+          height: '200px',
+          background: verticalColor,
+          opacity: 0.05,
+          filter: 'blur(40px)'
+        }}
       />
 
       <div className="p-6 relative z-10">
@@ -135,8 +150,7 @@ interface MetricItemProps {
 function MetricItem({ icon: Icon, label, value, color }: MetricItemProps) {
   return (
     <div
-      className="flex items-start gap-2 p-3 rounded-lg"
-      style={{ backgroundColor: 'var(--hub-bg-tertiary)' }}
+      className="flex items-start gap-2 p-3 rounded-lg bg-black/10 dark:bg-white/5 backdrop-blur-sm transition-colors"
     >
       <div
         className="p-1.5 rounded"
