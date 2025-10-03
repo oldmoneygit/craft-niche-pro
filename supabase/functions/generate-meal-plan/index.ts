@@ -29,14 +29,19 @@ Deno.serve(async (req: Request) => {
 
     const anthropicApiKey = Deno.env.get("ANTHROPIC_API_KEY");
     if (!anthropicApiKey) {
+      console.error("ANTHROPIC_API_KEY not found in environment");
       return new Response(
-        JSON.stringify({ error: "ANTHROPIC_API_KEY not configured" }),
+        JSON.stringify({ 
+          error: "Chave da API não configurada. Configure ANTHROPIC_API_KEY nas configurações de Secrets do Supabase." 
+        }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
+    
+    console.log("API key found, length:", anthropicApiKey.length);
 
     const systemPrompt = `Você auxilia nutricionistas gerando rascunhos de planos alimentares.
 
@@ -129,41 +134,56 @@ Retorne apenas JSON.`;
 
     console.log("Calling Anthropic API...");
 
-    const anthropicResponse = await fetch(
-      "https://api.anthropic.com/v1/messages",
-      {
-        method: "POST",
-        headers: {
-          "x-api-key": anthropicApiKey,
-          "anthropic-version": "2023-06-01",
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "claude-3-5-haiku-20241022",
-          max_tokens: 2048,
-          temperature: 0.7,
-          system: [
-            {
-              type: "text",
-              text: systemPrompt,
-              cache_control: { type: "ephemeral" },
-            },
-          ],
-          messages: [
-            {
-              role: "user",
-              content: userPrompt,
-            },
-          ],
+    let anthropicResponse;
+    try {
+      anthropicResponse = await fetch(
+        "https://api.anthropic.com/v1/messages",
+        {
+          method: "POST",
+          headers: {
+            "x-api-key": anthropicApiKey,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "claude-3-5-haiku-20241022",
+            max_tokens: 2048,
+            temperature: 0.7,
+            system: [
+              {
+                type: "text",
+                text: systemPrompt,
+                cache_control: { type: "ephemeral" },
+              },
+            ],
+            messages: [
+              {
+                role: "user",
+                content: userPrompt,
+              },
+            ],
+          }),
+        }
+      );
+    } catch (fetchError) {
+      console.error("Fetch error:", fetchError);
+      return new Response(
+        JSON.stringify({ 
+          error: "Erro ao conectar com a API da Anthropic. Verifique se a chave ANTHROPIC_API_KEY está configurada corretamente.",
+          details: fetchError instanceof Error ? fetchError.message : "Unknown error"
         }),
-      }
-    );
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
 
     if (!anthropicResponse.ok) {
       const errorText = await anthropicResponse.text();
       console.error("Anthropic API error:", errorText);
       return new Response(
-        JSON.stringify({ error: "Anthropic API error", details: errorText }),
+        JSON.stringify({ error: "Erro da API Anthropic", details: errorText }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
