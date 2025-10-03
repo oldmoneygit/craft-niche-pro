@@ -90,23 +90,24 @@ export default function PlatformMealPlanEditor() {
         .single()
         .then(({ data }) => {
           if (data) {
+            const clientData = data as any;
             setClientProfile({
-              id: data.id,
-              name: data.name,
-              age: data.age || 30,
-              gender: data.gender || 'other',
-              height_cm: data.height_cm || 170,
-              weight_kg: data.weight_kg || 70,
-              activity_level: data.activity_level || 'moderate',
-              goal: data.goal || 'maintenance',
-              dietary_restrictions: data.dietary_restrictions || [],
-              allergies: data.allergies || [],
-              dislikes: data.dislikes || [],
-              meal_preferences: data.meal_preferences || [],
-              budget: data.budget || 'medium',
-              medical_conditions: data.medical_conditions || [],
-              medications: data.medications || [],
-              notes: data.notes || ''
+              id: clientData.id,
+              name: clientData.name,
+              age: clientData.age || 30,
+              gender: clientData.gender || 'other',
+              height_cm: clientData.height_cm || clientData.height || 170,
+              weight_kg: clientData.weight_kg || clientData.weight_current || 70,
+              activity_level: clientData.activity_level || 'moderate',
+              goal: (clientData.goal || 'maintenance') as 'maintenance' | 'weight_loss' | 'muscle_gain' | 'health',
+              dietary_restrictions: clientData.dietary_restrictions || [],
+              allergies: typeof clientData.allergies === 'string' ? [clientData.allergies] : (clientData.allergies || []),
+              dislikes: clientData.dislikes || [],
+              meal_preferences: clientData.meal_preferences || [],
+              budget: clientData.budget || 'medium',
+              medical_conditions: clientData.medical_conditions || [],
+              medications: clientData.medications || [],
+              notes: clientData.notes || ''
             });
           }
         });
@@ -149,9 +150,12 @@ export default function PlatformMealPlanEditor() {
             if (!measure) {
               measure = {
                 id: `temp-${Date.now()}`,
+                food_id: food.id,
                 measure_name: 'gramas',
                 grams: 100,
-                is_default: true
+                grams_equivalent: 100,
+                is_default: true,
+                created_at: new Date().toISOString()
               };
             }
 
@@ -280,16 +284,18 @@ export default function PlatformMealPlanEditor() {
       const { data: plan, error: planError } = await supabase
         .from('meal_plans')
         .insert({
-          tenant_id: tenantId,
           client_id: clientId,
-          title: planName,
-          description: planDescription,
+          name: planName,
+          start_date: new Date().toISOString().split('T')[0],
+          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           calorie_target: goals.kcal,
           protein_target_g: goals.protein,
           carb_target_g: goals.carb,
           fat_target_g: goals.fat,
-          status: 'active'
-        })
+          status: 'ativo',
+          notes: planDescription,
+          plan_data: { breakfast: [], lunch: [], dinner: [], snacks: [] }
+        } as any)
         .select()
         .single();
 
@@ -311,7 +317,7 @@ export default function PlatformMealPlanEditor() {
 
         for (const item of meal.items) {
           await supabase
-            .from('meal_plan_items')
+            .from('meal_items')
             .insert({
               meal_id: mealData.id,
               food_id: item.food_id,

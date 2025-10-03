@@ -212,6 +212,13 @@ export default function PlatformClients() {
       height: '',
       goal: '',
       allergies: '',
+      age: '',
+      gender: '',
+      height_cm: '',
+      weight_kg: '',
+      activity_level: '',
+      dietary_restrictions: [],
+      notes: '',
     });
     setEditingClient(null);
   };
@@ -250,13 +257,6 @@ export default function PlatformClients() {
           height: validatedData.height || null,
           goal: validatedData.goal || null,
           allergies: validatedData.allergies || null,
-          age: validatedData.age || null,
-          gender: validatedData.gender || null,
-          height_cm: validatedData.height_cm || null,
-          weight_kg: validatedData.weight_kg || null,
-          activity_level: validatedData.activity_level || null,
-          dietary_restrictions: validatedData.dietary_restrictions || [],
-          notes: validatedData.notes || null,
           tenant_id: tenant!.id,
         });
       }
