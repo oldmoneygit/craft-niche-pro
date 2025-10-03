@@ -2,9 +2,9 @@ import { Platform, VERTICAL_COLORS, VERTICAL_STYLES, VERTICAL_STYLES_LIGHT } fro
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoveVertical as MoreVertical, TrendingUp, Users, FileText, DollarSign } from 'lucide-react';
+import { MoreVertical, TrendingUp, Users, FileText, DollarSign } from 'lucide-react';
 import { PlatformStatusBadge } from './PlatformStatusBadge';
-import { useTheme } from 'next-themes';
+import { useTheme } from '@/components/providers/ThemeProvider';
 
 interface PlatformDetailCardProps {
   platform: Platform;
@@ -12,13 +12,25 @@ interface PlatformDetailCardProps {
 
 export function PlatformDetailCard({ platform }: PlatformDetailCardProps) {
   const { theme } = useTheme();
-  const isDark = theme === 'dark' || theme === 'system';
+  const isDark = theme === 'dark';
+
+  console.log('🎨 Theme Debug:', {
+    theme,
+    isDark,
+    vertical: platform.vertical
+  });
 
   const verticalColor = VERTICAL_COLORS[platform.vertical];
   const darkStyles = VERTICAL_STYLES[platform.vertical];
   const lightStyles = VERTICAL_STYLES_LIGHT[platform.vertical];
 
   const currentStyles = isDark ? darkStyles : { ...lightStyles, color: verticalColor };
+
+  console.log('🖌️ Styles Applied:', {
+    bgStart: currentStyles.bgStart,
+    bgEnd: currentStyles.bgEnd,
+    borderColor: currentStyles.borderColor
+  });
 
   return (
     <Card
