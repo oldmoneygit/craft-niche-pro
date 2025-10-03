@@ -35,7 +35,9 @@ export const QuickPortionDialog = ({ food, isOpen, onClose, onConfirm }: QuickPo
           food_id: food.id,
           measure_name: 'gramas (100g)',
           grams: 100,
-          is_default: true
+          grams_equivalent: 100,
+          is_default: true,
+          created_at: new Date().toISOString()
         }];
       }
 

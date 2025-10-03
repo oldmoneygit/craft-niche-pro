@@ -837,6 +837,7 @@ export const AddFoodToMealModal = ({
             food_id: food.id,
             measure_name: 'gramas',
             grams: 100,
+            grams_equivalent: 100,
             is_default: true,
             created_at: new Date().toISOString()
           },
@@ -845,6 +846,7 @@ export const AddFoodToMealModal = ({
             food_id: food.id,
             measure_name: 'gramas',
             grams: 50,
+            grams_equivalent: 50,
             is_default: false,
             created_at: new Date().toISOString()
           },
@@ -853,6 +855,7 @@ export const AddFoodToMealModal = ({
             food_id: food.id,
             measure_name: 'gramas',
             grams: 200,
+            grams_equivalent: 200,
             is_default: false,
             created_at: new Date().toISOString()
           }

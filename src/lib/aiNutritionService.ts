@@ -61,37 +61,23 @@ export const generateAIBasedMealPlan = async (
 
     console.log('🤖 Chamando Edge Function...');
 
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      throw new Error('Você precisa estar autenticado para gerar planos');
-    }
-
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-    const functionUrl = `${supabaseUrl}/functions/v1/generate-meal-plan`;
-
-    const response = await fetch(functionUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${session.access_token}`,
-        'Content-Type': 'application/json',
-        'apikey': supabaseAnonKey
-      },
-      body: JSON.stringify({
+    const { data, error: functionError } = await supabase.functions.invoke('generate-meal-plan', {
+      body: {
         profile,
         calculatedData
-      })
+      }
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('❌ Erro da Edge Function:', errorData);
-      throw new Error(errorData.error || 'Erro ao gerar plano. Tente novamente.');
+    if (functionError) {
+      console.error('❌ Erro da Edge Function:', functionError);
+      throw new Error(functionError.message || 'Erro ao gerar plano. Tente novamente.');
     }
 
-    const aiResponse = await response.json();
+    if (!data || !data.meals) {
+      throw new Error('Resposta inválida da Edge Function');
+    }
+
+    const aiResponse = data;
 
     console.log('✅ Resposta recebida da Edge Function');
     console.log('📋 Refeições sugeridas:', aiResponse.meals?.length || 0);

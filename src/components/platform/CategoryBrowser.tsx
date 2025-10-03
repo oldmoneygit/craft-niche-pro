@@ -249,10 +249,10 @@ export const CategoryBrowser = ({ onSelectFood }: CategoryBrowserProps) => {
                         {food.name}
                       </p>
                       <Badge
-                        variant={food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'default' : 'secondary'}
+                        variant={food.source?.includes('TACO') ? 'default' : 'secondary'}
                         className="text-xs flex-shrink-0"
                       >
-                        {food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'TACO' : 'OFF'}
+                        {food.source?.includes('TACO') ? 'TACO' : 'OFF'}
                       </Badge>
                     </div>
                     {food.brand && (
