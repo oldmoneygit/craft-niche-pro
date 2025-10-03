@@ -64,16 +64,6 @@ export default function PlatformMealPlans() {
     }
   };
 
-  const handleEditTemplate = (templateId: string) => {
-    console.log('✏️ handleEditTemplate chamado com:', templateId);
-    toast({
-      title: "Edição de Template",
-      description: "Use 'Usar Template' para criar um novo plano baseado neste template e edite conforme necessário.",
-      duration: 5000
-    });
-    setShowTemplatePreview(false);
-  };
-
   const handleSelectClient = async (clientId: string) => {
     console.log('📋 Aplicando template', selectedTemplateId, 'ao cliente', clientId);
 
@@ -360,7 +350,6 @@ export default function PlatformMealPlans() {
         }}
         templateId={selectedTemplateId}
         onUseTemplate={handleUseTemplate}
-        onEditTemplate={handleEditTemplate}
       />
 
       <SelectClientForTemplateModal

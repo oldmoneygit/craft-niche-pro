@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Pencil, Users, ArrowRight } from "lucide-react";
+import { Users, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -12,15 +12,13 @@ interface TemplatePreviewModalProps {
   onClose: () => void;
   templateId: string | null;
   onUseTemplate: (templateId: string, templateName: string) => void;
-  onEditTemplate: (templateId: string) => void;
 }
 
 export function TemplatePreviewModal({
   open,
   onClose,
   templateId,
-  onUseTemplate,
-  onEditTemplate
+  onUseTemplate
 }: TemplatePreviewModalProps) {
   const [template, setTemplate] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -293,17 +291,6 @@ export function TemplatePreviewModal({
             <div className="flex gap-2 justify-end pt-4 border-t">
               <Button variant="outline" onClick={onClose}>
                 Cancelar
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  onEditTemplate(templateId!);
-                  onClose();
-                }}
-                className="gap-2"
-              >
-                <Pencil className="h-4 w-4" />
-                Editar Template
               </Button>
               <Button
                 onClick={() => {
