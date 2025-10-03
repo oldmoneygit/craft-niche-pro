@@ -43,22 +43,45 @@ export default function PlatformMealPlans() {
     setShowTemplatePreview(true);
   };
 
-  const handleUseTemplate = (templateId: string, templateName: string) => {
+  const handleUseTemplate = (templateId: string) => {
     setSelectedTemplateId(templateId);
-    setSelectedTemplateName(templateName);
     setShowTemplatePreview(false);
   };
 
   const handleEditTemplate = (templateId: string) => {
-    navigate(`/platform/templates/${templateId}/editar`);
+    toast({
+      title: "Edição de Template",
+      description: "Use 'Usar Template' para criar um novo plano baseado neste template e edite conforme necessário.",
+      duration: 5000
+    });
+    setShowTemplatePreview(false);
   };
 
-  const handleSelectClient = (clientId: string) => {
-    if (selectedTemplateId) {
-      navigate(`/platform/${clientConfig?.subdomain}/planos-alimentares/novo?templateId=${selectedTemplateId}&client=${clientId}`);
+  const handleSelectClient = async (clientId: string) => {
+    if (!selectedTemplateId) return;
+
+    try {
+      navigate(
+        `/platform/${clientId}/planos-alimentares/novo?templateId=${selectedTemplateId}`
+      );
+
+      await supabase.rpc('increment_template_usage', {
+        template_id: selectedTemplateId
+      });
+
+      toast({
+        title: "Template selecionado!",
+        description: "Ajuste o plano conforme necessário e salve."
+      });
+
       setSelectedTemplateId(null);
       setSelectedTemplateName("");
-      setShowTemplatePreview(false);
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive"
+      });
     }
   };
 
