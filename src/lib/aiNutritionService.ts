@@ -1,24 +1,6 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { ClientProfile } from '@/types/clientProfile';
 import { calculateBMR, calculateTDEE, calculateTargetCalories, calculateMacroDistribution } from './nutritionEngine';
-
-const getApiKey = (): string => {
-  const key = import.meta.env.VITE_ANTHROPIC_API_KEY;
-
-  if (!key) {
-    console.error('❌ VITE_ANTHROPIC_API_KEY não encontrada');
-    console.log('📋 Variáveis disponíveis:', Object.keys(import.meta.env));
-    throw new Error('Configure VITE_ANTHROPIC_API_KEY no arquivo .env');
-  }
-
-  console.log('✅ Chave API carregada:', key.substring(0, 20) + '...');
-  return key;
-};
-
-const anthropic = new Anthropic({
-  apiKey: getApiKey(),
-  dangerouslyAllowBrowser: true
-});
+import { supabase } from '@/integrations/supabase/client';
 
 interface AIGeneratedMealPlan {
   targetCalories: number;
@@ -40,99 +22,6 @@ interface AIGeneratedMealPlan {
   reasoning: string;
   educationalNotes: string;
 }
-
-const buildSystemPrompt = (): string => {
-  return `Você auxilia nutricionistas gerando rascunhos de planos alimentares.
-
-LIMITAÇÕES:
-- Você sugere, o nutricionista valida
-- Não prescreve - apenas economiza tempo
-- Baseado em diretrizes brasileiras
-
-DIRETRIZES:
-- Alimentos brasileiros acessíveis
-- Distribua macros equilibradamente
-- Porções realistas e variadas
-
-FORMATO JSON:
-{
-  "meals": [
-    {
-      "name": "string",
-      "time": "HH:MM",
-      "targetCalories": number,
-      "items": [
-        {
-          "food_name": "string",
-          "quantity": number,
-          "measure": "string",
-          "estimated_kcal": number,
-          "estimated_protein": number,
-          "estimated_carb": number,
-          "estimated_fat": number
-        }
-      ]
-    }
-  ],
-  "reasoning": "string",
-  "educationalNotes": "string"
-}`;
-};
-
-const buildUserPrompt = (profile: ClientProfile, calculatedData: any): string => {
-  const activityLabels = {
-    sedentary: 'Sedentário',
-    light: 'Leve',
-    moderate: 'Moderado',
-    intense: 'Intenso',
-    very_intense: 'Muito Intenso'
-  };
-
-  const goalLabels = {
-    maintenance: 'Manutenção de peso',
-    weight_loss: 'Perda de peso',
-    muscle_gain: 'Ganho de massa muscular',
-    health: 'Saúde geral'
-  };
-
-  return `PERFIL:
-${profile.name}, ${profile.age}a, ${profile.gender === 'male' ? 'M' : 'F'}, ${profile.weight_kg}kg, ${profile.height_cm}cm
-Atividade: ${activityLabels[profile.activity_level]}
-Objetivo: ${goalLabels[profile.goal]}
-
-RESTRIÇÕES:
-${profile.dietary_restrictions.length > 0 ? profile.dietary_restrictions.join(', ') : 'Nenhuma'}
-${profile.allergies.length > 0 ? 'Alergias: ' + profile.allergies.join(', ') : ''}
-${profile.dislikes.length > 0 ? 'Não gosta: ' + profile.dislikes.join(', ') : ''}
-${profile.medical_conditions.length > 0 ? 'Condições: ' + profile.medical_conditions.join(', ') : ''}
-${profile.notes ? 'Obs: ' + profile.notes : ''}
-
-METAS:
-Meta: ${calculatedData.targetCalories} kcal (P:${calculatedData.macros.protein_g}g C:${calculatedData.macros.carb_g}g G:${calculatedData.macros.fat_g}g)
-
-REFEIÇÕES (5):
-Café(08:00): ${Math.round(calculatedData.targetCalories * 0.20)}kcal
-Lanche1(10:00): ${Math.round(calculatedData.targetCalories * 0.10)}kcal
-Almoço(12:00): ${Math.round(calculatedData.targetCalories * 0.35)}kcal
-Lanche2(15:00): ${Math.round(calculatedData.targetCalories * 0.10)}kcal
-Jantar(19:00): ${Math.round(calculatedData.targetCalories * 0.25)}kcal
-
-ALIMENTOS (use EXATOS):
-Pão, forma, integral | Pão, francês | Ovo, cozido | Banana, prata | Maçã | Mamão | Laranja
-Leite, vaca, desnatado | Leite, vaca, integral | Iogurte, natural | Arroz, integral, cozido
-Arroz, branco, cozido | Feijão, carioca, cozido | Feijão, preto, cozido | Frango, peito, grelhado
-Carne, bovina, sem gordura | Macarrão, cozido | Alface | Tomate | Cenoura, crua
-Brócolis, cozido | Batata, cozida | Aveia, flocos | Azeite de oliva | Queijo, minas
-
-REGRAS:
-- Quantity em GRAMAS (não unidades)
-- Measure: "gramas" ou "ml"
-- 3-4 alimentos/refeição
-- Respeite restrições
-- JSON válido só
-
-Retorne apenas JSON.`;
-};
 
 export const generateAIBasedMealPlan = async (
   profile: ClientProfile
@@ -170,46 +59,41 @@ export const generateAIBasedMealPlan = async (
 
     console.log('📊 Cálculos científicos:', calculatedData);
 
-    console.log('🤖 Chamando Claude API...');
+    console.log('🤖 Chamando Edge Function...');
 
-    const message = await anthropic.messages.create({
-      model: 'claude-3-5-haiku-20241022',
-      max_tokens: 2048,
-      temperature: 0.7,
-      system: [
-        {
-          type: "text" as const,
-          text: buildSystemPrompt(),
-          cache_control: { type: "ephemeral" as const }
-        }
-      ],
-      messages: [
-        {
-          role: 'user',
-          content: buildUserPrompt(profile, calculatedData)
-        }
-      ]
-    });
+    const { data: { session } } = await supabase.auth.getSession();
 
-    console.log('✅ Resposta recebida da Claude API');
-
-    const responseText = message.content[0].type === 'text'
-      ? message.content[0].text
-      : '';
-
-    console.log('📝 Resposta (primeiros 300 chars):', responseText.substring(0, 300));
-
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-
-    if (!jsonMatch) {
-      console.error('❌ Resposta não contém JSON válido');
-      console.log('Resposta completa:', responseText);
-      throw new Error('Claude retornou resposta em formato inválido. Tente novamente.');
+    if (!session) {
+      throw new Error('Você precisa estar autenticado para gerar planos');
     }
 
-    const aiResponse = JSON.parse(jsonMatch[0]);
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-    console.log('✅ JSON parseado com sucesso');
+    const functionUrl = `${supabaseUrl}/functions/v1/generate-meal-plan`;
+
+    const response = await fetch(functionUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+        'apikey': supabaseAnonKey
+      },
+      body: JSON.stringify({
+        profile,
+        calculatedData
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('❌ Erro da Edge Function:', errorData);
+      throw new Error(errorData.error || 'Erro ao gerar plano. Tente novamente.');
+    }
+
+    const aiResponse = await response.json();
+
+    console.log('✅ Resposta recebida da Edge Function');
     console.log('📋 Refeições sugeridas:', aiResponse.meals?.length || 0);
 
     return {
