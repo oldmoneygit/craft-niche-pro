@@ -34,6 +34,97 @@ export default function PlatformMealPlanEditor() {
   const [searchParams] = useSearchParams();
   const clientId = searchParams.get('client');
 
+  // Carregar template se fornecido na URL
+  useEffect(() => {
+    const templateId = searchParams.get('templateId');
+    if (templateId) {
+      loadTemplateData(templateId);
+    }
+  }, [searchParams]);
+
+  const loadTemplateData = async (templateId: string) => {
+    try {
+      const { data: template, error: templateError } = await supabase
+        .from('meal_plan_templates')
+        .select(`
+          *,
+          meal_plan_template_meals (
+            *,
+            meal_plan_template_foods (
+              *,
+              foods:food_id (*),
+              food_measures:measure_id (*)
+            )
+          )
+        `)
+        .eq('id', templateId)
+        .order('meal_plan_template_meals(order_index)')
+        .single();
+
+      if (templateError) throw templateError;
+      if (!template) return;
+
+      // Incrementar contador de uso
+      await supabase
+        .from('meal_plan_templates')
+        .update({ times_used: (template.times_used || 0) + 1 })
+        .eq('id', templateId);
+
+      // Popular formulário com dados do template
+      setPlanName(`${template.name} - Cópia`);
+      setPlanDescription(template.description || '');
+      setGoals({
+        kcal: template.reference_calories,
+        protein: template.reference_protein,
+        carb: template.reference_carbs,
+        fat: template.reference_fat
+      });
+
+      // Converter estrutura do template para meals
+      if (template.meal_plan_template_meals && template.meal_plan_template_meals.length > 0) {
+        const convertedMeals = template.meal_plan_template_meals.map((meal: any) => ({
+          id: `temp-${Math.random()}`,
+          name: meal.name,
+          time: meal.time,
+          items: meal.meal_plan_template_foods?.map((food: any) => {
+            const grams = food.quantity * (food.food_measures?.grams || 100);
+            const multiplier = grams / 100;
+            
+            return {
+              id: `temp-${Math.random()}`,
+              food_id: food.food_id,
+              measure_id: food.measure_id,
+              quantity: food.quantity,
+              grams_total: grams,
+              kcal_total: Math.round((food.foods?.energy_kcal || 0) * multiplier),
+              protein_total: Math.round((food.foods?.protein_g || 0) * multiplier * 10) / 10,
+              carb_total: Math.round((food.foods?.carbohydrate_g || food.foods?.carbohydrates_g || food.foods?.carbs_g || 0) * multiplier * 10) / 10,
+              fat_total: Math.round((food.foods?.lipid_g || food.foods?.lipids_g || food.foods?.fat_g || 0) * multiplier * 10) / 10,
+              foods: food.foods,
+              measures: food.food_measures
+            };
+          }) || []
+        }));
+
+        setMeals(convertedMeals);
+      }
+
+      toast({
+        title: "Template carregado!",
+        description: `Plano baseado em "${template.name}". Ajuste conforme necessário e salve.`
+      });
+
+    } catch (error: any) {
+      console.error('Erro ao carregar template:', error);
+      toast({
+        title: "Erro ao carregar template",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+
   const [planName, setPlanName] = useState('');
   const [planDescription, setPlanDescription] = useState('');
   const [meals, setMeals] = useState<Meal[]>([
