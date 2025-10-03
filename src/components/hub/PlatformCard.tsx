@@ -18,22 +18,22 @@ interface PlatformCardProps {
 const verticalConfig = {
   nutrition: {
     color: '#10b981',
-    darkBgStart: '#18181b', darkBgEnd: '#1a2e1e', darkBorder: '#22543d',
+    darkBgStart: '#18181b', darkBgEnd: '#1a3d2e', darkBorder: '#2d5a45',
     lightBgStart: '#f0fdf4', lightBgEnd: '#dcfce7', lightBorder: '#bbf7d0',
   },
   fitness: {
     color: '#f97316',
-    darkBgStart: '#18181b', darkBgEnd: '#2d1810', darkBorder: '#7c2d12',
+    darkBgStart: '#18181b', darkBgEnd: '#3d2010', darkBorder: '#9c3d12',
     lightBgStart: '#fff7ed', lightBgEnd: '#ffedd5', lightBorder: '#fed7aa',
   },
   wellness: {
     color: '#06b6d4',
-    darkBgStart: '#18181b', darkBgEnd: '#0e2730', darkBorder: '#164e63',
+    darkBgStart: '#18181b', darkBgEnd: '#0e3d4a', darkBorder: '#1e6b7d',
     lightBgStart: '#ecfeff', lightBgEnd: '#cffafe', lightBorder: '#a5f3fc',
   },
   mental: {
     color: '#a855f7',
-    darkBgStart: '#18181b', darkBgEnd: '#2d1b40', darkBorder: '#6b21a8',
+    darkBgStart: '#18181b', darkBgEnd: '#3d1b50', darkBorder: '#7b21a8',
     lightBgStart: '#faf5ff', lightBgEnd: '#f3e8ff', lightBorder: '#e9d5ff',
   },
 };
@@ -53,7 +53,7 @@ export function PlatformCard({ vertical, title, subtitle, badge, metrics }: Plat
     >
       <div
         className="absolute top-0 right-0 w-48 h-48 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"
-        style={{ background: config.color, opacity: 0.05 }}
+        style={{ background: config.color, opacity: 0.08 }}
       />
 
       <div className="relative z-10 flex items-start justify-between mb-6">

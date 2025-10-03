@@ -1,5 +1,5 @@
 import React from 'react';
-import { Chrome as Home, Building2, Users, ChartBar as BarChart3, Settings } from 'lucide-react';
+import { Home, Building2, Users, BarChart3, Settings } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 
 const navItems = [
@@ -14,7 +14,7 @@ export function HubSidebar() {
   const location = useLocation();
 
   return (
-    <aside className="w-72 bg-zinc-900 border-r border-zinc-800 p-6 flex flex-col transition-colors duration-300">
+    <aside className="w-72 bg-zinc-900 border-r border-zinc-800 p-6 flex flex-col transition-colors duration-300 relative z-10">
       <div className="flex items-center gap-3 mb-10 pb-6 border-b border-zinc-800">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
           <span className="text-white font-black text-lg">K</span>
