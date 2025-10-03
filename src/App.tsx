@@ -2,11 +2,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ClientConfigProvider } from "@/core/contexts/ClientConfigContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import NotFound from "./pages/NotFound";
+import { HubDashboard } from "./pages/hub/HubDashboard";
 import PlatformDashboard from "./pages/platform/PlatformDashboard";
 import PlatformLogin from "./pages/platform/PlatformLogin";
 import PlatformAuth from "./pages/platform/PlatformAuth";
@@ -39,15 +41,23 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <ClientConfigProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              {/* Redirect root to gabriel-gandin platform */}
-              <Route path="/" element={<PlatformLogin />} />
+    <ThemeProvider>
+      <TooltipProvider>
+        <AuthProvider>
+          <ClientConfigProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                {/* Hub Routes */}
+                <Route path="/hub/dashboard" element={<HubDashboard />} />
+                <Route path="/hub/platforms" element={<div className="p-10 text-white">Platforms Page - Em desenvolvimento</div>} />
+                <Route path="/hub/clients" element={<div className="p-10 text-white">Clients Page - Em desenvolvimento</div>} />
+                <Route path="/hub/analytics" element={<div className="p-10 text-white">Analytics Page - Em desenvolvimento</div>} />
+                <Route path="/hub/settings" element={<div className="p-10 text-white">Settings Page - Em desenvolvimento</div>} />
+
+                {/* Redirect root to hub */}
+                <Route path="/" element={<Navigate to="/hub/dashboard" replace />} />
               
               {/* Platform Routes */}
               <Route path="/platform/:clientId/login" element={<PlatformAuth />} />
@@ -91,6 +101,7 @@ const App = () => (
         </ClientConfigProvider>
       </AuthProvider>
     </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
