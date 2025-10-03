@@ -291,12 +291,26 @@ export default function PlatformMealPlanEditor() {
       return;
     }
 
+    if (!tenantId) {
+      toast({
+        title: 'Erro de autenticação',
+        description: 'Tenant não encontrado. Faça login novamente.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setSaving(true);
     try {
+      console.log('💾 Salvando plano alimentar...');
+      console.log('Client ID:', clientId);
+      console.log('Tenant ID:', tenantId);
+      
       const { data: plan, error: planError } = await supabase
         .from('meal_plans')
         .insert({
           client_id: clientId,
+          tenant_id: tenantId,
           name: planName,
           start_date: new Date().toISOString().split('T')[0],
           end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -311,8 +325,14 @@ export default function PlatformMealPlanEditor() {
         .select()
         .single();
 
-      if (planError) throw planError;
+      if (planError) {
+        console.error('❌ Erro ao criar meal_plan:', planError);
+        throw planError;
+      }
+      
+      console.log('✅ Plano criado:', plan.id);
 
+      console.log('💾 Salvando refeições...');
       for (const meal of meals) {
         const { data: mealData, error: mealError } = await supabase
           .from('meal_plan_meals')
@@ -325,30 +345,51 @@ export default function PlatformMealPlanEditor() {
           .select()
           .single();
 
-        if (mealError) throw mealError;
+        if (mealError) {
+          console.error('❌ Erro ao criar refeição:', mealError);
+          throw mealError;
+        }
 
-        for (const item of meal.items) {
-          await supabase
-            .from('meal_items')
-            .insert({
-              meal_id: mealData.id,
-              food_id: item.food_id,
-              measure_id: item.measure_id,
-              quantity: item.quantity
-            });
+        console.log(`✅ Refeição criada: ${meal.name}`);
+
+        if (meal.items.length > 0) {
+          for (const item of meal.items) {
+            const { error: itemError } = await supabase
+              .from('meal_items')
+              .insert({
+                meal_id: mealData.id,
+                food_id: item.food_id,
+                measure_id: item.measure_id,
+                quantity: item.quantity,
+                kcal_total: item.kcal_total,
+                protein_total: item.protein_total,
+                carb_total: item.carb_total,
+                fat_total: item.fat_total,
+                grams_total: item.grams_total || (item.quantity * (item.measure?.grams || 100))
+              });
+            
+            if (itemError) {
+              console.error('❌ Erro ao adicionar alimento:', itemError);
+              throw itemError;
+            }
+            
+            console.log(`  ✅ Adicionado: ${item.food?.name}`);
+          }
         }
       }
+      
+      console.log('✅ Plano completo salvo com sucesso!');
 
       toast({
         title: 'Plano salvo com sucesso!',
         description: 'O plano alimentar foi criado'
       });
       navigate(-1);
-    } catch (error) {
-      console.error('Error saving plan:', error);
+    } catch (error: any) {
+      console.error('❌ Erro completo ao salvar:', error);
       toast({
         title: 'Erro ao salvar',
-        description: 'Tente novamente',
+        description: error.message || 'Tente novamente',
         variant: 'destructive'
       });
     } finally {
