@@ -165,46 +165,85 @@ export type Database = {
       }
       clients: {
         Row: {
+          activity_level: string | null
+          age: number | null
           allergies: string | null
           birth_date: string | null
+          budget: string | null
           created_at: string
+          dietary_restrictions: string[] | null
+          dislikes: string[] | null
           email: string | null
+          gender: string | null
           goal: string | null
           height: number | null
+          height_cm: number | null
           id: string
+          meal_preferences: string[] | null
+          medical_conditions: string[] | null
+          medications: string[] | null
           name: string
+          notes: string | null
           phone: string | null
+          target_weight_kg: number | null
           tenant_id: string
           updated_at: string
           weight_current: number | null
+          weight_kg: number | null
         }
         Insert: {
+          activity_level?: string | null
+          age?: number | null
           allergies?: string | null
           birth_date?: string | null
+          budget?: string | null
           created_at?: string
+          dietary_restrictions?: string[] | null
+          dislikes?: string[] | null
           email?: string | null
+          gender?: string | null
           goal?: string | null
           height?: number | null
+          height_cm?: number | null
           id?: string
+          meal_preferences?: string[] | null
+          medical_conditions?: string[] | null
+          medications?: string[] | null
           name: string
+          notes?: string | null
           phone?: string | null
+          target_weight_kg?: number | null
           tenant_id: string
           updated_at?: string
           weight_current?: number | null
+          weight_kg?: number | null
         }
         Update: {
+          activity_level?: string | null
+          age?: number | null
           allergies?: string | null
           birth_date?: string | null
+          budget?: string | null
           created_at?: string
+          dietary_restrictions?: string[] | null
+          dislikes?: string[] | null
           email?: string | null
+          gender?: string | null
           goal?: string | null
           height?: number | null
+          height_cm?: number | null
           id?: string
+          meal_preferences?: string[] | null
+          medical_conditions?: string[] | null
+          medications?: string[] | null
           name?: string
+          notes?: string | null
           phone?: string | null
+          target_weight_kg?: number | null
           tenant_id?: string
           updated_at?: string
           weight_current?: number | null
+          weight_kg?: number | null
         }
         Relationships: [
           {
@@ -839,6 +878,141 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      meal_plan_template_foods: {
+        Row: {
+          created_at: string | null
+          food_id: string
+          id: string
+          meal_id: string
+          measure_id: string
+          quantity: number
+        }
+        Insert: {
+          created_at?: string | null
+          food_id: string
+          id?: string
+          meal_id: string
+          measure_id: string
+          quantity: number
+        }
+        Update: {
+          created_at?: string | null
+          food_id?: string
+          id?: string
+          meal_id?: string
+          measure_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plan_template_foods_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meal_plan_template_foods_meal_id_fkey"
+            columns: ["meal_id"]
+            isOneToOne: false
+            referencedRelation: "meal_plan_template_meals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meal_plan_template_foods_measure_id_fkey"
+            columns: ["measure_id"]
+            isOneToOne: false
+            referencedRelation: "food_measures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meal_plan_template_meals: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          order_index: number
+          template_id: string
+          time: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          order_index: number
+          template_id: string
+          time?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          order_index?: number
+          template_id?: string
+          time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plan_template_meals_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "meal_plan_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meal_plan_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          objective: string | null
+          reference_calories: number
+          reference_carbs: number
+          reference_fat: number
+          reference_protein: number
+          tags: string[] | null
+          tenant_id: string
+          times_used: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          id?: string
+          name: string
+          objective?: string | null
+          reference_calories: number
+          reference_carbs: number
+          reference_fat: number
+          reference_protein: number
+          tags?: string[] | null
+          tenant_id: string
+          times_used?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
+          objective?: string | null
+          reference_calories?: number
+          reference_carbs?: number
+          reference_fat?: number
+          reference_protein?: number
+          tags?: string[] | null
+          tenant_id?: string
+          times_used?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       meal_plans: {
         Row: {
