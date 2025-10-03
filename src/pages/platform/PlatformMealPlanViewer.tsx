@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { AddFoodToMealModal } from '@/components/platform/AddFoodToMealModal';
+import { InlineFoodSearch } from '@/components/platform/InlineFoodSearch';
 import { EditPortionModal } from '@/components/platform/EditPortionModal';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -37,9 +37,9 @@ export default function PlatformMealPlanViewer() {
   const [originalMeals, setOriginalMeals] = useState<any[]>([]);
   
   // Estados para modais
-  const [addingToMeal, setAddingToMeal] = useState<string | null>(null);
   const [replacingFood, setReplacingFood] = useState<{ mealId: string; oldFoodItemId: string } | null>(null);
   const [editingPortion, setEditingPortion] = useState<FoodItemToEdit | null>(null);
+  const [showSearchForMeal, setShowSearchForMeal] = useState<string | null>(null);
 
   useEffect(() => {
     if (planId) loadMealPlan();
@@ -223,73 +223,40 @@ export default function PlatformMealPlanViewer() {
     }
   };
 
-  const handleAddOrReplaceFood = async (item: any) => {
+  const handleAddFood = async (mealId: string, item: any) => {
     try {
-      const mealId = addingToMeal;
-      if (!mealId) return;
+      const tempId = `temp-${Date.now()}`;
 
-      if (replacingFood) {
-        // ⭐ SUBSTITUIR APENAS NO ESTADO LOCAL
-        setMeals(meals.map(m => ({
+      setMeals(meals.map(m =>
+        m.id === mealId ? {
           ...m,
-          meal_items: m.meal_items.map((mealItem: any) => 
-            mealItem.id === replacingFood.oldFoodItemId ? {
-              id: mealItem.id, // Manter ID original
+          meal_items: [
+            ...(m.meal_items || []),
+            {
+              id: tempId,
               quantity: item.quantity,
-              grams_total: item.grams_total,
-              kcal_total: item.kcal_total,
-              protein_total: item.protein_total,
-              carb_total: item.carb_total,
-              fat_total: item.fat_total,
-              foods: item.food,
-              measures: item.measure,
+              grams_total: item.grams,
+              kcal_total: item.kcal,
+              protein_total: item.protein,
+              carb_total: item.carbs,
+              fat_total: item.fat,
+              foods: { name: item.food_name },
+              measures: { measure_name: item.measure_name },
               food_id: item.food_id,
-              measure_id: item.measure_id
-            } : mealItem
-          )
-        })));
+              measure_id: item.measure_id,
+              _isNew: true
+            }
+          ]
+        } : m
+      ));
 
-        toast({
-          title: 'Alimento substituído',
-          description: 'Clique em "Salvar Alterações" para confirmar',
-          duration: 2000
-        });
-        setReplacingFood(null);
-      } else {
-        // ⭐ ADICIONAR APENAS NO ESTADO LOCAL (com ID temporário)
-        const tempId = `temp-${Date.now()}`;
-        
-        setMeals(meals.map(m => 
-          m.id === mealId ? {
-            ...m,
-            meal_items: [
-              ...(m.meal_items || []),
-              {
-                id: tempId,
-                quantity: item.quantity,
-                grams_total: item.grams_total,
-                kcal_total: item.kcal_total,
-                protein_total: item.protein_total,
-                carb_total: item.carb_total,
-                fat_total: item.fat_total,
-                foods: item.food,
-                measures: item.measure,
-                food_id: item.food_id,
-                measure_id: item.measure_id,
-                _isNew: true // Flag para identificar items novos
-              }
-            ]
-          } : m
-        ));
+      toast({
+        title: 'Alimento adicionado',
+        description: 'Clique em "Salvar Alterações" para confirmar',
+        duration: 2000
+      });
 
-        toast({
-          title: 'Alimento adicionado',
-          description: 'Clique em "Salvar Alterações" para confirmar',
-          duration: 2000
-        });
-      }
-
-      setAddingToMeal(null);
+      setShowSearchForMeal(null);
     } catch (error: any) {
       toast({
         title: 'Erro ao adicionar',
@@ -616,15 +583,32 @@ export default function PlatformMealPlanViewer() {
                   </div>
 
                   {editMode && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setAddingToMeal(meal.id)}
-                      className="gap-2 mt-3 w-full"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Adicionar alimento
-                    </Button>
+                    showSearchForMeal === meal.id ? (
+                      <div className="mt-4 p-4 border-2 border-primary/20 rounded-lg bg-primary/5">
+                        <InlineFoodSearch
+                          onAddFood={(item) => handleAddFood(meal.id, item)}
+                          placeholder="Buscar e adicionar alimento... (⌘K)"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowSearchForMeal(null)}
+                          className="w-full mt-2"
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowSearchForMeal(meal.id)}
+                        className="gap-2 mt-3 w-full"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Adicionar alimento
+                      </Button>
+                    )
                   )}
                 </CardContent>
               </Card>
@@ -634,15 +618,6 @@ export default function PlatformMealPlanViewer() {
       </main>
 
       {/* Modais */}
-      <AddFoodToMealModal
-        isOpen={!!addingToMeal}
-        onClose={() => {
-          setAddingToMeal(null);
-          setReplacingFood(null);
-        }}
-        onAddFood={handleAddOrReplaceFood}
-      />
-
       <EditPortionModal
         foodItem={editingPortion}
         open={!!editingPortion}
