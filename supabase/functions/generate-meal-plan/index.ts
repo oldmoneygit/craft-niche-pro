@@ -190,9 +190,18 @@ Retorne apenas JSON.`;
 
     let parsed;
     try {
-      parsed = JSON.parse(responseText);
+      // Remove markdown code blocks if present
+      let cleanText = responseText.trim();
+      if (cleanText.startsWith("```json")) {
+        cleanText = cleanText.replace(/^```json\s*/, "").replace(/\s*```$/, "");
+      } else if (cleanText.startsWith("```")) {
+        cleanText = cleanText.replace(/^```\s*/, "").replace(/\s*```$/, "");
+      }
+      
+      parsed = JSON.parse(cleanText);
     } catch (e) {
       console.error("Failed to parse JSON:", e);
+      console.error("Response text was:", responseText);
       return new Response(
         JSON.stringify({ error: "Invalid JSON response from AI" }),
         {
