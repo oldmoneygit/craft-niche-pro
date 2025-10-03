@@ -28,6 +28,7 @@ interface Meal {
 }
 
 export default function PlatformMealPlanEditor() {
+  console.log('🟢 PlatformMealPlanEditor renderizado');
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -38,20 +39,29 @@ export default function PlatformMealPlanEditor() {
   // Tentar pegar clientId do path primeiro, depois do query string
   const clientId = pathClientId || searchParams.get('client');
 
+  console.log('🔵 Params:', { clientId, pathClientId, allParams: Object.fromEntries(searchParams) });
 
   // Carregar template se fornecido na URL
   useEffect(() => {
+    console.log('🔵 useEffect searchParams executado');
     const templateId = searchParams.get('templateId');
+    console.log('🔵 templateId da URL:', templateId);
 
     if (templateId) {
+      console.log('🔵 Chamando loadTemplateData...');
       loadTemplateData(templateId);
+    } else {
+      console.log('🔵 Nenhum templateId encontrado na URL');
     }
   }, [searchParams]);
 
   const loadTemplateData = async (templateId: string) => {
     setLoadedTemplateId(templateId);
-    try {
+    try;
+      console.log('🔵 Iniciando loadTemplateData com:', templateId);
+
       // 1. Buscar template SEM measures no JOIN
+      console.log('🔵 Buscando template no banco...');
       const { data: template, error: templateError } = await supabase
         .from('meal_plan_templates')
         .select(`
@@ -88,15 +98,20 @@ export default function PlatformMealPlanEditor() {
         .single();
 
       if (templateError) {
+        console.error('❌ Erro ao buscar template:', templateError);
         throw templateError;
       }
 
       if (!template) {
+        console.error('❌ Template não encontrado');
         return;
       }
 
+      console.log('✅ Template carregado:', template);
+      console.log('🔵 Número de refeições:', template.meal_plan_template_meals?.length || 0);
 
       // 2. Buscar measure_ids únicos
+      console.log('🔵 Coletando measure_ids...');
       const measureIds = new Set<string>();
       template.meal_plan_template_meals?.forEach((meal: any) => {
         meal.meal_plan_template_foods?.forEach((food: any) => {
@@ -104,17 +119,23 @@ export default function PlatformMealPlanEditor() {
         });
       });
 
+      console.log('📏 Measure IDs coletados:', Array.from(measureIds));
+      console.log('🔵 Total de measures únicos:', measureIds.size);
 
       // 3. Buscar todas as measures
+      console.log('🔵 Buscando measures na tabela food_measures...');
       const { data: measuresData, error: measuresError } = await supabase
         .from('food_measures')
         .select('id, measure_name, grams')
         .in('id', Array.from(measureIds));
 
       if (measuresError) {
+        console.error('❌ Erro ao buscar measures:', measuresError);
         throw measuresError;
       }
 
+      console.log('✅ Measures carregadas:', measuresData);
+      console.log('🔵 Total de measures encontrados:', measuresData?.length || 0);
 
       // 4. Criar map de measures
       const measuresMap = new Map(
@@ -144,9 +165,12 @@ export default function PlatformMealPlanEditor() {
       });
 
       // 8. Converter estrutura do template para meals
+      console.log('🔵 Convertendo estrutura do template para meals...');
 
       if (template.meal_plan_template_meals && template.meal_plan_template_meals.length > 0) {
         const convertedMeals = template.meal_plan_template_meals.map((meal: any, index: number) => {
+          console.log(`🔵 Convertendo meal ${index}: ${meal.name}`);
+          console.log(`🔵   - Número de foods: ${meal.meal_plan_template_foods?.length || 0}`);
 
           return {
             id: `temp-${Date.now()}-${Math.random()}`,
@@ -171,23 +195,33 @@ export default function PlatformMealPlanEditor() {
                 measures: food.measures
               };
 
+              console.log(`🔵     - Food: ${food.foods?.name} (${grams}g, ${item.kcal_total} kcal)`);
               return item;
             }) || []
           };
         });
 
+        console.log('✅ Refeições convertidas:', convertedMeals);
+        console.log('🔵 Total de refeições convertidas:', convertedMeals.length);
 
+        console.log('🔵 Setando estados (setPlanName, setGoals, setMeals)...');
         setMeals(convertedMeals);
+        console.log('✅ Estado meals atualizado!');
       } else {
+        console.log('⚠️ Nenhuma refeição para converter');
       }
 
+      console.log('🔵 Mostrando toast...');
       toast({
         title: "Template carregado!",
         description: `Plano baseado em "${template.name}". Ajuste conforme necessário e salve.`
       });
 
+      console.log('✅ loadTemplateData concluído com sucesso!');
 
     } catch (error: any) {
+      console.error('❌ ERRO FATAL em loadTemplateData:', error);
+      console.error('❌ Stack trace:', error.stack);
       toast({
         title: "Erro ao carregar template",
         description: error.message,
@@ -281,6 +315,10 @@ export default function PlatformMealPlanEditor() {
   }, [clientId]);
 
   const handleApplyGeneratedPlan = async (plan: any) => {
+    if (DEBUG_MODE) {
+      console.log('\n🚀 APLICANDO PLANO DA IA');
+      console.log('🎯 Meta:', plan.targetCalories, 'kcal');
+    }
 
     setGoals({
       kcal: plan.targetCalories,
@@ -295,6 +333,9 @@ export default function PlatformMealPlanEditor() {
 
     const newMeals = await Promise.all(
       plan.meals.map(async (aiMeal: any) => {
+        if (DEBUG_MODE) {
+          console.log(`\n📋 Refeição: ${aiMeal.name} (${aiMeal.targetCalories} kcal)`);
+        }
 
         const items = [];
 
@@ -345,9 +386,17 @@ export default function PlatformMealPlanEditor() {
             items.push(item);
             totalAdded++;
 
+            if (DEBUG_MODE) {
+              console.log(`  ✅ ${food.name}`);
+              console.log(`     ${quantityInGrams}g = ${item.kcal_total} kcal`);
+              console.log(`     P: ${item.protein_total}g | C: ${item.carb_total}g | G: ${item.fat_total}g`);
+            }
           } else {
             totalNotFound++;
             notFoundList.push(aiItem.food_name);
+            if (DEBUG_MODE) {
+              console.log(`  ❌ "${aiItem.food_name}" - NÃO ENCONTRADO`);
+            }
           }
         }
 
@@ -372,6 +421,15 @@ export default function PlatformMealPlanEditor() {
       return acc;
     }, { kcal: 0, protein: 0, carb: 0, fat: 0 });
 
+    if (DEBUG_MODE) {
+      console.log('\n📊 TOTAIS IMPLEMENTADOS:');
+      console.log(`  Calorias: ${totals.kcal} / ${plan.targetCalories} (${Math.round(totals.kcal/plan.targetCalories*100)}%)`);
+      console.log(`  Proteínas: ${totals.protein}g / ${plan.macros.protein_g}g`);
+      console.log(`  Carbos: ${totals.carb}g / ${plan.macros.carb_g}g`);
+      console.log(`  Gorduras: ${totals.fat}g / ${plan.macros.fat_g}g`);
+      console.log(`\n✅ Adicionados: ${totalAdded}`);
+      console.log(`❌ Não encontrados: ${totalNotFound}`);
+    }
 
     if (totalNotFound > 0) {
       toast({
@@ -450,6 +508,9 @@ export default function PlatformMealPlanEditor() {
 
     setSaving(true);
     try {
+      console.log('💾 Salvando plano alimentar...');
+      console.log('Client ID:', clientId);
+      console.log('Tenant ID:', tenantId);
       
       const { data: plan, error: planError } = await supabase
         .from('meal_plans')
@@ -474,10 +535,13 @@ export default function PlatformMealPlanEditor() {
         .single();
 
       if (planError) {
+        console.error('❌ Erro ao criar meal_plan:', planError);
         throw planError;
       }
       
+      console.log('✅ Plano criado:', plan.id);
 
+      console.log('💾 Salvando refeições...');
       for (const meal of meals) {
         const { data: mealData, error: mealError } = await supabase
           .from('meal_plan_meals')
@@ -491,9 +555,11 @@ export default function PlatformMealPlanEditor() {
           .single();
 
         if (mealError) {
+          console.error('❌ Erro ao criar refeição:', mealError);
           throw mealError;
         }
 
+        console.log(`✅ Refeição criada: ${meal.name}`);
 
         if (meal.items.length > 0) {
           for (const item of meal.items) {
@@ -512,13 +578,16 @@ export default function PlatformMealPlanEditor() {
               });
             
             if (itemError) {
+              console.error('❌ Erro ao adicionar alimento:', itemError);
               throw itemError;
             }
             
+            console.log(`  ✅ Adicionado: ${item.food?.name}`);
           }
         }
       }
       
+      console.log('✅ Plano completo salvo com sucesso!');
 
       toast({
         title: 'Plano salvo com sucesso!',
@@ -526,6 +595,7 @@ export default function PlatformMealPlanEditor() {
       });
       navigate(-1);
     } catch (error: any) {
+      console.error('❌ Erro completo ao salvar:', error);
       toast({
         title: 'Erro ao salvar',
         description: error.message || 'Tente novamente',
