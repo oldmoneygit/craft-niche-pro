@@ -77,8 +77,24 @@ export const QuickPortionDialog = ({ food, isOpen, onClose, onConfirm }: QuickPo
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span>{food.name}</span>
-            <Badge variant={food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'default' : 'secondary'}>
-              {food.nutrition_sources?.code === 'taco' || food.nutrition_sources?.code === 'tbca' ? 'TACO' : 'OFF'}
+            <Badge
+              variant={
+                food.source?.toLowerCase().includes('taco') ||
+                food.source?.toLowerCase().includes('tbca')
+                  ? 'default'
+                  : 'secondary'
+              }
+              className={
+                food.source?.toLowerCase().includes('taco') ||
+                food.source?.toLowerCase().includes('tbca')
+                  ? 'bg-green-600'
+                  : 'bg-blue-500'
+              }
+            >
+              {food.source?.toLowerCase().includes('taco') ||
+               food.source?.toLowerCase().includes('tbca')
+                ? 'TACO'
+                : 'OFF'}
             </Badge>
           </DialogTitle>
         </DialogHeader>
