@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CreditCard as Edit, Check, Plus, RefreshCw, Scale, Trash2, Clock, Flame, Save } from 'lucide-react';
+import { ArrowLeft, CreditCard as Edit, Check, Plus, RefreshCw, Scale, Trash2, Clock, Flame } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { InlineFoodSearch } from '@/components/platform/InlineFoodSearch';
 import { EditPortionModal } from '@/components/platform/EditPortionModal';
-import { SaveTemplateModal } from '@/components/platform/SaveTemplateModal';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface FoodItemToEdit {
@@ -41,7 +40,6 @@ export default function PlatformMealPlanViewer() {
   const [replacingFood, setReplacingFood] = useState<{ mealId: string; oldFoodItemId: string } | null>(null);
   const [editingPortion, setEditingPortion] = useState<FoodItemToEdit | null>(null);
   const [showSearchForMeal, setShowSearchForMeal] = useState<string | null>(null);
-  const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false);
 
   useEffect(() => {
     if (planId) loadMealPlan();
@@ -451,16 +449,10 @@ export default function PlatformMealPlanViewer() {
           </div>
           <div className="flex gap-2">
             {!editMode ? (
-              <>
-                <Button variant="outline" onClick={() => setShowSaveTemplateModal(true)} className="gap-2">
-                  <Save className="h-4 w-4" />
-                  Salvar como Template
-                </Button>
               <Button onClick={handleEnterEditMode} className="gap-2">
                 <Edit className="h-4 w-4" />
                 Editar Plano
               </Button>
-              </>
             ) : (
               <>
                 <Button
@@ -643,19 +635,6 @@ export default function PlatformMealPlanViewer() {
         open={!!editingPortion}
         onClose={() => setEditingPortion(null)}
         onSave={handleSavePortion}
-      />
-
-      <SaveTemplateModal
-        open={showSaveTemplateModal}
-        onClose={() => setShowSaveTemplateModal(false)}
-        mealPlanId={planId!}
-        currentPlan={{
-          calorie_target: totals.kcal,
-          protein_target_g: totals.protein,
-          carb_target_g: totals.carb,
-          fat_target_g: totals.fat,
-          goal: plan.goal
-        }}
       />
     </div>
   );
