@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Sparkles, Brain, Loader as Loader2, TriangleAlert as AlertTriangle } from 'lucide-react';
+import { Sparkles, Brain, Loader as Loader2, TriangleAlert as AlertTriangle, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { ClientProfile } from '@/types/clientProfile';
 import { generateAIBasedMealPlan, validateAIPlan } from '@/lib/aiNutritionService';
 import { useToast } from '@/hooks/use-toast';
@@ -15,6 +15,7 @@ interface AIAssistantProps {
 export const AIAssistant = ({ clientProfile, onApplyPlan }: AIAssistantProps) => {
   const [generating, setGenerating] = useState(false);
   const [generatedPlan, setGeneratedPlan] = useState<any>(null);
+  const [feedback, setFeedback] = useState<'good' | 'bad' | null>(null);
   const { toast } = useToast();
 
   const handleGenerate = async () => {
@@ -184,13 +185,41 @@ export const AIAssistant = ({ clientProfile, onApplyPlan }: AIAssistantProps) =>
               </div>
             )}
 
-            <Button
-              onClick={() => onApplyPlan(generatedPlan)}
-              variant="default"
-              className="w-full"
-            >
-              Aplicar Sugestão ao Plano
-            </Button>
+            <div className="space-y-3">
+              <Button
+                onClick={() => onApplyPlan(generatedPlan)}
+                variant="default"
+                className="w-full"
+              >
+                Aplicar Sugestão ao Plano
+              </Button>
+
+              <div className="flex gap-2 items-center justify-center pt-2 border-t">
+                <span className="text-xs text-muted-foreground">Este plano foi útil?</span>
+                <Button
+                  size="sm"
+                  variant={feedback === 'good' ? 'default' : 'outline'}
+                  onClick={() => {
+                    setFeedback('good');
+                    console.log('📊 Feedback positivo registrado', { plan: generatedPlan });
+                    toast({ title: 'Obrigado pelo feedback!' });
+                  }}
+                >
+                  <ThumbsUp className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant={feedback === 'bad' ? 'destructive' : 'outline'}
+                  onClick={() => {
+                    setFeedback('bad');
+                    console.log('📊 Feedback negativo registrado', { plan: generatedPlan });
+                    toast({ title: 'Obrigado pelo feedback. Vamos melhorar!' });
+                  }}
+                >
+                  <ThumbsDown className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </div>
         )}
       </CardContent>

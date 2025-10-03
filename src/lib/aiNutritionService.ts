@@ -42,25 +42,19 @@ interface AIGeneratedMealPlan {
 }
 
 const buildSystemPrompt = (): string => {
-  return `Você é um assistente especializado em nutrição que auxilia nutricionistas profissionais licenciados.
+  return `Você auxilia nutricionistas gerando rascunhos de planos alimentares.
 
-IMPORTANTE - LIMITAÇÕES E RESPONSABILIDADES:
-1. Você SUGERE planos alimentares como ponto de partida
-2. O nutricionista SEMPRE valida, ajusta e aprova antes de aplicar
-3. Você NÃO prescreve - apenas gera rascunhos para economizar tempo do profissional
-4. Suas sugestões são baseadas em diretrizes gerais brasileiras de nutrição
-5. Condições médicas específicas requerem ajuste profissional
+LIMITAÇÕES:
+- Você sugere, o nutricionista valida
+- Não prescreve - apenas economiza tempo
+- Baseado em diretrizes brasileiras
 
 DIRETRIZES:
-- Use alimentos brasileiros comuns e acessíveis
-- Considere a viabilidade prática das refeições
-- Distribua macros de forma equilibrada
-- Evite restrições extremas
-- Sugira porções realistas
-- Inclua variedade nutricional
+- Alimentos brasileiros acessíveis
+- Distribua macros equilibradamente
+- Porções realistas e variadas
 
-FORMATO DE RESPOSTA:
-Retorne APENAS um JSON válido no seguinte formato:
+FORMATO JSON:
 {
   "meals": [
     {
@@ -80,8 +74,8 @@ Retorne APENAS um JSON válido no seguinte formato:
       ]
     }
   ],
-  "reasoning": "string explicando as escolhas",
-  "educationalNotes": "string com orientações educativas para o cliente"
+  "reasoning": "string",
+  "educationalNotes": "string"
 }`;
 };
 
@@ -101,155 +95,43 @@ const buildUserPrompt = (profile: ClientProfile, calculatedData: any): string =>
     health: 'Saúde geral'
   };
 
-  return `Gere uma sugestão de plano alimentar para o seguinte perfil:
+  return `PERFIL:
+${profile.name}, ${profile.age}a, ${profile.gender === 'male' ? 'M' : 'F'}, ${profile.weight_kg}kg, ${profile.height_cm}cm
+Atividade: ${activityLabels[profile.activity_level]}
+Objetivo: ${goalLabels[profile.goal]}
 
-DADOS DO CLIENTE:
-- Nome: ${profile.name}
-- Idade: ${profile.age} anos
-- Sexo: ${profile.gender === 'male' ? 'Masculino' : profile.gender === 'female' ? 'Feminino' : 'Outro'}
-- Peso: ${profile.weight_kg}kg
-- Altura: ${profile.height_cm}cm
-- Nível de atividade: ${activityLabels[profile.activity_level]}
-- Objetivo: ${goalLabels[profile.goal]}
+RESTRIÇÕES:
+${profile.dietary_restrictions.length > 0 ? profile.dietary_restrictions.join(', ') : 'Nenhuma'}
+${profile.allergies.length > 0 ? 'Alergias: ' + profile.allergies.join(', ') : ''}
+${profile.dislikes.length > 0 ? 'Não gosta: ' + profile.dislikes.join(', ') : ''}
+${profile.medical_conditions.length > 0 ? 'Condições: ' + profile.medical_conditions.join(', ') : ''}
+${profile.notes ? 'Obs: ' + profile.notes : ''}
 
-RESTRIÇÕES E PREFERÊNCIAS:
-- Restrições alimentares: ${profile.dietary_restrictions.length > 0 ? profile.dietary_restrictions.join(', ') : 'Nenhuma'}
-- Alergias: ${profile.allergies.length > 0 ? profile.allergies.join(', ') : 'Nenhuma'}
-- Não gosta: ${profile.dislikes.length > 0 ? profile.dislikes.join(', ') : 'Nada específico'}
-- Preferências: ${profile.meal_preferences.length > 0 ? profile.meal_preferences.join(', ') : 'Padrão brasileiro'}
+METAS:
+Meta: ${calculatedData.targetCalories} kcal (P:${calculatedData.macros.protein_g}g C:${calculatedData.macros.carb_g}g G:${calculatedData.macros.fat_g}g)
 
-CONDIÇÕES MÉDICAS:
-- ${profile.medical_conditions.length > 0 ? profile.medical_conditions.join(', ') : 'Nenhuma informada'}
+REFEIÇÕES (5):
+Café(08:00): ${Math.round(calculatedData.targetCalories * 0.20)}kcal
+Lanche1(10:00): ${Math.round(calculatedData.targetCalories * 0.10)}kcal
+Almoço(12:00): ${Math.round(calculatedData.targetCalories * 0.35)}kcal
+Lanche2(15:00): ${Math.round(calculatedData.targetCalories * 0.10)}kcal
+Jantar(19:00): ${Math.round(calculatedData.targetCalories * 0.25)}kcal
 
-OBSERVAÇÕES DO NUTRICIONISTA:
-${profile.notes || 'Nenhuma'}
+ALIMENTOS (use EXATOS):
+Pão, forma, integral | Pão, francês | Ovo, cozido | Banana, prata | Maçã | Mamão | Laranja
+Leite, vaca, desnatado | Leite, vaca, integral | Iogurte, natural | Arroz, integral, cozido
+Arroz, branco, cozido | Feijão, carioca, cozido | Feijão, preto, cozido | Frango, peito, grelhado
+Carne, bovina, sem gordura | Macarrão, cozido | Alface | Tomate | Cenoura, crua
+Brócolis, cozido | Batata, cozida | Aveia, flocos | Azeite de oliva | Queijo, minas
 
-METAS CALCULADAS (já validadas cientificamente):
-- Meta calórica diária: ${calculatedData.targetCalories} kcal
-- Proteínas: ${calculatedData.macros.protein_g}g
-- Carboidratos: ${calculatedData.macros.carb_g}g
-- Gorduras: ${calculatedData.macros.fat_g}g
+REGRAS:
+- Quantity em GRAMAS (não unidades)
+- Measure: "gramas" ou "ml"
+- 3-4 alimentos/refeição
+- Respeite restrições
+- JSON válido só
 
-DISTRIBUIÇÃO POR REFEIÇÃO:
-- Café da Manhã (08:00): ${Math.round(calculatedData.targetCalories * 0.20)} kcal
-- Lanche da Manhã (10:00): ${Math.round(calculatedData.targetCalories * 0.10)} kcal
-- Almoço (12:00): ${Math.round(calculatedData.targetCalories * 0.35)} kcal
-- Lanche da Tarde (15:00): ${Math.round(calculatedData.targetCalories * 0.10)} kcal
-- Jantar (19:00): ${Math.round(calculatedData.targetCalories * 0.25)} kcal
-
-INSTRUÇÕES CRÍTICAS:
-1. Use EXATAMENTE estes nomes (copie e cole, incluindo vírgulas e acentos):
-   - "Pão, forma, integral"
-   - "Pão, francês"
-   - "Ovo, cozido"
-   - "Banana, prata"
-   - "Maçã"
-   - "Mamão"
-   - "Laranja"
-   - "Leite, vaca, desnatado"
-   - "Leite, vaca, integral"
-   - "Iogurte, natural"
-   - "Arroz, integral, cozido"
-   - "Arroz, branco, cozido"
-   - "Feijão, carioca, cozido"
-   - "Feijão, preto, cozido"
-   - "Frango, peito, grelhado"
-   - "Carne, bovina, sem gordura"
-   - "Macarrão, cozido"
-   - "Alface"
-   - "Tomate"
-   - "Cenoura, crua"
-   - "Brócolis, cozido"
-   - "Batata, cozida"
-   - "Aveia, flocos"
-   - "Azeite de oliva"
-   - "Queijo, minas"
-
-2. Para "quantity": especifique GRAMAS TOTAIS (não porções ou unidades)
-   Exemplo CORRETO: "quantity": 50 significa 50 gramas
-   Exemplo ERRADO: "quantity": 2 para 2 pães (use gramas: 100)
-
-3. Para "measure": sempre use "gramas" ou "ml"
-
-4. CADA refeição deve somar EXATAMENTE as calorias alvo (±5%)
-
-5. Cada refeição deve ter PELO MENOS 3-4 alimentos diferentes
-
-6. Respeite RIGOROSAMENTE as restrições alimentares
-
-EXEMPLO DE BOA RESPOSTA (SIGA ESTE FORMATO EXATO):
-{
-  "meals": [
-    {
-      "name": "Café da Manhã",
-      "time": "08:00",
-      "targetCalories": ${Math.round(calculatedData.targetCalories * 0.20)},
-      "items": [
-        {
-          "food_name": "Pão, forma, integral",
-          "quantity": 50,
-          "measure": "gramas",
-          "estimated_kcal": 127,
-          "estimated_protein": 6,
-          "estimated_carb": 20,
-          "estimated_fat": 2
-        },
-        {
-          "food_name": "Ovo, cozido",
-          "quantity": 100,
-          "measure": "gramas",
-          "estimated_kcal": 155,
-          "estimated_protein": 13,
-          "estimated_carb": 1,
-          "estimated_fat": 11
-        },
-        {
-          "food_name": "Banana, prata",
-          "quantity": 86,
-          "measure": "gramas",
-          "estimated_kcal": 84,
-          "estimated_protein": 1,
-          "estimated_carb": 22,
-          "estimated_fat": 0
-        }
-      ]
-    }
-  ],
-  "reasoning": "Café balanceado com carboidratos complexos do pão integral, proteínas do ovo e energia rápida da banana.",
-  "educationalNotes": "Hidrate-se ao acordar. Mastigue devagar. Café da manhã é essencial para metabolismo."
-}
-
-ALIMENTOS DISPONÍVEIS NO BANCO (USE ESTES NOMES EXATOS):
-- Arroz, branco, cozido (130 kcal/100g)
-- Arroz, integral, cozido (123 kcal/100g)
-- Feijão, preto, cozido (77 kcal/100g)
-- Feijão, carioca, cozido (76 kcal/100g)
-- Pão, francês (300 kcal/100g)
-- Pão, forma, integral (253 kcal/100g)
-- Frango, peito, grelhado (159 kcal/100g)
-- Carne, bovina, sem gordura (219 kcal/100g)
-- Ovo, cozido (155 kcal/100g)
-- Leite, vaca, integral (61 kcal/100g)
-- Leite, vaca, desnatado (35 kcal/100g)
-- Banana, prata (98 kcal/100g)
-- Maçã (52 kcal/100g)
-- Laranja (45 kcal/100g)
-- Mamão (40 kcal/100g)
-- Alface (15 kcal/100g)
-- Tomate (18 kcal/100g)
-- Cenoura, crua (43 kcal/100g)
-- Brócolis, cozido (25 kcal/100g)
-- Aveia, flocos (394 kcal/100g)
-- Azeite de oliva (884 kcal/100g)
-- Batata, cozida (85 kcal/100g)
-- Macarrão, cozido (111 kcal/100g)
-- Iogurte, natural (51 kcal/100g)
-- Queijo, minas (264 kcal/100g)
-
-IMPORTANTE: Use SOMENTE estes nomes de alimentos listados acima, exatamente como escrito.
-
-LEMBRE-SE: Esta é uma SUGESTÃO inicial. O nutricionista revisará e ajustará conforme necessário.
-Retorne APENAS JSON válido seguindo EXATAMENTE o formato acima.`;
+Retorne apenas JSON.`;
 };
 
 export const generateAIBasedMealPlan = async (
@@ -291,10 +173,16 @@ export const generateAIBasedMealPlan = async (
     console.log('🤖 Chamando Claude API...');
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
+      model: 'claude-3-5-haiku-20241022',
+      max_tokens: 2048,
       temperature: 0.7,
-      system: buildSystemPrompt(),
+      system: [
+        {
+          type: "text" as const,
+          text: buildSystemPrompt(),
+          cache_control: { type: "ephemeral" as const }
+        }
+      ],
       messages: [
         {
           role: 'user',
