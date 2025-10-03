@@ -2,7 +2,7 @@ import { Platform, VERTICAL_COLORS, VERTICAL_STYLES, VERTICAL_STYLES_LIGHT } fro
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreVertical, TrendingUp, Users, FileText, DollarSign } from 'lucide-react';
+import { MoveVertical as MoreVertical, TrendingUp, Users, FileText, DollarSign } from 'lucide-react';
 import { PlatformStatusBadge } from './PlatformStatusBadge';
 import { useTheme } from '@/components/providers/ThemeProvider';
 
