@@ -43,12 +43,29 @@ export default function PlatformMealPlans() {
     setShowTemplatePreview(true);
   };
 
-  const handleUseTemplate = (templateId: string) => {
-    setSelectedTemplateId(templateId);
-    setShowTemplatePreview(false);
+  const handleUseTemplate = async (templateId: string) => {
+    console.log('🎯 handleUseTemplate chamado com:', templateId);
+
+    try {
+      const { data: template } = await supabase
+        .from('meal_plan_templates')
+        .select('name')
+        .eq('id', templateId)
+        .single();
+
+      setSelectedTemplateId(templateId);
+      setSelectedTemplateName(template?.name || 'Template');
+      setShowTemplatePreview(false);
+    } catch (error) {
+      console.error('Erro ao buscar nome do template:', error);
+      setSelectedTemplateId(templateId);
+      setSelectedTemplateName('Template');
+      setShowTemplatePreview(false);
+    }
   };
 
   const handleEditTemplate = (templateId: string) => {
+    console.log('✏️ handleEditTemplate chamado com:', templateId);
     toast({
       title: "Edição de Template",
       description: "Use 'Usar Template' para criar um novo plano baseado neste template e edite conforme necessário.",
@@ -58,7 +75,12 @@ export default function PlatformMealPlans() {
   };
 
   const handleSelectClient = async (clientId: string) => {
-    if (!selectedTemplateId) return;
+    console.log('📋 Aplicando template', selectedTemplateId, 'ao cliente', clientId);
+
+    if (!selectedTemplateId) {
+      toast({ title: "Erro", description: "Template não selecionado", variant: "destructive" });
+      return;
+    }
 
     try {
       navigate(
@@ -77,6 +99,7 @@ export default function PlatformMealPlans() {
       setSelectedTemplateId(null);
       setSelectedTemplateName("");
     } catch (error: any) {
+      console.error('Erro ao aplicar template:', error);
       toast({
         title: "Erro",
         description: error.message,
