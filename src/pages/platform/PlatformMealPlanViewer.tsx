@@ -135,42 +135,58 @@ export default function PlatformMealPlanViewer() {
 
   const handleSavePortion = async (foodItemId: string, measureId: string, quantity: number) => {
     try {
-      // Buscar dados do alimento e medida para recalcular
+      // Buscar dados do alimento atual para recalcular
+      const meal = meals.find(m => m.meal_items.some((item: any) => item.id === foodItemId));
+      const foodItem = meal?.meal_items.find((item: any) => item.id === foodItemId);
+      
+      if (!foodItem) return;
+
+      // Buscar dados nutricionais do alimento
       const { data: foodData } = await supabase
         .from('foods')
         .select('energy_kcal, protein_g, carbohydrate_g, lipid_g')
-        .eq('id', (await supabase.from('meal_items').select('food_id').eq('id', foodItemId).single()).data?.food_id)
+        .eq('id', foodItem.foods.id)
         .single();
 
       const { data: measureData } = await supabase
         .from('food_measures')
-        .select('grams')
+        .select('grams, measure_name')
         .eq('id', measureId)
         .single();
 
       if (!foodData || !measureData) throw new Error('Dados não encontrados');
 
-      // Calcular totais
+      // Recalcular totais
       const totalGrams = quantity * measureData.grams;
       const multiplier = totalGrams / 100;
 
-      await supabase
-        .from('meal_items')
-        .update({
-          measure_id: measureId,
-          quantity: quantity,
-          grams_total: totalGrams,
-          kcal_total: Math.round(foodData.energy_kcal * multiplier),
-          protein_total: Math.round(foodData.protein_g * multiplier * 10) / 10,
-          carb_total: Math.round(foodData.carbohydrate_g * multiplier * 10) / 10,
-          fat_total: Math.round(foodData.lipid_g * multiplier * 10) / 10
-        })
-        .eq('id', foodItemId);
+      // ⭐ ATUALIZAR APENAS ESTADO LOCAL (não salvar no banco ainda)
+      setMeals(meals.map(m => ({
+        ...m,
+        meal_items: m.meal_items.map((item: any) => 
+          item.id === foodItemId ? {
+            ...item,
+            measure_id: measureId,
+            quantity: quantity,
+            grams_total: totalGrams,
+            kcal_total: Math.round(foodData.energy_kcal * multiplier),
+            protein_total: Math.round(foodData.protein_g * multiplier * 10) / 10,
+            carb_total: Math.round(foodData.carbohydrate_g * multiplier * 10) / 10,
+            fat_total: Math.round(foodData.lipid_g * multiplier * 10) / 10,
+            measures: {
+              ...item.measures,
+              id: measureId,
+              measure_name: measureData.measure_name,
+              grams: measureData.grams
+            }
+          } : item
+        )
+      })));
 
-      await loadMealPlan();
       toast({
         title: 'Porção atualizada',
-        description: 'As quantidades foram recalculadas'
+        description: 'Clique em "Salvar Alterações" para confirmar',
+        duration: 2000
       });
     } catch (error: any) {
       toast({
@@ -185,15 +201,18 @@ export default function PlatformMealPlanViewer() {
     if (!confirm('Tem certeza que deseja remover este alimento?')) return;
 
     try {
-      await supabase
-        .from('meal_items')
-        .delete()
-        .eq('id', foodItemId);
+      // ⭐ ATUALIZAR APENAS ESTADO LOCAL (não deletar do banco ainda)
+      setMeals(meals.map(m => 
+        m.id === mealId ? {
+          ...m,
+          meal_items: m.meal_items.filter((item: any) => item.id !== foodItemId)
+        } : m
+      ));
 
-      await loadMealPlan();
       toast({
         title: 'Alimento removido',
-        description: 'O item foi excluído do plano'
+        description: 'Clique em "Salvar Alterações" para confirmar',
+        duration: 2000
       });
     } catch (error: any) {
       toast({
@@ -210,53 +229,70 @@ export default function PlatformMealPlanViewer() {
       if (!mealId) return;
 
       if (replacingFood) {
-        // Substituir alimento existente
-        await supabase
-          .from('meal_items')
-          .update({
-            food_id: item.food_id,
-            measure_id: item.measure_id,
-            quantity: item.quantity,
-            grams_total: item.grams_total,
-            kcal_total: item.kcal_total,
-            protein_total: item.protein_total,
-            carb_total: item.carb_total,
-            fat_total: item.fat_total
-          })
-          .eq('id', replacingFood.oldFoodItemId);
+        // ⭐ SUBSTITUIR APENAS NO ESTADO LOCAL
+        setMeals(meals.map(m => ({
+          ...m,
+          meal_items: m.meal_items.map((mealItem: any) => 
+            mealItem.id === replacingFood.oldFoodItemId ? {
+              id: mealItem.id, // Manter ID original
+              quantity: item.quantity,
+              grams_total: item.grams_total,
+              kcal_total: item.kcal_total,
+              protein_total: item.protein_total,
+              carb_total: item.carb_total,
+              fat_total: item.fat_total,
+              foods: item.food,
+              measures: item.measure,
+              food_id: item.food_id,
+              measure_id: item.measure_id
+            } : mealItem
+          )
+        })));
 
         toast({
           title: 'Alimento substituído',
-          description: `Trocado para ${item.food.name}`
+          description: 'Clique em "Salvar Alterações" para confirmar',
+          duration: 2000
         });
         setReplacingFood(null);
       } else {
-        // Adicionar novo alimento
-        await supabase
-          .from('meal_items')
-          .insert({
-            meal_id: mealId,
-            food_id: item.food_id,
-            measure_id: item.measure_id,
-            quantity: item.quantity,
-            grams_total: item.grams_total,
-            kcal_total: item.kcal_total,
-            protein_total: item.protein_total,
-            carb_total: item.carb_total,
-            fat_total: item.fat_total
-          });
+        // ⭐ ADICIONAR APENAS NO ESTADO LOCAL (com ID temporário)
+        const tempId = `temp-${Date.now()}`;
+        
+        setMeals(meals.map(m => 
+          m.id === mealId ? {
+            ...m,
+            meal_items: [
+              ...(m.meal_items || []),
+              {
+                id: tempId,
+                quantity: item.quantity,
+                grams_total: item.grams_total,
+                kcal_total: item.kcal_total,
+                protein_total: item.protein_total,
+                carb_total: item.carb_total,
+                fat_total: item.fat_total,
+                foods: item.food,
+                measures: item.measure,
+                food_id: item.food_id,
+                measure_id: item.measure_id,
+                _isNew: true // Flag para identificar items novos
+              }
+            ]
+          } : m
+        ));
 
         toast({
           title: 'Alimento adicionado',
-          description: `${item.food.name} foi adicionado à refeição`
+          description: 'Clique em "Salvar Alterações" para confirmar',
+          duration: 2000
         });
       }
 
       setAddingToMeal(null);
-      await loadMealPlan();
     } catch (error: any) {
       toast({
-        title: 'Erro ao salvar',
+        title: 'Erro ao adicionar',
         description: error.message,
         variant: 'destructive'
       });
@@ -302,41 +338,94 @@ export default function PlatformMealPlanViewer() {
     });
   };
 
-  // ⭐ SALVAR ALTERAÇÕES (recalcular totais e persistir)
+  // ⭐ SALVAR ALTERAÇÕES (persistir todas as mudanças no banco)
   const handleSaveChanges = async () => {
     try {
       setIsSaving(true);
+      console.log('💾 Salvando alterações no banco...');
 
-      // Calcular totais atualizados
+      // Para cada refeição, sincronizar meal_items
+      for (const meal of meals) {
+        // 1. Buscar IDs existentes no banco
+        const { data: existingItems } = await supabase
+          .from('meal_items')
+          .select('id')
+          .eq('meal_id', meal.id);
+
+        const existingIds = new Set(existingItems?.map(item => item.id) || []);
+        const currentIds = new Set(
+          meal.meal_items
+            ?.filter((item: any) => !item.id.startsWith('temp-'))
+            .map((item: any) => item.id) || []
+        );
+
+        // 2. Deletar itens removidos
+        const idsToDelete = [...existingIds].filter(id => !currentIds.has(id));
+        if (idsToDelete.length > 0) {
+          console.log('🗑️ Deletando:', idsToDelete);
+          await supabase
+            .from('meal_items')
+            .delete()
+            .in('id', idsToDelete);
+        }
+
+        // 3. Inserir novos itens e atualizar existentes
+        for (const item of meal.meal_items || []) {
+          const itemData = {
+            meal_id: meal.id,
+            food_id: item.food_id,
+            measure_id: item.measure_id,
+            quantity: item.quantity,
+            grams_total: item.grams_total,
+            kcal_total: item.kcal_total,
+            protein_total: item.protein_total,
+            carb_total: item.carb_total,
+            fat_total: item.fat_total
+          };
+
+          if (item.id.startsWith('temp-') || item._isNew) {
+            // Inserir novo
+            console.log('➕ Inserindo novo item:', item.foods?.name);
+            await supabase.from('meal_items').insert(itemData);
+          } else if (existingIds.has(item.id)) {
+            // Atualizar existente
+            console.log('✏️ Atualizando item:', item.foods?.name);
+            await supabase
+              .from('meal_items')
+              .update(itemData)
+              .eq('id', item.id);
+          }
+        }
+      }
+
+      // 4. Recalcular e atualizar totais do plano
       const totals = getTotals();
-
-      // Atualizar totais do plano no banco
-      const { error: updateError } = await supabase
+      await supabase
         .from('meal_plans')
         .update({
-          calories_target: totals.kcal,
-          protein_target_g: totals.protein,
-          carb_target_g: totals.carb,
-          fat_target_g: totals.fat,
+          calories_target: Math.round(totals.kcal),
+          protein_target_g: Math.round(totals.protein * 10) / 10,
+          carb_target_g: Math.round(totals.carb * 10) / 10,
+          fat_target_g: Math.round(totals.fat * 10) / 10,
           updated_at: new Date().toISOString()
         })
         .eq('id', planId);
 
-      if (updateError) throw updateError;
+      console.log('✅ Todas as alterações salvas!');
 
-      // Atualizar backup (mudanças agora são "oficiais")
+      // Atualizar backup e sair do modo de edição
       setOriginalMeals(JSON.parse(JSON.stringify(meals)));
       setEditMode(false);
 
       toast({
-        title: '✅ Plano atualizado!',
-        description: `Totais recalculados: ${totals.kcal.toFixed(0)} kcal`
+        title: '✅ Plano salvo com sucesso!',
+        description: `${totals.kcal.toFixed(0)} kcal | P: ${totals.protein.toFixed(0)}g | C: ${totals.carb.toFixed(0)}g | G: ${totals.fat.toFixed(0)}g`
       });
 
-      // Recarregar para garantir sincronização
+      // Recarregar do banco para sincronizar
       await loadMealPlan();
     } catch (error: any) {
-      console.error('Erro ao salvar:', error);
+      console.error('❌ Erro ao salvar:', error);
       toast({
         title: 'Erro ao salvar',
         description: error.message,
