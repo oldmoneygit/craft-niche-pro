@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from '@/hooks/useTenantId';
@@ -34,9 +34,12 @@ export default function PlatformMealPlanEditor() {
   const { toast } = useToast();
   const { tenantId } = useTenantId();
   const [searchParams] = useSearchParams();
-  const clientId = searchParams.get('client');
+  const { clientId: pathClientId } = useParams<{ clientId: string }>();
 
-  console.log('🔵 Params:', { clientId, allParams: Object.fromEntries(searchParams) });
+  // Tentar pegar clientId do path primeiro, depois do query string
+  const clientId = pathClientId || searchParams.get('client');
+
+  console.log('🔵 Params:', { clientId, pathClientId, allParams: Object.fromEntries(searchParams) });
 
   // Carregar template se fornecido na URL
   useEffect(() => {
@@ -478,6 +481,15 @@ export default function PlatformMealPlanEditor() {
       toast({
         title: 'Nome obrigatório',
         description: 'Digite um nome para o plano alimentar',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (!clientId) {
+      toast({
+        title: 'Cliente não selecionado',
+        description: 'Volte e selecione um cliente para criar o plano.',
         variant: 'destructive'
       });
       return;
