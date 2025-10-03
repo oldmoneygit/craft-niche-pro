@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UtensilsCrossed, Plus, Send, Trash2, Edit, Copy, FileText, ChevronDown, TrendingUp } from 'lucide-react';
+import { UtensilsCrossed, Plus, Send, Trash2, CreditCard as Edit, Copy, FileText, ChevronDown, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from '@/hooks/useTenantId';
 import { useToast } from '@/hooks/use-toast';
