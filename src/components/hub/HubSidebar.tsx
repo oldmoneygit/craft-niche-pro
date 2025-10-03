@@ -14,14 +14,23 @@ export function HubSidebar() {
   const location = useLocation();
 
   return (
-    <aside className="w-72 bg-zinc-900 border-r border-zinc-800 p-6 flex flex-col transition-colors duration-300 relative z-10">
-      <div className="flex items-center gap-3 mb-10 pb-6 border-b border-zinc-800">
+    <aside
+      className="w-72 border-r p-6 flex flex-col transition-colors duration-300 relative z-10"
+      style={{
+        backgroundColor: 'var(--hub-bg-secondary)',
+        borderColor: 'var(--hub-border-primary)',
+      }}
+    >
+      <div
+        className="flex items-center gap-3 mb-10 pb-6 border-b"
+        style={{ borderColor: 'var(--hub-border-primary)' }}
+      >
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
           <span className="text-white font-black text-lg">K</span>
         </div>
         <div>
-          <div className="text-zinc-50 font-bold text-lg">KorLab</div>
-          <div className="text-zinc-500 text-xs uppercase tracking-wider font-semibold">
+          <div className="font-bold text-lg" style={{ color: 'var(--hub-text-primary)' }}>KorLab</div>
+          <div className="text-xs uppercase tracking-wider font-semibold" style={{ color: 'var(--hub-text-muted)' }}>
             Hub Platform
           </div>
         </div>
@@ -36,11 +45,13 @@ export function HubSidebar() {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center gap-3 px-4 py-3 mb-1 rounded-lg text-sm font-medium transition-all duration-200 ${
-                isActive
-                  ? 'bg-zinc-800 text-zinc-50 border-l-2 border-indigo-500 pl-3.5'
-                  : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300'
-              }`}
+              className="flex items-center gap-3 px-4 py-3 mb-1 rounded-lg text-sm font-medium transition-all duration-200 hover:opacity-80"
+              style={{
+                backgroundColor: isActive ? 'var(--hub-bg-tertiary)' : 'transparent',
+                color: isActive ? 'var(--hub-text-primary)' : 'var(--hub-text-tertiary)',
+                borderLeft: isActive ? '2px solid #6366f1' : 'none',
+                paddingLeft: isActive ? '14px' : '16px',
+              }}
             >
               <Icon size={20} className={isActive ? 'opacity-100' : 'opacity-70'} />
               {item.label}

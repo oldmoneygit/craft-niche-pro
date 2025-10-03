@@ -14,12 +14,12 @@ export function HubDashboard() {
       <div className="flex min-h-screen">
         <HubSidebar />
 
-        <main className="flex-1 p-10 relative z-10">
+        <main className="flex-1 p-10 relative z-10 transition-colors duration-300">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-zinc-50 mb-2">
+            <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--hub-text-primary)' }}>
               Dashboard Hub
             </h1>
-            <p className="text-zinc-400">
+            <p style={{ color: 'var(--hub-text-tertiary)' }}>
               Gestão centralizada das plataformas KorLab
             </p>
           </div>
@@ -57,7 +57,7 @@ export function HubDashboard() {
 
           <div>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-xl font-bold text-zinc-50">
+              <h2 className="text-xl font-bold" style={{ color: 'var(--hub-text-primary)' }}>
                 Plataformas por Vertical
               </h2>
               <a href="#" className="text-indigo-500 hover:text-indigo-400 font-semibold text-sm">

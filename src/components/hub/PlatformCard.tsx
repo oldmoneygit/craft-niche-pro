@@ -58,8 +58,8 @@ export function PlatformCard({ vertical, title, subtitle, badge, metrics }: Plat
 
       <div className="relative z-10 flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-xl font-bold text-zinc-50 mb-1">{title}</h3>
-          <p className="text-sm text-zinc-400 font-medium">{subtitle}</p>
+          <h3 className="text-xl font-bold mb-1" style={{ color: '#ffffff' }}>{title}</h3>
+          <p className="text-sm font-medium" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>{subtitle}</p>
         </div>
         <span
           className="px-3 py-1 rounded-full text-xs font-semibold text-white"
@@ -76,8 +76,8 @@ export function PlatformCard({ vertical, title, subtitle, badge, metrics }: Plat
             className="bg-white/5 rounded-lg p-4 border border-white/10 transition-all duration-300 hover:bg-white/10 hover:border-opacity-20"
             style={{ borderColor: config.color, borderOpacity: 0.1 }}
           >
-            <p className="text-xs text-zinc-400 font-medium mb-1">{metric.label}</p>
-            <p className="text-2xl font-bold text-zinc-50">{metric.value}</p>
+            <p className="text-xs font-medium mb-1" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>{metric.label}</p>
+            <p className="text-2xl font-bold" style={{ color: '#ffffff' }}>{metric.value}</p>
           </div>
         ))}
       </div>

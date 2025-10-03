@@ -2,7 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* KorLab Hub CSS Variables */
+:root {
+  --hub-bg-primary: #0a0a0a;
+  --hub-bg-secondary: #18181b;
+  --hub-bg-tertiary: #27272a;
+  --hub-border-primary: #27272a;
+  --hub-border-secondary: #3f3f46;
+  --hub-text-primary: #f5f5f5;
+  --hub-text-secondary: #e5e5e5;
+  --hub-text-tertiary: #a1a1aa;
+  --hub-text-muted: #71717a;
+}
+
+:root.light,
+[data-theme="light"] {
+  --hub-bg-primary: #ffffff;
+  --hub-bg-secondary: #f8fafc;
+  --hub-bg-tertiary: #f1f5f9;
+  --hub-border-primary: #e2e8f0;
+  --hub-border-secondary: #cbd5e1;
+  --hub-text-primary: #0f172a;
+  --hub-text-secondary: #1e293b;
+  --hub-text-tertiary: #475569;
+  --hub-text-muted: #64748b;
+}
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here.
 All colors MUST be HSL.
 */
 
