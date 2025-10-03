@@ -319,6 +319,8 @@ export default function PlatformMealPlanEditor() {
           carb_target_g: goals.carb,
           fat_target_g: goals.fat,
           status: 'ativo',
+          active: true,
+          is_active: true,
           notes: planDescription,
           plan_data: { breakfast: [], lunch: [], dinner: [], snacks: [] }
         } as any)
