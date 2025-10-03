@@ -7,6 +7,9 @@ import { ClientProfile } from '@/types/clientProfile';
 import { generateAIBasedMealPlan, validateAIPlan } from '@/lib/aiNutritionService';
 import { useToast } from '@/hooks/use-toast';
 
+// Debug mode apenas em desenvolvimento
+const DEBUG_MODE = import.meta.env.DEV;
+
 interface AIAssistantProps {
   clientProfile: ClientProfile;
   onApplyPlan: (plan: any) => void;
@@ -31,11 +34,15 @@ export const AIAssistant = ({ clientProfile, onApplyPlan }: AIAssistantProps) =>
     setGenerating(true);
 
     try {
-      console.log('🎯 Iniciando geração para:', clientProfile.name);
+      if (DEBUG_MODE) {
+        console.log('🎯 Iniciando geração para:', clientProfile.name);
+      }
 
       const aiPlan = await generateAIBasedMealPlan(clientProfile);
 
-      console.log('✅ Plano gerado com sucesso');
+      if (DEBUG_MODE) {
+        console.log('✅ Plano gerado com sucesso');
+      }
 
       const validation = validateAIPlan(aiPlan);
 

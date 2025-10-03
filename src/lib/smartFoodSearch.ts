@@ -1,5 +1,8 @@
 import { supabase } from '@/integrations/supabase/client';
 
+// Debug mode apenas em desenvolvimento
+const DEBUG_MODE = import.meta.env.DEV;
+
 export interface FoodSearchResult {
   id: string;
   name: string;
@@ -37,6 +40,7 @@ const calculateMatchScore = (
 
   let score = 100;
 
+  // Penalties apenas para alimentos realmente problemáticos
   const criticalPenalties: Record<string, number> = {
     'pó': -200,
     'po': -200,
@@ -48,23 +52,22 @@ const calculateMatchScore = (
     'desidratado': -150,
     'liofilizado': -150,
     'achocolatado': -100,
-    'chocolate': -80,
-    'morango': -80,
-    'baunilha': -80,
-    'vitamina': -60,
-    'codorna': -100,
-    'pata': -100,
-    'purê': -80,
+    'codorna': -100,  // Tipo diferente de ovo
+    'pata': -100,     // Tipo diferente de ave
+    'purê': -80,      // Preparação muito específica
     'pure': -80,
-    'gema': -80,
-    'clara': -60,
-    'molho': -40
+    'gema': -80,      // Parte específica (quando pediu inteiro)
+    'clara': -60,     // Parte específica (quando pediu inteiro)
+    'vitamina': -60   // Bebida preparada
+    // Removido: 'morango', 'baunilha', 'chocolate', 'molho' - são variações válidas
   };
 
   for (const [word, penalty] of Object.entries(criticalPenalties)) {
     if (normFood.includes(word)) {
       score += penalty;
-      console.log(`      ⚠️ Penalidade "${word}": ${penalty}`);
+      if (DEBUG_MODE) {
+        console.log(`      ⚠️ Penalidade "${word}": ${penalty}`);
+      }
     }
   }
 
@@ -75,16 +78,16 @@ const calculateMatchScore = (
 
   if (aiHasCozido && foodHasCozido) {
     score += 50;
-    console.log(`      ✅ Match preparo: cozido`);
+    if (DEBUG_MODE) console.log(`      ✅ Match preparo: cozido`);
   } else if (aiHasCru && foodHasCru) {
     score += 30;
-    console.log(`      ✅ Match preparo: cru`);
+    if (DEBUG_MODE) console.log(`      ✅ Match preparo: cru`);
   } else if (aiHasCozido && foodHasCru) {
     score -= 80;
-    console.log(`      ❌ Mismatch: pediu cozido, achou cru`);
+    if (DEBUG_MODE) console.log(`      ❌ Mismatch: pediu cozido, achou cru`);
   } else if (aiHasCru && foodHasCozido) {
     score -= 80;
-    console.log(`      ❌ Mismatch: pediu cru, achou cozido`);
+    if (DEBUG_MODE) console.log(`      ❌ Mismatch: pediu cru, achou cozido`);
   }
 
   if (!aiHasCozido && !aiHasCru) {
@@ -93,10 +96,10 @@ const calculateMatchScore = (
 
     if (needsCookingMatch && foodHasCozido) {
       score += 40;
-      console.log(`      ✅ Assumiu cozido (correto)`);
+      if (DEBUG_MODE) console.log(`      ✅ Assumiu cozido (correto)`);
     } else if (needsCookingMatch && foodHasCru) {
       score -= 60;
-      console.log(`      ❌ Encontrou cru (não ideal)`);
+      if (DEBUG_MODE) console.log(`      ❌ Encontrou cru (não ideal)`);
     }
   }
 
@@ -112,13 +115,17 @@ const calculateMatchScore = (
 export const smartFoodSearch = async (
   aiSuggestion: string
 ): Promise<FoodSearchResult | null> => {
-  console.log(`🔍 Buscando: "${aiSuggestion}"`);
+  if (DEBUG_MODE) {
+    console.log(`🔍 Buscando: "${aiSuggestion}"`);
+  }
 
   const keywords = extractKeywords(aiSuggestion);
-  console.log(`  🔑 Keywords: ${keywords.join(', ')}`);
+  if (DEBUG_MODE) {
+    console.log(`  🔑 Keywords: ${keywords.join(', ')}`);
+  }
 
   if (keywords.length === 0) {
-    console.log(`  ❌ Nenhuma keyword válida`);
+    if (DEBUG_MODE) console.log(`  ❌ Nenhuma keyword válida`);
     return null;
   }
 
@@ -132,11 +139,13 @@ export const smartFoodSearch = async (
     .limit(30);
 
   if (error || !candidates || candidates.length === 0) {
-    console.log(`  ❌ Nenhum candidato para "${mainKeyword}"`);
+    if (DEBUG_MODE) console.log(`  ❌ Nenhum candidato para "${mainKeyword}"`);
     return null;
   }
 
-  console.log(`  📊 ${candidates.length} candidatos encontrados`);
+  if (DEBUG_MODE) {
+    console.log(`  📊 ${candidates.length} candidatos encontrados`);
+  }
 
   const ranked = candidates
     .map(food => ({
@@ -150,12 +159,14 @@ export const smartFoodSearch = async (
 
   const best = ranked[0];
 
-  console.log(`  ✅ Match: "${best.name}"`);
-  console.log(`     Score: ${Math.round(best.score)}`);
-  console.log(`     Keywords: ${best.keywordMatches}/${keywords.length}`);
+  if (DEBUG_MODE) {
+    console.log(`  ✅ Match: "${best.name}"`);
+    console.log(`     Score: ${Math.round(best.score)}`);
+    console.log(`     Keywords: ${best.keywordMatches}/${keywords.length}`);
+  }
 
   if (best.keywordMatches === 0 || best.score < 20) {
-    console.log(`  ⚠️ Score muito baixo - rejeitado`);
+    if (DEBUG_MODE) console.log(`  ⚠️ Score muito baixo - rejeitado`);
     return null;
   }
 

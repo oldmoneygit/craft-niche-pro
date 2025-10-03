@@ -6,6 +6,9 @@ import { formatDate, formatCurrency, calculateDaysRemaining } from '@/lib/servic
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
+// Debug mode apenas em desenvolvimento
+const DEBUG_MODE = import.meta.env.DEV;
+
 interface ExpiringService {
   id: string;
   client_id: string;
@@ -42,12 +45,14 @@ export const ServiceExpirationAlerts = ({
     today.setHours(0, 0, 0, 0);
     const futureDate = new Date(today.getTime() + daysThreshold * 24 * 60 * 60 * 1000);
 
-    console.log('🔍 Buscando serviços expirando:', {
-      tenantId,
-      today: today.toISOString().split('T')[0],
-      futureDate: futureDate.toISOString().split('T')[0],
-      daysThreshold
-    });
+    if (DEBUG_MODE) {
+      console.log('🔍 Buscando serviços expirando:', {
+        tenantId,
+        today: today.toISOString().split('T')[0],
+        futureDate: futureDate.toISOString().split('T')[0],
+        daysThreshold
+      });
+    }
 
     const { data, error } = await supabase
       .from('service_subscriptions')
@@ -57,7 +62,9 @@ export const ServiceExpirationAlerts = ({
       .lte('end_date', futureDate.toISOString().split('T')[0])
       .order('end_date', { ascending: true });
 
-    console.log('📊 Resultado da busca:', { data, error, count: data?.length });
+    if (DEBUG_MODE) {
+      console.log('📊 Resultado da busca:', { data, error, count: data?.length });
+    }
 
     if (error) {
       console.error('❌ Erro ao buscar serviços expirando:', error);
@@ -70,13 +77,15 @@ export const ServiceExpirationAlerts = ({
       const client = sub.clients as any;
       const service = sub.services as any;
       
-      console.log('📅 Serviço processado:', {
-        client: client?.name,
-        service: service?.name,
-        end_date: sub.end_date,
-        status: sub.status,
-        daysRemaining
-      });
+      if (DEBUG_MODE) {
+        console.log('📅 Serviço processado:', {
+          client: client?.name,
+          service: service?.name,
+          end_date: sub.end_date,
+          status: sub.status,
+          daysRemaining
+        });
+      }
       
       return {
         id: sub.id,
@@ -90,7 +99,9 @@ export const ServiceExpirationAlerts = ({
       };
     }) || [];
 
-    console.log('✅ Serviços expirando processados:', processed.length, processed);
+    if (DEBUG_MODE) {
+      console.log('✅ Serviços expirando processados:', processed.length, processed);
+    }
 
     setExpiringServices(processed);
     setLoading(false);

@@ -2,6 +2,9 @@ import { ClientProfile } from '@/types/clientProfile';
 import { calculateBMR, calculateTDEE, calculateTargetCalories, calculateMacroDistribution } from './nutritionEngine';
 import { supabase } from '@/integrations/supabase/client';
 
+// Debug mode apenas em desenvolvimento
+const DEBUG_MODE = import.meta.env.DEV;
+
 interface AIGeneratedMealPlan {
   targetCalories: number;
   macros: { protein_g: number; carb_g: number; fat_g: number };
@@ -26,8 +29,10 @@ interface AIGeneratedMealPlan {
 export const generateAIBasedMealPlan = async (
   profile: ClientProfile
 ): Promise<AIGeneratedMealPlan> => {
-  console.log('🚀 Iniciando geração de plano com IA');
-  console.log('👤 Perfil:', profile);
+  if (DEBUG_MODE) {
+    console.log('🚀 Iniciando geração de plano com IA');
+    console.log('👤 Perfil:', profile);
+  }
 
   if (!profile.age || profile.age < 10 || profile.age > 120) {
     throw new Error('Idade inválida ou não informada');
@@ -57,9 +62,10 @@ export const generateAIBasedMealPlan = async (
 
     const calculatedData = { bmr, tdee, targetCalories, macros };
 
-    console.log('📊 Cálculos científicos:', calculatedData);
-
-    console.log('🤖 Chamando Edge Function...');
+    if (DEBUG_MODE) {
+      console.log('📊 Cálculos científicos:', calculatedData);
+      console.log('🤖 Chamando Edge Function...');
+    }
 
     const { data, error: functionError } = await supabase.functions.invoke('generate-meal-plan', {
       body: {
@@ -79,8 +85,10 @@ export const generateAIBasedMealPlan = async (
 
     const aiResponse = data;
 
-    console.log('✅ Resposta recebida da Edge Function');
-    console.log('📋 Refeições sugeridas:', aiResponse.meals?.length || 0);
+    if (DEBUG_MODE) {
+      console.log('✅ Resposta recebida da Edge Function');
+      console.log('📋 Refeições sugeridas:', aiResponse.meals?.length || 0);
+    }
 
     return {
       targetCalories: calculatedData.targetCalories,

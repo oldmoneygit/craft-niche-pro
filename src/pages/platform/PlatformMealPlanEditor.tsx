@@ -18,6 +18,9 @@ import { formatNutrient } from '@/lib/nutritionCalculations';
 import { ClientProfile } from '@/types/clientProfile';
 import { smartFoodSearch } from '@/lib/smartFoodSearch';
 
+// Debug mode apenas em desenvolvimento
+const DEBUG_MODE = import.meta.env.DEV;
+
 interface Meal {
   id: string;
   name: string;
@@ -115,8 +118,10 @@ export default function PlatformMealPlanEditor() {
   }, [clientId]);
 
   const handleApplyGeneratedPlan = async (plan: any) => {
-    console.log('\n🚀 APLICANDO PLANO DA IA');
-    console.log('🎯 Meta:', plan.targetCalories, 'kcal');
+    if (DEBUG_MODE) {
+      console.log('\n🚀 APLICANDO PLANO DA IA');
+      console.log('🎯 Meta:', plan.targetCalories, 'kcal');
+    }
 
     setGoals({
       kcal: plan.targetCalories,
@@ -131,7 +136,9 @@ export default function PlatformMealPlanEditor() {
 
     const newMeals = await Promise.all(
       plan.meals.map(async (aiMeal: any) => {
-        console.log(`\n📋 Refeição: ${aiMeal.name} (${aiMeal.targetCalories} kcal)`);
+        if (DEBUG_MODE) {
+          console.log(`\n📋 Refeição: ${aiMeal.name} (${aiMeal.targetCalories} kcal)`);
+        }
 
         const items = [];
 
@@ -182,13 +189,17 @@ export default function PlatformMealPlanEditor() {
             items.push(item);
             totalAdded++;
 
-            console.log(`  ✅ ${food.name}`);
-            console.log(`     ${quantityInGrams}g = ${item.kcal_total} kcal`);
-            console.log(`     P: ${item.protein_total}g | C: ${item.carb_total}g | G: ${item.fat_total}g`);
+            if (DEBUG_MODE) {
+              console.log(`  ✅ ${food.name}`);
+              console.log(`     ${quantityInGrams}g = ${item.kcal_total} kcal`);
+              console.log(`     P: ${item.protein_total}g | C: ${item.carb_total}g | G: ${item.fat_total}g`);
+            }
           } else {
             totalNotFound++;
             notFoundList.push(aiItem.food_name);
-            console.log(`  ❌ "${aiItem.food_name}" - NÃO ENCONTRADO`);
+            if (DEBUG_MODE) {
+              console.log(`  ❌ "${aiItem.food_name}" - NÃO ENCONTRADO`);
+            }
           }
         }
 
@@ -213,14 +224,15 @@ export default function PlatformMealPlanEditor() {
       return acc;
     }, { kcal: 0, protein: 0, carb: 0, fat: 0 });
 
-    console.log('\n📊 TOTAIS IMPLEMENTADOS:');
-    console.log(`  Calorias: ${totals.kcal} / ${plan.targetCalories} (${Math.round(totals.kcal/plan.targetCalories*100)}%)`);
-    console.log(`  Proteínas: ${totals.protein}g / ${plan.macros.protein_g}g`);
-    console.log(`  Carbos: ${totals.carb}g / ${plan.macros.carb_g}g`);
-    console.log(`  Gorduras: ${totals.fat}g / ${plan.macros.fat_g}g`);
-
-    console.log(`\n✅ Adicionados: ${totalAdded}`);
-    console.log(`❌ Não encontrados: ${totalNotFound}`);
+    if (DEBUG_MODE) {
+      console.log('\n📊 TOTAIS IMPLEMENTADOS:');
+      console.log(`  Calorias: ${totals.kcal} / ${plan.targetCalories} (${Math.round(totals.kcal/plan.targetCalories*100)}%)`);
+      console.log(`  Proteínas: ${totals.protein}g / ${plan.macros.protein_g}g`);
+      console.log(`  Carbos: ${totals.carb}g / ${plan.macros.carb_g}g`);
+      console.log(`  Gorduras: ${totals.fat}g / ${plan.macros.fat_g}g`);
+      console.log(`\n✅ Adicionados: ${totalAdded}`);
+      console.log(`❌ Não encontrados: ${totalNotFound}`);
+    }
 
     if (totalNotFound > 0) {
       toast({
