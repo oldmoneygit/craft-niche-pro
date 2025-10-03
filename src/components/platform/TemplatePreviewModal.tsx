@@ -64,7 +64,7 @@ export function TemplatePreviewModal({
                 lipids_g,
                 source
               ),
-              food_measures:measures (
+              food_measures!meal_plan_template_foods_measure_id_fkey (
                 id,
                 name,
                 grams
