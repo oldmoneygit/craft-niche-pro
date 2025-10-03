@@ -13,8 +13,6 @@ export interface FoodSearchResult {
 const normalizeText = (text: string): string => {
   return text
     .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
     .replace(/[,.-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -22,27 +20,33 @@ const normalizeText = (text: string): string => {
 
 const extractKeywords = (text: string): string[] => {
   const normalized = normalizeText(text);
+  const stopWords = ['de', 'da', 'do', 'com', 'sem', 'em', 'a', 'o', 'crua', 'cru', 'cozido', 'cozida', 'assado', 'assada', 'grelhado', 'grelhada', 'frito', 'frita'];
 
-  const stopWords = ['de', 'da', 'do', 'com', 'sem', 'em', 'a', 'o', 'crua', 'cru', 'cozido', 'cozida', 'assado', 'assada', 'grelhado', 'grelhada'];
-
-  const words = normalized
+  return normalized
     .split(' ')
     .filter(w => w.length > 2 && !stopWords.includes(w));
-
-  return words;
 };
 
-const calculateSimilarity = (str1: string, str2: string): number => {
-  const norm1 = normalizeText(str1);
-  const norm2 = normalizeText(str2);
+const calculateMatchScore = (aiSuggestion: string, foodName: string, keywords: string[]): number => {
+  const normAi = normalizeText(aiSuggestion);
+  const normFood = normalizeText(foodName);
 
-  const words1 = norm1.split(' ');
-  const words2 = norm2.split(' ');
+  let score = 100;
 
-  const commonWords = words1.filter(w => words2.includes(w)).length;
-  const totalWords = Math.max(words1.length, words2.length);
+  const unwantedWords = ['instantaneo', 'po', 'extrato', 'tablete', 'codorna', 'seca', 'seco', 'desidratado', 'liofilizado', 'concentrado', 'industrializado'];
+  for (const unwanted of unwantedWords) {
+    if (normFood.includes(unwanted)) {
+      score -= 40;
+    }
+  }
 
-  return commonWords / totalWords;
+  const matchedKeywords = keywords.filter(kw => normFood.includes(kw)).length;
+  score += matchedKeywords * 20;
+
+  const lengthDiff = Math.abs(normAi.length - normFood.length);
+  score -= lengthDiff * 0.5;
+
+  return score;
 };
 
 export const smartFoodSearch = async (
@@ -65,10 +69,10 @@ export const smartFoodSearch = async (
     .select('id, name, energy_kcal, protein_g, carbohydrate_g, lipid_g, source')
     .ilike('name', `%${mainKeyword}%`)
     .or('source.ilike.%TACO%,source.ilike.%TBCA%')
-    .limit(20);
+    .limit(30);
 
   if (error || !candidates || candidates.length === 0) {
-    console.log(`  ❌ Nenhum candidato encontrado para "${mainKeyword}"`);
+    console.log(`  ❌ Nenhum candidato para "${mainKeyword}"`);
     return null;
   }
 
@@ -77,36 +81,31 @@ export const smartFoodSearch = async (
   const ranked = candidates
     .map(food => ({
       ...food,
-      similarity: calculateSimilarity(aiSuggestion, food.name),
+      score: calculateMatchScore(aiSuggestion, food.name, keywords),
       keywordMatches: keywords.filter(kw =>
         normalizeText(food.name).includes(kw)
       ).length
     }))
-    .sort((a, b) => {
-      if (b.keywordMatches !== a.keywordMatches) {
-        return b.keywordMatches - a.keywordMatches;
-      }
-      return b.similarity - a.similarity;
-    });
+    .sort((a, b) => b.score - a.score);
 
   const best = ranked[0];
 
-  console.log(`  ✅ Melhor match: "${best.name}"`);
-  console.log(`     Similaridade: ${Math.round(best.similarity * 100)}%`);
+  console.log(`  ✅ Match: "${best.name}"`);
+  console.log(`     Score: ${Math.round(best.score)}`);
   console.log(`     Keywords: ${best.keywordMatches}/${keywords.length}`);
 
-  if (best.keywordMatches > 0) {
-    return {
-      id: best.id,
-      name: best.name,
-      energy_kcal: best.energy_kcal,
-      protein_g: best.protein_g,
-      carbohydrate_g: best.carbohydrate_g,
-      lipid_g: best.lipid_g,
-      source: best.source
-    };
+  if (best.keywordMatches === 0 || best.score < 20) {
+    console.log(`  ⚠️ Score muito baixo - rejeitado`);
+    return null;
   }
 
-  console.log(`  ❌ Nenhum match adequado`);
-  return null;
+  return {
+    id: best.id,
+    name: best.name,
+    energy_kcal: best.energy_kcal,
+    protein_g: best.protein_g,
+    carbohydrate_g: best.carbohydrate_g,
+    lipid_g: best.lipid_g,
+    source: best.source
+  };
 };
