@@ -1026,16 +1026,19 @@ export type Database = {
           fat_target_g: number | null
           goal: string | null
           id: string
+          is_active: boolean | null
           name: string
           notes: string | null
           plan_data: Json
           protein_target_g: number | null
           public_token: string | null
+          replaced_by: string | null
           start_date: string
           status: string
           tenant_id: string
           title: string | null
           updated_at: string
+          version: number | null
         }
         Insert: {
           active?: boolean | null
@@ -1048,16 +1051,19 @@ export type Database = {
           fat_target_g?: number | null
           goal?: string | null
           id?: string
+          is_active?: boolean | null
           name: string
           notes?: string | null
           plan_data?: Json
           protein_target_g?: number | null
           public_token?: string | null
+          replaced_by?: string | null
           start_date: string
           status?: string
           tenant_id: string
           title?: string | null
           updated_at?: string
+          version?: number | null
         }
         Update: {
           active?: boolean | null
@@ -1070,16 +1076,19 @@ export type Database = {
           fat_target_g?: number | null
           goal?: string | null
           id?: string
+          is_active?: boolean | null
           name?: string
           notes?: string | null
           plan_data?: Json
           protein_target_g?: number | null
           public_token?: string | null
+          replaced_by?: string | null
           start_date?: string
           status?: string
           tenant_id?: string
           title?: string | null
           updated_at?: string
+          version?: number | null
         }
         Relationships: [
           {
@@ -1087,6 +1096,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meal_plans_replaced_by_fkey"
+            columns: ["replaced_by"]
+            isOneToOne: false
+            referencedRelation: "meal_plans"
             referencedColumns: ["id"]
           },
         ]
