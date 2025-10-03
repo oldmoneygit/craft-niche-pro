@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Building2, Users, BarChart3, Settings } from 'lucide-react';
+import { Chrome as Home, Building2, Users, ChartBar as BarChart3, Settings } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 
 const navItems = [
