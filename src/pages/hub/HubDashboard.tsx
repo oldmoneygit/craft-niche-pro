@@ -11,10 +11,10 @@ export function HubDashboard() {
     <>
       <GridGradientBackground />
 
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen" style={{ position: 'relative', zIndex: 1 }}>
         <HubSidebar />
 
-        <main className="flex-1 p-10 relative z-10 transition-colors duration-300">
+        <main className="flex-1 p-10 relative transition-colors duration-300">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--hub-text-primary)' }}>
               Dashboard Hub

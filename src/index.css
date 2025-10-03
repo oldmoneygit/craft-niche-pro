@@ -28,18 +28,17 @@
   --hub-text-muted: #64748b;
 }
 
-/* Force background color on body and root */
+/* Text color only - background handled by GridGradientBackground */
 body {
-  background-color: var(--hub-bg-primary) !important;
   color: var(--hub-text-secondary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: color 0.3s ease;
   min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
 #root {
-  background-color: var(--hub-bg-primary);
   min-height: 100vh;
-  transition: background-color 0.3s ease;
 }
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here.
@@ -260,13 +259,13 @@ All colors MUST be HSL.
 }
 
 /* KorLab Hub Theme Styles - Grid Background Adaptation */
-[data-theme="light"] .grid-gradient-layer {
+[data-theme="light"] .gradient-layer {
   background:
     radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.08), transparent 60%),
     radial-gradient(ellipse 60% 50% at 50% 120%, rgba(139, 92, 246, 0.06), transparent 50%) !important;
 }
 
-[data-theme="light"] .grid-lines-layer {
+[data-theme="light"] .grid-layer {
   background-image:
     linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px) !important;
