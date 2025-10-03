@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit, Check, Plus, RefreshCw, Scale, Trash2, Clock, Flame } from 'lucide-react';
+import { ArrowLeft, CreditCard as Edit, Check, Plus, RefreshCw, Scale, Trash2, Clock, Flame } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
