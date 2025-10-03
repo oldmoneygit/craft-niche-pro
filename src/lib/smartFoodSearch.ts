@@ -48,7 +48,12 @@ const calculateMatchScore = (
     'desidratado': -150,
     'liofilizado': -150,
     'codorna': -100,
-    'pata': -100
+    'pata': -100,
+    'purê': -80,
+    'pure': -80,
+    'gema': -80,
+    'clara': -60,
+    'molho': -40
   };
 
   for (const [word, penalty] of Object.entries(criticalPenalties)) {
