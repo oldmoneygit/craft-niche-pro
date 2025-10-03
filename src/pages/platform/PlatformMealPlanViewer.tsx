@@ -225,27 +225,39 @@ export default function PlatformMealPlanViewer() {
 
   const handleAddFood = async (mealId: string, item: any) => {
     try {
+      console.log('📥 Recebendo item do InlineFoodSearch:', item);
+
       const tempId = `temp-${Date.now()}`;
+
+      const newItem = {
+        id: tempId,
+        quantity: item.quantity,
+        grams_total: item.grams_total || item.grams || 0,
+        kcal_total: item.kcal_total || item.kcal || 0,
+        protein_total: item.protein_total || item.protein || 0,
+        carb_total: item.carb_total || item.carbs || 0,
+        fat_total: item.fat_total || item.fat || 0,
+        foods: {
+          name: item.food?.name || item.food_name || 'Alimento',
+          id: item.food?.id || item.food_id
+        },
+        measures: {
+          measure_name: item.measure?.measure_name || item.measure_name || 'gramas',
+          id: item.measure?.id || item.measure_id
+        },
+        food_id: item.food?.id || item.food_id,
+        measure_id: item.measure?.id || item.measure_id,
+        _isNew: true
+      };
+
+      console.log('✅ Item criado para adicionar:', newItem);
 
       setMeals(meals.map(m =>
         m.id === mealId ? {
           ...m,
           meal_items: [
             ...(m.meal_items || []),
-            {
-              id: tempId,
-              quantity: item.quantity,
-              grams_total: item.grams,
-              kcal_total: item.kcal,
-              protein_total: item.protein,
-              carb_total: item.carbs,
-              fat_total: item.fat,
-              foods: { name: item.food_name },
-              measures: { measure_name: item.measure_name },
-              food_id: item.food_id,
-              measure_id: item.measure_id,
-              _isNew: true
-            }
+            newItem
           ]
         } : m
       ));
@@ -543,9 +555,9 @@ export default function PlatformMealPlanViewer() {
                         className="flex items-center justify-between py-3 border-b last:border-0 group"
                       >
                         <div className="flex-1">
-                          <p className="font-medium">{item.foods.name}</p>
+                          <p className="font-medium">{item.foods?.name || 'Alimento sem nome'}</p>
                           <p className="text-sm text-muted-foreground">
-                            {item.quantity} {item.measures.measure_name} • {item.kcal_total} kcal
+                            {item.quantity} {item.measures?.measure_name || 'gramas'} • {item.kcal_total || 0} kcal
                           </p>
                         </div>
 
