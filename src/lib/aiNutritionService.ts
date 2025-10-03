@@ -137,56 +137,47 @@ DISTRIBUIÇÃO POR REFEIÇÃO:
 - Lanche da Tarde (15:00): ${Math.round(calculatedData.targetCalories * 0.10)} kcal
 - Jantar (19:00): ${Math.round(calculatedData.targetCalories * 0.25)} kcal
 
-INSTRUÇÕES IMPORTANTES:
-1. Use EXATAMENTE esses nomes de alimentos da Tabela TACO (banco de dados brasileiro):
-
-   PÃES:
-   - "Pão, francês" (NÃO use "Pão francês")
+INSTRUÇÕES CRÍTICAS:
+1. Use EXATAMENTE estes nomes (copie e cole, incluindo vírgulas e acentos):
    - "Pão, forma, integral"
-   - "Pão, forma, trigo"
-
-   CEREAIS:
-   - "Arroz, integral, cozido"
-   - "Arroz, branco, cozido"
-   - "Macarrão, cozido"
-
-   LEGUMINOSAS:
-   - "Feijão, preto, cozido"
-   - "Feijão, carioca, cozido"
-
-   CARNES:
-   - "Frango, peito, grelhado"
-   - "Carne, bovina, magra"
+   - "Pão, francês"
    - "Ovo, cozido"
-   - "Peixe, filé"
-
-   LATICÍNIOS:
-   - "Leite, vaca, integral"
-   - "Leite, vaca, desnatado"
-   - "Queijo, minas"
-   - "Iogurte, natural"
-
-   FRUTAS:
    - "Banana, prata"
    - "Maçã"
-   - "Laranja"
    - "Mamão"
-
-   VEGETAIS:
+   - "Laranja"
+   - "Leite, vaca, desnatado"
+   - "Leite, vaca, integral"
+   - "Iogurte, natural"
+   - "Arroz, integral, cozido"
+   - "Arroz, branco, cozido"
+   - "Feijão, carioca, cozido"
+   - "Feijão, preto, cozido"
+   - "Frango, peito, grelhado"
+   - "Carne, bovina, sem gordura"
+   - "Macarrão, cozido"
    - "Alface"
    - "Tomate"
    - "Cenoura, crua"
    - "Brócolis, cozido"
+   - "Batata, cozida"
+   - "Aveia, flocos"
+   - "Azeite de oliva"
+   - "Queijo, minas"
 
-2. IMPORTANTE: As quantidades e porções devem SOMAR EXATAMENTE (ou muito próximo) as calorias alvo de cada refeição
-3. Cada refeição deve ter PELO MENOS 3-4 alimentos diferentes
-4. Distribua os macros proporcionalmente em cada refeição
-5. Use porções realistas (ex: 2 unidades de pão, 4 colheres de arroz, 1 filé de frango de 120g)
+2. Para "quantity": especifique GRAMAS TOTAIS (não porções ou unidades)
+   Exemplo CORRETO: "quantity": 50 significa 50 gramas
+   Exemplo ERRADO: "quantity": 2 para 2 pães (use gramas: 100)
+
+3. Para "measure": sempre use "gramas" ou "ml"
+
+4. CADA refeição deve somar EXATAMENTE as calorias alvo (±5%)
+
+5. Cada refeição deve ter PELO MENOS 3-4 alimentos diferentes
+
 6. Respeite RIGOROSAMENTE as restrições alimentares
-7. No "reasoning", explique POR QUÊ essas escolhas fazem sentido para este perfil
-8. No "educationalNotes", dê 3-4 dicas práticas que o nutricionista pode repassar ao cliente
 
-EXEMPLO DE BOA RESPOSTA:
+EXEMPLO DE BOA RESPOSTA (SIGA ESTE FORMATO EXATO):
 {
   "meals": [
     {
@@ -195,37 +186,37 @@ EXEMPLO DE BOA RESPOSTA:
       "targetCalories": ${Math.round(calculatedData.targetCalories * 0.20)},
       "items": [
         {
-          "food_name": "Pão, francês",
-          "quantity": 2,
-          "measure": "unidade",
-          "estimated_kcal": 270,
-          "estimated_protein": 9,
-          "estimated_carb": 54,
-          "estimated_fat": 3
+          "food_name": "Pão, forma, integral",
+          "quantity": 50,
+          "measure": "gramas",
+          "estimated_kcal": 127,
+          "estimated_protein": 6,
+          "estimated_carb": 20,
+          "estimated_fat": 2
         },
         {
           "food_name": "Ovo, cozido",
-          "quantity": 2,
-          "measure": "unidade",
-          "estimated_kcal": 140,
-          "estimated_protein": 12,
+          "quantity": 100,
+          "measure": "gramas",
+          "estimated_kcal": 155,
+          "estimated_protein": 13,
           "estimated_carb": 1,
-          "estimated_fat": 10
+          "estimated_fat": 11
         },
         {
           "food_name": "Banana, prata",
-          "quantity": 1,
-          "measure": "unidade",
-          "estimated_kcal": 98,
+          "quantity": 86,
+          "measure": "gramas",
+          "estimated_kcal": 84,
           "estimated_protein": 1,
-          "estimated_carb": 26,
+          "estimated_carb": 22,
           "estimated_fat": 0
         }
       ]
     }
   ],
-  "reasoning": "...",
-  "educationalNotes": "..."
+  "reasoning": "Café balanceado com carboidratos complexos do pão integral, proteínas do ovo e energia rápida da banana.",
+  "educationalNotes": "Hidrate-se ao acordar. Mastigue devagar. Café da manhã é essencial para metabolismo."
 }
 
 ALIMENTOS DISPONÍVEIS NO BANCO (USE ESTES NOMES EXATOS):

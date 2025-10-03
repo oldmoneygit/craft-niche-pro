@@ -144,20 +144,29 @@ export default function PlatformMealPlanEditor() {
               .eq('food_id', food.id)
               .order('is_default', { ascending: false });
 
-            const measure = measures?.[0] || {
-              id: `temp-${Date.now()}`,
-              measure_name: aiItem.measure || 'porção',
-              grams: 100
-            };
+            let measure = measures?.[0];
 
-            const gramsTotal = aiItem.quantity * (measure.grams || 100);
-            const multiplier = gramsTotal / 100;
+            if (!measure) {
+              measure = {
+                id: `temp-${Date.now()}`,
+                measure_name: 'gramas',
+                grams: 100,
+                is_default: true
+              };
+            }
+
+            const quantityInGrams = aiItem.quantity;
+            const measureGrams = measure.grams || 100;
+
+            const quantityOfMeasures = quantityInGrams / measureGrams;
+
+            const multiplier = quantityInGrams / 100;
 
             const item = {
               id: `${Date.now()}-${Math.random()}`,
               food_id: food.id,
               measure_id: measure.id,
-              quantity: aiItem.quantity,
+              quantity: quantityOfMeasures,
               food,
               measure,
               kcal_total: Math.round(food.energy_kcal * multiplier),
@@ -169,11 +178,13 @@ export default function PlatformMealPlanEditor() {
             items.push(item);
             totalAdded++;
 
-            console.log(`  ✅ ${food.name}: ${item.kcal_total} kcal`);
+            console.log(`  ✅ ${food.name}`);
+            console.log(`     ${quantityInGrams}g = ${item.kcal_total} kcal`);
+            console.log(`     P: ${item.protein_total}g | C: ${item.carb_total}g | G: ${item.fat_total}g`);
           } else {
             totalNotFound++;
             notFoundList.push(aiItem.food_name);
-            console.log(`  ❌ "${aiItem.food_name}"`);
+            console.log(`  ❌ "${aiItem.food_name}" - NÃO ENCONTRADO`);
           }
         }
 
@@ -188,20 +199,35 @@ export default function PlatformMealPlanEditor() {
 
     setMeals(newMeals);
 
-    console.log('\n📊 RESUMO FINAL:');
-    console.log(`  ✅ Adicionados: ${totalAdded}`);
-    console.log(`  ❌ Não encontrados: ${totalNotFound}`);
+    const totals = newMeals.reduce((acc, meal) => {
+      meal.items.forEach(item => {
+        acc.kcal += item.kcal_total;
+        acc.protein += item.protein_total;
+        acc.carb += item.carb_total;
+        acc.fat += item.fat_total;
+      });
+      return acc;
+    }, { kcal: 0, protein: 0, carb: 0, fat: 0 });
+
+    console.log('\n📊 TOTAIS IMPLEMENTADOS:');
+    console.log(`  Calorias: ${totals.kcal} / ${plan.targetCalories} (${Math.round(totals.kcal/plan.targetCalories*100)}%)`);
+    console.log(`  Proteínas: ${totals.protein}g / ${plan.macros.protein_g}g`);
+    console.log(`  Carbos: ${totals.carb}g / ${plan.macros.carb_g}g`);
+    console.log(`  Gorduras: ${totals.fat}g / ${plan.macros.fat_g}g`);
+
+    console.log(`\n✅ Adicionados: ${totalAdded}`);
+    console.log(`❌ Não encontrados: ${totalNotFound}`);
 
     if (totalNotFound > 0) {
       toast({
         title: `Plano parcialmente aplicado`,
-        description: `${totalAdded} alimentos adicionados. ${totalNotFound} não encontrados: ${notFoundList.slice(0, 2).join(', ')}...`,
+        description: `${totalAdded} alimentos OK. ${totalNotFound} não encontrados no banco TACO.`,
         variant: 'default'
       });
     } else {
       toast({
         title: 'Plano aplicado com sucesso!',
-        description: `${totalAdded} alimentos adicionados automaticamente`
+        description: `${totalAdded} alimentos com ${totals.kcal} kcal (${Math.round(totals.kcal/plan.targetCalories*100)}% da meta)`
       });
     }
   };

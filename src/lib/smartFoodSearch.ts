@@ -1,5 +1,4 @@
 import { supabase } from '@/integrations/supabase/client';
-import { getMappedFoodName, normalizeText } from './foodMapping';
 
 export interface FoodSearchResult {
   id: string;
@@ -11,72 +10,80 @@ export interface FoodSearchResult {
   source: string;
 }
 
+const EXACT_FOOD_MAP: Record<string, string[]> = {
+  'Pão, forma, integral': ['Pão, forma, integral', 'pao forma integral', 'pao integral'],
+  'Pão, francês': ['Pão, francês', 'pao frances'],
+
+  'Ovo, cozido': ['Ovo, cozido', 'ovo cozido', 'ovo'],
+
+  'Banana, prata': ['Banana, prata', 'banana'],
+  'Maçã': ['Maçã', 'maca'],
+  'Mamão': ['Mamão', 'mamao'],
+  'Laranja': ['Laranja'],
+
+  'Leite, vaca, desnatado': ['Leite, vaca, desnatado', 'leite desnatado'],
+  'Leite, vaca, integral': ['Leite, vaca, integral', 'leite integral', 'leite'],
+  'Iogurte, natural': ['Iogurte, natural', 'iogurte natural', 'iogurte'],
+
+  'Arroz, integral, cozido': ['Arroz, integral, cozido', 'arroz integral'],
+  'Arroz, branco, cozido': ['Arroz, branco, cozido', 'arroz branco', 'arroz'],
+  'Feijão, carioca, cozido': ['Feijão, carioca, cozido', 'feijao carioca'],
+  'Feijão, preto, cozido': ['Feijão, preto, cozido', 'feijao preto'],
+  'Macarrão, cozido': ['Macarrão, cozido', 'macarrao'],
+  'Aveia, flocos': ['Aveia, flocos', 'aveia'],
+
+  'Frango, peito, grelhado': ['Frango, peito, grelhado', 'frango peito', 'peito de frango', 'frango'],
+  'Carne, bovina, sem gordura': ['Carne, bovina, sem gordura', 'carne bovina', 'carne'],
+
+  'Alface': ['Alface', 'alface americana'],
+  'Tomate': ['Tomate'],
+  'Cenoura, crua': ['Cenoura, crua', 'cenoura'],
+  'Brócolis, cozido': ['Brócolis, cozido', 'brocolis'],
+
+  'Batata, cozida': ['Batata, cozida', 'batata'],
+  'Azeite de oliva': ['Azeite de oliva', 'azeite'],
+  'Queijo, minas': ['Queijo, minas', 'queijo minas', 'queijo']
+};
+
+const normalizeText = (text: string): string => {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+};
+
 export const smartFoodSearch = async (
   aiSuggestion: string
 ): Promise<FoodSearchResult | null> => {
   console.log(`🔍 Buscando: "${aiSuggestion}"`);
 
-  const mappedName = getMappedFoodName(aiSuggestion);
-  if (mappedName) {
-    console.log(`  📋 Mapeado para: "${mappedName}"`);
-
-    const { data } = await supabase
-      .from('foods')
-      .select('id, name, energy_kcal, protein_g, carbohydrate_g, lipid_g, source')
-      .ilike('name', mappedName)
-      .limit(1)
-      .single();
-
-    if (data) {
-      console.log(`  ✅ Encontrado via mapeamento: ${data.name}`);
-      return data;
-    }
-  }
-
   const normalized = normalizeText(aiSuggestion);
-  const keywords = normalized.split(' ').filter(w => w.length > 2);
 
-  console.log(`  🔑 Keywords: ${keywords.join(', ')}`);
+  for (const [tacoName, variations] of Object.entries(EXACT_FOOD_MAP)) {
+    for (const variation of variations) {
+      if (normalizeText(variation) === normalized ||
+          normalized.includes(normalizeText(variation)) ||
+          normalizeText(variation).includes(normalized)) {
 
-  for (const keyword of keywords) {
-    const { data } = await supabase
-      .from('foods')
-      .select('id, name, energy_kcal, protein_g, carbohydrate_g, lipid_g, source')
-      .ilike('name', `%${keyword}%`)
-      .limit(1);
+        console.log(`  📋 Mapeado para TACO: "${tacoName}"`);
 
-    if (data && data.length > 0) {
-      console.log(`  ✅ Encontrado via keyword "${keyword}": ${data[0].name}`);
-      return data[0];
+        const { data } = await supabase
+          .from('foods')
+          .select('id, name, energy_kcal, protein_g, carbohydrate_g, lipid_g, source')
+          .ilike('name', tacoName)
+          .or('source.ilike.%TACO%,source.ilike.%TBCA%')
+          .limit(1)
+          .single();
+
+        if (data) {
+          console.log(`  ✅ Encontrado: ${data.name} (${data.energy_kcal} kcal/100g)`);
+          return data;
+        }
+      }
     }
   }
 
-  const { data: tacoData } = await supabase
-    .from('foods')
-    .select('id, name, energy_kcal, protein_g, carbohydrate_g, lipid_g, source')
-    .or('source.ilike.%TACO%,source.ilike.%TBCA%')
-    .ilike('name', `%${keywords[0]}%`)
-    .limit(1);
-
-  if (tacoData && tacoData.length > 0) {
-    console.log(`  ✅ Encontrado TACO: ${tacoData[0].name}`);
-    return tacoData[0];
-  }
-
-  const firstWord = keywords[0];
-  if (firstWord) {
-    const { data } = await supabase
-      .from('foods')
-      .select('id, name, energy_kcal, protein_g, carbohydrate_g, lipid_g, source')
-      .ilike('name', `${firstWord}%`)
-      .limit(1);
-
-    if (data && data.length > 0) {
-      console.log(`  ⚠️ Encontrado genérico: ${data[0].name}`);
-      return data[0];
-    }
-  }
-
-  console.log(`  ❌ NÃO ENCONTRADO: ${aiSuggestion}`);
+  console.log(`  ❌ NÃO MAPEADO: "${aiSuggestion}"`);
   return null;
 };
