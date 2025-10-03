@@ -122,7 +122,7 @@ export default function PlatformMealPlanEditor() {
       console.log('🔵 Buscando measures na tabela food_measures...');
       const { data: measuresData, error: measuresError } = await supabase
         .from('food_measures')
-        .select('id, measure_name, grams')
+        .select('id, name, grams')
         .in('id', Array.from(measureIds));
 
       if (measuresError) {
@@ -350,7 +350,7 @@ export default function PlatformMealPlanEditor() {
               measure = {
                 id: `temp-${Date.now()}`,
                 food_id: food.id,
-                measure_name: 'gramas',
+                name: 'gramas',
                 grams: 100,
                 grams_equivalent: 100,
                 is_default: true,
@@ -460,7 +460,7 @@ export default function PlatformMealPlanEditor() {
 
     toast({
       title: 'Alimento adicionado',
-      description: `${item.quantity} ${item.measure.measure_name} de ${item.food.name}`
+      description: `${item.quantity} ${item.measure?.name || 'porção'} de ${item.food.name}`
     });
   };
 
@@ -813,7 +813,7 @@ export default function PlatformMealPlanEditor() {
                           >
                             <div className="flex-1">
                               <p className="font-medium mb-1">
-                                {item.quantity} {item.measure.measure_name} de {item.food.name}
+                                {item.quantity} {item.measure?.name || 'porção'} de {item.food.name}
                               </p>
                               <p className="text-sm text-muted-foreground">
                                 {item.kcal_total.toFixed(0)} kcal |
