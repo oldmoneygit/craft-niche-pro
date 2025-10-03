@@ -25,12 +25,12 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const anthropicApiKey = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!anthropicApiKey) {
-      console.error("ANTHROPIC_API_KEY not found in environment");
+    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+    if (!lovableApiKey) {
+      console.error("LOVABLE_API_KEY not found in environment");
       return new Response(
         JSON.stringify({ 
-          error: "Chave da API não configurada. Configure ANTHROPIC_API_KEY nas configurações de Secrets do Supabase." 
+          error: "Chave da API não configurada. Entre em contato com o suporte." 
         }),
         {
           status: 500,
@@ -39,7 +39,7 @@ Deno.serve(async (req: Request) => {
       );
     }
     
-    console.log("API key found, length:", anthropicApiKey.length);
+    console.log("API key found, calling Lovable AI Gateway...");
 
     const systemPrompt = `Você auxilia nutricionistas gerando rascunhos de planos alimentares.
 
@@ -130,31 +130,25 @@ REGRAS:
 
 Retorne apenas JSON.`;
 
-    console.log("Calling Anthropic API...");
+    console.log("Calling Lovable AI Gateway...");
 
-    let anthropicResponse;
+    let aiResponse;
     try {
-      anthropicResponse = await fetch(
-        "https://api.anthropic.com/v1/messages",
+      aiResponse = await fetch(
+        "https://ai.gateway.lovable.dev/v1/chat/completions",
         {
           method: "POST",
           headers: {
-            "x-api-key": anthropicApiKey,
-            "anthropic-version": "2023-06-01",
-            "content-type": "application/json",
+            "Authorization": `Bearer ${lovableApiKey}`,
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "claude-3-5-haiku-20241022",
-            max_tokens: 2048,
-            temperature: 0.7,
-            system: [
-              {
-                type: "text",
-                text: systemPrompt,
-                cache_control: { type: "ephemeral" },
-              },
-            ],
+            model: "google/gemini-2.5-flash",
             messages: [
+              {
+                role: "system",
+                content: systemPrompt,
+              },
               {
                 role: "user",
                 content: userPrompt,
@@ -167,7 +161,7 @@ Retorne apenas JSON.`;
       console.error("Fetch error:", fetchError);
       return new Response(
         JSON.stringify({ 
-          error: "Erro ao conectar com a API da Anthropic. Verifique se a chave ANTHROPIC_API_KEY está configurada corretamente.",
+          error: "Erro ao conectar com a API de IA.",
           details: fetchError instanceof Error ? fetchError.message : "Unknown error"
         }),
         {
@@ -177,11 +171,11 @@ Retorne apenas JSON.`;
       );
     }
 
-    if (!anthropicResponse.ok) {
-      const errorText = await anthropicResponse.text();
-      console.error("Anthropic API error:", errorText);
+    if (!aiResponse.ok) {
+      const errorText = await aiResponse.text();
+      console.error("AI Gateway error:", errorText);
       return new Response(
-        JSON.stringify({ error: "Erro da API Anthropic", details: errorText }),
+        JSON.stringify({ error: "Erro da API de IA", details: errorText }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -189,13 +183,10 @@ Retorne apenas JSON.`;
       );
     }
 
-    const anthropicData = await anthropicResponse.json();
-    const responseText =
-      anthropicData.content?.[0]?.type === "text"
-        ? anthropicData.content[0].text
-        : "";
+    const aiData = await aiResponse.json();
+    const responseText = aiData.choices?.[0]?.message?.content || "";
 
-    console.log("Response received from Anthropic");
+    console.log("Response received from AI Gateway");
 
     let parsed;
     try {
