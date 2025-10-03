@@ -10,47 +10,39 @@ export interface FoodSearchResult {
   source: string;
 }
 
-const EXACT_FOOD_MAP: Record<string, string[]> = {
-  'Pão, forma, integral': ['Pão, forma, integral', 'pao forma integral', 'pao integral'],
-  'Pão, francês': ['Pão, francês', 'pao frances'],
-
-  'Ovo, cozido': ['Ovo, cozido', 'ovo cozido', 'ovo'],
-
-  'Banana, prata': ['Banana, prata', 'banana'],
-  'Maçã': ['Maçã', 'maca'],
-  'Mamão': ['Mamão', 'mamao'],
-  'Laranja': ['Laranja'],
-
-  'Leite, vaca, desnatado': ['Leite, vaca, desnatado', 'leite desnatado'],
-  'Leite, vaca, integral': ['Leite, vaca, integral', 'leite integral', 'leite'],
-  'Iogurte, natural': ['Iogurte, natural', 'iogurte natural', 'iogurte'],
-
-  'Arroz, integral, cozido': ['Arroz, integral, cozido', 'arroz integral'],
-  'Arroz, branco, cozido': ['Arroz, branco, cozido', 'arroz branco', 'arroz'],
-  'Feijão, carioca, cozido': ['Feijão, carioca, cozido', 'feijao carioca'],
-  'Feijão, preto, cozido': ['Feijão, preto, cozido', 'feijao preto'],
-  'Macarrão, cozido': ['Macarrão, cozido', 'macarrao'],
-  'Aveia, flocos': ['Aveia, flocos', 'aveia'],
-
-  'Frango, peito, grelhado': ['Frango, peito, grelhado', 'frango peito', 'peito de frango', 'frango'],
-  'Carne, bovina, sem gordura': ['Carne, bovina, sem gordura', 'carne bovina', 'carne'],
-
-  'Alface': ['Alface', 'alface americana'],
-  'Tomate': ['Tomate'],
-  'Cenoura, crua': ['Cenoura, crua', 'cenoura'],
-  'Brócolis, cozido': ['Brócolis, cozido', 'brocolis'],
-
-  'Batata, cozida': ['Batata, cozida', 'batata'],
-  'Azeite de oliva': ['Azeite de oliva', 'azeite'],
-  'Queijo, minas': ['Queijo, minas', 'queijo minas', 'queijo']
-};
-
 const normalizeText = (text: string): string => {
   return text
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[,.-]/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
+};
+
+const extractKeywords = (text: string): string[] => {
+  const normalized = normalizeText(text);
+
+  const stopWords = ['de', 'da', 'do', 'com', 'sem', 'em', 'a', 'o', 'crua', 'cru', 'cozido', 'cozida', 'assado', 'assada', 'grelhado', 'grelhada'];
+
+  const words = normalized
+    .split(' ')
+    .filter(w => w.length > 2 && !stopWords.includes(w));
+
+  return words;
+};
+
+const calculateSimilarity = (str1: string, str2: string): number => {
+  const norm1 = normalizeText(str1);
+  const norm2 = normalizeText(str2);
+
+  const words1 = norm1.split(' ');
+  const words2 = norm2.split(' ');
+
+  const commonWords = words1.filter(w => words2.includes(w)).length;
+  const totalWords = Math.max(words1.length, words2.length);
+
+  return commonWords / totalWords;
 };
 
 export const smartFoodSearch = async (
@@ -58,37 +50,63 @@ export const smartFoodSearch = async (
 ): Promise<FoodSearchResult | null> => {
   console.log(`🔍 Buscando: "${aiSuggestion}"`);
 
-  const normalized = normalizeText(aiSuggestion);
+  const keywords = extractKeywords(aiSuggestion);
+  console.log(`  🔑 Keywords: ${keywords.join(', ')}`);
 
-  for (const [tacoName, variations] of Object.entries(EXACT_FOOD_MAP)) {
-    for (const variation of variations) {
-      if (normalizeText(variation) === normalized ||
-          normalized.includes(normalizeText(variation)) ||
-          normalizeText(variation).includes(normalized)) {
-
-        console.log(`  📋 Mapeado para TACO: "${tacoName}"`);
-
-        const { data, error } = await supabase
-          .from('foods')
-          .select('id, name, energy_kcal, protein_g, carbohydrate_g, lipid_g, source')
-          .ilike('name', tacoName)
-          .or('source.ilike.%TACO%,source.ilike.%TBCA%')
-          .limit(1);
-
-        if (error) {
-          console.log(`  ⚠️ Erro Supabase:`, error.message);
-          continue;
-        }
-
-        if (data && data.length > 0) {
-          const food = data[0];
-          console.log(`  ✅ Encontrado: ${food.name} (${food.energy_kcal} kcal/100g)`);
-          return food;
-        }
-      }
-    }
+  if (keywords.length === 0) {
+    console.log(`  ❌ Nenhuma keyword válida`);
+    return null;
   }
 
-  console.log(`  ❌ NÃO MAPEADO: "${aiSuggestion}"`);
+  const mainKeyword = keywords[0];
+
+  const { data: candidates, error } = await supabase
+    .from('foods')
+    .select('id, name, energy_kcal, protein_g, carbohydrate_g, lipid_g, source')
+    .ilike('name', `%${mainKeyword}%`)
+    .or('source.ilike.%TACO%,source.ilike.%TBCA%')
+    .limit(20);
+
+  if (error || !candidates || candidates.length === 0) {
+    console.log(`  ❌ Nenhum candidato encontrado para "${mainKeyword}"`);
+    return null;
+  }
+
+  console.log(`  📊 ${candidates.length} candidatos encontrados`);
+
+  const ranked = candidates
+    .map(food => ({
+      ...food,
+      similarity: calculateSimilarity(aiSuggestion, food.name),
+      keywordMatches: keywords.filter(kw =>
+        normalizeText(food.name).includes(kw)
+      ).length
+    }))
+    .sort((a, b) => {
+      if (b.keywordMatches !== a.keywordMatches) {
+        return b.keywordMatches - a.keywordMatches;
+      }
+      return b.similarity - a.similarity;
+    });
+
+  const best = ranked[0];
+
+  console.log(`  ✅ Melhor match: "${best.name}"`);
+  console.log(`     Similaridade: ${Math.round(best.similarity * 100)}%`);
+  console.log(`     Keywords: ${best.keywordMatches}/${keywords.length}`);
+
+  if (best.keywordMatches > 0) {
+    return {
+      id: best.id,
+      name: best.name,
+      energy_kcal: best.energy_kcal,
+      protein_g: best.protein_g,
+      carbohydrate_g: best.carbohydrate_g,
+      lipid_g: best.lipid_g,
+      source: best.source
+    };
+  }
+
+  console.log(`  ❌ Nenhum match adequado`);
   return null;
 };
