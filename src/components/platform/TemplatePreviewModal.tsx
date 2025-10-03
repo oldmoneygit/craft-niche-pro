@@ -37,7 +37,7 @@ export function TemplatePreviewModal({
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data: templateData, error: templateError } = await supabase
         .from('meal_plan_templates')
         .select(`
           id,
@@ -68,11 +68,6 @@ export function TemplatePreviewModal({
                 carbohydrate_g,
                 lipid_g,
                 source
-              ),
-              measures:food_measures!meal_plan_template_foods_measure_id_fkey (
-                id,
-                name,
-                grams
               )
             )
           )
@@ -80,15 +75,39 @@ export function TemplatePreviewModal({
         .eq('id', templateId)
         .single();
 
-      if (error) throw error;
+      if (templateError) throw templateError;
 
-      if (data.meal_plan_template_meals) {
-        data.meal_plan_template_meals.sort((a: any, b: any) =>
+      const measureIds = new Set<string>();
+      templateData.meal_plan_template_meals?.forEach((meal: any) => {
+        meal.meal_plan_template_foods?.forEach((food: any) => {
+          if (food.measure_id) measureIds.add(food.measure_id);
+        });
+      });
+
+      const { data: measuresData, error: measuresError } = await supabase
+        .from('food_measures')
+        .select('id, measure_name, grams')
+        .in('id', Array.from(measureIds));
+
+      if (measuresError) throw measuresError;
+
+      const measuresMap = new Map(
+        measuresData?.map(m => [m.id, m]) || []
+      );
+
+      templateData.meal_plan_template_meals?.forEach((meal: any) => {
+        meal.meal_plan_template_foods?.forEach((food: any) => {
+          food.measures = measuresMap.get(food.measure_id) || null;
+        });
+      });
+
+      if (templateData.meal_plan_template_meals) {
+        templateData.meal_plan_template_meals.sort((a: any, b: any) =>
           a.order_index - b.order_index
         );
       }
 
-      setTemplate(data);
+      setTemplate(templateData);
 
     } catch (error: any) {
       console.error('Erro ao carregar detalhes:', error);
@@ -242,7 +261,7 @@ export function TemplatePreviewModal({
                                 <div className="flex-1">
                                   <p className="font-medium">{food.foods?.name}</p>
                                   <p className="text-sm text-muted-foreground">
-                                    {food.quantity} {food.measures?.name} ({grams.toFixed(0)}g)
+                                    {food.quantity} {food.measures?.measure_name} ({grams.toFixed(0)}g)
                                   </p>
                                 </div>
                                 <div className="text-right">
