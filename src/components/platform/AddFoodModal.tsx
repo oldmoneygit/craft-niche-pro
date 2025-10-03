@@ -69,8 +69,10 @@ export function AddFoodModal({
         .ilike('name', `%${searchTerm}%`)
         .limit(50);
 
-      if (sourceFilter !== 'all') {
-        query = query.eq('source', sourceFilter);
+      if (sourceFilter === 'TACO') {
+        query = query.ilike('source', '%TACO%');
+      } else if (sourceFilter === 'OpenFoodFacts') {
+        query = query.eq('source', 'OpenFoodFacts');
       }
 
       const { data, error } = await query;
@@ -78,14 +80,18 @@ export function AddFoodModal({
       if (error) throw error;
 
       const sortedData = (data || []).sort((a, b) => {
-        if (a.source === 'TACO' && b.source !== 'TACO') return -1;
-        if (a.source !== 'TACO' && b.source === 'TACO') return 1;
+        const isTacoA = a.source?.includes('TACO');
+        const isTacoB = b.source?.includes('TACO');
+
+        if (isTacoA && !isTacoB) return -1;
+        if (!isTacoA && isTacoB) return 1;
         return a.name.localeCompare(b.name);
       });
 
       setFoods(sortedData);
     } catch (error) {
       console.error('Erro ao buscar alimentos:', error);
+      setFoods([]);
     } finally {
       setIsLoading(false);
     }
@@ -160,22 +166,40 @@ export function AddFoodModal({
                   variant={sourceFilter === 'all' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSourceFilter('all')}
+                  className="gap-1"
                 >
                   Todas as tabelas
+                  {sourceFilter === 'all' && foods.length > 0 && (
+                    <Badge variant="secondary" className="ml-1">
+                      {foods.length}
+                    </Badge>
+                  )}
                 </Button>
                 <Button
                   variant={sourceFilter === 'TACO' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSourceFilter('TACO')}
+                  className="gap-1"
                 >
-                  Apenas TACO
+                  <span>🇧🇷</span> TACO
+                  {sourceFilter === 'TACO' && foods.length > 0 && (
+                    <Badge variant="secondary" className="ml-1">
+                      {foods.length}
+                    </Badge>
+                  )}
                 </Button>
                 <Button
                   variant={sourceFilter === 'OpenFoodFacts' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSourceFilter('OpenFoodFacts')}
+                  className="gap-1"
                 >
-                  Apenas OpenFoodFacts
+                  OpenFoodFacts
+                  {sourceFilter === 'OpenFoodFacts' && foods.length > 0 && (
+                    <Badge variant="secondary" className="ml-1">
+                      {foods.length}
+                    </Badge>
+                  )}
                 </Button>
               </div>
 
@@ -287,28 +311,39 @@ export function AddFoodModal({
                     {foods.map(food => (
                     <Card
                       key={food.id}
-                      className="cursor-pointer hover:border-primary hover:shadow-md transition-all"
+                      className={`cursor-pointer transition-all ${
+                        food.source?.includes('TACO')
+                          ? 'border-2 border-green-500 hover:border-green-600 hover:shadow-lg bg-green-50/30'
+                          : 'border border-gray-200 hover:border-primary hover:shadow-md'
+                      }`}
                       onClick={() => handleSelectFood(food)}
                     >
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start gap-4">
                           <div className="flex-1">
-                            <p className="font-semibold text-base mb-1">
-                              {food.name}
-                            </p>
+                            <div className="flex items-center gap-2 mb-1">
+                              {food.source?.includes('TACO') && (
+                                <span className="text-green-600 text-lg">🇧🇷</span>
+                              )}
+                              <p className="font-semibold text-base">{food.name}</p>
+                            </div>
                             <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-                              <span>{food.energy_kcal} kcal</span>
-                              <span>P: {food.protein_g}g</span>
-                              <span>C: {food.carbs_g}g</span>
-                              <span>G: {food.fat_g}g</span>
+                              <span>{food.energy_kcal != null ? food.energy_kcal : 0} kcal</span>
+                              <span>P: {food.protein_g != null ? food.protein_g : 0}g</span>
+                              <span>C: {food.carbs_g != null ? food.carbs_g : 0}g</span>
+                              <span>G: {food.fat_g != null ? food.fat_g : 0}g</span>
                               <span className="text-xs">(por 100g)</span>
                             </div>
                           </div>
                           <Badge
-                            variant={food.source === 'TACO' ? 'default' : 'secondary'}
-                            className="shrink-0"
+                            variant={food.source?.includes('TACO') ? 'default' : 'secondary'}
+                            className={`shrink-0 ${
+                              food.source?.includes('TACO')
+                                ? 'bg-green-600 hover:bg-green-700 text-white'
+                                : 'bg-blue-500 hover:bg-blue-600 text-white'
+                            }`}
                           >
-                            {food.source}
+                            {food.source?.includes('TACO') ? '🇧🇷 TACO' : 'OFF'}
                           </Badge>
                         </div>
                       </CardContent>
