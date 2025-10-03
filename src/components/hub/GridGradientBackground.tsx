@@ -1,8 +1,11 @@
 export function GridGradientBackground() {
   return (
-    <div className="fixed inset-0 -z-20 overflow-hidden pointer-events-none">
+    <div
+      className="fixed inset-0 overflow-hidden pointer-events-none"
+      style={{ zIndex: -20 }}
+    >
       <div
-        className="absolute inset-0 transition-opacity duration-700 grid-gradient-bg"
+        className="grid-gradient-layer absolute inset-0 transition-opacity duration-700"
         style={{
           background: `
             radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.15), transparent 60%),
@@ -12,7 +15,7 @@ export function GridGradientBackground() {
       />
 
       <div
-        className="absolute inset-0 transition-opacity duration-700 grid-layer"
+        className="grid-lines-layer absolute inset-0 transition-opacity duration-700"
         style={{
           backgroundImage: `
             linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
