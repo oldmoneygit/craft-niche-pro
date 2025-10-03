@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, AlertCircle, XCircle } from 'lucide-react';
+import { CircleCheck as CheckCircle, CircleAlert as AlertCircle, Circle as XCircle } from 'lucide-react';
 import { PlatformStatus } from '@/types/hub';
 
 interface PlatformStatusBadgeProps {

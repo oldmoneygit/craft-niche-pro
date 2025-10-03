@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { VerticalType, PlatformStatus } from '@/types/hub';
-import { Apple, Dumbbell, Heart, Brain, CheckCircle, AlertCircle } from 'lucide-react';
+import { Apple, Dumbbell, Heart, Brain, CircleCheck as CheckCircle, CircleAlert as AlertCircle } from 'lucide-react';
 
 interface PlatformFiltersProps {
   selectedVertical: VerticalType | null;
