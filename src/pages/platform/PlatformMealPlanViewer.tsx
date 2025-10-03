@@ -31,6 +31,10 @@ export default function PlatformMealPlanViewer() {
   const [meals, setMeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // ⭐ Backup para o botão cancelar
+  const [originalMeals, setOriginalMeals] = useState<any[]>([]);
   
   // Estados para modais
   const [addingToMeal, setAddingToMeal] = useState<string | null>(null);
@@ -79,6 +83,9 @@ export default function PlatformMealPlanViewer() {
 
       if (mealsError) throw mealsError;
       setMeals(mealsData || []);
+      
+      // ⭐ Criar backup (deep copy) para reverter mudanças
+      setOriginalMeals(JSON.parse(JSON.stringify(mealsData || [])));
     } catch (error: any) {
       toast({
         title: 'Erro ao carregar plano',
@@ -268,6 +275,78 @@ export default function PlatformMealPlanViewer() {
     }, { kcal: 0, protein: 0, carb: 0, fat: 0 });
   };
 
+  // ⭐ ENTRAR EM MODO DE EDIÇÃO (salvar backup)
+  const handleEnterEditMode = () => {
+    // Criar backup antes de permitir edições
+    setOriginalMeals(JSON.parse(JSON.stringify(meals)));
+    setEditMode(true);
+    
+    toast({
+      title: 'Modo de edição ativo',
+      description: 'Faça as alterações necessárias e clique em "Salvar Alterações".'
+    });
+  };
+
+  // ⭐ CANCELAR EDIÇÕES (reverter para backup)
+  const handleCancelEdit = () => {
+    // Restaurar estado original (desfazer todas as mudanças)
+    setMeals(JSON.parse(JSON.stringify(originalMeals)));
+    setEditMode(false);
+    
+    // Recarregar do banco para garantir dados frescos
+    loadMealPlan();
+    
+    toast({
+      title: 'Edições canceladas',
+      description: 'Todas as alterações foram descartadas.'
+    });
+  };
+
+  // ⭐ SALVAR ALTERAÇÕES (recalcular totais e persistir)
+  const handleSaveChanges = async () => {
+    try {
+      setIsSaving(true);
+
+      // Calcular totais atualizados
+      const totals = getTotals();
+
+      // Atualizar totais do plano no banco
+      const { error: updateError } = await supabase
+        .from('meal_plans')
+        .update({
+          calories_target: totals.kcal,
+          protein_target_g: totals.protein,
+          carb_target_g: totals.carb,
+          fat_target_g: totals.fat,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', planId);
+
+      if (updateError) throw updateError;
+
+      // Atualizar backup (mudanças agora são "oficiais")
+      setOriginalMeals(JSON.parse(JSON.stringify(meals)));
+      setEditMode(false);
+
+      toast({
+        title: '✅ Plano atualizado!',
+        description: `Totais recalculados: ${totals.kcal.toFixed(0)} kcal`
+      });
+
+      // Recarregar para garantir sincronização
+      await loadMealPlan();
+    } catch (error: any) {
+      console.error('Erro ao salvar:', error);
+      toast({
+        title: 'Erro ao salvar',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -302,7 +381,7 @@ export default function PlatformMealPlanViewer() {
           </div>
           <div className="flex gap-2">
             {!editMode ? (
-              <Button onClick={() => setEditMode(true)} className="gap-2">
+              <Button onClick={handleEnterEditMode} className="gap-2">
                 <Edit className="h-4 w-4" />
                 Editar Plano
               </Button>
@@ -310,25 +389,18 @@ export default function PlatformMealPlanViewer() {
               <>
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    setEditMode(false);
-                    loadMealPlan();
-                  }}
+                  onClick={handleCancelEdit}
+                  disabled={isSaving}
                 >
                   Cancelar
                 </Button>
                 <Button
-                  onClick={() => {
-                    setEditMode(false);
-                    toast({
-                      title: 'Plano atualizado',
-                      description: 'As alterações foram salvas com sucesso'
-                    });
-                  }}
+                  onClick={handleSaveChanges}
+                  disabled={isSaving}
                   className="gap-2"
                 >
                   <Check className="h-4 w-4" />
-                  Salvar Alterações
+                  {isSaving ? 'Salvando...' : 'Salvar Alterações'}
                 </Button>
               </>
             )}
