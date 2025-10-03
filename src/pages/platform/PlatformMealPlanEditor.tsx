@@ -460,7 +460,7 @@ export default function PlatformMealPlanEditor() {
 
     toast({
       title: 'Alimento adicionado',
-      description: `${item.quantity} ${item.measure?.measure_name || 'porção'} de ${item.food.name}`
+      description: `${item.quantity} ${item.measure?.measure_name || 'porção'} de ${item.foods?.name || 'alimento'}`
     });
   };
 
@@ -813,7 +813,7 @@ export default function PlatformMealPlanEditor() {
                           >
                             <div className="flex-1">
                               <p className="font-medium mb-1">
-                                {item.quantity} {item.measure?.measure_name || 'porção'} de {item.food.name}
+                                {item.quantity} {item.measure?.measure_name || 'porção'} de {item.foods?.name || 'alimento'}
                               </p>
                               <p className="text-sm text-muted-foreground">
                                 {item.kcal_total.toFixed(0)} kcal |
