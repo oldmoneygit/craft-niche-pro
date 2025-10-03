@@ -35,6 +35,7 @@ export function AddFoodModal({
   const [selectedMeasure, setSelectedMeasure] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'TACO' | 'OpenFoodFacts'>('all');
 
   useEffect(() => {
     if (open) {
@@ -56,20 +57,33 @@ export function AddFoodModal({
     } else {
       setFoods([]);
     }
-  }, [searchTerm]);
+  }, [searchTerm, sourceFilter]);
 
   const searchFoods = async () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('foods')
         .select('*')
         .ilike('name', `%${searchTerm}%`)
         .limit(50);
 
+      if (sourceFilter !== 'all') {
+        query = query.eq('source', sourceFilter);
+      }
+
+      const { data, error } = await query;
+
       if (error) throw error;
-      setFoods(data || []);
+
+      const sortedData = (data || []).sort((a, b) => {
+        if (a.source === 'TACO' && b.source !== 'TACO') return -1;
+        if (a.source !== 'TACO' && b.source === 'TACO') return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      setFoods(sortedData);
     } catch (error) {
       console.error('Erro ao buscar alimentos:', error);
     } finally {
@@ -141,6 +155,91 @@ export function AddFoodModal({
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div className="flex gap-2 flex-wrap mb-4">
+                <Button
+                  variant={sourceFilter === 'all' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSourceFilter('all')}
+                >
+                  Todas as tabelas
+                </Button>
+                <Button
+                  variant={sourceFilter === 'TACO' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSourceFilter('TACO')}
+                >
+                  Apenas TACO
+                </Button>
+                <Button
+                  variant={sourceFilter === 'OpenFoodFacts' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSourceFilter('OpenFoodFacts')}
+                >
+                  Apenas OpenFoodFacts
+                </Button>
+              </div>
+
+              {searchTerm.length === 0 && (
+                <div>
+                  <p className="text-sm font-semibold mb-3">Navegar por Categorias:</p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    <Button
+                      variant="outline"
+                      className="h-auto py-3 flex flex-col items-center gap-2"
+                      onClick={() => setSearchTerm('arroz')}
+                    >
+                      <span className="text-2xl">🌾</span>
+                      <span className="text-xs">Cereais</span>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="h-auto py-3 flex flex-col items-center gap-2"
+                      onClick={() => setSearchTerm('frango')}
+                    >
+                      <span className="text-2xl">🍖</span>
+                      <span className="text-xs">Carnes</span>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="h-auto py-3 flex flex-col items-center gap-2"
+                      onClick={() => setSearchTerm('banana')}
+                    >
+                      <span className="text-2xl">🍎</span>
+                      <span className="text-xs">Frutas</span>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="h-auto py-3 flex flex-col items-center gap-2"
+                      onClick={() => setSearchTerm('leite')}
+                    >
+                      <span className="text-2xl">🥛</span>
+                      <span className="text-xs">Leite</span>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="h-auto py-3 flex flex-col items-center gap-2"
+                      onClick={() => setSearchTerm('alface')}
+                    >
+                      <span className="text-2xl">🥬</span>
+                      <span className="text-xs">Verduras</span>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="h-auto py-3 flex flex-col items-center gap-2"
+                      onClick={() => setSearchTerm('peixe')}
+                    >
+                      <span className="text-2xl">🐟</span>
+                      <span className="text-xs">Peixes</span>
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
@@ -152,14 +251,6 @@ export function AddFoodModal({
                 />
               </div>
 
-              {searchTerm.length === 0 && (
-                <div className="text-center py-16">
-                  <Search className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-lg text-muted-foreground">
-                    Digite pelo menos 2 caracteres para buscar alimentos
-                  </p>
-                </div>
-              )}
 
               {searchTerm.length > 0 && searchTerm.length < 2 && (
                 <div className="text-center py-16">
@@ -192,7 +283,8 @@ export function AddFoodModal({
                     {foods.length} {foods.length === 1 ? 'alimento encontrado' : 'alimentos encontrados'}
                   </p>
 
-                  {foods.map(food => (
+                  <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+                    {foods.map(food => (
                     <Card
                       key={food.id}
                       className="cursor-pointer hover:border-primary hover:shadow-md transition-all"
@@ -221,7 +313,8 @@ export function AddFoodModal({
                         </div>
                       </CardContent>
                     </Card>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -304,7 +397,10 @@ export function AddFoodModal({
                       <div className="bg-background rounded p-3">
                         <p className="text-xs text-muted-foreground mb-1">Calorias</p>
                         <p className="text-xl font-bold">
-                          {((selectedFood.energy_kcal * parseFloat(totalGrams)) / 100).toFixed(0)}
+                          {selectedFood.energy_kcal != null
+                            ? (((selectedFood.energy_kcal || 0) * parseFloat(totalGrams)) / 100).toFixed(0)
+                            : '0'
+                          }
                           <span className="text-sm font-normal text-muted-foreground ml-1">kcal</span>
                         </p>
                       </div>
@@ -312,7 +408,10 @@ export function AddFoodModal({
                       <div className="bg-background rounded p-3">
                         <p className="text-xs text-muted-foreground mb-1">Proteínas</p>
                         <p className="text-xl font-bold">
-                          {((selectedFood.protein_g * parseFloat(totalGrams)) / 100).toFixed(1)}
+                          {selectedFood.protein_g != null
+                            ? (((selectedFood.protein_g || 0) * parseFloat(totalGrams)) / 100).toFixed(1)
+                            : '0.0'
+                          }
                           <span className="text-sm font-normal text-muted-foreground ml-1">g</span>
                         </p>
                       </div>
@@ -320,7 +419,10 @@ export function AddFoodModal({
                       <div className="bg-background rounded p-3">
                         <p className="text-xs text-muted-foreground mb-1">Carboidratos</p>
                         <p className="text-xl font-bold">
-                          {((selectedFood.carbs_g * parseFloat(totalGrams)) / 100).toFixed(1)}
+                          {selectedFood.carbs_g != null
+                            ? (((selectedFood.carbs_g || 0) * parseFloat(totalGrams)) / 100).toFixed(1)
+                            : '0.0'
+                          }
                           <span className="text-sm font-normal text-muted-foreground ml-1">g</span>
                         </p>
                       </div>
@@ -328,7 +430,10 @@ export function AddFoodModal({
                       <div className="bg-background rounded p-3">
                         <p className="text-xs text-muted-foreground mb-1">Gorduras</p>
                         <p className="text-xl font-bold">
-                          {((selectedFood.fat_g * parseFloat(totalGrams)) / 100).toFixed(1)}
+                          {selectedFood.fat_g != null
+                            ? (((selectedFood.fat_g || 0) * parseFloat(totalGrams)) / 100).toFixed(1)
+                            : '0.0'
+                          }
                           <span className="text-sm font-normal text-muted-foreground ml-1">g</span>
                         </p>
                       </div>
