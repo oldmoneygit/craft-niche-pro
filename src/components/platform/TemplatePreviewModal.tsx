@@ -56,12 +56,8 @@ export function TemplatePreviewModal({
                 name,
                 energy_kcal,
                 protein_g,
-                carbs_g,
                 carbohydrate_g,
-                carbohydrates_g,
-                fat_g,
                 lipid_g,
-                lipids_g,
                 source
               ),
               food_measures!meal_plan_template_foods_measure_id_fkey (
@@ -105,8 +101,8 @@ export function TemplatePreviewModal({
       return {
         kcal: totals.kcal + ((food.foods?.energy_kcal || 0) * multiplier),
         protein: totals.protein + ((food.foods?.protein_g || 0) * multiplier),
-        carbs: totals.carbs + ((food.foods?.carbs_g || food.foods?.carbohydrate_g || food.foods?.carbohydrates_g || 0) * multiplier),
-        fat: totals.fat + ((food.foods?.fat_g || food.foods?.lipid_g || food.foods?.lipids_g || 0) * multiplier)
+        carbs: totals.carbs + ((food.foods?.carbohydrate_g || 0) * multiplier),
+        fat: totals.fat + ((food.foods?.lipid_g || 0) * multiplier)
       };
     }, { kcal: 0, protein: 0, carbs: 0, fat: 0 });
   };
