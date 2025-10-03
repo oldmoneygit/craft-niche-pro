@@ -68,17 +68,22 @@ export const smartFoodSearch = async (
 
         console.log(`  📋 Mapeado para TACO: "${tacoName}"`);
 
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('foods')
           .select('id, name, energy_kcal, protein_g, carbohydrate_g, lipid_g, source')
           .ilike('name', tacoName)
           .or('source.ilike.%TACO%,source.ilike.%TBCA%')
-          .limit(1)
-          .single();
+          .limit(1);
 
-        if (data) {
-          console.log(`  ✅ Encontrado: ${data.name} (${data.energy_kcal} kcal/100g)`);
-          return data;
+        if (error) {
+          console.log(`  ⚠️ Erro Supabase:`, error.message);
+          continue;
+        }
+
+        if (data && data.length > 0) {
+          const food = data[0];
+          console.log(`  ✅ Encontrado: ${food.name} (${food.energy_kcal} kcal/100g)`);
+          return food;
         }
       }
     }
