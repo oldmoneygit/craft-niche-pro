@@ -11,7 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ArrowLeft, Plus, Trash2, Target, TrendingUp, ChartBar as BarChart3, Clock, Save } from 'lucide-react';
 import { InlineFoodSearch } from '@/components/platform/InlineFoodSearch';
-import { CategoryBrowser } from '@/components/platform/CategoryBrowser';
+import { AddFoodModal } from '@/components/platform/AddFoodModal';
 import { QuickPortionDialog } from '@/components/platform/QuickPortionDialog';
 import { AIAssistant } from '@/components/platform/AIAssistant';
 import { formatNutrient } from '@/lib/nutritionCalculations';
@@ -51,6 +51,8 @@ export default function PlatformMealPlanEditor() {
     food: any;
     mealId: string;
   } | null>(null);
+  const [showAddFoodModal, setShowAddFoodModal] = useState(false);
+  const [currentMealId, setCurrentMealId] = useState<string | null>(null);
   const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
 
   const totals = meals.reduce((acc, meal) => {
@@ -663,11 +665,17 @@ export default function PlatformMealPlanEditor() {
                     />
 
                     <div className="pt-2">
-                      <CategoryBrowser
-                        onSelectFood={(food) => {
-                          setSelectedFoodForPortion({ food, mealId: meal.id });
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setCurrentMealId(meal.id);
+                          setShowAddFoodModal(true);
                         }}
-                      />
+                        className="w-full"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Navegar por Categorias
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -712,6 +720,31 @@ export default function PlatformMealPlanEditor() {
           }}
         />
       )}
+
+      <AddFoodModal
+        open={showAddFoodModal}
+        onClose={() => {
+          setShowAddFoodModal(false);
+          setCurrentMealId(null);
+        }}
+        mealId={currentMealId || ''}
+        onFoodAdded={(foodItem) => {
+          handleAddFoodToMeal(currentMealId!, {
+            food_id: foodItem.food_id,
+            food_name: foodItem.food_name,
+            measure_id: foodItem.measure_id,
+            quantity: foodItem.quantity,
+            measure_name: '',
+            measure_grams: 0,
+            kcal: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0
+          });
+          setShowAddFoodModal(false);
+          setCurrentMealId(null);
+        }}
+      />
     </div>
   );
 }
