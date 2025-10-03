@@ -28,25 +28,36 @@ interface Meal {
 }
 
 export default function PlatformMealPlanEditor() {
+  console.log('🟢 PlatformMealPlanEditor renderizado');
+
   const navigate = useNavigate();
   const { toast } = useToast();
   const { tenantId } = useTenantId();
   const [searchParams] = useSearchParams();
   const clientId = searchParams.get('client');
 
+  console.log('🔵 Params:', { clientId, allParams: Object.fromEntries(searchParams) });
+
   // Carregar template se fornecido na URL
   useEffect(() => {
+    console.log('🔵 useEffect searchParams executado');
     const templateId = searchParams.get('templateId');
+    console.log('🔵 templateId da URL:', templateId);
+
     if (templateId) {
+      console.log('🔵 Chamando loadTemplateData...');
       loadTemplateData(templateId);
+    } else {
+      console.log('🔵 Nenhum templateId encontrado na URL');
     }
   }, [searchParams]);
 
   const loadTemplateData = async (templateId: string) => {
     try {
-      console.log('🔄 Carregando template:', templateId);
+      console.log('🔵 Iniciando loadTemplateData com:', templateId);
 
       // 1. Buscar template SEM measures no JOIN
+      console.log('🔵 Buscando template no banco...');
       const { data: template, error: templateError } = await supabase
         .from('meal_plan_templates')
         .select(`
@@ -82,12 +93,21 @@ export default function PlatformMealPlanEditor() {
         .eq('id', templateId)
         .single();
 
-      if (templateError) throw templateError;
-      if (!template) return;
+      if (templateError) {
+        console.error('❌ Erro ao buscar template:', templateError);
+        throw templateError;
+      }
+
+      if (!template) {
+        console.error('❌ Template não encontrado');
+        return;
+      }
 
       console.log('✅ Template carregado:', template);
+      console.log('🔵 Número de refeições:', template.meal_plan_template_meals?.length || 0);
 
       // 2. Buscar measure_ids únicos
+      console.log('🔵 Coletando measure_ids...');
       const measureIds = new Set<string>();
       template.meal_plan_template_meals?.forEach((meal: any) => {
         meal.meal_plan_template_foods?.forEach((food: any) => {
@@ -95,17 +115,23 @@ export default function PlatformMealPlanEditor() {
         });
       });
 
-      console.log('📏 Buscando measures:', Array.from(measureIds));
+      console.log('📏 Measure IDs coletados:', Array.from(measureIds));
+      console.log('🔵 Total de measures únicos:', measureIds.size);
 
       // 3. Buscar todas as measures
+      console.log('🔵 Buscando measures na tabela food_measures...');
       const { data: measuresData, error: measuresError } = await supabase
         .from('food_measures')
         .select('id, measure_name, grams')
         .in('id', Array.from(measureIds));
 
-      if (measuresError) throw measuresError;
+      if (measuresError) {
+        console.error('❌ Erro ao buscar measures:', measuresError);
+        throw measuresError;
+      }
 
       console.log('✅ Measures carregadas:', measuresData);
+      console.log('🔵 Total de measures encontrados:', measuresData?.length || 0);
 
       // 4. Criar map de measures
       const measuresMap = new Map(
@@ -135,43 +161,63 @@ export default function PlatformMealPlanEditor() {
       });
 
       // 8. Converter estrutura do template para meals
-      if (template.meal_plan_template_meals && template.meal_plan_template_meals.length > 0) {
-        const convertedMeals = template.meal_plan_template_meals.map((meal: any) => ({
-          id: `temp-${Date.now()}-${Math.random()}`,
-          name: meal.name,
-          time: meal.time,
-          order_index: meal.order_index,
-          items: meal.meal_plan_template_foods?.map((food: any) => {
-            const grams = food.quantity * (food.measures?.grams || 100);
-            const multiplier = grams / 100;
+      console.log('🔵 Convertendo estrutura do template para meals...');
 
-            return {
-              id: `temp-${Date.now()}-${Math.random()}`,
-              food_id: food.food_id,
-              measure_id: food.measure_id,
-              quantity: food.quantity,
-              grams_total: grams,
-              kcal_total: Math.round((food.foods?.energy_kcal || 0) * multiplier),
-              protein_total: Math.round((food.foods?.protein_g || 0) * multiplier * 10) / 10,
-              carb_total: Math.round((food.foods?.carbohydrate_g || 0) * multiplier * 10) / 10,
-              fat_total: Math.round((food.foods?.lipid_g || 0) * multiplier * 10) / 10,
-              foods: food.foods,
-              measures: food.measures
-            };
-          }) || []
-        }));
+      if (template.meal_plan_template_meals && template.meal_plan_template_meals.length > 0) {
+        const convertedMeals = template.meal_plan_template_meals.map((meal: any, index: number) => {
+          console.log(`🔵 Convertendo meal ${index}: ${meal.name}`);
+          console.log(`🔵   - Número de foods: ${meal.meal_plan_template_foods?.length || 0}`);
+
+          return {
+            id: `temp-${Date.now()}-${Math.random()}`,
+            name: meal.name,
+            time: meal.time || '12:00',
+            order_index: meal.order_index,
+            items: meal.meal_plan_template_foods?.map((food: any) => {
+              const grams = food.quantity * (food.measures?.grams || 100);
+              const multiplier = grams / 100;
+
+              const item = {
+                id: `temp-${Date.now()}-${Math.random()}`,
+                food_id: food.food_id,
+                measure_id: food.measure_id,
+                quantity: food.quantity,
+                grams_total: grams,
+                kcal_total: Math.round((food.foods?.energy_kcal || 0) * multiplier),
+                protein_total: Math.round((food.foods?.protein_g || 0) * multiplier * 10) / 10,
+                carb_total: Math.round((food.foods?.carbohydrate_g || 0) * multiplier * 10) / 10,
+                fat_total: Math.round((food.foods?.lipid_g || 0) * multiplier * 10) / 10,
+                foods: food.foods,
+                measures: food.measures
+              };
+
+              console.log(`🔵     - Food: ${food.foods?.name} (${grams}g, ${item.kcal_total} kcal)`);
+              return item;
+            }) || []
+          };
+        });
 
         console.log('✅ Refeições convertidas:', convertedMeals);
+        console.log('🔵 Total de refeições convertidas:', convertedMeals.length);
+
+        console.log('🔵 Setando estados (setPlanName, setGoals, setMeals)...');
         setMeals(convertedMeals);
+        console.log('✅ Estado meals atualizado!');
+      } else {
+        console.log('⚠️ Nenhuma refeição para converter');
       }
 
+      console.log('🔵 Mostrando toast...');
       toast({
         title: "Template carregado!",
         description: `Plano baseado em "${template.name}". Ajuste conforme necessário e salve.`
       });
 
+      console.log('✅ loadTemplateData concluído com sucesso!');
+
     } catch (error: any) {
-      console.error('❌ Erro ao carregar template:', error);
+      console.error('❌ ERRO FATAL em loadTemplateData:', error);
+      console.error('❌ Stack trace:', error.stack);
       toast({
         title: "Erro ao carregar template",
         description: error.message,
