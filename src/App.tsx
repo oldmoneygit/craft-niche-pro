@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import { HubDashboard } from "./pages/hub/HubDashboard";
+import { HubPlatforms } from "./pages/hub/HubPlatforms";
 import PlatformDashboard from "./pages/platform/PlatformDashboard";
 import PlatformLogin from "./pages/platform/PlatformLogin";
 import PlatformAuth from "./pages/platform/PlatformAuth";
@@ -51,7 +52,7 @@ const App = () => (
               <Routes>
                 {/* Hub Routes */}
                 <Route path="/hub/dashboard" element={<HubDashboard />} />
-                <Route path="/hub/platforms" element={<div className="p-10 text-white">Platforms Page - Em desenvolvimento</div>} />
+                <Route path="/hub/platforms" element={<HubPlatforms />} />
                 <Route path="/hub/clients" element={<div className="p-10 text-white">Clients Page - Em desenvolvimento</div>} />
                 <Route path="/hub/analytics" element={<div className="p-10 text-white">Analytics Page - Em desenvolvimento</div>} />
                 <Route path="/hub/settings" element={<div className="p-10 text-white">Settings Page - Em desenvolvimento</div>} />
