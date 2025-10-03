@@ -44,68 +44,124 @@ export default function PlatformMealPlanEditor() {
 
   const loadTemplateData = async (templateId: string) => {
     try {
+      console.log('🔄 Carregando template:', templateId);
+
+      // 1. Buscar template SEM measures no JOIN
       const { data: template, error: templateError } = await supabase
         .from('meal_plan_templates')
         .select(`
-          *,
+          id,
+          name,
+          description,
+          reference_calories,
+          reference_protein,
+          reference_carbs,
+          reference_fat,
           meal_plan_template_meals (
-            *,
+            id,
+            name,
+            time,
+            order_index,
             meal_plan_template_foods (
-              *,
-              foods:food_id (*),
-              food_measures:measure_id (*)
+              id,
+              quantity,
+              food_id,
+              measure_id,
+              foods (
+                id,
+                name,
+                energy_kcal,
+                protein_g,
+                carbohydrate_g,
+                lipid_g,
+                source
+              )
             )
           )
         `)
         .eq('id', templateId)
-        .order('meal_plan_template_meals(order_index)')
         .single();
 
       if (templateError) throw templateError;
       if (!template) return;
 
-      // Incrementar contador de uso
-      await supabase
-        .from('meal_plan_templates')
-        .update({ times_used: (template.times_used || 0) + 1 })
-        .eq('id', templateId);
+      console.log('✅ Template carregado:', template);
 
-      // Popular formulário com dados do template
+      // 2. Buscar measure_ids únicos
+      const measureIds = new Set<string>();
+      template.meal_plan_template_meals?.forEach((meal: any) => {
+        meal.meal_plan_template_foods?.forEach((food: any) => {
+          if (food.measure_id) measureIds.add(food.measure_id);
+        });
+      });
+
+      console.log('📏 Buscando measures:', Array.from(measureIds));
+
+      // 3. Buscar todas as measures
+      const { data: measuresData, error: measuresError } = await supabase
+        .from('food_measures')
+        .select('id, measure_name, grams')
+        .in('id', Array.from(measureIds));
+
+      if (measuresError) throw measuresError;
+
+      console.log('✅ Measures carregadas:', measuresData);
+
+      // 4. Criar map de measures
+      const measuresMap = new Map(
+        measuresData?.map(m => [m.id, m]) || []
+      );
+
+      // 5. Associar measures aos foods
+      template.meal_plan_template_meals?.forEach((meal: any) => {
+        meal.meal_plan_template_foods?.forEach((food: any) => {
+          food.measures = measuresMap.get(food.measure_id);
+        });
+      });
+
+      // 6. Incrementar contador de uso
+      await supabase.rpc('increment_template_usage', {
+        template_id: templateId
+      });
+
+      // 7. Popular formulário com dados do template
       setPlanName(`${template.name} - Cópia`);
       setPlanDescription(template.description || '');
       setGoals({
-        kcal: template.reference_calories,
-        protein: template.reference_protein,
-        carb: template.reference_carbs,
-        fat: template.reference_fat
+        kcal: template.reference_calories || 2000,
+        protein: template.reference_protein || 150,
+        carb: template.reference_carbs || 250,
+        fat: template.reference_fat || 65
       });
 
-      // Converter estrutura do template para meals
+      // 8. Converter estrutura do template para meals
       if (template.meal_plan_template_meals && template.meal_plan_template_meals.length > 0) {
         const convertedMeals = template.meal_plan_template_meals.map((meal: any) => ({
-          id: `temp-${Math.random()}`,
+          id: `temp-${Date.now()}-${Math.random()}`,
           name: meal.name,
           time: meal.time,
+          order_index: meal.order_index,
           items: meal.meal_plan_template_foods?.map((food: any) => {
-            const grams = food.quantity * (food.food_measures?.grams || 100);
+            const grams = food.quantity * (food.measures?.grams || 100);
             const multiplier = grams / 100;
-            
+
             return {
-              id: `temp-${Math.random()}`,
+              id: `temp-${Date.now()}-${Math.random()}`,
               food_id: food.food_id,
               measure_id: food.measure_id,
               quantity: food.quantity,
               grams_total: grams,
               kcal_total: Math.round((food.foods?.energy_kcal || 0) * multiplier),
               protein_total: Math.round((food.foods?.protein_g || 0) * multiplier * 10) / 10,
-              carb_total: Math.round((food.foods?.carbohydrate_g || food.foods?.carbohydrates_g || food.foods?.carbs_g || 0) * multiplier * 10) / 10,
-              fat_total: Math.round((food.foods?.lipid_g || food.foods?.lipids_g || food.foods?.fat_g || 0) * multiplier * 10) / 10,
+              carb_total: Math.round((food.foods?.carbohydrate_g || 0) * multiplier * 10) / 10,
+              fat_total: Math.round((food.foods?.lipid_g || 0) * multiplier * 10) / 10,
               foods: food.foods,
-              measures: food.food_measures
+              measures: food.measures
             };
           }) || []
         }));
 
+        console.log('✅ Refeições convertidas:', convertedMeals);
         setMeals(convertedMeals);
       }
 
@@ -115,7 +171,7 @@ export default function PlatformMealPlanEditor() {
       });
 
     } catch (error: any) {
-      console.error('Erro ao carregar template:', error);
+      console.error('❌ Erro ao carregar template:', error);
       toast({
         title: "Erro ao carregar template",
         description: error.message,
