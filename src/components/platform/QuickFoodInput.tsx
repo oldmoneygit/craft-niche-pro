@@ -56,18 +56,16 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
   const { data: foods = [] } = useQuery({
     queryKey: ['quick-food-search', searchTerm],
     queryFn: async () => {
-      console.log('🔍 1. Iniciando busca:', searchTerm);
+      const term = searchTerm.trim();
       
-      if (searchTerm.length < 2) {
-        console.log('⚠️ Termo muito curto, mínimo 2 caracteres');
+      if (term.length < 2) {
         return [];
       }
 
-      const term = searchTerm.trim().toLowerCase();
-      console.log('🔍 2. Termo processado:', term);
+      console.log('🔍 Buscando:', term);
 
-      // ETAPA 1: Busca exata prioritária (começa com o termo)
-      const { data: exactMatches, error: exactError } = await supabase
+      // Query SIMPLES que funciona
+      const { data, error } = await supabase
         .from('foods')
         .select(`
           id,
@@ -78,48 +76,64 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
           carbohydrate_g,
           lipid_g,
           source_id,
-          nutrition_sources!inner(id, code, name)
+          nutrition_sources(id, code, name)
         `)
-        .ilike('name', `${term}%`)
+        .ilike('name', `%${term}%`)
         .eq('active', true)
-        .order('source_id', { ascending: true })
-        .order('name')
         .limit(20);
 
-      if (exactError) {
-        console.error('Erro na busca exata:', exactError);
+      console.log('📊 Resultados:', { 
+        count: data?.length, 
+        error,
+        primeiro: data?.[0]?.name 
+      });
+
+      if (error) {
+        console.error('❌ Erro:', error);
+        return [];
       }
 
-      // ETAPA 2: Se < 20 resultados, busca parcial
-      if ((exactMatches?.length || 0) < 20) {
-        const { data: partialMatches, error: partialError } = await supabase
-          .from('foods')
-          .select(`
-            id,
-            name,
-            brand,
-            energy_kcal,
-            protein_g,
-            carbohydrate_g,
-            lipid_g,
-            source_id,
-            nutrition_sources!inner(id, code, name)
-          `)
-          .ilike('name', `%${term}%`)
-          .not('name', 'ilike', `${term}%`)
-          .eq('active', true)
-          .order('source_id', { ascending: true })
-          .order('name')
-          .limit(20 - (exactMatches?.length || 0));
+      // Ordenar DEPOIS no JavaScript (não na query)
+      const sorted = (data || []).sort((a, b) => {
+        // Prioridade por fonte
+        const codeA = a.nutrition_sources?.code || 'zzz';
+        const codeB = b.nutrition_sources?.code || 'zzz';
+        
+        const priorityA = 
+          codeA === 'taco' ? 1 : 
+          codeA === 'tbca' ? 2 : 
+          codeA === 'usda' ? 3 : 999;
+          
+        const priorityB = 
+          codeB === 'taco' ? 1 : 
+          codeB === 'tbca' ? 2 : 
+          codeB === 'usda' ? 3 : 999;
 
-        if (partialError) {
-          console.error('Erro na busca parcial:', partialError);
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB;
         }
 
-        return [...(exactMatches || []), ...(partialMatches || [])];
-      }
+        // Prioridade por posição do termo
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
+        const searchLower = term.toLowerCase();
 
-      return exactMatches || [];
+        const startsA = nameA.startsWith(searchLower) ? 1 : 0;
+        const startsB = nameB.startsWith(searchLower) ? 1 : 0;
+
+        if (startsA !== startsB) {
+          return startsB - startsA; // Começa com = primeiro
+        }
+
+        return a.name.localeCompare(b.name);
+      });
+
+      console.log('✅ Top 3:', sorted.slice(0, 3).map(f => ({
+        name: f.name,
+        source: f.nutrition_sources?.code
+      })));
+
+      return sorted;
     },
     enabled: searchTerm.length >= 2 && !selectedFood
   });
@@ -208,15 +222,15 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
   };
 
   const getBadgeConfig = (source?: { code: string }) => {
-    const code = source?.code?.toUpperCase() || 'OFF';
-
-    if (code === 'TACO' || code === 'TBCA') {
-      return { text: code, className: 'bg-green-600 text-white' };
+    const code = source?.code?.toLowerCase();
+    
+    if (code === 'taco' || code === 'tbca') {
+      return { text: code.toUpperCase(), className: 'bg-green-600 text-white' };
     }
-    if (code === 'USDA') {
-      return { text: code, className: 'bg-blue-600 text-white' };
+    if (code === 'usda') {
+      return { text: 'USDA', className: 'bg-blue-600 text-white' };
     }
-    return { text: code, className: 'bg-gray-600 text-white' };
+    return { text: 'OFF', className: 'bg-gray-600 text-white' };
   };
 
   return (
