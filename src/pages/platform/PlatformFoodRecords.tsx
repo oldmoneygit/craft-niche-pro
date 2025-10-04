@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Plus, ClipboardList, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -9,38 +9,36 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useTenantId } from '@/hooks/useTenantId';
 
 export default function PlatformFoodRecords() {
-  const { tenantId } = useParams();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const { tenantId: tenantIdLoading } = useTenantId();
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
 
   const { data: clients = [] } = useQuery({
-    queryKey: ['clients', tenantId],
+    queryKey: ['clients', tenantIdLoading],
     queryFn: async () => {
-      console.log('🔍 Buscando clientes para tenant:', tenantId);
+      if (!tenantIdLoading) return [];
+
+      console.log('🔍 Buscando clientes para tenant:', tenantIdLoading);
 
       const { data, error } = await supabase
         .from('clients')
         .select('id, name, email')
-        .eq('tenant_id', tenantId)
+        .eq('tenant_id', tenantIdLoading)
         .order('name');
 
       if (error) {
         console.error('❌ Erro ao buscar clientes:', error);
-        console.log('📊 Usando clientes mock temporários');
-
-        return [
-          { id: 'mock-1', name: 'João Silva', email: 'joao@example.com' },
-          { id: 'mock-2', name: 'Maria Santos', email: 'maria@example.com' },
-          { id: 'mock-3', name: 'Pedro Oliveira', email: 'pedro@example.com' }
-        ];
+        toast.error('Erro ao buscar clientes');
+        return [];
       }
 
       console.log('✅ Clientes carregados:', data?.length || 0);
       return data || [];
-    }
+    },
+    enabled: !!tenantIdLoading
   });
 
   const { data: records = [] } = useQuery({
@@ -51,7 +49,7 @@ export default function PlatformFoodRecords() {
       console.log('🔍 Buscando recordatórios para cliente:', selectedClient);
 
       const { data, error } = await supabase
-        .from('food_records')
+        .from('food_records' as any)
         .select(`
           id,
           record_date,
@@ -72,17 +70,17 @@ export default function PlatformFoodRecords() {
 
       if (error) {
         console.error('❌ Erro ao buscar recordatórios:', error);
-      } else {
-        console.log('✅ Recordatórios carregados:', data?.length || 0);
+        return [];
       }
 
+      console.log('✅ Recordatórios carregados:', data?.length || 0);
       return data || [];
     },
     enabled: !!selectedClient
   });
 
   const handleCreateRecord = (clientId: string) => {
-    navigate(`/platform/${tenantId}/recordatorio/novo?client=${clientId}`);
+    navigate(`/platform/${tenantIdLoading}/recordatorio/novo?client=${clientId}`);
   };
 
   const calculateTotals = (record: any) => {
@@ -107,7 +105,7 @@ export default function PlatformFoodRecords() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate(`/platform/${tenantId}`)}
+            onClick={() => navigate(`/platform/${tenantIdLoading}`)}
             className="text-gray-100 hover:bg-gray-800"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -195,13 +193,13 @@ export default function PlatformFoodRecords() {
                   </Card>
                 ) : (
                   <div className="grid gap-4">
-                    {records.map((record) => {
+                    {records.map((record: any) => {
                       const totals = calculateTotals(record);
                       return (
                         <Card
                           key={record.id}
                           className="cursor-pointer bg-gray-800 border-gray-700 hover:bg-gray-750 transition-all"
-                          onClick={() => navigate(`/platform/${tenantId}/recordatorio/${record.id}`)}
+                          onClick={() => navigate(`/platform/${tenantIdLoading}/recordatorio/${record.id}`)}
                         >
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between gap-4">

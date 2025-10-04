@@ -1,156 +1,176 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Plus, Save, Utensils, Clock, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { QuickFoodInput } from '@/components/platform/QuickFoodInput';
-import { RecordFoodItem } from '@/components/platform/RecordFoodItem';
+import { ArrowLeft, Plus, Trash2, GripVertical, Clock, Save } from 'lucide-react';
 import { toast } from 'sonner';
+import { QuickFoodInput } from '@/components/platform/QuickFoodInput';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useTenantId } from '@/hooks/useTenantId';
 
-interface RecordMeal {
-  id?: string;
-  meal_time: string;
-  meal_name: string;
-  notes: string;
-  items: RecordItem[];
-}
-
-interface RecordItem {
-  id?: string;
+interface FoodItem {
+  id: string;
   food_id: string;
   food_name: string;
   measure_id: string;
   measure_name: string;
-  measure_grams: number;
   quantity: number;
-  grams_total: number;
-  kcal_total: number;
-  protein_total: number;
-  carb_total: number;
-  fat_total: number;
+  grams: number;
+  kcal: number;
+  protein: number;
+  carb: number;
+  fat: number;
+  order: number;
+}
+
+interface Meal {
+  id?: string;
+  name: string;
+  time: string;
+  notes: string;
+  order: number;
+  items: FoodItem[];
 }
 
 export default function PlatformFoodRecordEditor() {
-  const { tenantId, recordId } = useParams();
+  const navigate = useNavigate();
+  const { recordId } = useParams();
   const [searchParams] = useSearchParams();
   const clientId = searchParams.get('client');
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const { tenantId, loading: loadingTenant } = useTenantId();
 
-  const [meals, setMeals] = useState<RecordMeal[]>([]);
+  const [clientName, setClientName] = useState('');
   const [recordDate, setRecordDate] = useState(new Date().toISOString().split('T')[0]);
-  const [recordNotes, setRecordNotes] = useState('');
+  const [notes, setNotes] = useState('');
+  const [meals, setMeals] = useState<Meal[]>([]);
+  const [saving, setSaving] = useState(false);
   const [showAddMealDialog, setShowAddMealDialog] = useState(false);
-  const [newMealTime, setNewMealTime] = useState('07:00');
+  const [newMealTime, setNewMealTime] = useState('08:00');
   const [newMealName, setNewMealName] = useState('');
 
-  const { data: client } = useQuery({
-    queryKey: ['client', clientId],
-    queryFn: async () => {
-      console.log('🔍 Buscando cliente:', clientId);
+  useEffect(() => {
+    if (clientId && tenantId) {
+      loadClient();
+    }
+  }, [clientId, tenantId]);
 
+  useEffect(() => {
+    if (recordId && tenantId) {
+      loadRecord();
+    }
+  }, [recordId, tenantId]);
+
+  const loadClient = async () => {
+    if (!clientId || !tenantId) return;
+
+    const { data, error } = await supabase
+      .from('clients')
+      .select('name')
+      .eq('id', clientId)
+      .eq('tenant_id', tenantId)
+      .single();
+
+    if (!error && data) {
+      setClientName(data.name);
+    }
+  };
+
+  const loadRecord = async () => {
+    if (!recordId || !tenantId) return;
+
+    try {
       const { data, error } = await supabase
-        .from('clients')
-        .select('id, name')
-        .eq('id', clientId)
-        .single();
-
-      if (error) {
-        console.error('❌ Erro ao buscar cliente:', error);
-        console.log('📊 Usando cliente mock temporário');
-
-        if (clientId?.startsWith('mock-')) {
-          const mockClients: Record<string, any> = {
-            'mock-1': { id: 'mock-1', name: 'João Silva' },
-            'mock-2': { id: 'mock-2', name: 'Maria Santos' },
-            'mock-3': { id: 'mock-3', name: 'Pedro Oliveira' }
-          };
-          return mockClients[clientId] || { id: clientId, name: 'Cliente Teste' };
-        }
-
-        return { id: clientId, name: 'Cliente Teste' };
-      }
-
-      console.log('✅ Cliente carregado:', data);
-      return data;
-    },
-    enabled: !!clientId
-  });
-
-  const { data: existingRecord, isLoading } = useQuery({
-    queryKey: ['food-record', recordId],
-    queryFn: async () => {
-      if (!recordId) return null;
-
-      const { data } = await supabase
-        .from('food_records')
+        .from('food_records' as any)
         .select(`
-          *,
-          record_meals(
-            *,
-            record_items(
-              *,
-              foods(name),
-              food_measures(measure_name, grams)
+          id,
+          record_date,
+          notes,
+          client_id,
+          tenant_id,
+          record_meals (
+            id,
+            name,
+            time,
+            order_index,
+            notes,
+            record_items (
+              id,
+              food_id,
+              measure_id,
+              quantity,
+              grams_total,
+              kcal_total,
+              protein_total,
+              carb_total,
+              fat_total,
+              order_index,
+              foods (name),
+              food_measures (measure_name)
             )
           )
         `)
         .eq('id', recordId)
+        .eq('tenant_id', tenantId)
         .single();
 
-      return data;
-    },
-    enabled: !!recordId
-  });
+      if (error) {
+        console.error('Erro ao carregar recordatório:', error);
+        toast.error('Erro ao carregar recordatório');
+        return;
+      }
 
-  useEffect(() => {
-    if (existingRecord) {
-      setRecordDate(existingRecord.record_date);
-      setRecordNotes(existingRecord.notes || '');
+      if (!data) return;
 
-      const loadedMeals = existingRecord.record_meals?.map((meal: any) => ({
+      setRecordDate((data as any).record_date);
+      setNotes((data as any).notes || '');
+      
+      const loadedMeals: Meal[] = ((data as any).record_meals || []).map((meal: any) => ({
         id: meal.id,
-        meal_time: meal.meal_time,
-        meal_name: meal.meal_name,
+        name: meal.name,
+        time: meal.time || '08:00',
         notes: meal.notes || '',
-        items: meal.record_items?.map((item: any) => ({
+        order: meal.order_index || 0,
+        items: (meal.record_items || []).map((item: any) => ({
           id: item.id,
           food_id: item.food_id,
-          food_name: item.foods.name,
+          food_name: item.foods?.name || '',
           measure_id: item.measure_id,
-          measure_name: item.food_measures.measure_name,
-          measure_grams: item.food_measures.grams,
+          measure_name: item.food_measures?.measure_name || '',
           quantity: item.quantity,
-          grams_total: item.grams_total,
-          kcal_total: item.kcal_total,
-          protein_total: item.protein_total,
-          carb_total: item.carb_total,
-          fat_total: item.fat_total
-        })) || []
-      })) || [];
+          grams: item.grams_total,
+          kcal: item.kcal_total,
+          protein: item.protein_total,
+          carb: item.carb_total,
+          fat: item.fat_total,
+          order: item.order_index || 0
+        }))
+      }));
 
       setMeals(loadedMeals);
+    } catch (error) {
+      console.error('Erro:', error);
+      toast.error('Erro ao carregar recordatório');
     }
-  }, [existingRecord]);
+  };
 
   const handleAddMeal = () => {
-    const newMeal: RecordMeal = {
-      meal_time: newMealTime,
-      meal_name: newMealName || `Refeição ${meals.length + 1}`,
+    const newMeal: Meal = {
+      name: newMealName || `Refeição ${meals.length + 1}`,
+      time: newMealTime,
       notes: '',
+      order: meals.length,
       items: []
     };
+
     setMeals([...meals, newMeal]);
     setShowAddMealDialog(false);
-    setNewMealTime('07:00');
+    setNewMealTime('08:00');
     setNewMealName('');
   };
 
@@ -158,7 +178,7 @@ export default function PlatformFoodRecordEditor() {
     setMeals(meals.filter((_, i) => i !== index));
   };
 
-  const handleAddFoodToMeal = async (mealIndex: number, foodData: any) => {
+  const handleAddFood = async (mealIndex: number, foodData: any) => {
     const { data: food } = await supabase
       .from('foods')
       .select('name')
@@ -167,22 +187,23 @@ export default function PlatformFoodRecordEditor() {
 
     const { data: measure } = await supabase
       .from('food_measures')
-      .select('measure_name, grams')
+      .select('measure_name')
       .eq('id', foodData.measure_id)
       .single();
 
-    const newItem: RecordItem = {
+    const newItem: FoodItem = {
+      id: `temp-${Date.now()}`,
       food_id: foodData.food_id,
       food_name: food?.name || '',
       measure_id: foodData.measure_id,
       measure_name: measure?.measure_name || '',
-      measure_grams: measure?.grams || 0,
       quantity: foodData.quantity,
-      grams_total: foodData.grams_total,
-      kcal_total: foodData.kcal_total,
-      protein_total: foodData.protein_total,
-      carb_total: foodData.carb_total,
-      fat_total: foodData.fat_total
+      grams: foodData.grams_total,
+      kcal: foodData.kcal_total,
+      protein: foodData.protein_total,
+      carb: foodData.carb_total,
+      fat: foodData.fat_total,
+      order: meals[mealIndex].items.length
     };
 
     const updatedMeals = [...meals];
@@ -190,116 +211,65 @@ export default function PlatformFoodRecordEditor() {
     setMeals(updatedMeals);
   };
 
-  const handleUpdateItem = async (mealIndex: number, itemIndex: number, updates: any) => {
+  const handleRemoveFood = (mealIndex: number, itemIndex: number) => {
     const updatedMeals = [...meals];
-    const item = updatedMeals[mealIndex].items[itemIndex];
-
-    if (updates.measure_id) {
-      const { data: measure } = await supabase
-        .from('food_measures')
-        .select('measure_name, grams')
-        .eq('id', updates.measure_id)
-        .single();
-
-      if (measure) {
-        item.measure_id = updates.measure_id;
-        item.measure_name = measure.measure_name;
-        item.measure_grams = measure.grams;
-      }
-    }
-
-    if (updates.quantity !== undefined) {
-      item.quantity = updates.quantity;
-    }
-
-    const { data: food } = await supabase
-      .from('foods')
-      .select('energy_kcal, protein_g, carbohydrate_g, lipid_g')
-      .eq('id', item.food_id)
-      .single();
-
-    if (food) {
-      const gramsTotal = item.measure_grams * item.quantity;
-      const multiplier = gramsTotal / 100;
-
-      item.grams_total = gramsTotal;
-      item.kcal_total = (food.energy_kcal || 0) * multiplier;
-      item.protein_total = (food.protein_g || 0) * multiplier;
-      item.carb_total = (food.carbohydrate_g || 0) * multiplier;
-      item.fat_total = (food.lipid_g || 0) * multiplier;
-    }
-
+    updatedMeals[mealIndex].items = updatedMeals[mealIndex].items.filter((_, i) => i !== itemIndex);
     setMeals(updatedMeals);
   };
 
-  const handleRemoveItem = (mealIndex: number, itemIndex: number) => {
-    const updatedMeals = [...meals];
-    updatedMeals[mealIndex].items.splice(itemIndex, 1);
-    setMeals(updatedMeals);
-  };
+  const handleSave = async () => {
+    if (!clientId || !tenantId) {
+      toast.error('Cliente não identificado');
+      return;
+    }
 
-  const calculateTotals = () => {
-    let totals = { kcal: 0, protein: 0, carb: 0, fat: 0 };
-
-    meals.forEach(meal => {
-      meal.items.forEach(item => {
-        totals.kcal += item.kcal_total || 0;
-        totals.protein += item.protein_total || 0;
-        totals.carb += item.carb_total || 0;
-        totals.fat += item.fat_total || 0;
-      });
-    });
-
-    return totals;
-  };
-
-  const saveMutation = useMutation({
-    mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not found');
-
+    setSaving(true);
+    try {
       let recordIdToUse = recordId;
 
       if (!recordId) {
         const { data: newRecord, error: recordError } = await supabase
-          .from('food_records')
+          .from('food_records' as any)
           .insert({
             client_id: clientId,
+            tenant_id: tenantId,
             record_date: recordDate,
-            notes: recordNotes,
-            created_by: user.id
+            notes,
+            status: 'draft'
           })
           .select()
           .single();
 
         if (recordError) throw recordError;
-        recordIdToUse = newRecord.id;
+        recordIdToUse = (newRecord as any).id;
       } else {
         const { error: updateError } = await supabase
-          .from('food_records')
+          .from('food_records' as any)
           .update({
             record_date: recordDate,
-            notes: recordNotes
+            notes
           })
           .eq('id', recordId);
 
         if (updateError) throw updateError;
-
-        await supabase
-          .from('record_meals')
-          .delete()
-          .eq('record_id', recordId);
       }
 
-      for (const [index, meal] of meals.entries()) {
-        const { data: newMeal, error: mealError } = await supabase
-          .from('record_meals')
+      const { error: deleteMealsError } = await supabase
+        .from('record_meals' as any)
+        .delete()
+        .eq('food_record_id', recordIdToUse);
+
+      if (deleteMealsError) throw deleteMealsError;
+
+      for (const meal of meals) {
+        const { data: mealData, error: mealError } = await supabase
+          .from('record_meals' as any)
           .insert({
-            record_id: recordIdToUse,
-            meal_time: meal.meal_time,
-            meal_name: meal.meal_name,
-            notes: meal.notes,
-            order_index: index
+            food_record_id: recordIdToUse,
+            name: meal.name,
+            time: meal.time,
+            order_index: meal.order,
+            notes: meal.notes
           })
           .select()
           .single();
@@ -307,118 +277,97 @@ export default function PlatformFoodRecordEditor() {
         if (mealError) throw mealError;
 
         if (meal.items.length > 0) {
-          const items = meal.items.map(item => ({
-            record_meal_id: newMeal.id,
+          const mealId = (mealData as any).id;
+          const items = meal.items.map((item, idx) => ({
+            record_meal_id: mealId,
             food_id: item.food_id,
             measure_id: item.measure_id,
             quantity: item.quantity,
-            grams_total: item.grams_total,
-            kcal_total: item.kcal_total,
-            protein_total: item.protein_total,
-            carb_total: item.carb_total,
-            fat_total: item.fat_total
+            grams_total: item.grams,
+            kcal_total: item.kcal,
+            protein_total: item.protein,
+            carb_total: item.carb,
+            fat_total: item.fat,
+            order_index: idx
           }));
 
           const { error: itemsError } = await supabase
-            .from('record_items')
+            .from('record_items' as any)
             .insert(items);
 
           if (itemsError) throw itemsError;
         }
       }
 
-      return recordIdToUse;
-    },
-    onSuccess: (savedRecordId) => {
-      queryClient.invalidateQueries({ queryKey: ['food-records'] });
-      queryClient.invalidateQueries({ queryKey: ['food-record', savedRecordId] });
       toast.success('Recordatório salvo com sucesso!');
       navigate(`/platform/${tenantId}/recordatorio`);
-    },
-    onError: (error) => {
-      console.error('Error saving record:', error);
+    } catch (error) {
+      console.error('Erro ao salvar:', error);
       toast.error('Erro ao salvar recordatório');
+    } finally {
+      setSaving(false);
     }
-  });
+  };
 
-  const convertToMealPlanMutation = useMutation({
-    mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not found');
+  const handleConvertToPlan = async () => {
+    if (!clientId || !tenantId) return;
 
+    try {
       const totals = calculateTotals();
-
-      const { data: plan, error: planError } = await supabase
+      
+      const { data: mealPlan, error } = await supabase
         .from('meal_plans')
         .insert({
           client_id: clientId,
-          name: `Plano baseado em ${format(new Date(recordDate), "dd/MM/yyyy")}`,
-          target_kcal: Math.round(totals.kcal),
-          target_protein: Math.round(totals.protein),
-          target_carbs: Math.round(totals.carb),
-          target_fats: Math.round(totals.fat),
-          created_by: user.id
+          tenant_id: tenantId,
+          name: `Plano baseado em ${format(new Date(recordDate), 'dd/MM/yyyy')}`,
+          start_date: new Date().toISOString().split('T')[0],
+          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          calorie_target: totals.kcal,
+          protein_target_g: totals.protein,
+          carb_target_g: totals.carb,
+          fat_target_g: totals.fat
         })
         .select()
         .single();
 
-      if (planError) throw planError;
+      if (error) throw error;
 
-      for (const meal of meals) {
-        const { data: newMeal, error: mealError } = await supabase
-          .from('meals')
-          .insert({
-            meal_plan_id: plan.id,
-            name: meal.meal_name,
-            time: meal.meal_time
-          })
-          .select()
-          .single();
-
-        if (mealError) throw mealError;
-
-        if (meal.items.length > 0) {
-          const items = meal.items.map(item => ({
-            meal_id: newMeal.id,
-            food_id: item.food_id,
-            measure_id: item.measure_id,
-            quantity: item.quantity,
-            grams_total: item.grams_total,
-            kcal_total: item.kcal_total,
-            protein_total: item.protein_total,
-            carb_total: item.carb_total,
-            fat_total: item.fat_total
-          }));
-
-          const { error: itemsError } = await supabase
-            .from('meal_items')
-            .insert(items);
-
-          if (itemsError) throw itemsError;
-        }
-      }
-
-      return plan.id;
-    },
-    onSuccess: (planId) => {
-      toast.success('Plano alimentar criado com sucesso!');
-      navigate(`/platform/${tenantId}/planos-alimentares/${planId}`);
-    },
-    onError: (error) => {
-      console.error('Error converting to meal plan:', error);
-      toast.error('Erro ao criar plano alimentar');
+      toast.success('Plano alimentar criado!');
+      navigate(`/platform/${tenantId}/planos-alimentares/${mealPlan.id}`);
+    } catch (error) {
+      console.error('Erro ao converter:', error);
+      toast.error('Erro ao criar plano');
     }
-  });
+  };
+
+  const calculateTotals = () => {
+    let kcal = 0, protein = 0, carb = 0, fat = 0;
+    
+    meals.forEach(meal => {
+      meal.items.forEach(item => {
+        kcal += item.kcal;
+        protein += item.protein;
+        carb += item.carb;
+        fat += item.fat;
+      });
+    });
+
+    return { kcal, protein, carb, fat };
+  };
 
   const totals = calculateTotals();
 
-  if (isLoading) {
-    return <div className="container mx-auto p-6">Carregando...</div>;
+  if (loadingTenant) {
+    return <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <p className="text-gray-400">Carregando...</p>
+    </div>;
   }
 
   return (
     <div className="min-h-screen bg-gray-900">
       <div className="container mx-auto p-6 max-w-5xl">
+        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <Button
@@ -431,7 +380,7 @@ export default function PlatformFoodRecordEditor() {
             </Button>
             <div>
               <h1 className="text-2xl font-bold text-gray-100">
-                Recordatório - {client?.name}
+                Recordatório - {clientName}
               </h1>
               <p className="text-sm text-gray-400">
                 {format(new Date(recordDate), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
@@ -439,144 +388,159 @@ export default function PlatformFoodRecordEditor() {
             </div>
           </div>
           <Button
-            onClick={() => saveMutation.mutate()}
-            disabled={saveMutation.isPending}
-            className="bg-primary hover:bg-primary/90 text-white"
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-primary hover:bg-primary/90"
           >
             <Save className="h-4 w-4 mr-2" />
-            Salvar
+            {saving ? 'Salvando...' : 'Salvar'}
           </Button>
         </div>
 
-        <div className="space-y-6">
+        {/* Meals */}
+        <div className="space-y-4 mb-6">
           {meals.map((meal, mealIndex) => (
             <Card key={mealIndex} className="bg-gray-800 border-gray-700">
-              <CardHeader className="pb-3 bg-gray-700/50">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
+              <div className="p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
                     <Clock className="h-5 w-5 text-gray-400" />
-                    <div>
-                      <CardTitle className="text-lg text-gray-100">{meal.meal_time} - {meal.meal_name}</CardTitle>
-                      <p className="text-sm text-gray-400 mt-1">
-                        {Math.round(meal.items.reduce((sum, item) => sum + item.kcal_total, 0))} kcal
-                      </p>
-                    </div>
+                    <span className="font-semibold text-gray-100">{meal.time} {meal.name}</span>
+                    <span className="text-sm text-gray-400">
+                      {Math.round(meal.items.reduce((sum, item) => sum + item.kcal, 0))} kcal
+                    </span>
                   </div>
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={() => handleRemoveMeal(mealIndex)}
-                    className="text-red-400 hover:text-red-300 hover:bg-gray-700"
+                    className="text-red-400 hover:text-red-300"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-6 bg-gray-800">
-              <QuickFoodInput
-                onAdd={(foodData) => handleAddFoodToMeal(mealIndex, foodData)}
-                placeholder="🔍 Digite o alimento..."
-              />
 
-              <div className="space-y-3">
-                {meal.items.map((item, itemIndex) => (
-                  <RecordFoodItem
-                    key={itemIndex}
-                    item={item}
-                    onUpdate={(updates) => handleUpdateItem(mealIndex, itemIndex, updates)}
-                    onRemove={() => handleRemoveItem(mealIndex, itemIndex)}
-                  />
-                ))}
+                <QuickFoodInput
+                  onAdd={(foodData) => handleAddFood(mealIndex, foodData)}
+                  placeholder="🔍 Digite alimento..."
+                />
+
+                <div className="mt-4 space-y-2">
+                  {meal.items.map((item, itemIndex) => (
+                    <div key={item.id} className="flex items-center gap-3 p-2 bg-gray-700/50 rounded">
+                      <GripVertical className="h-4 w-4 text-gray-500" />
+                      <div className="flex-1 text-gray-100">
+                        {item.food_name}
+                      </div>
+                      <div className="text-gray-300">
+                        {item.quantity} {item.measure_name}
+                      </div>
+                      <div className="text-gray-400">
+                        {Math.round(item.grams)}g
+                      </div>
+                      <div className="text-gray-100 font-medium">
+                        {Math.round(item.kcal)} kcal
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleRemoveFood(mealIndex, itemIndex)}
+                        className="text-red-400 hover:text-red-300"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+
+                {meal.items.length > 0 && (
+                  <div className="mt-3">
+                    <Textarea
+                      placeholder="Observações sobre esta refeição..."
+                      value={meal.notes}
+                      onChange={(e) => {
+                        const updated = [...meals];
+                        updated[mealIndex].notes = e.target.value;
+                        setMeals(updated);
+                      }}
+                      className="bg-gray-700 border-gray-600 text-gray-100"
+                      rows={2}
+                    />
+                  </div>
+                )}
               </div>
-
-              {meal.items.length > 0 && (
-                <div className="pt-4">
-                  <Label className="text-sm font-medium text-gray-300">Observações</Label>
-                  <Textarea
-                    value={meal.notes}
-                    onChange={(e) => {
-                      const updatedMeals = [...meals];
-                      updatedMeals[mealIndex].notes = e.target.value;
-                      setMeals(updatedMeals);
-                    }}
-                    placeholder="Ex: Come correndo antes do trabalho..."
-                    className="mt-1 min-h-[60px] bg-gray-700 border-gray-600 text-gray-100 placeholder:text-gray-400"
-                  />
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-
-          <Button
-            variant="outline"
-            className="w-full border-gray-600 text-gray-100 hover:bg-gray-800 hover:text-gray-100"
-            onClick={() => setShowAddMealDialog(true)}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar Refeição
-          </Button>
-
-          <Card className="bg-gray-800 border-gray-700">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-100">Resumo do Dia</h3>
-              </div>
-              <div className="grid grid-cols-4 gap-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold text-gray-100">{Math.round(totals.kcal)}</div>
-                  <div className="text-xs text-gray-400">kcal</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-100">{Math.round(totals.protein)}g</div>
-                  <div className="text-xs text-gray-400">Proteínas</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-100">{Math.round(totals.carb)}g</div>
-                  <div className="text-xs text-gray-400">Carboidratos</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-100">{Math.round(totals.fat)}g</div>
-                  <div className="text-xs text-gray-400">Gorduras</div>
-                </div>
-              </div>
-
-              {meals.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-gray-700">
-                  <Button
-                    className="w-full bg-green-600 hover:bg-green-700 text-white"
-                    onClick={() => convertToMealPlanMutation.mutate()}
-                    disabled={convertToMealPlanMutation.isPending}
-                  >
-                    <Utensils className="h-4 w-4 mr-2" />
-                    Criar Plano Alimentar a partir deste Recordatório
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            </Card>
+          ))}
         </div>
 
-        <Dialog open={showAddMealDialog} onOpenChange={setShowAddMealDialog}>
-        <DialogContent>
+        <Button
+          onClick={() => setShowAddMealDialog(true)}
+          variant="outline"
+          className="w-full border-gray-700 text-gray-300 hover:bg-gray-800"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Adicionar Refeição
+        </Button>
+
+        {/* Summary */}
+        {meals.length > 0 && (
+          <Card className="mt-6 bg-gray-800 border-gray-700">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex gap-8 text-gray-100">
+                  <div>
+                    <span className="text-sm text-gray-400">RESUMO:</span>
+                    <span className="ml-2 font-bold">{Math.round(totals.kcal)} kcal</span>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-400">P:</span>
+                    <span className="ml-1">{Math.round(totals.protein)}g</span>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-400">C:</span>
+                    <span className="ml-1">{Math.round(totals.carb)}g</span>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-400">G:</span>
+                    <span className="ml-1">{Math.round(totals.fat)}g</span>
+                  </div>
+                </div>
+                <Button
+                  onClick={handleConvertToPlan}
+                  variant="outline"
+                  className="border-primary text-primary hover:bg-primary/10"
+                >
+                  Criar Plano Alimentar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* Add Meal Dialog */}
+      <Dialog open={showAddMealDialog} onOpenChange={setShowAddMealDialog}>
+        <DialogContent className="bg-gray-800 border-gray-700">
           <DialogHeader>
-            <DialogTitle>Adicionar Refeição</DialogTitle>
+            <DialogTitle className="text-gray-100">Adicionar Refeição</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Horário</Label>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-gray-300">Horário</Label>
               <Input
                 type="time"
                 value={newMealTime}
                 onChange={(e) => setNewMealTime(e.target.value)}
+                className="bg-gray-700 border-gray-600 text-gray-100"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Nome da Refeição</Label>
+            <div>
+              <Label className="text-gray-300">Nome da Refeição</Label>
               <Input
-                placeholder={`Refeição ${meals.length + 1}`}
                 value={newMealName}
                 onChange={(e) => setNewMealName(e.target.value)}
+                placeholder={`Refeição ${meals.length + 1}`}
+                className="bg-gray-700 border-gray-600 text-gray-100"
               />
             </div>
           </div>
@@ -584,11 +548,12 @@ export default function PlatformFoodRecordEditor() {
             <Button variant="outline" onClick={() => setShowAddMealDialog(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleAddMeal}>Adicionar</Button>
+            <Button onClick={handleAddMeal} className="bg-primary hover:bg-primary/90">
+              Adicionar
+            </Button>
           </DialogFooter>
         </DialogContent>
-        </Dialog>
-      </div>
+      </Dialog>
     </div>
   );
 }
