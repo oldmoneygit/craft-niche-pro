@@ -21,8 +21,12 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [categoryResults, setCategoryResults] = useState<any[]>([]);
   const [isSearchingCategory, setIsSearchingCategory] = useState(false);
+  const [allFoods, setAllFoods] = useState<any[]>([]);
+  const [displayLimit, setDisplayLimit] = useState(50);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const categories = [
     { icon: '🌾', name: 'Cereais', searchTerms: ['arroz', 'macarrão', 'pão', 'trigo', 'aveia'] },
@@ -73,14 +77,24 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
       for (const term of category.searchTerms) {
         let searchQuery = supabase
           .from('foods')
-          .select('id, name, brand, energy_kcal, protein_g, carbohydrate_g, lipid_g, source, category')
+          .select(`
+            id,
+            name,
+            brand,
+            energy_kcal,
+            protein_g,
+            carbohydrate_g,
+            lipid_g,
+            nutrition_sources!inner(code, name)
+          `)
           .ilike('name', `%${term}%`)
+          .eq('active', true)
           .limit(20);
 
         if (sourceFilter === 'TACO') {
-          searchQuery = searchQuery.or('source.ilike.%TACO%,source.ilike.%TBCA%');
+          searchQuery = searchQuery.in('nutrition_sources.code', ['taco', 'tbca']);
         } else if (sourceFilter === 'OpenFoodFacts') {
-          searchQuery = searchQuery.ilike('source', '%OpenFoodFacts%');
+          searchQuery = searchQuery.eq('nutrition_sources.code', 'openfoodfacts');
         }
 
         const { data } = await searchQuery;
@@ -92,11 +106,13 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
       );
 
       const sorted = uniqueResults.sort((a, b) => {
-        const aIsTACO = a.source?.toLowerCase().includes('taco') || a.source?.toLowerCase().includes('tbca');
-        const bIsTACO = b.source?.toLowerCase().includes('taco') || b.source?.toLowerCase().includes('tbca');
+        const sourceA = a.nutrition_sources?.code?.toLowerCase() || '';
+        const sourceB = b.nutrition_sources?.code?.toLowerCase() || '';
 
-        if (aIsTACO && !bIsTACO) return -1;
-        if (!aIsTACO && bIsTACO) return 1;
+        const priorityA = sourceA === 'taco' ? 1 : sourceA === 'tbca' ? 2 : sourceA === 'usda' ? 3 : 999;
+        const priorityB = sourceB === 'taco' ? 1 : sourceB === 'tbca' ? 2 : sourceB === 'usda' ? 3 : 999;
+
+        if (priorityA !== priorityB) return priorityA - priorityB;
         return a.name.localeCompare(b.name);
       });
 
@@ -117,6 +133,54 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
     setQuery('');
   };
 
+  useEffect(() => {
+    const loadAllFoods = async () => {
+      try {
+        let foodsQuery = supabase
+          .from('foods')
+          .select(`
+            id,
+            name,
+            brand,
+            energy_kcal,
+            protein_g,
+            carbohydrate_g,
+            lipid_g,
+            nutrition_sources!inner(code, name)
+          `)
+          .eq('active', true);
+
+        if (sourceFilter === 'TACO') {
+          foodsQuery = foodsQuery.in('nutrition_sources.code', ['taco', 'tbca']);
+        } else if (sourceFilter === 'OpenFoodFacts') {
+          foodsQuery = foodsQuery.eq('nutrition_sources.code', 'openfoodfacts');
+        }
+
+        const { data, error } = await foodsQuery;
+
+        if (error) throw error;
+
+        const sorted = (data || []).sort((a, b) => {
+          const sourceA = a.nutrition_sources?.code?.toLowerCase() || '';
+          const sourceB = b.nutrition_sources?.code?.toLowerCase() || '';
+
+          const priorityA = sourceA === 'taco' ? 1 : sourceA === 'tbca' ? 2 : sourceA === 'usda' ? 3 : 999;
+          const priorityB = sourceB === 'taco' ? 1 : sourceB === 'tbca' ? 2 : sourceB === 'usda' ? 3 : 999;
+
+          if (priorityA !== priorityB) return priorityA - priorityB;
+          return a.name.localeCompare(b.name);
+        });
+
+        setAllFoods(sorted);
+        console.log(`✅ Carregados ${sorted.length} alimentos`);
+      } catch (error) {
+        console.error('Erro ao carregar alimentos:', error);
+      }
+    };
+
+    loadAllFoods();
+  }, [sourceFilter]);
+
   const { data: results, isLoading } = useQuery({
     queryKey: ['inline-food-search', query, sourceFilter],
     queryFn: async () => {
@@ -131,14 +195,24 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
         patterns.map(async (pattern) => {
           let searchQuery = supabase
             .from('foods')
-            .select('id, name, brand, energy_kcal, protein_g, carbohydrate_g, lipid_g, source, category')
+            .select(`
+              id,
+              name,
+              brand,
+              energy_kcal,
+              protein_g,
+              carbohydrate_g,
+              lipid_g,
+              nutrition_sources!inner(code, name)
+            `)
             .or(`name.ilike.${pattern},brand.ilike.${pattern}`)
-            .limit(20);
+            .eq('active', true)
+            .limit(30);
 
           if (sourceFilter === 'TACO') {
-            searchQuery = searchQuery.or('source.ilike.%TACO%,source.ilike.%TBCA%');
+            searchQuery = searchQuery.in('nutrition_sources.code', ['taco', 'tbca']);
           } else if (sourceFilter === 'OpenFoodFacts') {
-            searchQuery = searchQuery.ilike('source', '%OpenFoodFacts%');
+            searchQuery = searchQuery.eq('nutrition_sources.code', 'openfoodfacts');
           }
 
           const { data } = await searchQuery;
@@ -152,11 +226,13 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
       );
 
       const sorted = uniqueResults.sort((a, b) => {
-        const aIsTACO = a.source?.toLowerCase().includes('taco') || a.source?.toLowerCase().includes('tbca');
-        const bIsTACO = b.source?.toLowerCase().includes('taco') || b.source?.toLowerCase().includes('tbca');
+        const sourceA = a.nutrition_sources?.code?.toLowerCase() || '';
+        const sourceB = b.nutrition_sources?.code?.toLowerCase() || '';
 
-        if (aIsTACO && !bIsTACO) return -1;
-        if (!aIsTACO && bIsTACO) return 1;
+        const priorityA = sourceA === 'taco' ? 1 : sourceA === 'tbca' ? 2 : sourceA === 'usda' ? 3 : 999;
+        const priorityB = sourceB === 'taco' ? 1 : sourceB === 'tbca' ? 2 : sourceB === 'usda' ? 3 : 999;
+
+        if (priorityA !== priorityB) return priorityA - priorityB;
 
         const normalizedQuery = normalizeSearchTerm(query);
         const queryWords = normalizedQuery.split(' ');
@@ -174,18 +250,38 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
         return a.name.localeCompare(b.name);
       });
 
-      const limited = sorted.slice(0, 10);
-
-      console.log('✅ Resultados:', limited.length, '- Únicos de', uniqueResults.length);
+      console.log('✅ Resultados:', sorted.length);
       console.log('📊 Distribuição:', {
-        TACO: limited.filter(r => r.source?.toLowerCase().includes('taco')).length,
-        OFF: limited.filter(r => r.source?.toLowerCase().includes('openfood')).length
+        TACO: sorted.filter(r => r.nutrition_sources?.code === 'taco').length,
+        TBCA: sorted.filter(r => r.nutrition_sources?.code === 'tbca').length,
+        Outros: sorted.filter(r => !['taco', 'tbca'].includes(r.nutrition_sources?.code || '')).length
       });
 
-      return limited;
+      return sorted;
     },
     enabled: query.length >= 2
   });
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!resultsRef.current || query.length >= 2) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = resultsRef.current;
+      const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
+
+      if (scrollPercentage > 0.8 && !isLoadingMore && displayLimit < allFoods.length) {
+        setIsLoadingMore(true);
+        setTimeout(() => {
+          setDisplayLimit(prev => Math.min(prev + 50, allFoods.length));
+          setIsLoadingMore(false);
+        }, 300);
+      }
+    };
+
+    const ref = resultsRef.current;
+    ref?.addEventListener('scroll', handleScroll);
+    return () => ref?.removeEventListener('scroll', handleScroll);
+  }, [displayLimit, allFoods.length, isLoadingMore, query]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -218,6 +314,57 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  const renderFoodItem = (food: any) => {
+    const sourceCode = food.nutrition_sources?.code?.toLowerCase() || '';
+    const isTACO = sourceCode === 'taco' || sourceCode === 'tbca';
+    const badgeText = sourceCode === 'taco' ? 'TACO' : sourceCode === 'tbca' ? 'TBCA' : 'OFF';
+
+    return (
+      <button
+        key={food.id}
+        onClick={() => {
+          setSelectedFood(food);
+          setIsOpen(false);
+        }}
+        className={cn(
+          "w-full p-3 text-left hover:bg-muted transition-colors border-b last:border-0 group",
+          isTACO && "bg-green-50/50 dark:bg-green-950/10"
+        )}
+      >
+        <div className="flex justify-between items-start gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              {isTACO && <span className="text-xs">🇧🇷</span>}
+              <p className="font-medium truncate group-hover:text-primary transition-colors text-sm">
+                {food.name}
+              </p>
+              <Badge
+                variant={isTACO ? 'default' : 'secondary'}
+                className={cn(
+                  "flex-shrink-0 text-xs",
+                  isTACO && "bg-green-600"
+                )}
+              >
+                {badgeText}
+              </Badge>
+            </div>
+            {food.brand && (
+              <p className="text-xs text-muted-foreground mb-1 truncate">
+                {food.brand}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              {food.energy_kcal} kcal |
+              P: {food.protein_g?.toFixed(1)}g |
+              C: {food.carbohydrate_g?.toFixed(1)}g |
+              G: {food.lipid_g?.toFixed(1)}g
+            </p>
+          </div>
+        </div>
+      </button>
+    );
+  };
 
   return (
     <>
@@ -360,12 +507,11 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
                 setActiveCategory(null);
                 setCategoryResults([]);
               } else if (e.target.value.length === 0) {
-                setShowCategories(true);
                 setActiveCategory(null);
                 setCategoryResults([]);
               }
             }}
-            onFocus={() => query.length >= 2 && setIsOpen(true)}
+            onFocus={() => setIsOpen(true)}
             className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground font-medium"
             data-food-search
           />
@@ -388,113 +534,46 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
           </div>
         </div>
 
-        {(isOpen && ((query.length >= 2 && results) || (activeCategory && categoryResults.length > 0))) && (
+        {(isOpen && ((query.length >= 2 && results) || (activeCategory && categoryResults.length > 0) || (query.length === 0 && allFoods.length > 0))) && (
           <div
             ref={dropdownRef}
-            className="absolute top-full left-0 right-0 mt-2 bg-background border rounded-lg shadow-lg max-h-[400px] overflow-auto z-50 animate-in fade-in-0 zoom-in-95"
+            className="absolute top-full left-0 right-0 mt-2 bg-background border rounded-lg shadow-lg max-h-[400px] z-50 animate-in fade-in-0 zoom-in-95 flex flex-col"
           >
+            <div ref={resultsRef} className="overflow-auto flex-1">
             {(isLoading || isSearchingCategory) ? (
               <div className="p-8 text-center text-sm text-muted-foreground">
                 <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2" />
                 Buscando alimentos...
               </div>
+            ) : query.length === 0 && allFoods.length > 0 ? (
+              <>
+                <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b px-3 py-2 z-10">
+                  <p className="text-xs text-muted-foreground">
+                    Mostrando {Math.min(displayLimit, allFoods.length)} de {allFoods.length} alimentos
+                  </p>
+                </div>
+                {allFoods.slice(0, displayLimit).map((food) => renderFoodItem(food))}
+                {isLoadingMore && (
+                  <div className="p-4 text-center text-sm text-muted-foreground">
+                    <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full mx-auto" />
+                  </div>
+                )}
+                {displayLimit >= allFoods.length && allFoods.length > 50 && (
+                  <div className="p-3 text-center text-xs text-muted-foreground border-t">
+                    Todos os alimentos carregados
+                  </div>
+                )}
+              </>
             ) : (activeCategory && categoryResults.length > 0) ? (
-              categoryResults.map((food) => {
-                const isTACO = food.source?.toLowerCase().includes('taco') || food.source?.toLowerCase().includes('tbca');
-
-                return (
-                  <button
-                    key={food.id}
-                    onClick={() => {
-                      setSelectedFood(food);
-                      setIsOpen(false);
-                    }}
-                    className={cn(
-                      "w-full p-3 text-left hover:bg-muted transition-colors border-b last:border-0 group",
-                      isTACO && "bg-green-50 dark:bg-green-950/20"
-                    )}
-                  >
-                    <div className="flex justify-between items-start gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          {isTACO && <span className="text-xs">🇧🇷</span>}
-                          <p className="font-medium truncate group-hover:text-primary transition-colors">
-                            {food.name}
-                          </p>
-                          <Badge
-                            variant={isTACO ? 'default' : 'secondary'}
-                            className="flex-shrink-0 text-xs"
-                          >
-                            {isTACO ? 'TACO' : 'OFF'}
-                          </Badge>
-                        </div>
-                        {food.brand && (
-                          <p className="text-xs text-muted-foreground mb-1 truncate">
-                            {food.brand}
-                          </p>
-                        )}
-                        <p className="text-xs text-muted-foreground">
-                          {food.energy_kcal} kcal |
-                          P: {food.protein_g?.toFixed(1)}g |
-                          C: {food.carbohydrate_g?.toFixed(1)}g |
-                          G: {food.lipid_g?.toFixed(1)}g
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })
+              categoryResults.map((food) => renderFoodItem(food))
             ) : results && results.length > 0 ? (
-              results.map((food) => {
-                const isTACO = food.source?.toLowerCase().includes('taco') || food.source?.toLowerCase().includes('tbca');
-
-                return (
-                  <button
-                    key={food.id}
-                    onClick={() => {
-                      setSelectedFood(food);
-                      setIsOpen(false);
-                    }}
-                    className={cn(
-                      "w-full p-3 text-left hover:bg-muted transition-colors border-b last:border-0 group",
-                      isTACO && "bg-green-50 dark:bg-green-950/20"
-                    )}
-                  >
-                    <div className="flex justify-between items-start gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          {isTACO && <span className="text-xs">🇧🇷</span>}
-                          <p className="font-medium truncate group-hover:text-primary transition-colors">
-                            {food.name}
-                          </p>
-                          <Badge
-                            variant={isTACO ? 'default' : 'secondary'}
-                            className="flex-shrink-0 text-xs"
-                          >
-                            {isTACO ? 'TACO' : 'OFF'}
-                          </Badge>
-                        </div>
-                        {food.brand && (
-                          <p className="text-xs text-muted-foreground mb-1 truncate">
-                            {food.brand}
-                          </p>
-                        )}
-                        <p className="text-xs text-muted-foreground">
-                          {food.energy_kcal} kcal |
-                          P: {food.protein_g?.toFixed(1)}g |
-                          C: {food.carbohydrate_g?.toFixed(1)}g |
-                          G: {food.lipid_g?.toFixed(1)}g
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })
+              results.map((food) => renderFoodItem(food))
             ) : (
               <div className="p-8 text-center text-sm text-muted-foreground">
                 Nenhum alimento encontrado para "{query}"
               </div>
             )}
+            </div>
           </div>
         )}
       </div>
