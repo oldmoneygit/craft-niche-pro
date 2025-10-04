@@ -61,7 +61,7 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
       const term = searchTerm.trim().toLowerCase();
 
       // ETAPA 1: Busca exata prioritária (começa com o termo)
-      const { data: exactMatches } = await supabase
+      const { data: exactMatches, error: exactError } = await supabase
         .from('foods')
         .select(`
           id,
@@ -72,7 +72,7 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
           carbohydrate_g,
           lipid_g,
           source_id,
-          nutrition_sources(code, name)
+          nutrition_sources!inner(id, code, name)
         `)
         .ilike('name', `${term}%`)
         .eq('active', true)
@@ -80,9 +80,13 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
         .order('name')
         .limit(20);
 
+      if (exactError) {
+        console.error('Erro na busca exata:', exactError);
+      }
+
       // ETAPA 2: Se < 20 resultados, busca parcial
       if ((exactMatches?.length || 0) < 20) {
-        const { data: partialMatches } = await supabase
+        const { data: partialMatches, error: partialError } = await supabase
           .from('foods')
           .select(`
             id,
@@ -93,7 +97,7 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
             carbohydrate_g,
             lipid_g,
             source_id,
-            nutrition_sources(code, name)
+            nutrition_sources!inner(id, code, name)
           `)
           .ilike('name', `%${term}%`)
           .not('name', 'ilike', `${term}%`)
@@ -101,6 +105,10 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
           .order('source_id', { ascending: true })
           .order('name')
           .limit(20 - (exactMatches?.length || 0));
+
+        if (partialError) {
+          console.error('Erro na busca parcial:', partialError);
+        }
 
         return [...(exactMatches || []), ...(partialMatches || [])];
       }
