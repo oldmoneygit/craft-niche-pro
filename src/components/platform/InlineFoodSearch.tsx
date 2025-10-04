@@ -65,6 +65,24 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
     return patterns;
   };
 
+  const getPriority = (code: string | undefined): number => {
+    if (!code) return 999;
+    const lowerCode = code.toLowerCase();
+    if (lowerCode === 'taco') return 1;
+    if (lowerCode === 'tbca') return 2;
+    if (lowerCode === 'usda') return 3;
+    return 999;
+  };
+
+  const getBadgeText = (source?: { code: string; name: string }): string => {
+    if (!source?.code) return 'OFF';
+    const code = source.code.toLowerCase();
+    if (code === 'taco') return 'TACO';
+    if (code === 'tbca') return 'TBCA';
+    if (code === 'usda') return 'USDA';
+    return 'OFF';
+  };
+
   const handleCategoryClick = async (category: typeof categories[0]) => {
     setIsSearchingCategory(true);
     setActiveCategory(category.name);
@@ -75,7 +93,7 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
       let allResults: any[] = [];
 
       for (const term of category.searchTerms) {
-        let searchQuery = supabase
+        const searchQuery = supabase
           .from('foods')
           .select(`
             id,
@@ -85,20 +103,27 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
             protein_g,
             carbohydrate_g,
             lipid_g,
-            nutrition_sources!inner(code, name)
+            source_id,
+            nutrition_sources(code, name)
           `)
           .ilike('name', `%${term}%`)
           .eq('active', true)
           .limit(20);
 
-        if (sourceFilter === 'TACO') {
-          searchQuery = searchQuery.in('nutrition_sources.code', ['taco', 'tbca']);
-        } else if (sourceFilter === 'OpenFoodFacts') {
-          searchQuery = searchQuery.eq('nutrition_sources.code', 'openfoodfacts');
-        }
-
         const { data } = await searchQuery;
         if (data) allResults = [...allResults, ...data];
+      }
+
+      if (sourceFilter === 'TACO') {
+        allResults = allResults.filter(f => {
+          const code = f.nutrition_sources?.code?.toLowerCase();
+          return code === 'taco' || code === 'tbca';
+        });
+      } else if (sourceFilter === 'OpenFoodFacts') {
+        allResults = allResults.filter(f => {
+          const code = f.nutrition_sources?.code?.toLowerCase();
+          return code === 'openfoodfacts';
+        });
       }
 
       const uniqueResults = Array.from(
@@ -106,11 +131,8 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
       );
 
       const sorted = uniqueResults.sort((a, b) => {
-        const sourceA = a.nutrition_sources?.code?.toLowerCase() || '';
-        const sourceB = b.nutrition_sources?.code?.toLowerCase() || '';
-
-        const priorityA = sourceA === 'taco' ? 1 : sourceA === 'tbca' ? 2 : sourceA === 'usda' ? 3 : 999;
-        const priorityB = sourceB === 'taco' ? 1 : sourceB === 'tbca' ? 2 : sourceB === 'usda' ? 3 : 999;
+        const priorityA = getPriority(a.nutrition_sources?.code);
+        const priorityB = getPriority(b.nutrition_sources?.code);
 
         if (priorityA !== priorityB) return priorityA - priorityB;
         return a.name.localeCompare(b.name);
@@ -136,6 +158,8 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
   useEffect(() => {
     const loadAllFoods = async () => {
       try {
+        console.log('🔄 Carregando todos os alimentos com filtro:', sourceFilter);
+
         let foodsQuery = supabase
           .from('foods')
           .select(`
@@ -146,35 +170,48 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
             protein_g,
             carbohydrate_g,
             lipid_g,
-            nutrition_sources!inner(code, name)
+            source_id,
+            nutrition_sources(code, name)
           `)
-          .eq('active', true);
-
-        if (sourceFilter === 'TACO') {
-          foodsQuery = foodsQuery.in('nutrition_sources.code', ['taco', 'tbca']);
-        } else if (sourceFilter === 'OpenFoodFacts') {
-          foodsQuery = foodsQuery.eq('nutrition_sources.code', 'openfoodfacts');
-        }
+          .eq('active', true)
+          .order('name');
 
         const { data, error } = await foodsQuery;
 
+        console.log('📊 Query resultado:', {
+          total: data?.length,
+          error: error?.message,
+          sample: data?.[0]
+        });
+
         if (error) throw error;
 
-        const sorted = (data || []).sort((a, b) => {
-          const sourceA = a.nutrition_sources?.code?.toLowerCase() || '';
-          const sourceB = b.nutrition_sources?.code?.toLowerCase() || '';
+        let filtered = data || [];
 
-          const priorityA = sourceA === 'taco' ? 1 : sourceA === 'tbca' ? 2 : sourceA === 'usda' ? 3 : 999;
-          const priorityB = sourceB === 'taco' ? 1 : sourceB === 'tbca' ? 2 : sourceB === 'usda' ? 3 : 999;
+        if (sourceFilter === 'TACO') {
+          filtered = filtered.filter(f => {
+            const code = f.nutrition_sources?.code?.toLowerCase();
+            return code === 'taco' || code === 'tbca';
+          });
+        } else if (sourceFilter === 'OpenFoodFacts') {
+          filtered = filtered.filter(f => {
+            const code = f.nutrition_sources?.code?.toLowerCase();
+            return code === 'openfoodfacts';
+          });
+        }
+
+        const sorted = filtered.sort((a, b) => {
+          const priorityA = getPriority(a.nutrition_sources?.code);
+          const priorityB = getPriority(b.nutrition_sources?.code);
 
           if (priorityA !== priorityB) return priorityA - priorityB;
           return a.name.localeCompare(b.name);
         });
 
         setAllFoods(sorted);
-        console.log(`✅ Carregados ${sorted.length} alimentos`);
+        console.log(`✅ Carregados ${sorted.length} alimentos (de ${data?.length || 0} total)`);
       } catch (error) {
-        console.error('Erro ao carregar alimentos:', error);
+        console.error('❌ Erro ao carregar alimentos:', error);
       }
     };
 
@@ -193,7 +230,7 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
 
       const searches = await Promise.all(
         patterns.map(async (pattern) => {
-          let searchQuery = supabase
+          const searchQuery = supabase
             .from('foods')
             .select(`
               id,
@@ -203,17 +240,12 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
               protein_g,
               carbohydrate_g,
               lipid_g,
-              nutrition_sources!inner(code, name)
+              source_id,
+              nutrition_sources(code, name)
             `)
             .or(`name.ilike.${pattern},brand.ilike.${pattern}`)
             .eq('active', true)
             .limit(30);
-
-          if (sourceFilter === 'TACO') {
-            searchQuery = searchQuery.in('nutrition_sources.code', ['taco', 'tbca']);
-          } else if (sourceFilter === 'OpenFoodFacts') {
-            searchQuery = searchQuery.eq('nutrition_sources.code', 'openfoodfacts');
-          }
 
           const { data } = await searchQuery;
           return data || [];
@@ -225,12 +257,23 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
         new Map(allResults.map(item => [item.id, item])).values()
       );
 
-      const sorted = uniqueResults.sort((a, b) => {
-        const sourceA = a.nutrition_sources?.code?.toLowerCase() || '';
-        const sourceB = b.nutrition_sources?.code?.toLowerCase() || '';
+      let filtered = uniqueResults;
 
-        const priorityA = sourceA === 'taco' ? 1 : sourceA === 'tbca' ? 2 : sourceA === 'usda' ? 3 : 999;
-        const priorityB = sourceB === 'taco' ? 1 : sourceB === 'tbca' ? 2 : sourceB === 'usda' ? 3 : 999;
+      if (sourceFilter === 'TACO') {
+        filtered = filtered.filter(f => {
+          const code = f.nutrition_sources?.code?.toLowerCase();
+          return code === 'taco' || code === 'tbca';
+        });
+      } else if (sourceFilter === 'OpenFoodFacts') {
+        filtered = filtered.filter(f => {
+          const code = f.nutrition_sources?.code?.toLowerCase();
+          return code === 'openfoodfacts';
+        });
+      }
+
+      const sorted = filtered.sort((a, b) => {
+        const priorityA = getPriority(a.nutrition_sources?.code);
+        const priorityB = getPriority(b.nutrition_sources?.code);
 
         if (priorityA !== priorityB) return priorityA - priorityB;
 
@@ -252,9 +295,13 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
 
       console.log('✅ Resultados:', sorted.length);
       console.log('📊 Distribuição:', {
-        TACO: sorted.filter(r => r.nutrition_sources?.code === 'taco').length,
-        TBCA: sorted.filter(r => r.nutrition_sources?.code === 'tbca').length,
-        Outros: sorted.filter(r => !['taco', 'tbca'].includes(r.nutrition_sources?.code || '')).length
+        TACO: sorted.filter(r => r.nutrition_sources?.code?.toLowerCase() === 'taco').length,
+        TBCA: sorted.filter(r => r.nutrition_sources?.code?.toLowerCase() === 'tbca').length,
+        Outros: sorted.filter(r => {
+          const code = r.nutrition_sources?.code?.toLowerCase();
+          return code && code !== 'taco' && code !== 'tbca';
+        }).length,
+        SemFonte: sorted.filter(r => !r.nutrition_sources?.code).length
       });
 
       return sorted;
@@ -316,9 +363,9 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
   }, []);
 
   const renderFoodItem = (food: any) => {
-    const sourceCode = food.nutrition_sources?.code?.toLowerCase() || '';
+    const sourceCode = food.nutrition_sources?.code?.toLowerCase();
     const isTACO = sourceCode === 'taco' || sourceCode === 'tbca';
-    const badgeText = sourceCode === 'taco' ? 'TACO' : sourceCode === 'tbca' ? 'TBCA' : 'OFF';
+    const badgeText = getBadgeText(food.nutrition_sources);
 
     return (
       <button
