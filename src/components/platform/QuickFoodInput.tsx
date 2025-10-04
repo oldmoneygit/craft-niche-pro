@@ -58,7 +58,10 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
     queryFn: async () => {
       if (searchTerm.length < 2) return [];
 
-      const { data } = await supabase
+      const term = searchTerm.trim().toLowerCase();
+
+      // ETAPA 1: Busca exata prioritária (começa com o termo)
+      const { data: exactMatches } = await supabase
         .from('foods')
         .select(`
           id,
@@ -68,14 +71,41 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
           protein_g,
           carbohydrate_g,
           lipid_g,
+          source_id,
           nutrition_sources(code, name)
         `)
-        .or(`name.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%`)
+        .ilike('name', `${term}%`)
         .eq('active', true)
+        .order('source_id', { ascending: true })
         .order('name')
-        .limit(5);
+        .limit(20);
 
-      return data || [];
+      // ETAPA 2: Se < 20 resultados, busca parcial
+      if ((exactMatches?.length || 0) < 20) {
+        const { data: partialMatches } = await supabase
+          .from('foods')
+          .select(`
+            id,
+            name,
+            brand,
+            energy_kcal,
+            protein_g,
+            carbohydrate_g,
+            lipid_g,
+            source_id,
+            nutrition_sources(code, name)
+          `)
+          .ilike('name', `%${term}%`)
+          .not('name', 'ilike', `${term}%`)
+          .eq('active', true)
+          .order('source_id', { ascending: true })
+          .order('name')
+          .limit(20 - (exactMatches?.length || 0));
+
+        return [...(exactMatches || []), ...(partialMatches || [])];
+      }
+
+      return exactMatches || [];
     },
     enabled: searchTerm.length >= 2 && !selectedFood
   });
@@ -183,7 +213,7 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
           />
 
           {showSuggestions && foods.length > 0 && (
-            <div className="absolute z-50 mt-1 w-full bg-gray-800 border border-gray-700 rounded-md shadow-xl max-h-60 overflow-auto">
+            <div className="absolute z-50 mt-1 w-full bg-gray-800 border border-gray-700 rounded-md shadow-xl max-h-96 overflow-y-auto">
               {foods.map((food) => {
                 const badge = getBadgeConfig(food.nutrition_sources);
                 return (

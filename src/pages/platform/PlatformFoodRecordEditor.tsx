@@ -448,7 +448,7 @@ export default function PlatformFoodRecordEditor() {
           </Button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-6">
           {meals.map((meal, mealIndex) => (
             <Card key={mealIndex} className="bg-gray-800 border-gray-700">
               <CardHeader className="pb-3 bg-gray-700/50">
@@ -472,13 +472,13 @@ export default function PlatformFoodRecordEditor() {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3 bg-gray-800">
+              <CardContent className="space-y-4 bg-gray-800">
               <QuickFoodInput
                 onAdd={(foodData) => handleAddFoodToMeal(mealIndex, foodData)}
                 placeholder="🔍 Digite o alimento..."
               />
 
-              <div className="space-y-1">
+              <div className="space-y-2 mt-6">
                 {meal.items.map((item, itemIndex) => (
                   <RecordFoodItem
                     key={itemIndex}

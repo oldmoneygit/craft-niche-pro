@@ -103,7 +103,7 @@ export default function PlatformFoodRecords() {
   return (
     <div className="min-h-screen bg-gray-900">
       <div className="container mx-auto p-6 max-w-7xl">
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 mb-8">
           <Button
             variant="ghost"
             size="icon"
@@ -123,12 +123,12 @@ export default function PlatformFoodRecords() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
+        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
           <Card className="bg-gray-800 border-gray-700">
-            <CardHeader className="bg-gray-700/50 pb-3">
+            <CardHeader className="bg-gray-700/50 pb-4">
               <CardTitle className="text-lg text-gray-100">Pacientes</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 bg-gray-800 pt-4">
+            <CardContent className="space-y-3 bg-gray-800 pt-6 pb-6">
               {clients.map((client) => (
                 <button
                   key={client.id}
