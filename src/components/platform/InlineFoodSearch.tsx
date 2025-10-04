@@ -16,7 +16,7 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFood, setSelectedFood] = useState<any>(null);
-  const [sourceFilter, setSourceFilter] = useState<'all' | 'TACO' | 'OpenFoodFacts'>('all');
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'taco_tbca' | 'custom'>('all');
   const [showCategories, setShowCategories] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [categoryResults, setCategoryResults] = useState<any[]>([]);
@@ -75,12 +75,14 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
   };
 
   const getBadgeText = (source?: { code: string; name: string }): string => {
-    if (!source?.code) return 'OFF';
+    if (!source?.code) return 'OUTRO';
     const code = source.code.toLowerCase();
     if (code === 'taco') return 'TACO';
     if (code === 'tbca') return 'TBCA';
     if (code === 'usda') return 'USDA';
-    return 'OFF';
+    if (code === 'ibge') return 'IBGE';
+    if (code === 'custom') return 'CUSTOM';
+    return 'OUTRO';
   };
 
   const handleCategoryClick = async (category: typeof categories[0]) => {
@@ -114,15 +116,15 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
         if (data) allResults = [...allResults, ...data];
       }
 
-      if (sourceFilter === 'TACO') {
+      if (sourceFilter === 'taco_tbca') {
         allResults = allResults.filter(f => {
           const code = f.nutrition_sources?.code?.toLowerCase();
           return code === 'taco' || code === 'tbca';
         });
-      } else if (sourceFilter === 'OpenFoodFacts') {
+      } else if (sourceFilter === 'custom') {
         allResults = allResults.filter(f => {
           const code = f.nutrition_sources?.code?.toLowerCase();
-          return code === 'openfoodfacts';
+          return code === 'custom' || code === 'ibge';
         });
       }
 
@@ -188,16 +190,18 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
 
         let filtered = data || [];
 
-        if (sourceFilter === 'TACO') {
+        if (sourceFilter === 'taco_tbca') {
           filtered = filtered.filter(f => {
             const code = f.nutrition_sources?.code?.toLowerCase();
             return code === 'taco' || code === 'tbca';
           });
-        } else if (sourceFilter === 'OpenFoodFacts') {
+          console.log(`🔍 Filtrado TACO/TBCA: ${filtered.length} alimentos`);
+        } else if (sourceFilter === 'custom') {
           filtered = filtered.filter(f => {
             const code = f.nutrition_sources?.code?.toLowerCase();
-            return code === 'openfoodfacts';
+            return code === 'custom' || code === 'ibge';
           });
+          console.log(`🔍 Filtrado CUSTOM/IBGE: ${filtered.length} alimentos`);
         }
 
         const sorted = filtered.sort((a, b) => {
@@ -259,15 +263,15 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
 
       let filtered = uniqueResults;
 
-      if (sourceFilter === 'TACO') {
+      if (sourceFilter === 'taco_tbca') {
         filtered = filtered.filter(f => {
           const code = f.nutrition_sources?.code?.toLowerCase();
           return code === 'taco' || code === 'tbca';
         });
-      } else if (sourceFilter === 'OpenFoodFacts') {
+      } else if (sourceFilter === 'custom') {
         filtered = filtered.filter(f => {
           const code = f.nutrition_sources?.code?.toLowerCase();
-          return code === 'openfoodfacts';
+          return code === 'custom' || code === 'ibge';
         });
       }
 
@@ -431,26 +435,26 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
               Todas
             </button>
             <button
-              onClick={() => setSourceFilter('TACO')}
+              onClick={() => setSourceFilter('taco_tbca')}
               className={cn(
                 "px-2.5 py-1 rounded text-xs font-medium transition-all",
-                sourceFilter === 'TACO'
+                sourceFilter === 'taco_tbca'
                   ? "bg-green-600 text-white"
                   : "bg-muted/50 hover:bg-muted text-muted-foreground"
               )}
             >
-              TACO
+              Oficiais
             </button>
             <button
-              onClick={() => setSourceFilter('OpenFoodFacts')}
+              onClick={() => setSourceFilter('custom')}
               className={cn(
                 "px-2.5 py-1 rounded text-xs font-medium transition-all",
-                sourceFilter === 'OpenFoodFacts'
-                  ? "bg-blue-600 text-white"
+                sourceFilter === 'custom'
+                  ? "bg-purple-600 text-white"
                   : "bg-muted/50 hover:bg-muted text-muted-foreground"
               )}
             >
-              OFF
+              Personalizados
             </button>
           </div>
         </div>
