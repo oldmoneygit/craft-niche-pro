@@ -18,6 +18,12 @@ export const QuickPortionDialog = ({ food, isOpen, onClose, onConfirm }: QuickPo
   const [selectedMeasure, setSelectedMeasure] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
 
+  // Estados para medida customizada
+  const [showCustomMeasure, setShowCustomMeasure] = useState(false);
+  const [customMeasureName, setCustomMeasureName] = useState('');
+  const [customMeasureGrams, setCustomMeasureGrams] = useState('');
+  const [isSavingMeasure, setIsSavingMeasure] = useState(false);
+
   const { data: measures } = useQuery({
     queryKey: ['food-measures', food.id],
     queryFn: async () => {
@@ -138,6 +144,18 @@ export const QuickPortionDialog = ({ food, isOpen, onClose, onConfirm }: QuickPo
                 </option>
               ))}
             </select>
+
+            {/* BOTÃO DE TESTE - SEMPRE VISÍVEL */}
+            <div className="mt-2 p-2 bg-yellow-100 border border-yellow-400 rounded">
+              <p className="text-xs text-yellow-800 mb-1">🧪 TESTE QuickPortionDialog</p>
+              <button
+                type="button"
+                onClick={() => alert('✅ BOTÃO FUNCIONA! Arquivo: QuickPortionDialog.tsx')}
+                className="text-blue-600 underline cursor-pointer text-sm font-medium"
+              >
+                ➕ CLIQUE AQUI PARA TESTAR
+              </button>
+            </div>
           </div>
 
           <div>
