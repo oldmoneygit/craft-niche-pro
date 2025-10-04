@@ -95,17 +95,31 @@ export function AddFoodToMealModal({
       const { data, error } = await supabase
         .from('food_measures')
         .select('*')
-        .eq('food_id', foodId)
-        .order('grams', { ascending: true });
+        .eq('food_id', foodId);
 
       if (error) throw error;
 
-      setMeasures(data || []);
-      if (data && data.length > 0) {
-        setSelectedMeasure(data[0].id);
+      // Ordenar medidas: "100 gramas" sempre primeiro, depois alfabética
+      const sortedMeasures = (data || []).sort((a, b) => {
+        const isA100g = a.measure_name === '100 gramas';
+        const isB100g = b.measure_name === '100 gramas';
+
+        if (isA100g && !isB100g) return -1;
+        if (!isA100g && isB100g) return 1;
+
+        return a.measure_name.localeCompare(b.measure_name);
+      });
+
+      setMeasures(sortedMeasures);
+
+      // Selecionar "100 gramas" como padrão, ou a primeira disponível
+      if (sortedMeasures.length > 0) {
+        const defaultMeasure = sortedMeasures.find(m => m.measure_name === '100 gramas') || sortedMeasures[0];
+        setSelectedMeasure(defaultMeasure.id);
       }
     } catch (error) {
       console.error('Erro ao carregar medidas:', error);
+      setMeasures([]);
     }
   };
 
@@ -127,13 +141,13 @@ export function AddFoodToMealModal({
       food_id: selectedFood.id,
       food_name: selectedFood.name,
       measure_id: selectedMeasure,
-      measure_name: selectedMeasureData.name,
+      measure_name: selectedMeasureData.measure_name,
       measure_grams: selectedMeasureData.grams,
       quantity: quantity,
       kcal: (selectedFood.energy_kcal * totalGrams) / 100,
       protein: (selectedFood.protein_g * totalGrams) / 100,
-      carbs: (selectedFood.carbs_g * totalGrams) / 100,
-      fat: (selectedFood.fat_g * totalGrams) / 100
+      carbs: (selectedFood.carbohydrate_g * totalGrams) / 100,
+      fat: (selectedFood.lipid_g * totalGrams) / 100
     };
 
     onAddFood(item);
@@ -400,7 +414,7 @@ export function AddFoodToMealModal({
                     <SelectContent>
                       {measures.map(measure => (
                         <SelectItem key={measure.id} value={measure.id} className="text-base">
-                          {measure.name} ({measure.grams}g)
+                          {measure.measure_name} ({measure.grams}g)
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -430,7 +444,7 @@ export function AddFoodToMealModal({
                     <div className="flex justify-between items-center">
                       <span className="font-medium">Porção Total:</span>
                       <span className="text-lg font-bold text-primary">
-                        {quantity}x {selectedMeasureData?.name} = {totalGrams}g
+                        {quantity}x {selectedMeasureData?.measure_name} = {totalGrams}g
                       </span>
                     </div>
 
