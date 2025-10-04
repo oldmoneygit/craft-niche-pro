@@ -1,9 +1,9 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { 
-  Users, 
-  MessageCircle, 
-  BarChart3, 
+import {
+  Users,
+  MessageCircle,
+  BarChart3,
   Calendar,
   Bot,
   ClipboardList,
@@ -13,7 +13,8 @@ import {
   Bell,
   Brain,
   UserPlus,
-  Package
+  Package,
+  BookOpen
 } from 'lucide-react';
 import {
   Sidebar,
@@ -114,7 +115,13 @@ export function PlatformSidebar() {
       url: `${platformBasePath}/servicos`,
       icon: Package,
     });
-    
+
+    businessSpecificItems.push({
+      title: 'Recordatório Alimentar',
+      url: `${platformBasePath}/recordatorio`,
+      icon: BookOpen,
+    });
+
     if (isModuleEnabled('mealPlans')) {
       businessSpecificItems.push({
         title: 'Planos Alimentares',
