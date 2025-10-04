@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ interface QuickPortionDialogProps {
 }
 
 export const QuickPortionDialog = ({ food, isOpen, onClose, onConfirm }: QuickPortionDialogProps) => {
+  const queryClient = useQueryClient();
   const [selectedMeasure, setSelectedMeasure] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
 
@@ -61,6 +62,63 @@ export const QuickPortionDialog = ({ food, isOpen, onClose, onConfirm }: QuickPo
   const calculatedNutrition = selectedMeasure
     ? calculateItemNutrition(food, selectedMeasure, quantity)
     : null;
+
+  const handleSaveCustomMeasure = async () => {
+    if (!customMeasureName.trim()) {
+      alert('Digite o nome da medida');
+      return;
+    }
+
+    const grams = parseFloat(customMeasureGrams);
+    if (isNaN(grams) || grams <= 0) {
+      alert('Digite um peso válido em gramas');
+      return;
+    }
+
+    const exists = measures?.find(
+      m => m.measure_name.toLowerCase() === customMeasureName.trim().toLowerCase()
+    );
+    if (exists) {
+      alert('Já existe uma medida com esse nome');
+      return;
+    }
+
+    setIsSavingMeasure(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('food_measures')
+        .insert({
+          food_id: food.id,
+          measure_name: customMeasureName.trim(),
+          grams: grams,
+          is_default: false
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Recarregar medidas usando queryClient
+      await queryClient.invalidateQueries({ queryKey: ['food-measures', food.id] });
+
+      // Selecionar a nova medida
+      if (data) {
+        setSelectedMeasure(data);
+      }
+
+      setCustomMeasureName('');
+      setCustomMeasureGrams('');
+      setShowCustomMeasure(false);
+
+      console.log('✅ Medida customizada salva:', data);
+    } catch (error) {
+      console.error('Erro ao salvar:', error);
+      alert('Erro ao salvar medida');
+    } finally {
+      setIsSavingMeasure(false);
+    }
+  };
 
   const handleConfirm = () => {
     if (!selectedMeasure) return;
@@ -145,17 +203,68 @@ export const QuickPortionDialog = ({ food, isOpen, onClose, onConfirm }: QuickPo
               ))}
             </select>
 
-            {/* BOTÃO DE TESTE - SEMPRE VISÍVEL */}
-            <div className="mt-2 p-2 bg-yellow-100 border border-yellow-400 rounded">
-              <p className="text-xs text-yellow-800 mb-1">🧪 TESTE QuickPortionDialog</p>
+            {!showCustomMeasure && (
               <button
                 type="button"
-                onClick={() => alert('✅ BOTÃO FUNCIONA! Arquivo: QuickPortionDialog.tsx')}
-                className="text-blue-600 underline cursor-pointer text-sm font-medium"
+                onClick={() => setShowCustomMeasure(true)}
+                className="mt-2 text-primary underline text-sm hover:text-primary/80"
               >
-                ➕ CLIQUE AQUI PARA TESTAR
+                ➕ Adicionar medida caseira
               </button>
-            </div>
+            )}
+
+            {showCustomMeasure && (
+              <div className="mt-3 p-3 border rounded bg-muted/30 space-y-3">
+                <div>
+                  <label className="text-xs font-medium block mb-1">Nome da medida</label>
+                  <input
+                    type="text"
+                    placeholder="ex: pacote, lata, sachê"
+                    value={customMeasureName}
+                    onChange={(e) => setCustomMeasureName(e.target.value)}
+                    disabled={isSavingMeasure}
+                    className="w-full px-3 py-2 border rounded text-sm bg-background"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-medium block mb-1">Peso em gramas</label>
+                  <input
+                    type="number"
+                    placeholder="ex: 250"
+                    min="0"
+                    step="0.1"
+                    value={customMeasureGrams}
+                    onChange={(e) => setCustomMeasureGrams(e.target.value)}
+                    disabled={isSavingMeasure}
+                    className="w-full px-3 py-2 border rounded text-sm bg-background"
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCustomMeasure(false);
+                      setCustomMeasureName('');
+                      setCustomMeasureGrams('');
+                    }}
+                    disabled={isSavingMeasure}
+                    className="px-3 py-1.5 border rounded text-sm hover:bg-muted disabled:opacity-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveCustomMeasure}
+                    disabled={isSavingMeasure || !customMeasureName.trim() || !customMeasureGrams}
+                    className="px-3 py-1.5 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    {isSavingMeasure ? 'Salvando...' : 'Salvar'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
