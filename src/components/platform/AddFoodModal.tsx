@@ -37,6 +37,12 @@ export function AddFoodModal({
   const [isLoading, setIsLoading] = useState(false);
   const [sourceFilter, setSourceFilter] = useState<'all' | 'TACO' | 'OpenFoodFacts'>('all');
 
+  // Estado para adicionar medida customizada
+  const [showCustomMeasure, setShowCustomMeasure] = useState(false);
+  const [customMeasureName, setCustomMeasureName] = useState('');
+  const [customMeasureGrams, setCustomMeasureGrams] = useState('');
+  const [isSavingMeasure, setIsSavingMeasure] = useState(false);
+
   useEffect(() => {
     if (open) {
       setView('search');
@@ -44,6 +50,9 @@ export function AddFoodModal({
       setSelectedFood(null);
       setQuantity(1);
       setFoods([]);
+      setShowCustomMeasure(false);
+      setCustomMeasureName('');
+      setCustomMeasureGrams('');
     }
   }, [open]);
 
@@ -167,6 +176,67 @@ export function AddFoodModal({
     }
   }, [selectedMeasure, measures]);
 
+  const handleSaveCustomMeasure = async () => {
+    if (!selectedFood || !customMeasureName.trim() || !customMeasureGrams) return;
+
+    const grams = parseFloat(customMeasureGrams);
+    if (isNaN(grams) || grams <= 0) {
+      alert('Por favor, insira um peso válido em gramas.');
+      return;
+    }
+
+    // Verificar se já existe medida com esse nome
+    const existingMeasure = measures.find(
+      m => m.measure_name.toLowerCase() === customMeasureName.trim().toLowerCase()
+    );
+    if (existingMeasure) {
+      alert('Já existe uma medida com esse nome. Escolha outro nome.');
+      return;
+    }
+
+    setIsSavingMeasure(true);
+    try {
+      const { data, error } = await supabase
+        .from('food_measures')
+        .insert({
+          food_id: selectedFood.id,
+          measure_name: customMeasureName.trim(),
+          grams: grams,
+          is_default: false
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      console.log('✅ Medida customizada salva:', data);
+
+      // Recarregar medidas
+      await loadMeasures(selectedFood.id);
+
+      // Selecionar a medida recém-criada
+      if (data) {
+        setSelectedMeasure(data.id);
+      }
+
+      // Fechar formulário e limpar
+      setShowCustomMeasure(false);
+      setCustomMeasureName('');
+      setCustomMeasureGrams('');
+    } catch (error) {
+      console.error('❌ Erro ao salvar medida:', error);
+      alert('Erro ao salvar medida. Tente novamente.');
+    } finally {
+      setIsSavingMeasure(false);
+    }
+  };
+
+  const handleCancelCustomMeasure = () => {
+    setShowCustomMeasure(false);
+    setCustomMeasureName('');
+    setCustomMeasureGrams('');
+  };
+
   const handleAdd = () => {
     if (!selectedFood || !selectedMeasure) return;
 
@@ -182,6 +252,9 @@ export function AddFoodModal({
     setSelectedFood(null);
     setQuantity(1);
     setFoods([]);
+    setShowCustomMeasure(false);
+    setCustomMeasureName('');
+    setCustomMeasureGrams('');
   };
 
   const selectedMeasureData = measures.find(m => m.id === selectedMeasure);
@@ -453,6 +526,71 @@ export function AddFoodModal({
                       )}
                     </SelectContent>
                   </Select>
+
+                  {!showCustomMeasure && (
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="mt-2 p-0 h-auto text-sm text-primary hover:text-primary/80"
+                      onClick={() => setShowCustomMeasure(true)}
+                    >
+                      ➕ Adicionar medida caseira
+                    </Button>
+                  )}
+
+                  {showCustomMeasure && (
+                    <div className="mt-4 p-4 border rounded-lg bg-muted/30 space-y-4">
+                      <div>
+                        <Label className="text-sm font-medium mb-1.5 block">
+                          Nome da medida
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder="ex: pacote, lata, sachê"
+                          value={customMeasureName}
+                          onChange={(e) => setCustomMeasureName(e.target.value)}
+                          className="h-10"
+                          disabled={isSavingMeasure}
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="text-sm font-medium mb-1.5 block">
+                          Peso em gramas
+                        </Label>
+                        <Input
+                          type="number"
+                          placeholder="ex: 250"
+                          value={customMeasureGrams}
+                          onChange={(e) => setCustomMeasureGrams(e.target.value)}
+                          className="h-10"
+                          min="0"
+                          step="0.1"
+                          disabled={isSavingMeasure}
+                        />
+                      </div>
+
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleCancelCustomMeasure}
+                          disabled={isSavingMeasure}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={handleSaveCustomMeasure}
+                          disabled={isSavingMeasure || !customMeasureName.trim() || !customMeasureGrams}
+                        >
+                          {isSavingMeasure ? 'Salvando...' : 'Salvar'}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>
