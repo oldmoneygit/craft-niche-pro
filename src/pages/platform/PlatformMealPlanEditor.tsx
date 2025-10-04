@@ -758,13 +758,10 @@ export default function PlatformMealPlanEditor() {
                           >
                             <div className="flex-1">
                               <p className="font-medium mb-1">
-                                {item.quantity} {item.measure?.measure_name || 'porção'} de {item.foods?.name || 'alimento'}
+                                {item.food?.name || item.foods?.name || 'Alimento'}
                               </p>
                               <p className="text-sm text-muted-foreground">
-                                {item.kcal_total.toFixed(0)} kcal |
-                                P: {formatNutrient(item.protein_total)} |
-                                C: {formatNutrient(item.carb_total)} |
-                                G: {formatNutrient(item.fat_total)}
+                                {item.quantity} {item.measure?.measure_name || 'porção'} • {item.kcal_total.toFixed(0)} kcal | P: {formatNutrient(item.protein_total)} | C: {formatNutrient(item.carb_total)} | G: {formatNutrient(item.fat_total)}
                               </p>
                             </div>
                             <Button
