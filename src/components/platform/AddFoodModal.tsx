@@ -99,12 +99,17 @@ export function AddFoodModal({
 
   const loadMeasures = async (foodId: string) => {
     try {
+      console.log('🔍 Carregando medidas para food_id:', foodId);
+
       const { data, error } = await supabase
         .from('food_measures')
         .select('*')
         .eq('food_id', foodId);
 
       if (error) throw error;
+
+      console.log('📊 Medidas retornadas do banco:', data);
+      console.log('📊 Total de medidas:', data?.length);
 
       // Ordenar medidas: "100 gramas" sempre primeiro, depois alfabética
       const sortedMeasures = (data || []).sort((a, b) => {
@@ -117,24 +122,50 @@ export function AddFoodModal({
         return a.measure_name.localeCompare(b.measure_name);
       });
 
+      console.log('✅ Medidas ordenadas:', sortedMeasures.map(m => ({
+        id: m.id,
+        name: m.measure_name,
+        grams: m.grams
+      })));
+
       setMeasures(sortedMeasures);
 
       // Selecionar "100 gramas" como padrão, ou a primeira disponível
       if (sortedMeasures.length > 0) {
         const defaultMeasure = sortedMeasures.find(m => m.measure_name === '100 gramas') || sortedMeasures[0];
+        console.log('🎯 Medida padrão selecionada:', defaultMeasure.measure_name);
         setSelectedMeasure(defaultMeasure.id);
+      } else {
+        console.warn('⚠️ Nenhuma medida encontrada para este alimento!');
       }
     } catch (error) {
-      console.error('Erro ao carregar medidas:', error);
+      console.error('❌ Erro ao carregar medidas:', error);
       setMeasures([]);
     }
   };
 
   const handleSelectFood = async (food: any) => {
+    console.log('🍎 Alimento selecionado:', food.name, '| ID:', food.id);
     setSelectedFood(food);
     await loadMeasures(food.id);
     setView('add-portion');
   };
+
+  // Debug: Log medidas sempre que mudarem
+  useEffect(() => {
+    if (measures.length > 0) {
+      console.log('🔄 State "measures" atualizado. Total:', measures.length);
+      console.log('📋 Lista de medidas no state:', measures.map(m => `${m.measure_name} (${m.grams}g)`));
+    }
+  }, [measures]);
+
+  // Debug: Log medida selecionada
+  useEffect(() => {
+    if (selectedMeasure) {
+      const selected = measures.find(m => m.id === selectedMeasure);
+      console.log('🎯 Medida selecionada no state:', selected?.measure_name, '(', selected?.grams, 'g)');
+    }
+  }, [selectedMeasure, measures]);
 
   const handleAdd = () => {
     if (!selectedFood || !selectedMeasure) return;
@@ -403,14 +434,23 @@ export function AddFoodModal({
                   </Label>
                   <Select value={selectedMeasure} onValueChange={setSelectedMeasure}>
                     <SelectTrigger className="h-12 text-base">
-                      <SelectValue />
+                      <SelectValue placeholder="Selecione a medida" />
                     </SelectTrigger>
                     <SelectContent>
-                      {measures.map(measure => (
-                        <SelectItem key={measure.id} value={measure.id} className="text-base">
-                          {measure.measure_name} ({measure.grams}g)
-                        </SelectItem>
-                      ))}
+                      {measures.length === 0 ? (
+                        <div className="p-4 text-center text-muted-foreground">
+                          Nenhuma medida disponível
+                        </div>
+                      ) : (
+                        measures.map(measure => {
+                          console.log('🔧 Renderizando medida:', measure.measure_name, '(', measure.grams, 'g)');
+                          return (
+                            <SelectItem key={measure.id} value={measure.id} className="text-base">
+                              {measure.measure_name} ({measure.grams}g)
+                            </SelectItem>
+                          );
+                        })
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
