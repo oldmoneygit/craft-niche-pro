@@ -56,12 +56,18 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
   const { data: foods = [] } = useQuery({
     queryKey: ['quick-food-search', searchTerm],
     queryFn: async () => {
-      if (searchTerm.length < 2) return [];
+      console.log('🔍 1. Iniciando busca:', searchTerm);
+      
+      if (searchTerm.length < 2) {
+        console.log('⚠️ Termo muito curto, mínimo 2 caracteres');
+        return [];
+      }
 
       const term = searchTerm.trim().toLowerCase();
+      console.log('🔍 2. Termo processado:', term);
 
-      // ETAPA 1: Busca exata prioritária (começa com o termo)
-      const { data: exactMatches, error: exactError } = await supabase
+      // Query simplificada SEM inner join (que força relacionamento)
+      const { data, error } = await supabase
         .from('foods')
         .select(`
           id,
@@ -72,48 +78,25 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
           carbohydrate_g,
           lipid_g,
           source_id,
-          nutrition_sources!inner(id, code, name)
+          nutrition_sources(id, code, name)
         `)
-        .ilike('name', `${term}%`)
+        .ilike('name', `%${term}%`)
         .eq('active', true)
-        .order('source_id', { ascending: true })
         .order('name')
         .limit(20);
 
-      if (exactError) {
-        console.error('Erro na busca exata:', exactError);
+      console.log('✅ 3. Resultado da busca:', {
+        count: data?.length || 0,
+        error: error?.message,
+        sample: data?.[0]?.name
+      });
+
+      if (error) {
+        console.error('❌ Erro na query:', error);
+        return [];
       }
 
-      // ETAPA 2: Se < 20 resultados, busca parcial
-      if ((exactMatches?.length || 0) < 20) {
-        const { data: partialMatches, error: partialError } = await supabase
-          .from('foods')
-          .select(`
-            id,
-            name,
-            brand,
-            energy_kcal,
-            protein_g,
-            carbohydrate_g,
-            lipid_g,
-            source_id,
-            nutrition_sources!inner(id, code, name)
-          `)
-          .ilike('name', `%${term}%`)
-          .not('name', 'ilike', `${term}%`)
-          .eq('active', true)
-          .order('source_id', { ascending: true })
-          .order('name')
-          .limit(20 - (exactMatches?.length || 0));
-
-        if (partialError) {
-          console.error('Erro na busca parcial:', partialError);
-        }
-
-        return [...(exactMatches || []), ...(partialMatches || [])];
-      }
-
-      return exactMatches || [];
+      return data || [];
     },
     enabled: searchTerm.length >= 2 && !selectedFood
   });
@@ -123,11 +106,19 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
     queryFn: async () => {
       if (!selectedFood?.id) return [];
 
-      const { data } = await supabase
+      console.log('📏 Buscando medidas para:', selectedFood.name);
+
+      const { data, error } = await supabase
         .from('food_measures')
         .select('id, measure_name, grams, is_default')
         .eq('food_id', selectedFood.id)
         .order('is_default', { ascending: false });
+
+      console.log('📏 Medidas encontradas:', data?.length || 0);
+
+      if (error) {
+        console.error('❌ Erro ao buscar medidas:', error);
+      }
 
       return data || [];
     },
