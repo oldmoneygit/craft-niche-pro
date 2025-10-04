@@ -16,7 +16,8 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFood, setSelectedFood] = useState<any>(null);
-  const [sourceFilter, setSourceFilter] = useState<'all' | 'taco_tbca' | 'custom'>('all');
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'TACO' | 'OFF'>('all');
+  const [sourceIds, setSourceIds] = useState<{ taco: string[], off: string[] }>({ taco: [], off: [] });
   const [showCategories, setShowCategories] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [categoryResults, setCategoryResults] = useState<any[]>([]);
@@ -74,15 +75,22 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
     return 999;
   };
 
-  const getBadgeText = (source?: { code: string; name: string }): string => {
-    if (!source?.code) return 'OUTRO';
-    const code = source.code.toLowerCase();
-    if (code === 'taco') return 'TACO';
-    if (code === 'tbca') return 'TBCA';
-    if (code === 'usda') return 'USDA';
-    if (code === 'ibge') return 'IBGE';
-    if (code === 'custom') return 'CUSTOM';
-    return 'OUTRO';
+  const getBadgeConfig = (source?: { code: string; name: string }) => {
+    const code = source?.code?.toUpperCase() || 'OFF';
+
+    if (code === 'TACO' || code === 'TBCA') {
+      return { text: code, className: 'bg-green-600 text-white' };
+    }
+    if (code === 'USDA') {
+      return { text: code, className: 'bg-blue-600 text-white' };
+    }
+    if (code === 'IBGE') {
+      return { text: code, className: 'bg-orange-600 text-white' };
+    }
+    if (code === 'CUSTOM') {
+      return { text: code, className: 'bg-purple-600 text-white' };
+    }
+    return { text: code, className: 'bg-secondary text-secondary-foreground' };
   };
 
   const handleCategoryClick = async (category: typeof categories[0]) => {
@@ -116,16 +124,14 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
         if (data) allResults = [...allResults, ...data];
       }
 
-      if (sourceFilter === 'taco_tbca') {
-        allResults = allResults.filter(f => {
-          const code = f.nutrition_sources?.code?.toLowerCase();
-          return code === 'taco' || code === 'tbca';
-        });
-      } else if (sourceFilter === 'custom') {
-        allResults = allResults.filter(f => {
-          const code = f.nutrition_sources?.code?.toLowerCase();
-          return code === 'custom' || code === 'ibge';
-        });
+      if (sourceFilter === 'TACO') {
+        allResults = allResults.filter(f =>
+          sourceIds.taco.includes(f.source_id)
+        );
+      } else if (sourceFilter === 'OFF') {
+        allResults = allResults.filter(f =>
+          sourceIds.off.includes(f.source_id)
+        );
       }
 
       const uniqueResults = Array.from(
@@ -158,6 +164,33 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
   };
 
   useEffect(() => {
+    const loadSourceIds = async () => {
+      try {
+        const { data: sources } = await supabase
+          .from('nutrition_sources')
+          .select('id, code');
+
+        if (sources) {
+          const tacoIds = sources
+            .filter(s => ['taco', 'tbca'].includes(s.code.toLowerCase()))
+            .map(s => s.id);
+
+          const offIds = sources
+            .filter(s => ['openfoodfacts', 'off'].includes(s.code.toLowerCase()))
+            .map(s => s.id);
+
+          setSourceIds({ taco: tacoIds, off: offIds });
+          console.log('📋 Source IDs carregados:', { tacoIds, offIds });
+        }
+      } catch (error) {
+        console.error('Erro ao carregar source IDs:', error);
+      }
+    };
+
+    loadSourceIds();
+  }, []);
+
+  useEffect(() => {
     const loadAllFoods = async () => {
       try {
         console.log('🔄 Carregando todos os alimentos com filtro:', sourceFilter);
@@ -175,10 +208,17 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
             source_id,
             nutrition_sources(code, name)
           `)
-          .eq('active', true)
-          .order('name');
+          .eq('active', true);
 
-        const { data, error } = await foodsQuery;
+        if (sourceFilter === 'TACO' && sourceIds.taco.length > 0) {
+          foodsQuery = foodsQuery.in('source_id', sourceIds.taco);
+          console.log('🔍 Filtrando por TACO/TBCA IDs:', sourceIds.taco);
+        } else if (sourceFilter === 'OFF' && sourceIds.off.length > 0) {
+          foodsQuery = foodsQuery.in('source_id', sourceIds.off);
+          console.log('🔍 Filtrando por OFF IDs:', sourceIds.off);
+        }
+
+        const { data, error } = await foodsQuery.order('name');
 
         console.log('📊 Query resultado:', {
           total: data?.length,
@@ -188,23 +228,7 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
 
         if (error) throw error;
 
-        let filtered = data || [];
-
-        if (sourceFilter === 'taco_tbca') {
-          filtered = filtered.filter(f => {
-            const code = f.nutrition_sources?.code?.toLowerCase();
-            return code === 'taco' || code === 'tbca';
-          });
-          console.log(`🔍 Filtrado TACO/TBCA: ${filtered.length} alimentos`);
-        } else if (sourceFilter === 'custom') {
-          filtered = filtered.filter(f => {
-            const code = f.nutrition_sources?.code?.toLowerCase();
-            return code === 'custom' || code === 'ibge';
-          });
-          console.log(`🔍 Filtrado CUSTOM/IBGE: ${filtered.length} alimentos`);
-        }
-
-        const sorted = filtered.sort((a, b) => {
+        const sorted = (data || []).sort((a, b) => {
           const priorityA = getPriority(a.nutrition_sources?.code);
           const priorityB = getPriority(b.nutrition_sources?.code);
 
@@ -213,14 +237,16 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
         });
 
         setAllFoods(sorted);
-        console.log(`✅ Carregados ${sorted.length} alimentos (de ${data?.length || 0} total)`);
+        console.log(`✅ Carregados ${sorted.length} alimentos`);
       } catch (error) {
         console.error('❌ Erro ao carregar alimentos:', error);
       }
     };
 
-    loadAllFoods();
-  }, [sourceFilter]);
+    if (sourceFilter === 'all' || sourceIds.taco.length > 0 || sourceIds.off.length > 0) {
+      loadAllFoods();
+    }
+  }, [sourceFilter, sourceIds]);
 
   const { data: results, isLoading } = useQuery({
     queryKey: ['inline-food-search', query, sourceFilter],
@@ -263,16 +289,14 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
 
       let filtered = uniqueResults;
 
-      if (sourceFilter === 'taco_tbca') {
-        filtered = filtered.filter(f => {
-          const code = f.nutrition_sources?.code?.toLowerCase();
-          return code === 'taco' || code === 'tbca';
-        });
-      } else if (sourceFilter === 'custom') {
-        filtered = filtered.filter(f => {
-          const code = f.nutrition_sources?.code?.toLowerCase();
-          return code === 'custom' || code === 'ibge';
-        });
+      if (sourceFilter === 'TACO') {
+        filtered = filtered.filter(f =>
+          sourceIds.taco.includes(f.source_id)
+        );
+      } else if (sourceFilter === 'OFF') {
+        filtered = filtered.filter(f =>
+          sourceIds.off.includes(f.source_id)
+        );
       }
 
       const sorted = filtered.sort((a, b) => {
@@ -369,7 +393,7 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
   const renderFoodItem = (food: any) => {
     const sourceCode = food.nutrition_sources?.code?.toLowerCase();
     const isTACO = sourceCode === 'taco' || sourceCode === 'tbca';
-    const badgeText = getBadgeText(food.nutrition_sources);
+    const badgeConfig = getBadgeConfig(food.nutrition_sources);
 
     return (
       <button
@@ -391,13 +415,12 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
                 {food.name}
               </p>
               <Badge
-                variant={isTACO ? 'default' : 'secondary'}
                 className={cn(
                   "flex-shrink-0 text-xs",
-                  isTACO && "bg-green-600"
+                  badgeConfig.className
                 )}
               >
-                {badgeText}
+                {badgeConfig.text}
               </Badge>
             </div>
             {food.brand && (
@@ -435,26 +458,26 @@ export const InlineFoodSearch = ({ onAddFood, placeholder = "Buscar alimento..."
               Todas
             </button>
             <button
-              onClick={() => setSourceFilter('taco_tbca')}
+              onClick={() => setSourceFilter('TACO')}
               className={cn(
                 "px-2.5 py-1 rounded text-xs font-medium transition-all",
-                sourceFilter === 'taco_tbca'
+                sourceFilter === 'TACO'
                   ? "bg-green-600 text-white"
                   : "bg-muted/50 hover:bg-muted text-muted-foreground"
               )}
             >
-              Oficiais
+              TACO/TBCA
             </button>
             <button
-              onClick={() => setSourceFilter('custom')}
+              onClick={() => setSourceFilter('OFF')}
               className={cn(
                 "px-2.5 py-1 rounded text-xs font-medium transition-all",
-                sourceFilter === 'custom'
-                  ? "bg-purple-600 text-white"
+                sourceFilter === 'OFF'
+                  ? "bg-blue-600 text-white"
                   : "bg-muted/50 hover:bg-muted text-muted-foreground"
               )}
             >
-              Personalizados
+              OFF
             </button>
           </div>
         </div>
