@@ -11,7 +11,7 @@ interface StatCardProps {
     value: string;
     positive: boolean;
   };
-  icon: LucideIcon;
+  icon: typeof LucideIcon;
 }
 
 const variantColors = {

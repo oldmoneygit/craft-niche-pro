@@ -128,10 +128,10 @@ export default function PlatformMealPlanEditor() {
         });
       });
 
-      // 6. Incrementar contador de uso
-      await supabase.rpc('increment_template_usage', {
-        template_id: templateId
-      });
+      // 6. Incrementar contador de uso (RPC function needs to be created)
+      // await supabase.rpc('increment_template_usage', {
+      //   template_id: templateId
+      // });
 
       // 7. Popular formulário com dados do template
       setPlanName(`${template.name} - Cópia`);

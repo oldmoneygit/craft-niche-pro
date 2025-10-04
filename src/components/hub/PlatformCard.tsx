@@ -74,7 +74,7 @@ export function PlatformCard({ vertical, title, subtitle, badge, metrics }: Plat
           <div
             key={index}
             className="bg-white/5 rounded-lg p-4 border border-white/10 transition-all duration-300 hover:bg-white/10 hover:border-opacity-20"
-            style={{ borderColor: config.color, borderOpacity: 0.1 }}
+            style={{ borderColor: config.color }}
           >
             <p className="text-xs font-medium mb-1" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>{metric.label}</p>
             <p className="text-2xl font-bold" style={{ color: '#ffffff' }}>{metric.value}</p>

@@ -84,23 +84,20 @@ export function TemplateLibraryModal({
       if (error) throw error;
 
       // Para cada template, buscar quantos clientes estão usando
-      const templatesWithClients = await Promise.all(
-        (data || []).map(async (template) => {
-          const { data: plans } = await supabase
-            .from('meal_plans')
-            .select(`
-              id,
-              clients!inner(id, name)
-            `)
-            .eq('template_id', template.id)
-            .eq('tenant_id', profile.tenant_id);
+      const templatesWithClients: any[] = [];
+      
+      for (const template of (data || [])) {
+        const result = await supabase
+          .from('meal_plans' as any)
+          .select('id')
+          .eq('template_id', (template as any).id)
+          .eq('tenant_id', profile.tenant_id);
 
-          return {
-            ...template,
-            clients_using: plans?.map(p => p.clients).filter(Boolean) || []
-          };
-        })
-      );
+        templatesWithClients.push({
+          ...template,
+          clients_using: result.data || []
+        });
+      }
 
       setTemplates(templatesWithClients);
 

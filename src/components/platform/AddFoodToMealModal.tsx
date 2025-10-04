@@ -589,7 +589,7 @@ export function AddFoodToMealModal({
                         <p className="text-xs text-muted-foreground mb-1">Calorias</p>
                         <p className="text-xl font-bold">
                           {selectedFood.energy_kcal != null
-                            ? (((selectedFood.energy_kcal || 0) * parseFloat(totalGrams)) / 100).toFixed(0)
+                            ? ((selectedFood.energy_kcal * parseFloat(totalGrams || '0')) / 100).toFixed(0)
                             : '0'
                           }
                           <span className="text-sm font-normal text-muted-foreground ml-1">kcal</span>
@@ -600,7 +600,7 @@ export function AddFoodToMealModal({
                         <p className="text-xs text-muted-foreground mb-1">Proteínas</p>
                         <p className="text-xl font-bold">
                           {selectedFood.protein_g != null
-                            ? (((selectedFood.protein_g || 0) * parseFloat(totalGrams)) / 100).toFixed(1)
+                            ? ((selectedFood.protein_g * parseFloat(totalGrams || '0')) / 100).toFixed(1)
                             : '0.0'
                           }
                           <span className="text-sm font-normal text-muted-foreground ml-1">g</span>
@@ -611,7 +611,7 @@ export function AddFoodToMealModal({
                         <p className="text-xs text-muted-foreground mb-1">Carboidratos</p>
                         <p className="text-xl font-bold">
                           {selectedFood.carbs_g != null
-                            ? (((selectedFood.carbs_g || 0) * parseFloat(totalGrams)) / 100).toFixed(1)
+                            ? ((selectedFood.carbs_g * parseFloat(totalGrams || '0')) / 100).toFixed(1)
                             : '0.0'
                           }
                           <span className="text-sm font-normal text-muted-foreground ml-1">g</span>
@@ -622,7 +622,7 @@ export function AddFoodToMealModal({
                         <p className="text-xs text-muted-foreground mb-1">Gorduras</p>
                         <p className="text-xl font-bold">
                           {selectedFood.fat_g != null
-                            ? (((selectedFood.fat_g || 0) * parseFloat(totalGrams)) / 100).toFixed(1)
+                            ? ((selectedFood.fat_g * parseFloat(totalGrams || '0')) / 100).toFixed(1)
                             : '0.0'
                           }
                           <span className="text-sm font-normal text-muted-foreground ml-1">g</span>

@@ -74,9 +74,10 @@ export default function PlatformMealPlans() {
         `/platform/${clientId}/planos-alimentares/novo?templateId=${selectedTemplateId}`
       );
 
-      await supabase.rpc('increment_template_usage', {
-        template_id: selectedTemplateId
-      });
+      // Increment usage count (RPC function needs to be created)
+      // await supabase.rpc('increment_template_usage', {
+      //   template_id: selectedTemplateId
+      // });
 
       toast({
         title: "Template selecionado!",

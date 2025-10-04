@@ -41,6 +41,7 @@ export default function PlatformMealPlanViewer() {
   const [replacingFood, setReplacingFood] = useState<{ mealId: string; oldFoodItemId: string } | null>(null);
   const [editingPortion, setEditingPortion] = useState<FoodItemToEdit | null>(null);
   const [showSearchForMeal, setShowSearchForMeal] = useState<string | null>(null);
+  const [addingToMeal, setAddingToMeal] = useState<string | null>(null);
   const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false);
 
   useEffect(() => {
