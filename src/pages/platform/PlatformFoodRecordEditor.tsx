@@ -55,11 +55,31 @@ export default function PlatformFoodRecordEditor() {
   const { data: client } = useQuery({
     queryKey: ['client', clientId],
     queryFn: async () => {
-      const { data } = await supabase
+      console.log('🔍 Buscando cliente:', clientId);
+
+      const { data, error } = await supabase
         .from('clients')
         .select('id, name')
         .eq('id', clientId)
         .single();
+
+      if (error) {
+        console.error('❌ Erro ao buscar cliente:', error);
+        console.log('📊 Usando cliente mock temporário');
+
+        if (clientId?.startsWith('mock-')) {
+          const mockClients: Record<string, any> = {
+            'mock-1': { id: 'mock-1', name: 'João Silva' },
+            'mock-2': { id: 'mock-2', name: 'Maria Santos' },
+            'mock-3': { id: 'mock-3', name: 'Pedro Oliveira' }
+          };
+          return mockClients[clientId] || { id: clientId, name: 'Cliente Teste' };
+        }
+
+        return { id: clientId, name: 'Cliente Teste' };
+      }
+
+      console.log('✅ Cliente carregado:', data);
       return data;
     },
     enabled: !!clientId

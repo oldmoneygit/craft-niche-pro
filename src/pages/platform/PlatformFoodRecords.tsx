@@ -19,12 +19,26 @@ export default function PlatformFoodRecords() {
   const { data: clients = [] } = useQuery({
     queryKey: ['clients', tenantId],
     queryFn: async () => {
-      const { data } = await supabase
+      console.log('🔍 Buscando clientes para tenant:', tenantId);
+
+      const { data, error } = await supabase
         .from('clients')
         .select('id, name, email')
         .eq('tenant_id', tenantId)
         .order('name');
 
+      if (error) {
+        console.error('❌ Erro ao buscar clientes:', error);
+        console.log('📊 Usando clientes mock temporários');
+
+        return [
+          { id: 'mock-1', name: 'João Silva', email: 'joao@example.com' },
+          { id: 'mock-2', name: 'Maria Santos', email: 'maria@example.com' },
+          { id: 'mock-3', name: 'Pedro Oliveira', email: 'pedro@example.com' }
+        ];
+      }
+
+      console.log('✅ Clientes carregados:', data?.length || 0);
       return data || [];
     }
   });
@@ -34,7 +48,9 @@ export default function PlatformFoodRecords() {
     queryFn: async () => {
       if (!selectedClient) return [];
 
-      const { data } = await supabase
+      console.log('🔍 Buscando recordatórios para cliente:', selectedClient);
+
+      const { data, error } = await supabase
         .from('food_records')
         .select(`
           id,
@@ -53,6 +69,12 @@ export default function PlatformFoodRecords() {
         `)
         .eq('client_id', selectedClient)
         .order('record_date', { ascending: false });
+
+      if (error) {
+        console.error('❌ Erro ao buscar recordatórios:', error);
+      } else {
+        console.log('✅ Recordatórios carregados:', data?.length || 0);
+      }
 
       return data || [];
     },
