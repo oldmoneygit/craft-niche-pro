@@ -491,6 +491,18 @@ export function AddFoodToMealModal({
                     </SelectContent>
                   </Select>
 
+                  {/* BOTÃO DE TESTE - SEMPRE VISÍVEL */}
+                  <div className="mt-2 p-2 bg-yellow-100 border border-yellow-400 rounded">
+                    <p className="text-xs text-yellow-800 mb-1">🧪 TESTE DE VISIBILIDADE</p>
+                    <button
+                      type="button"
+                      onClick={() => alert('✅ BOTÃO FUNCIONA! showCustomMeasure=' + showCustomMeasure)}
+                      className="text-blue-600 underline cursor-pointer text-sm"
+                    >
+                      ➕ CLIQUE AQUI PARA TESTAR
+                    </button>
+                  </div>
+
                   {!showCustomMeasure && (
                     <Button
                       type="button"
