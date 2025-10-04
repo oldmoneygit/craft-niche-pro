@@ -164,14 +164,14 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
     if (code === 'USDA') {
       return { text: code, className: 'bg-blue-600 text-white' };
     }
-    return { text: code, className: 'bg-secondary text-secondary-foreground' };
+    return { text: code, className: 'bg-gray-600 text-white' };
   };
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
       {!selectedFood ? (
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             ref={inputRef}
             type="text"
@@ -179,23 +179,23 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
             onChange={(e) => setSearchTerm(e.target.value)}
             onFocus={() => setShowSuggestions(true)}
             placeholder={placeholder}
-            className="pl-10"
+            className="pl-10 bg-gray-700 border-gray-600 text-gray-100 placeholder:text-gray-400 focus:border-primary focus:ring-primary"
           />
 
           {showSuggestions && foods.length > 0 && (
-            <div className="absolute z-50 mt-1 w-full bg-popover border rounded-md shadow-lg max-h-60 overflow-auto">
+            <div className="absolute z-50 mt-1 w-full bg-gray-800 border border-gray-700 rounded-md shadow-xl max-h-60 overflow-auto">
               {foods.map((food) => {
                 const badge = getBadgeConfig(food.nutrition_sources);
                 return (
                   <button
                     key={food.id}
                     onClick={() => handleSelectFood(food)}
-                    className="w-full px-3 py-2 text-left hover:bg-accent transition-colors flex items-center justify-between gap-2"
+                    className="w-full px-3 py-2 text-left bg-gray-800 hover:bg-gray-700 transition-colors flex items-center justify-between gap-2"
                   >
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">{food.name}</div>
+                      <div className="font-medium truncate text-gray-100">{food.name}</div>
                       {food.brand && (
-                        <div className="text-xs text-muted-foreground truncate">{food.brand}</div>
+                        <div className="text-xs text-gray-400 truncate">{food.brand}</div>
                       )}
                     </div>
                     <Badge className={cn("text-xs flex-shrink-0", badge.className)}>
@@ -208,12 +208,12 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
           )}
         </div>
       ) : (
-        <div className="flex flex-col gap-2 p-3 border rounded-lg bg-muted/50">
+        <div className="flex flex-col gap-2 p-3 border border-gray-700 rounded-lg bg-gray-800">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <div className="font-medium">{selectedFood.name}</div>
+              <div className="font-medium text-gray-100">{selectedFood.name}</div>
               {selectedFood.brand && (
-                <div className="text-xs text-muted-foreground">{selectedFood.brand}</div>
+                <div className="text-xs text-gray-400">{selectedFood.brand}</div>
               )}
             </div>
             <Badge className={cn("text-xs flex-shrink-0", getBadgeConfig(selectedFood.nutrition_sources).className)}>
@@ -223,7 +223,7 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
 
           <div className="grid grid-cols-[1fr_100px_auto] gap-2 items-end">
             <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">Medida</label>
+              <label className="text-xs text-gray-400">Medida</label>
               <Select value={selectedMeasure} onValueChange={setSelectedMeasure}>
                 <SelectTrigger>
                   <SelectValue />
@@ -239,7 +239,7 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">Qtd</label>
+              <label className="text-xs text-gray-400">Qtd</label>
               <Input
                 type="number"
                 min="0.1"
@@ -250,15 +250,15 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
                   if (e.key === 'Enter') handleSave();
                   if (e.key === 'Escape') handleCancel();
                 }}
+                className="bg-gray-700 border-gray-600 text-gray-100"
               />
             </div>
 
             <div className="flex gap-1">
               <Button
                 size="icon"
-                variant="default"
                 onClick={handleSave}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-green-600 hover:bg-green-700 text-white"
               >
                 <Check className="h-4 w-4" />
               </Button>
@@ -266,6 +266,7 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
                 size="icon"
                 variant="outline"
                 onClick={handleCancel}
+                className="border-gray-600 text-gray-100 hover:bg-gray-700"
               >
                 <X className="h-4 w-4" />
               </Button>

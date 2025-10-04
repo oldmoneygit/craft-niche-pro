@@ -417,56 +417,62 @@ export default function PlatformFoodRecordEditor() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-5xl">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(`/platform/${tenantId}/recordatorio`)}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">
-              Recordatório - {client?.name}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {format(new Date(recordDate), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-            </p>
+    <div className="min-h-screen bg-gray-900">
+      <div className="container mx-auto p-6 max-w-5xl">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(`/platform/${tenantId}/recordatorio`)}
+              className="text-gray-100 hover:bg-gray-800"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-100">
+                Recordatório - {client?.name}
+              </h1>
+              <p className="text-sm text-gray-400">
+                {format(new Date(recordDate), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+              </p>
+            </div>
           </div>
+          <Button
+            onClick={() => saveMutation.mutate()}
+            disabled={saveMutation.isPending}
+            className="bg-primary hover:bg-primary/90 text-white"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            Salvar
+          </Button>
         </div>
-        <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
-          <Save className="h-4 w-4 mr-2" />
-          Salvar
-        </Button>
-      </div>
 
-      <div className="space-y-4">
-        {meals.map((meal, mealIndex) => (
-          <Card key={mealIndex}>
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <CardTitle className="text-lg">{meal.meal_time} - {meal.meal_name}</CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {Math.round(meal.items.reduce((sum, item) => sum + item.kcal_total, 0))} kcal
-                    </p>
+        <div className="space-y-4">
+          {meals.map((meal, mealIndex) => (
+            <Card key={mealIndex} className="bg-gray-800 border-gray-700">
+              <CardHeader className="pb-3 bg-gray-700/50">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <Clock className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <CardTitle className="text-lg text-gray-100">{meal.meal_time} - {meal.meal_name}</CardTitle>
+                      <p className="text-sm text-gray-400 mt-1">
+                        {Math.round(meal.items.reduce((sum, item) => sum + item.kcal_total, 0))} kcal
+                      </p>
+                    </div>
                   </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleRemoveMeal(mealIndex)}
+                    className="text-red-400 hover:text-red-300 hover:bg-gray-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleRemoveMeal(mealIndex)}
-                  className="text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
+              </CardHeader>
+              <CardContent className="space-y-3 bg-gray-800">
               <QuickFoodInput
                 onAdd={(foodData) => handleAddFoodToMeal(mealIndex, foodData)}
                 placeholder="🔍 Digite o alimento..."
@@ -485,7 +491,7 @@ export default function PlatformFoodRecordEditor() {
 
               {meal.items.length > 0 && (
                 <div className="pt-2">
-                  <Label className="text-xs text-muted-foreground">Observações</Label>
+                  <Label className="text-xs text-gray-400">Observações</Label>
                   <Textarea
                     value={meal.notes}
                     onChange={(e) => {
@@ -494,7 +500,7 @@ export default function PlatformFoodRecordEditor() {
                       setMeals(updatedMeals);
                     }}
                     placeholder="Ex: Come correndo antes do trabalho..."
-                    className="mt-1 min-h-[60px]"
+                    className="mt-1 min-h-[60px] bg-gray-700 border-gray-600 text-gray-100 placeholder:text-gray-400"
                   />
                 </div>
               )}
@@ -502,57 +508,56 @@ export default function PlatformFoodRecordEditor() {
           </Card>
         ))}
 
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={() => setShowAddMealDialog(true)}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Adicionar Refeição
-        </Button>
+          <Button
+            variant="outline"
+            className="w-full border-gray-600 text-gray-100 hover:bg-gray-800 hover:text-gray-100"
+            onClick={() => setShowAddMealDialog(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Adicionar Refeição
+          </Button>
 
-        <Card className="bg-primary/5">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Resumo do Dia</h3>
-            </div>
-            <div className="grid grid-cols-4 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold">{Math.round(totals.kcal)}</div>
-                <div className="text-xs text-muted-foreground">kcal</div>
+          <Card className="bg-gray-800 border-gray-700">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-100">Resumo do Dia</h3>
               </div>
-              <div>
-                <div className="text-2xl font-bold">{Math.round(totals.protein)}g</div>
-                <div className="text-xs text-muted-foreground">Proteínas</div>
+              <div className="grid grid-cols-4 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-gray-100">{Math.round(totals.kcal)}</div>
+                  <div className="text-xs text-gray-400">kcal</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-100">{Math.round(totals.protein)}g</div>
+                  <div className="text-xs text-gray-400">Proteínas</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-100">{Math.round(totals.carb)}g</div>
+                  <div className="text-xs text-gray-400">Carboidratos</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-100">{Math.round(totals.fat)}g</div>
+                  <div className="text-xs text-gray-400">Gorduras</div>
+                </div>
               </div>
-              <div>
-                <div className="text-2xl font-bold">{Math.round(totals.carb)}g</div>
-                <div className="text-xs text-muted-foreground">Carboidratos</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{Math.round(totals.fat)}g</div>
-                <div className="text-xs text-muted-foreground">Gorduras</div>
-              </div>
-            </div>
 
-            {meals.length > 0 && (
-              <div className="mt-4 pt-4 border-t">
-                <Button
-                  className="w-full"
-                  variant="default"
-                  onClick={() => convertToMealPlanMutation.mutate()}
-                  disabled={convertToMealPlanMutation.isPending}
-                >
-                  <Utensils className="h-4 w-4 mr-2" />
-                  Criar Plano Alimentar a partir deste Recordatório
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+              {meals.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-gray-700">
+                  <Button
+                    className="w-full bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => convertToMealPlanMutation.mutate()}
+                    disabled={convertToMealPlanMutation.isPending}
+                  >
+                    <Utensils className="h-4 w-4 mr-2" />
+                    Criar Plano Alimentar a partir deste Recordatório
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-      <Dialog open={showAddMealDialog} onOpenChange={setShowAddMealDialog}>
+        <Dialog open={showAddMealDialog} onOpenChange={setShowAddMealDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Adicionar Refeição</DialogTitle>
@@ -582,7 +587,8 @@ export default function PlatformFoodRecordEditor() {
             <Button onClick={handleAddMeal}>Adicionar</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+        </Dialog>
+      </div>
     </div>
   );
 }

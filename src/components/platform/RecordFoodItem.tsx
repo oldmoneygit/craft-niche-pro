@@ -45,16 +45,16 @@ export function RecordFoodItem({ item, onUpdate, onRemove, dragHandleProps }: Re
   };
 
   return (
-    <div className="group flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors">
+    <div className="group flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-gray-700/50 transition-colors">
       <div
         {...dragHandleProps}
         className="cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
       >
-        <GripVertical className="h-4 w-4 text-muted-foreground" />
+        <GripVertical className="h-4 w-4 text-gray-400" />
       </div>
 
       <div className="flex-1 grid grid-cols-[2fr_1fr_1fr_100px] gap-3 items-center">
-        <div className="font-medium truncate">{item.food_name}</div>
+        <div className="font-medium truncate text-gray-100">{item.food_name}</div>
 
         <div className="flex items-center gap-1">
           {isEditingQuantity ? (
@@ -73,12 +73,12 @@ export function RecordFoodItem({ item, onUpdate, onRemove, dragHandleProps }: Re
                 }
               }}
               autoFocus
-              className="h-8 w-16"
+              className="h-8 w-16 bg-gray-700 border-gray-600 text-gray-100"
             />
           ) : (
             <button
               onClick={() => setIsEditingQuantity(true)}
-              className="h-8 px-2 hover:bg-accent rounded text-sm"
+              className="h-8 px-2 hover:bg-gray-700 rounded text-sm text-gray-100"
             >
               {item.quantity}
             </button>
@@ -98,21 +98,21 @@ export function RecordFoodItem({ item, onUpdate, onRemove, dragHandleProps }: Re
           </Select>
         </div>
 
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-gray-400">
           {Math.round(item.grams_total)}g
         </div>
 
         <div className="flex items-center justify-between gap-2">
-          <Badge variant="outline" className="font-mono">
+          <Badge variant="outline" className="font-mono border-gray-600 text-gray-100">
             {Math.round(item.kcal_total)} kcal
           </Badge>
           <Button
             size="icon"
             variant="ghost"
             onClick={onRemove}
-            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300 hover:bg-gray-700"
           >
-            <Trash2 className="h-4 w-4 text-destructive" />
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </div>
