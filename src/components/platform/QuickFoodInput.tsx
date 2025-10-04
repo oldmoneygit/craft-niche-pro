@@ -66,8 +66,8 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
       const term = searchTerm.trim().toLowerCase();
       console.log('🔍 2. Termo processado:', term);
 
-      // Query simplificada SEM inner join (que força relacionamento)
-      const { data, error } = await supabase
+      // ETAPA 1: Busca exata prioritária (começa com o termo)
+      const { data: exactMatches, error: exactError } = await supabase
         .from('foods')
         .select(`
           id,
@@ -78,25 +78,48 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
           carbohydrate_g,
           lipid_g,
           source_id,
-          nutrition_sources(id, code, name)
+          nutrition_sources!inner(id, code, name)
         `)
-        .ilike('name', `%${term}%`)
+        .ilike('name', `${term}%`)
         .eq('active', true)
+        .order('source_id', { ascending: true })
         .order('name')
         .limit(20);
 
-      console.log('✅ 3. Resultado da busca:', {
-        count: data?.length || 0,
-        error: error?.message,
-        sample: data?.[0]?.name
-      });
-
-      if (error) {
-        console.error('❌ Erro na query:', error);
-        return [];
+      if (exactError) {
+        console.error('Erro na busca exata:', exactError);
       }
 
-      return data || [];
+      // ETAPA 2: Se < 20 resultados, busca parcial
+      if ((exactMatches?.length || 0) < 20) {
+        const { data: partialMatches, error: partialError } = await supabase
+          .from('foods')
+          .select(`
+            id,
+            name,
+            brand,
+            energy_kcal,
+            protein_g,
+            carbohydrate_g,
+            lipid_g,
+            source_id,
+            nutrition_sources!inner(id, code, name)
+          `)
+          .ilike('name', `%${term}%`)
+          .not('name', 'ilike', `${term}%`)
+          .eq('active', true)
+          .order('source_id', { ascending: true })
+          .order('name')
+          .limit(20 - (exactMatches?.length || 0));
+
+        if (partialError) {
+          console.error('Erro na busca parcial:', partialError);
+        }
+
+        return [...(exactMatches || []), ...(partialMatches || [])];
+      }
+
+      return exactMatches || [];
     },
     enabled: searchTerm.length >= 2 && !selectedFood
   });
