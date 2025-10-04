@@ -59,33 +59,9 @@ export default function PlatformFoodRecords() {
     enabled: !!selectedClient
   });
 
-  const createRecordMutation = useMutation({
-    mutationFn: async (clientId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not found');
-
-      const { data, error } = await supabase
-        .from('food_records')
-        .insert({
-          client_id: clientId,
-          created_by: user.id,
-          record_date: new Date().toISOString().split('T')[0]
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['food-records'] });
-      navigate(`/platform/${tenantId}/recordatorio/${data.id}`);
-    },
-    onError: (error) => {
-      console.error('Error creating record:', error);
-      toast.error('Erro ao criar recordatório');
-    }
-  });
+  const handleCreateRecord = (clientId: string) => {
+    navigate(`/platform/${tenantId}/recordatorio/novo?client=${clientId}`);
+  };
 
   const calculateTotals = (record: any) => {
     let totals = { kcal: 0, protein: 0, carb: 0, fat: 0 };
@@ -166,8 +142,7 @@ export default function PlatformFoodRecords() {
                   Recordatórios de {clients.find(c => c.id === selectedClient)?.name}
                 </h2>
                 <Button
-                  onClick={() => createRecordMutation.mutate(selectedClient)}
-                  disabled={createRecordMutation.isPending}
+                  onClick={() => handleCreateRecord(selectedClient)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Novo Recordatório
@@ -183,8 +158,7 @@ export default function PlatformFoodRecords() {
                       description="Crie o primeiro recordatório para este paciente"
                       action={
                         <Button
-                          onClick={() => createRecordMutation.mutate(selectedClient)}
-                          disabled={createRecordMutation.isPending}
+                          onClick={() => handleCreateRecord(selectedClient)}
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           Criar Recordatório

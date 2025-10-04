@@ -34,6 +34,7 @@ import PlatformFinancial from "./pages/platform/PlatformFinancial";
 import PlatformReports from "./pages/platform/PlatformReports";
 import PlatformServices from "./pages/platform/PlatformServices";
 import PlatformFoodRecords from "./pages/platform/PlatformFoodRecords";
+import PlatformFoodRecordEditor from "./pages/platform/PlatformFoodRecordEditor";
 import { PlatformQuestionnairePreview } from "./pages/platform/PlatformQuestionnairePreview";
 import QuestionnairePublic from "./pages/QuestionnairePublic";
 import PublicQuestionnaireResponse from "./pages/public/PublicQuestionnaireResponse";
@@ -89,6 +90,8 @@ const App = () => (
               <Route path="/platform/:clientId/relatorios" element={<PlatformProtectedRoute><PlatformReports /></PlatformProtectedRoute>} />
               <Route path="/platform/:clientId/servicos" element={<PlatformProtectedRoute><PlatformServices /></PlatformProtectedRoute>} />
               <Route path="/platform/:tenantId/recordatorio" element={<PlatformProtectedRoute><PlatformFoodRecords /></PlatformProtectedRoute>} />
+              <Route path="/platform/:tenantId/recordatorio/novo" element={<PlatformProtectedRoute><PlatformFoodRecordEditor /></PlatformProtectedRoute>} />
+              <Route path="/platform/:tenantId/recordatorio/:recordId" element={<PlatformProtectedRoute><PlatformFoodRecordEditor /></PlatformProtectedRoute>} />
 
               {/* Public Questionnaires */}
               <Route path="/questionnaire/:questionnaireId" element={<QuestionnairePublic />} />
