@@ -18,7 +18,6 @@
 8. [food_measures](#food_measures) - Medidas dos alimentos
 9. [clients](#clients) - Pacientes/clientes
 10. [appointments](#appointments) - Agendamentos
-11. [tenants](#tenants) - Multi-tenant
 
 ---
 
@@ -108,11 +107,17 @@
 | `end_date` | date | ✅ | Data fim |
 | `plan_data` | jsonb | ✅ | Dados do plano |
 | `status` | text | ✅ | **ENUM:** ativo, concluido, pausado |
-| `target_kcal` | numeric | ❌ | Meta de calorias |
-| `target_protein` | numeric | ❌ | Meta proteínas |
-| `target_carbs` | numeric | ❌ | Meta carboidratos |
-| `target_fats` | numeric | ❌ | Meta gorduras |
-| `created_by` | uuid | ❌ | Quem criou |
+| `calorie_target` | numeric | ❌ | Meta de calorias (kcal) |
+| `protein_target_g` | numeric | ❌ | Meta proteínas (g) |
+| `carb_target_g` | numeric | ❌ | Meta carboidratos (g) |
+| `fat_target_g` | numeric | ❌ | Meta gorduras (g) |
+| `goal` | text | ❌ | Objetivo do plano |
+| `notes` | text | ❌ | Observações gerais |
+| `public_token` | text | ❌ | Token para visualização pública |
+| `version` | integer | ❌ | Versão do plano (default: 1) |
+| `is_active` | boolean | ❌ | Plano ativo? (default: true) |
+| `replaced_by` | uuid | ❌ | FK → meal_plans.id (auto-referência) |
+| `active` | boolean | ❌ | Status ativo (legacy) |
 | `created_at` | timestamptz | ✅ | Auto |
 | `updated_at` | timestamptz | ✅ | Auto |
 
@@ -125,7 +130,7 @@ status IN ('ativo', 'concluido', 'pausado')
 **Relacionamentos:**
 - `tenant_id` → `tenants.id`
 - `client_id` → `clients.id`
-- `created_by` → `auth.users.id`
+- `replaced_by` → `meal_plans.id` (plano que substituiu este)
 
 ---
 
