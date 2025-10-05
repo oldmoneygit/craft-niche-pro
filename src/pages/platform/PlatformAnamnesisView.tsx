@@ -16,6 +16,69 @@ export default function PlatformAnamnesisView() {
   const [clientName, setClientName] = useState('');
   const [loading, setLoading] = useState(true);
 
+  // Funções de tradução
+  const translateMaritalStatus = (status: string) => {
+    const translations: Record<string, string> = {
+      'single': 'Solteiro(a)',
+      'married': 'Casado(a)',
+      'divorced': 'Divorciado(a)',
+      'widowed': 'Viúvo(a)',
+      'other': 'Outro'
+    };
+    return translations[status] || status;
+  };
+
+  const translateAlcohol = (level: string) => {
+    const translations: Record<string, string> = {
+      'none': 'Não consome',
+      'occasional': 'Ocasional (eventos)',
+      'moderate': 'Moderado (1-2x/semana)',
+      'frequent': 'Frequente (3+x/semana)'
+    };
+    return translations[level] || level;
+  };
+
+  const translateSmoking = (status: string) => {
+    const translations: Record<string, string> = {
+      'never': 'Nunca fumou',
+      'former': 'Ex-fumante',
+      'current': 'Fumante'
+    };
+    return translations[status] || status;
+  };
+
+  const translateActivity = (level: string) => {
+    const translations: Record<string, string> = {
+      'sedentary': 'Sedentário (sem exercício)',
+      'light': 'Leve (1-2x/semana)',
+      'moderate': 'Moderado (3-4x/semana)',
+      'intense': 'Intenso (5-6x/semana)',
+      'very_intense': 'Muito Intenso (diário, atleta)'
+    };
+    return translations[level] || level;
+  };
+
+  const translateStress = (level: string) => {
+    const translations: Record<string, string> = {
+      'low': 'Baixo',
+      'moderate': 'Moderado',
+      'high': 'Alto',
+      'very_high': 'Muito Alto'
+    };
+    return translations[level] || level;
+  };
+
+  const translateEatingOut = (frequency: string) => {
+    const translations: Record<string, string> = {
+      'never': 'Nunca',
+      'rarely': 'Raramente (1x/mês)',
+      'sometimes': 'Às vezes (1x/semana)',
+      'often': 'Frequentemente (3+x/semana)',
+      'daily': 'Diariamente'
+    };
+    return translations[frequency] || frequency;
+  };
+
   useEffect(() => {
     if (anamnesisId && tenantId) {
       loadAnamnesis();
@@ -130,7 +193,7 @@ export default function PlatformAnamnesisView() {
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4 text-sm">
               <DataField label="Profissão" value={anamnesis.occupation} />
-              <DataField label="Estado Civil" value={anamnesis.marital_status} />
+              <DataField label="Estado Civil" value={translateMaritalStatus(anamnesis.marital_status)} />
               <DataField label="Pessoas na Residência" value={anamnesis.household_size} />
               
               <div className="col-span-2 border-t border-border pt-4 mt-4">
@@ -182,12 +245,12 @@ export default function PlatformAnamnesisView() {
             <CardContent className="grid grid-cols-2 gap-4 text-sm">
               <DataField label="Refeições/Dia" value={anamnesis.meals_per_day} />
               <DataField label="Água (L/dia)" value={anamnesis.water_intake_liters} />
-              <DataField label="Álcool" value={anamnesis.alcohol_consumption} />
-              <DataField label="Tabagismo" value={anamnesis.smoking} />
-              <DataField label="Atividade Física" value={anamnesis.physical_activity} />
+              <DataField label="Álcool" value={translateAlcohol(anamnesis.alcohol_consumption)} />
+              <DataField label="Tabagismo" value={translateSmoking(anamnesis.smoking)} />
+              <DataField label="Atividade Física" value={translateActivity(anamnesis.physical_activity)} />
               <DataField label="Horas de Sono" value={anamnesis.sleep_hours} />
-              <DataField label="Estresse" value={anamnesis.stress_level} />
-              <DataField label="Come Fora" value={anamnesis.eating_out_frequency} />
+              <DataField label="Estresse" value={translateStress(anamnesis.stress_level)} />
+              <DataField label="Come Fora" value={translateEatingOut(anamnesis.eating_out_frequency)} />
               <div className="col-span-2">
                 <DataField label="Preferências Alimentares" value={anamnesis.food_preferences} />
               </div>
