@@ -61,9 +61,9 @@ export function RecordFoodItem({ item, onUpdate, onRemove, dragHandleProps }: Re
 
   return (
     <div className="group relative flex items-start gap-4 p-4 
-                    bg-gray-700/50 rounded-lg border border-gray-600
-                    hover:bg-gray-700 hover:border-gray-500 
-                    transition-all duration-200">
+                    bg-gradient-to-r from-gray-800/50 to-gray-700/30
+                    rounded-lg border border-gray-600/50
+                    hover:border-primary/50 transition-all duration-200">
       
       {/* Drag Handle */}
       <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing opacity-40 
@@ -76,7 +76,7 @@ export function RecordFoodItem({ item, onUpdate, onRemove, dragHandleProps }: Re
         
         {/* Linha 1: Nome + Badge + Botão Remover */}
         <div className="flex items-start justify-between gap-3 mb-3">
-          <h4 className="font-semibold text-white text-base leading-tight">
+          <h4 className="font-semibold text-white text-lg leading-tight">
             {item.food_name}
           </h4>
           
@@ -96,7 +96,7 @@ export function RecordFoodItem({ item, onUpdate, onRemove, dragHandleProps }: Re
 
         {/* Linha 2: Quantidade × Medida + Calorias */}
         <div className="flex items-center justify-between gap-4 mb-2">
-          <div className="flex items-center gap-2 text-sm text-gray-300">
+          <div className="flex items-center gap-2">
             {isEditingQuantity ? (
               <Input
                 type="number"
@@ -118,14 +118,14 @@ export function RecordFoodItem({ item, onUpdate, onRemove, dragHandleProps }: Re
             ) : (
               <button
                 onClick={() => setIsEditingQuantity(true)}
-                className="font-semibold text-primary text-base hover:text-primary/80 transition-colors"
+                className="font-bold text-primary text-base hover:text-primary/80 transition-colors"
               >
                 {item.quantity} ×
               </button>
             )}
             
             <Select value={item.measure_id} onValueChange={handleMeasureChange}>
-              <SelectTrigger className="h-7 w-[180px] bg-gray-800 border-gray-600 text-gray-100">
+              <SelectTrigger className="h-7 w-[180px] bg-gray-800 border-gray-600 text-gray-300">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -137,31 +137,28 @@ export function RecordFoodItem({ item, onUpdate, onRemove, dragHandleProps }: Re
               </SelectContent>
             </Select>
 
-            <span className="text-gray-400 text-xs">
+            <span className="text-gray-500 text-sm">
               ({Math.round(item.grams_total)}g)
             </span>
           </div>
           
           <div className="text-right flex-shrink-0">
-            <div className="text-xl font-bold text-white leading-none">
-              {Math.round(item.kcal_total)}
-            </div>
-            <div className="text-xs text-gray-400 leading-none mt-0.5">
-              kcal
+            <div className="text-xl font-bold text-orange-400 leading-none">
+              {Math.round(item.kcal_total)} kcal
             </div>
           </div>
         </div>
 
         {/* Linha 3: Macronutrientes */}
-        <div className="flex gap-4 text-xs text-gray-400">
-          <span className="font-medium">
-            P: <span className="text-gray-300">{item.protein_total.toFixed(1)}g</span>
+        <div className="flex gap-4 text-sm">
+          <span className="text-blue-400 font-medium">
+            P: {item.protein_total.toFixed(1)}g
           </span>
-          <span className="font-medium">
-            C: <span className="text-gray-300">{item.carb_total.toFixed(1)}g</span>
+          <span className="text-purple-400 font-medium">
+            C: {item.carb_total.toFixed(1)}g
           </span>
-          <span className="font-medium">
-            G: <span className="text-gray-300">{item.fat_total.toFixed(1)}g</span>
+          <span className="text-yellow-400 font-medium">
+            G: {item.fat_total.toFixed(1)}g
           </span>
         </div>
       </div>
