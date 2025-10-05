@@ -176,8 +176,8 @@ export function Sidebar() {
           <ZapIcon />
         </div>
         <div className="logo-text">
-          <div className="logo-title">NutriPro</div>
-          <div className="logo-subtitle">Plataforma PAI</div>
+          <div className="logo-title">KorLab Nutri</div>
+          <div className="logo-subtitle">NUTRIÇÃO</div>
         </div>
       </div>
 
