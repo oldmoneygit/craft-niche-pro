@@ -17,7 +17,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (stored === 'dark' || stored === 'light') return stored;
       if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
     }
-    return 'dark';
+    return 'light'; // Começar em light mode por padrão
   });
 
   useEffect(() => {
@@ -25,6 +25,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.classList.remove('dark', 'light');
     document.documentElement.classList.add(theme);
     localStorage.setItem('korlab-theme', theme);
+    
+    // Log para debug
+    console.log('Theme changed to:', theme);
   }, [theme]);
 
   const toggleTheme = () => setThemeState(prev => prev === 'dark' ? 'light' : 'dark');
