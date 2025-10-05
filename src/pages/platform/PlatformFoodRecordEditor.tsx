@@ -646,20 +646,21 @@ export default function PlatformFoodRecordEditor() {
       const { data: newPlan, error: planError } = await supabase
         .from('meal_plans')
         .insert({
-          client_id: (fullRecord as any).client_id,
           tenant_id: tenantId,
+          client_id: (fullRecord as any).client_id,
           name: `Plano - ${format(
             new Date((fullRecord as any).record_date), 
             "dd 'de' MMMM 'de' yyyy",
             { locale: ptBR }
           )}`,
-          start_date: new Date().toISOString().split('T')[0],
-          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          start_date: (fullRecord as any).record_date,
+          end_date: new Date(new Date((fullRecord as any).record_date).setDate(new Date((fullRecord as any).record_date).getDate() + 30)).toISOString().split('T')[0],
+          plan_data: {},
+          status: 'ativo',
           calorie_target: Math.round(totals.kcal),
           protein_target_g: Math.round(totals.protein),
           carb_target_g: Math.round(totals.carbs),
-          fat_target_g: Math.round(totals.fats),
-          status: 'ativo'  // ✅ ENUM correto: 'ativo', 'concluido', 'pausado'
+          fat_target_g: Math.round(totals.fats)
         })
         .select()
         .single();
