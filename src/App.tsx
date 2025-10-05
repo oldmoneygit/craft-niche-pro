@@ -4,7 +4,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Clientes } from './pages/Clientes';
 import { Leads } from './pages/Leads';
 import { Agendamentos } from './pages/Agendamentos';
-import { PlanosAlimentares } from './pages/PlanosAlimentares';
+import PlanosAlimentares from './pages/PlanosAlimentares';
 import Questionarios from './pages/Questionarios';
 import Recordatorio from './pages/Recordatorio';
 import { FeedbacksSemanais } from './pages/FeedbacksSemanais';
