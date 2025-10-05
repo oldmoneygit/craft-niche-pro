@@ -61,9 +61,10 @@ export function RecordFoodItem({ item, onUpdate, onRemove, dragHandleProps }: Re
 
   return (
     <div className="group relative flex items-start gap-4 p-4 
-                    bg-gradient-to-r from-gray-800/50 to-gray-700/30
+                    bg-gradient-to-r from-gray-800/60 to-gray-700/40
                     rounded-lg border border-gray-600/50
-                    hover:border-primary/50 transition-all duration-200">
+                    hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5
+                    transition-all duration-200">
       
       {/* Drag Handle */}
       <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing opacity-40 
@@ -95,8 +96,8 @@ export function RecordFoodItem({ item, onUpdate, onRemove, dragHandleProps }: Re
         </div>
 
         {/* Linha 2: Quantidade × Medida + Calorias */}
-        <div className="flex items-center justify-between gap-4 mb-2">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-4 mb-3">
+          <div className="flex items-baseline gap-1.5">
             {isEditingQuantity ? (
               <Input
                 type="number"
@@ -118,14 +119,16 @@ export function RecordFoodItem({ item, onUpdate, onRemove, dragHandleProps }: Re
             ) : (
               <button
                 onClick={() => setIsEditingQuantity(true)}
-                className="font-bold text-primary text-base hover:text-primary/80 transition-colors"
+                className="font-bold text-primary text-lg hover:text-primary/80 transition-colors"
               >
-                {item.quantity} ×
+                {item.quantity}
               </button>
             )}
             
+            <span className="text-primary/60 font-medium text-base">×</span>
+            
             <Select value={item.measure_id} onValueChange={handleMeasureChange}>
-              <SelectTrigger className="h-7 w-[180px] bg-gray-800 border-gray-600 text-gray-300">
+              <SelectTrigger className="h-7 w-[180px] bg-gray-800 border-gray-600 text-gray-300 font-medium">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -137,29 +140,43 @@ export function RecordFoodItem({ item, onUpdate, onRemove, dragHandleProps }: Re
               </SelectContent>
             </Select>
 
-            <span className="text-gray-500 text-sm">
+            <span className="text-gray-500 text-sm ml-1">
               ({Math.round(item.grams_total)}g)
             </span>
           </div>
           
           <div className="text-right flex-shrink-0">
-            <div className="text-xl font-bold text-orange-400 leading-none">
-              {Math.round(item.kcal_total)} kcal
+            <div className="text-2xl font-bold text-orange-400 leading-none">
+              {Math.round(item.kcal_total)}
+            </div>
+            <div className="text-xs text-orange-400/60 font-medium leading-none mt-0.5">
+              kcal
             </div>
           </div>
         </div>
 
         {/* Linha 3: Macronutrientes */}
-        <div className="flex gap-4 text-sm">
-          <span className="text-blue-400 font-medium">
-            P: {item.protein_total.toFixed(1)}g
-          </span>
-          <span className="text-purple-400 font-medium">
-            C: {item.carb_total.toFixed(1)}g
-          </span>
-          <span className="text-yellow-400 font-medium">
-            G: {item.fat_total.toFixed(1)}g
-          </span>
+        <div className="flex gap-5 text-sm font-medium">
+          <div className="flex items-baseline gap-1">
+            <span className="text-blue-400/80 font-semibold">P:</span>
+            <span className="text-blue-300 font-bold">
+              {item.protein_total.toFixed(1)}g
+            </span>
+          </div>
+          
+          <div className="flex items-baseline gap-1">
+            <span className="text-purple-400/80 font-semibold">C:</span>
+            <span className="text-purple-300 font-bold">
+              {item.carb_total.toFixed(1)}g
+            </span>
+          </div>
+          
+          <div className="flex items-baseline gap-1">
+            <span className="text-yellow-400/80 font-semibold">G:</span>
+            <span className="text-yellow-300 font-bold">
+              {item.fat_total.toFixed(1)}g
+            </span>
+          </div>
         </div>
       </div>
     </div>

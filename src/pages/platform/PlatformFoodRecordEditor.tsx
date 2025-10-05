@@ -311,23 +311,29 @@ export default function PlatformFoodRecordEditor() {
   };
 
   const handleConvertToPlan = async () => {
-    // Validar apenas recordId antes de buscar
-    if (!recordId) {
-      toast.error('Salve o recordatório antes de criar um plano');
-      return;
-    }
-
-    if (!tenantId) {
-      toast.error('Tenant não identificado');
-      return;
-    }
-
     try {
       setIsConverting(true);
       
-      console.log('🔄 Convertendo recordatório para plano...');
+      console.log('🔄 Iniciando conversão do recordatório...');
 
-      // 1. BUSCAR RECORDATÓRIO COMPLETO DO BANCO
+      // VALIDAÇÃO 1: Apenas verificar se recordId existe
+      if (!recordId) {
+        toast.error('Salve o recordatório antes de criar um plano', {
+          description: 'Clique em "Salvar" primeiro'
+        });
+        setIsConverting(false);
+        return;
+      }
+
+      if (!tenantId) {
+        toast.error('Tenant não identificado');
+        setIsConverting(false);
+        return;
+      }
+
+      console.log('📋 Buscando recordatório completo:', recordId);
+
+      // BUSCAR DADOS DO BANCO (client_id está aqui)
       const { data: fullRecord, error: fetchError } = await supabase
         .from('food_records' as any)
         .select(`
@@ -336,7 +342,7 @@ export default function PlatformFoodRecordEditor() {
             *,
             record_items!inner(
               *,
-              foods!inner(name),
+              foods!inner(name, energy_kcal, protein_g, carbohydrate_g, lipid_g),
               food_measures!inner(measure_name, grams)
             )
           )
@@ -344,51 +350,65 @@ export default function PlatformFoodRecordEditor() {
         .eq('id', recordId)
         .single();
 
-      if (fetchError || !fullRecord) {
-        console.error('❌ Erro ao buscar:', fetchError);
-        toast.error('Erro ao carregar recordatório');
+      if (fetchError) {
+        console.error('❌ Erro ao buscar recordatório:', fetchError);
+        toast.error('Erro ao carregar recordatório', {
+          description: fetchError.message
+        });
+        setIsConverting(false);
         return;
       }
 
-      // Debug: verificar dados do banco
-      console.log('📋 Record completo:', {
+      if (!fullRecord) {
+        toast.error('Recordatório não encontrado');
+        setIsConverting(false);
+        return;
+      }
+
+      console.log('✅ Recordatório carregado:', {
         id: (fullRecord as any).id,
         client_id: (fullRecord as any).client_id,
+        date: (fullRecord as any).record_date,
         meals: (fullRecord as any).record_meals?.length,
-        date: (fullRecord as any).record_date
+        total_items: (fullRecord as any).record_meals?.reduce(
+          (sum: number, m: any) => sum + (m.record_items?.length || 0), 0
+        )
       });
 
-      // Validar client_id dos dados do banco
+      // VALIDAÇÃO 2: Verificar client_id DOS DADOS DO BANCO
       if (!(fullRecord as any).client_id) {
-        toast.error('Recordatório sem cliente associado');
+        toast.error('Recordatório sem cliente associado', {
+          description: 'Entre em contato com o suporte'
+        });
+        setIsConverting(false);
         return;
       }
 
-      // Validar se tem refeições
+      // VALIDAÇÃO 3: Verificar se tem refeições
       if (!(fullRecord as any).record_meals || (fullRecord as any).record_meals.length === 0) {
-        toast.error('Adicione pelo menos uma refeição ao recordatório');
+        toast.error('Adicione pelo menos uma refeição', {
+          description: 'O recordatório está vazio'
+        });
+        setIsConverting(false);
         return;
       }
 
-      // Validar se tem itens
-      const hasItems = (fullRecord as any).record_meals.some((m: any) => 
-        m.record_items && m.record_items.length > 0
+      // VALIDAÇÃO 4: Verificar se tem alimentos
+      const hasItems = (fullRecord as any).record_meals.some(
+        (meal: any) => meal.record_items && meal.record_items.length > 0
       );
+
       if (!hasItems) {
-        toast.error('Adicione alimentos às refeições antes de criar o plano');
+        toast.error('Adicione alimentos às refeições', {
+          description: 'Todas as refeições estão vazias'
+        });
+        setIsConverting(false);
         return;
       }
 
       console.log('✅ Cliente encontrado:', (fullRecord as any).client_id);
 
-      console.log('📋 Recordatório carregado:', {
-        meals: (fullRecord as any).record_meals.length,
-        items: (fullRecord as any).record_meals.reduce((sum: number, m: any) => 
-          sum + m.record_items.length, 0
-        )
-      });
-
-      // 2. CALCULAR TOTAIS DO RECORDATÓRIO
+      // CALCULAR TOTAIS
       const totals = (fullRecord as any).record_meals.reduce((acc: any, meal: any) => {
         meal.record_items.forEach((item: any) => {
           acc.kcal += item.kcal_total || 0;
@@ -401,19 +421,21 @@ export default function PlatformFoodRecordEditor() {
 
       console.log('📊 Totais calculados:', totals);
 
-      // 3. CRIAR MEAL PLAN
+      // CRIAR MEAL PLAN
       const planName = `Plano - ${format(
         new Date((fullRecord as any).record_date), 
         "dd 'de' MMMM 'de' yyyy",
         { locale: ptBR }
       )}`;
 
-      const { data: user } = await supabase.auth.getUser();
+      console.log('📝 Criando plano:', planName);
+
+      const { data: { user } } = await supabase.auth.getUser();
 
       const { data: newPlan, error: planError } = await supabase
         .from('meal_plans')
         .insert({
-          client_id: (fullRecord as any).client_id, // Usar client_id do banco
+          client_id: (fullRecord as any).client_id, // DO BANCO
           tenant_id: tenantId,
           name: planName,
           start_date: new Date().toISOString().split('T')[0],
@@ -428,73 +450,89 @@ export default function PlatformFoodRecordEditor() {
         .single();
 
       if (planError || !newPlan) {
-        throw new Error('Erro ao criar plano alimentar');
+        console.error('❌ Erro ao criar plano:', planError);
+        toast.error('Erro ao criar plano alimentar', {
+          description: planError?.message || 'Erro desconhecido'
+        });
+        setIsConverting(false);
+        return;
       }
 
       console.log('✅ Plano criado:', newPlan.id);
 
-      // 4. COPIAR REFEIÇÕES E ITENS
+      // COPIAR REFEIÇÕES E ITENS
+      let totalMealsCopied = 0;
+      let totalItemsCopied = 0;
+
       for (const recordMeal of (fullRecord as any).record_meals) {
         
-        // 4.1 Criar meal
+        // Criar meal
         const { data: newMeal, error: mealError } = await supabase
           .from('meals' as any)
           .insert({
             meal_plan_id: newPlan.id,
-            name: recordMeal.name,
-            time: recordMeal.time,
+            name: recordMeal.meal_name,
+            time: recordMeal.meal_time,
             order_index: recordMeal.order_index || 0
           })
           .select()
           .single();
 
         if (mealError || !newMeal) {
-          console.error('Erro ao criar meal:', mealError);
+          console.error('❌ Erro ao criar meal:', mealError);
           continue;
         }
 
-        // 4.2 Criar meal_items em batch
-        const mealItems = recordMeal.record_items.map((item: any) => ({
-          meal_id: (newMeal as any).id,
-          food_id: item.food_id,
-          measure_id: item.measure_id,
-          quantity: item.quantity,
-          grams_total: item.grams_total,
-          kcal_total: item.kcal_total,
-          protein_total: item.protein_total,
-          carb_total: item.carb_total,
-          fat_total: item.fat_total
-        }));
+        totalMealsCopied++;
 
-        const { error: itemsError } = await supabase
-          .from('meal_items' as any)
-          .insert(mealItems);
+        // Criar items
+        if (recordMeal.record_items && recordMeal.record_items.length > 0) {
+          const mealItems = recordMeal.record_items.map((item: any) => ({
+            meal_id: (newMeal as any).id,
+            food_id: item.food_id,
+            measure_id: item.measure_id,
+            quantity: item.quantity,
+            grams_total: item.grams_total,
+            kcal_total: item.kcal_total,
+            protein_total: item.protein_total,
+            carb_total: item.carb_total,
+            fat_total: item.fat_total
+          }));
 
-        if (itemsError) {
-          console.error('Erro ao criar items:', itemsError);
+          const { error: itemsError } = await supabase
+            .from('meal_items' as any)
+            .insert(mealItems);
+
+          if (itemsError) {
+            console.error('❌ Erro ao criar items:', itemsError);
+          } else {
+            totalItemsCopied += mealItems.length;
+            console.log(`✅ ${recordMeal.meal_name}: ${mealItems.length} itens copiados`);
+          }
         }
-
-        console.log(`✅ Refeição "${recordMeal.name}" copiada com ${mealItems.length} itens`);
       }
 
-      // 5. MOSTRAR SUCESSO E REDIRECIONAR
-      toast.success('Plano alimentar criado com sucesso!', {
-        description: `Baseado no recordatório de ${format(
-          new Date((fullRecord as any).record_date), 
-          "dd/MM/yyyy"
-        )}`
+      console.log('🎉 Conversão concluída:', {
+        plan_id: newPlan.id,
+        meals: totalMealsCopied,
+        items: totalItemsCopied
       });
 
-      // Aguardar 1 segundo para usuário ver o toast
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // SUCESSO
+      toast.success('Plano alimentar criado com sucesso!', {
+        description: `${totalMealsCopied} refeições e ${totalItemsCopied} alimentos copiados`
+      });
 
-      // Redirecionar para editor do plano
+      // Aguardar 800ms para usuário ver toast
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // REDIRECIONAR
       navigate(`/platform/${tenantId}/planos-alimentares/${newPlan.id}`);
 
     } catch (error: any) {
-      console.error('❌ Erro ao converter:', error);
+      console.error('💥 Erro inesperado:', error);
       toast.error('Erro ao criar plano alimentar', {
-        description: error.message
+        description: error instanceof Error ? error.message : 'Erro desconhecido'
       });
     } finally {
       setIsConverting(false);
@@ -644,32 +682,62 @@ export default function PlatformFoodRecordEditor() {
 
         {/* Summary */}
         {meals.length > 0 && (
-          <Card className="mt-6 bg-gray-800 border-gray-700">
-            <CardContent className="p-4">
+          <Card className="mt-6 bg-gray-800/80 border-gray-700">
+            <CardContent className="p-6">
+              <h3 className="text-gray-400 text-sm font-semibold uppercase tracking-wide mb-4">
+                Resumo do Dia
+              </h3>
+              
               <div className="flex items-center justify-between">
-                <div className="flex gap-8 text-gray-100">
-                  <div>
-                    <span className="text-sm text-gray-400">RESUMO:</span>
-                    <span className="ml-2 font-bold">{Math.round(totals.kcal)} kcal</span>
+                <div className="grid grid-cols-4 gap-6">
+                  {/* Total Kcal - LARANJA */}
+                  <div className="text-center">
+                    <div className="text-orange-400 font-bold text-3xl">
+                      {Math.round(totals.kcal)}
+                    </div>
+                    <div className="text-orange-400/60 text-xs mt-1 font-medium">
+                      kcal
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-sm text-gray-400">P:</span>
-                    <span className="ml-1">{Math.round(totals.protein)}g</span>
+                  
+                  {/* Proteínas - AZUL */}
+                  <div className="text-center">
+                    <div className="text-blue-400 font-bold text-2xl">
+                      {Math.round(totals.protein)}g
+                    </div>
+                    <div className="text-blue-400/60 text-xs mt-1 font-medium">
+                      Proteínas
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-sm text-gray-400">C:</span>
-                    <span className="ml-1">{Math.round(totals.carb)}g</span>
+                  
+                  {/* Carboidratos - ROXO */}
+                  <div className="text-center">
+                    <div className="text-purple-400 font-bold text-2xl">
+                      {Math.round(totals.carb)}g
+                    </div>
+                    <div className="text-purple-400/60 text-xs mt-1 font-medium">
+                      Carboidratos
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-sm text-gray-400">G:</span>
-                    <span className="ml-1">{Math.round(totals.fat)}g</span>
+                  
+                  {/* Gorduras - AMARELO */}
+                  <div className="text-center">
+                    <div className="text-yellow-400 font-bold text-2xl">
+                      {Math.round(totals.fat)}g
+                    </div>
+                    <div className="text-yellow-400/60 text-xs mt-1 font-medium">
+                      Gorduras
+                    </div>
                   </div>
                 </div>
+                
                 <Button
                   onClick={handleConvertToPlan}
                   disabled={isConverting || !recordId}
                   size="lg"
-                  className="bg-primary hover:bg-primary/90"
+                  className="bg-primary hover:bg-primary/90 
+                             disabled:opacity-50 disabled:cursor-not-allowed
+                             transition-all duration-200"
                 >
                   {isConverting ? (
                     <>
