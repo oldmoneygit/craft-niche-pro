@@ -35,6 +35,7 @@ import PlatformReports from "./pages/platform/PlatformReports";
 import PlatformServices from "./pages/platform/PlatformServices";
 import PlatformFoodRecords from "./pages/platform/PlatformFoodRecords";
 import PlatformFoodRecordEditor from "./pages/platform/PlatformFoodRecordEditor";
+import PlatformAnamnesisForm from "./pages/platform/PlatformAnamnesisForm";
 import { PlatformQuestionnairePreview } from "./pages/platform/PlatformQuestionnairePreview";
 import QuestionnairePublic from "./pages/QuestionnairePublic";
 import PublicQuestionnaireResponse from "./pages/public/PublicQuestionnaireResponse";
@@ -92,6 +93,10 @@ const App = () => (
               <Route path="/platform/:tenantId/recordatorio" element={<PlatformProtectedRoute><PlatformFoodRecords /></PlatformProtectedRoute>} />
               <Route path="/platform/:tenantId/recordatorio/novo" element={<PlatformProtectedRoute><PlatformFoodRecordEditor /></PlatformProtectedRoute>} />
               <Route path="/platform/:tenantId/recordatorio/:recordId" element={<PlatformProtectedRoute><PlatformFoodRecordEditor /></PlatformProtectedRoute>} />
+              
+              {/* Anamnesis Routes */}
+              <Route path="/platform/:tenantId/anamnese/nova" element={<PlatformProtectedRoute><PlatformAnamnesisForm /></PlatformProtectedRoute>} />
+              <Route path="/platform/:tenantId/anamnese/:anamnesisId" element={<PlatformProtectedRoute><PlatformAnamnesisForm /></PlatformProtectedRoute>} />
 
               {/* Public Questionnaires */}
               <Route path="/questionnaire/:questionnaireId" element={<QuestionnairePublic />} />

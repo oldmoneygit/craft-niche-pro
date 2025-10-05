@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import PlatformPageWrapper from '@/core/layouts/PlatformPageWrapper';
 import { useTenant } from '@/hooks/useTenant';
 import { useClients } from '@/hooks/useClients';
@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Plus, CreditCard as Edit, Trash2, User, Filter, CircleAlert as AlertCircle } from 'lucide-react';
+import { Search, Plus, CreditCard as Edit, Trash2, User, Filter, CircleAlert as AlertCircle, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,6 +37,7 @@ const clientSchema = z.object({
 
 export default function PlatformClients() {
   const { clientId } = useParams<{ clientId: string }>();
+  const navigate = useNavigate();
   const actualClientId = clientId && clientId !== ':clientId' ? clientId : 'gabriel-gandin';
   
   const { tenant, loading: tenantLoading } = useTenant(actualClientId);
@@ -557,6 +558,18 @@ export default function PlatformClients() {
 
                   {/* Ações (visíveis no hover) */}
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/platform/${tenant?.id}/anamnese/nova?client=${client.id}`);
+                      }}
+                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      title="Nova Anamnese"
+                    >
+                      <FileText className="w-4 h-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="sm"
