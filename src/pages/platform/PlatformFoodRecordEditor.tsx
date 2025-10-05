@@ -453,7 +453,7 @@ export default function PlatformFoodRecordEditor() {
         const { data: newMeal, error: mealError } = await supabase
           .from('record_meals' as any)
           .insert({
-            record_id: recordId,
+            food_record_id: recordId,
             time: mealTemplate.time,
             name: mealTemplate.name,
             order_index: index,
@@ -549,12 +549,21 @@ export default function PlatformFoodRecordEditor() {
         .from('food_records' as any)
         .select(`
           *,
-          record_meals!inner(
-            *,
-            record_items!inner(
-              *,
-              foods!inner(name, energy_kcal, protein_g, carbohydrate_g, lipid_g),
-              food_measures!inner(measure_name, grams)
+          record_meals!food_record_id(
+            id,
+            name,
+            time,
+            order_index,
+            record_items(
+              id,
+              food_id,
+              measure_id,
+              quantity,
+              grams_total,
+              kcal_total,
+              protein_total,
+              carb_total,
+              fat_total
             )
           )
         `)
