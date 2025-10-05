@@ -31,6 +31,7 @@ interface Food {
   protein_g: number;
   carbohydrate_g: number;
   lipid_g: number;
+  category_id?: string;
   nutrition_sources?: {
     code: string;
     name: string;
@@ -143,21 +144,30 @@ export function QuickFoodInput({ onAdd, placeholder = "🔍 Digite o alimento (e
     queryFn: async () => {
       if (!selectedFood?.id) return [];
 
-      console.log('📏 Buscando medidas para:', selectedFood.name);
+      console.log('📏 Carregando medidas para:', selectedFood.name);
 
-      const { data, error } = await supabase
+      // PRIORIDADE 1: Medidas específicas do alimento
+      const { data: specificMeasures, error: specificError } = await supabase
         .from('food_measures')
         .select('id, measure_name, grams, is_default')
         .eq('food_id', selectedFood.id)
-        .order('is_default', { ascending: false });
+        .order('is_default', { ascending: false })
+        .order('measure_name');
 
-      console.log('📏 Medidas encontradas:', data?.length || 0);
-
-      if (error) {
-        console.error('❌ Erro ao buscar medidas:', error);
+      if (specificMeasures && specificMeasures.length > 0) {
+        console.log('✅ Usando medidas específicas:', specificMeasures.length);
+        return specificMeasures;
       }
 
-      return data || [];
+      console.log('⚠️ Sem medidas específicas, usando fallback');
+
+      // PRIORIDADE 2: Fallback - sempre incluir "100 gramas"
+      return [{
+        id: `generic-100g-${selectedFood.id}`,
+        measure_name: '100 gramas',
+        grams: 100,
+        is_default: true
+      }];
     },
     enabled: !!selectedFood?.id
   });

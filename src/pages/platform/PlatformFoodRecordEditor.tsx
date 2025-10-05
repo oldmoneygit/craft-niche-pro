@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Plus, Trash2, GripVertical, Clock, Save } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, GripVertical, Clock, Save, Loader2, Utensils } from 'lucide-react';
 import { toast } from 'sonner';
 import { QuickFoodInput } from '@/components/platform/QuickFoodInput';
 import { format } from 'date-fns';
@@ -50,6 +50,7 @@ export default function PlatformFoodRecordEditor() {
   const [notes, setNotes] = useState('');
   const [meals, setMeals] = useState<Meal[]>([]);
   const [saving, setSaving] = useState(false);
+  const [isConverting, setIsConverting] = useState(false);
   const [showAddMealDialog, setShowAddMealDialog] = useState(false);
   const [newMealTime, setNewMealTime] = useState('08:00');
   const [newMealName, setNewMealName] = useState('');
@@ -310,34 +311,169 @@ export default function PlatformFoodRecordEditor() {
   };
 
   const handleConvertToPlan = async () => {
-    if (!clientId || !tenantId) return;
+    if (!recordId) {
+      toast.error('Salve o recordatório antes de criar um plano');
+      return;
+    }
+
+    if (!clientId || !tenantId) {
+      toast.error('Cliente não identificado');
+      return;
+    }
+
+    if (meals.length === 0) {
+      toast.error('Adicione pelo menos uma refeição ao recordatório');
+      return;
+    }
+
+    if (!meals.some(m => m.items.length > 0)) {
+      toast.error('Adicione alimentos às refeições antes de criar o plano');
+      return;
+    }
 
     try {
-      const totals = calculateTotals();
+      setIsConverting(true);
       
-      const { data: mealPlan, error } = await supabase
+      console.log('🔄 Convertendo recordatório para plano...');
+
+      // 1. BUSCAR RECORDATÓRIO COMPLETO
+      const { data: fullRecord, error: fetchError } = await supabase
+        .from('food_records' as any)
+        .select(`
+          *,
+          record_meals!inner(
+            *,
+            record_items!inner(
+              *,
+              foods!inner(name),
+              food_measures!inner(measure_name, grams)
+            )
+          )
+        `)
+        .eq('id', recordId)
+        .single();
+
+      if (fetchError || !fullRecord) {
+        throw new Error('Erro ao buscar recordatório');
+      }
+
+      console.log('📋 Recordatório carregado:', {
+        meals: (fullRecord as any).record_meals.length,
+        items: (fullRecord as any).record_meals.reduce((sum: number, m: any) => 
+          sum + m.record_items.length, 0
+        )
+      });
+
+      // 2. CALCULAR TOTAIS DO RECORDATÓRIO
+      const totals = (fullRecord as any).record_meals.reduce((acc: any, meal: any) => {
+        meal.record_items.forEach((item: any) => {
+          acc.kcal += item.kcal_total || 0;
+          acc.protein += item.protein_total || 0;
+          acc.carbs += item.carb_total || 0;
+          acc.fats += item.fat_total || 0;
+        });
+        return acc;
+      }, { kcal: 0, protein: 0, carbs: 0, fats: 0 });
+
+      console.log('📊 Totais calculados:', totals);
+
+      // 3. CRIAR MEAL PLAN
+      const planName = `Plano - ${format(
+        new Date((fullRecord as any).record_date), 
+        "dd 'de' MMMM 'de' yyyy",
+        { locale: ptBR }
+      )}`;
+
+      const { data: user } = await supabase.auth.getUser();
+
+      const { data: newPlan, error: planError } = await supabase
         .from('meal_plans')
         .insert({
           client_id: clientId,
           tenant_id: tenantId,
-          name: `Plano baseado em ${format(new Date(recordDate), 'dd/MM/yyyy')}`,
+          name: planName,
           start_date: new Date().toISOString().split('T')[0],
           end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          calorie_target: totals.kcal,
-          protein_target_g: totals.protein,
-          carb_target_g: totals.carb,
-          fat_target_g: totals.fat
+          calorie_target: Math.round(totals.kcal),
+          protein_target_g: Math.round(totals.protein),
+          carb_target_g: Math.round(totals.carbs),
+          fat_target_g: Math.round(totals.fats),
+          status: 'active'
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (planError || !newPlan) {
+        throw new Error('Erro ao criar plano alimentar');
+      }
 
-      toast.success('Plano alimentar criado!');
-      navigate(`/platform/${tenantId}/planos-alimentares/${mealPlan.id}`);
-    } catch (error) {
-      console.error('Erro ao converter:', error);
-      toast.error('Erro ao criar plano');
+      console.log('✅ Plano criado:', newPlan.id);
+
+      // 4. COPIAR REFEIÇÕES E ITENS
+      for (const recordMeal of (fullRecord as any).record_meals) {
+        
+        // 4.1 Criar meal
+        const { data: newMeal, error: mealError } = await supabase
+          .from('meals' as any)
+          .insert({
+            meal_plan_id: newPlan.id,
+            name: recordMeal.name,
+            time: recordMeal.time,
+            order_index: recordMeal.order_index || 0
+          })
+          .select()
+          .single();
+
+        if (mealError || !newMeal) {
+          console.error('Erro ao criar meal:', mealError);
+          continue;
+        }
+
+        // 4.2 Criar meal_items em batch
+        const mealItems = recordMeal.record_items.map((item: any) => ({
+          meal_id: (newMeal as any).id,
+          food_id: item.food_id,
+          measure_id: item.measure_id,
+          quantity: item.quantity,
+          grams_total: item.grams_total,
+          kcal_total: item.kcal_total,
+          protein_total: item.protein_total,
+          carb_total: item.carb_total,
+          fat_total: item.fat_total
+        }));
+
+        const { error: itemsError } = await supabase
+          .from('meal_items' as any)
+          .insert(mealItems);
+
+        if (itemsError) {
+          console.error('Erro ao criar items:', itemsError);
+        }
+
+        console.log(`✅ Refeição "${recordMeal.name}" copiada com ${mealItems.length} itens`);
+      }
+
+      // 5. MOSTRAR SUCESSO E REDIRECIONAR
+      toast.success('Plano alimentar criado com sucesso!', {
+        description: `Baseado no recordatório de ${format(
+          new Date((fullRecord as any).record_date), 
+          "dd/MM/yyyy"
+        )}`
+      });
+
+      // Aguardar 1 segundo para usuário ver o toast
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Redirecionar para editor do plano
+      navigate(`/platform/${tenantId}/planos-alimentares/${newPlan.id}`);
+
+    } catch (error: any) {
+      console.error('❌ Erro ao converter:', error);
+      toast.error('Erro ao criar plano alimentar', {
+        description: error.message
+      });
+    } finally {
+      setIsConverting(false);
     }
   };
 
@@ -507,10 +643,21 @@ export default function PlatformFoodRecordEditor() {
                 </div>
                 <Button
                   onClick={handleConvertToPlan}
-                  variant="outline"
-                  className="border-primary text-primary hover:bg-primary/10"
+                  disabled={isConverting || !recordId}
+                  size="lg"
+                  className="bg-primary hover:bg-primary/90"
                 >
-                  Criar Plano Alimentar
+                  {isConverting ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Criando plano...
+                    </>
+                  ) : (
+                    <>
+                      <Utensils className="mr-2 h-5 w-5" />
+                      Criar Plano Alimentar
+                    </>
+                  )}
                 </Button>
               </div>
             </CardContent>

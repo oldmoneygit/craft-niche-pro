@@ -44,86 +44,126 @@ export function RecordFoodItem({ item, onUpdate, onRemove, dragHandleProps }: Re
     onUpdate({ measure_id: measureId });
   };
 
+  const getBadgeColor = (code?: string) => {
+    const c = code?.toLowerCase();
+    
+    if (c === 'taco' || c === 'tbca') {
+      return 'bg-green-600 text-white hover:bg-green-700';
+    }
+    if (c === 'usda') {
+      return 'bg-blue-600 text-white hover:bg-blue-700';
+    }
+    if (c === 'ibge') {
+      return 'bg-orange-600 text-white hover:bg-orange-700';
+    }
+    return 'bg-gray-600 text-white hover:bg-gray-700';
+  };
+
   return (
-    <div className="group flex items-start justify-between gap-4 p-4 bg-gray-700/50 rounded-lg border border-gray-600 hover:bg-gray-700 transition-colors">
-      {/* Coluna Esquerda: Nome + Detalhes */}
-      <div className="flex-1 min-w-0">
-        <h4 className="font-semibold text-white text-base mb-2">
-          {item.food_name}
-        </h4>
-
-        <div className="flex items-center gap-3 text-sm text-gray-300 mb-2">
-          {isEditingQuantity ? (
-            <Input
-              type="number"
-              min="0.1"
-              step="0.1"
-              value={tempQuantity}
-              onChange={(e) => setTempQuantity(e.target.value)}
-              onBlur={handleQuantitySubmit}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleQuantitySubmit();
-                if (e.key === 'Escape') {
-                  setTempQuantity(item.quantity.toString());
-                  setIsEditingQuantity(false);
-                }
-              }}
-              autoFocus
-              className="h-7 w-16 bg-gray-800 border-gray-600 text-gray-100"
-            />
-          ) : (
-            <button
-              onClick={() => setIsEditingQuantity(true)}
-              className="font-medium text-primary hover:text-primary/80 transition-colors"
-            >
-              {item.quantity} ×
-            </button>
-          )}
-
-          <Select value={item.measure_id} onValueChange={handleMeasureChange}>
-            <SelectTrigger className="h-7 w-[180px] bg-gray-800 border-gray-600">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {measures.map((measure) => (
-                <SelectItem key={measure.id} value={measure.id}>
-                  {measure.measure_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <span className="text-gray-400">
-            ({Math.round(item.grams_total)}g)
-          </span>
-        </div>
-
-        <div className="flex gap-4 text-xs text-gray-400">
-          <span>P: {Math.round(item.protein_total)}g</span>
-          <span>C: {Math.round(item.carb_total)}g</span>
-          <span>G: {Math.round(item.fat_total)}g</span>
-        </div>
+    <div className="group relative flex items-start gap-4 p-4 
+                    bg-gray-700/50 rounded-lg border border-gray-600
+                    hover:bg-gray-700 hover:border-gray-500 
+                    transition-all duration-200">
+      
+      {/* Drag Handle */}
+      <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing opacity-40 
+                      group-hover:opacity-100 transition-opacity pt-1">
+        <GripVertical className="h-5 w-5 text-gray-400" />
       </div>
 
-      {/* Coluna Direita: Calorias + Ações */}
-      <div className="flex items-center gap-3">
-        <div className="text-right whitespace-nowrap">
-          <div className="text-lg font-bold text-white">
-            {Math.round(item.kcal_total)}
-          </div>
-          <div className="text-xs text-gray-400">
-            kcal
+      {/* Conteúdo Principal */}
+      <div className="flex-1 min-w-0">
+        
+        {/* Linha 1: Nome + Badge + Botão Remover */}
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <h4 className="font-semibold text-white text-base leading-tight">
+            {item.food_name}
+          </h4>
+          
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onRemove}
+              className="h-8 w-8 opacity-0 group-hover:opacity-100 
+                         transition-opacity text-red-400 hover:text-red-300
+                         hover:bg-red-500/10"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={onRemove}
-          className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300 hover:bg-gray-800"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        {/* Linha 2: Quantidade × Medida + Calorias */}
+        <div className="flex items-center justify-between gap-4 mb-2">
+          <div className="flex items-center gap-2 text-sm text-gray-300">
+            {isEditingQuantity ? (
+              <Input
+                type="number"
+                min="0.1"
+                step="0.1"
+                value={tempQuantity}
+                onChange={(e) => setTempQuantity(e.target.value)}
+                onBlur={handleQuantitySubmit}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleQuantitySubmit();
+                  if (e.key === 'Escape') {
+                    setTempQuantity(item.quantity.toString());
+                    setIsEditingQuantity(false);
+                  }
+                }}
+                autoFocus
+                className="h-7 w-16 bg-gray-800 border-gray-600 text-gray-100"
+              />
+            ) : (
+              <button
+                onClick={() => setIsEditingQuantity(true)}
+                className="font-semibold text-primary text-base hover:text-primary/80 transition-colors"
+              >
+                {item.quantity} ×
+              </button>
+            )}
+            
+            <Select value={item.measure_id} onValueChange={handleMeasureChange}>
+              <SelectTrigger className="h-7 w-[180px] bg-gray-800 border-gray-600 text-gray-100">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {measures.map((measure) => (
+                  <SelectItem key={measure.id} value={measure.id}>
+                    {measure.measure_name} ({measure.grams}g)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <span className="text-gray-400 text-xs">
+              ({Math.round(item.grams_total)}g)
+            </span>
+          </div>
+          
+          <div className="text-right flex-shrink-0">
+            <div className="text-xl font-bold text-white leading-none">
+              {Math.round(item.kcal_total)}
+            </div>
+            <div className="text-xs text-gray-400 leading-none mt-0.5">
+              kcal
+            </div>
+          </div>
+        </div>
+
+        {/* Linha 3: Macronutrientes */}
+        <div className="flex gap-4 text-xs text-gray-400">
+          <span className="font-medium">
+            P: <span className="text-gray-300">{item.protein_total.toFixed(1)}g</span>
+          </span>
+          <span className="font-medium">
+            C: <span className="text-gray-300">{item.carb_total.toFixed(1)}g</span>
+          </span>
+          <span className="font-medium">
+            G: <span className="text-gray-300">{item.fat_total.toFixed(1)}g</span>
+          </span>
+        </div>
       </div>
     </div>
   );
