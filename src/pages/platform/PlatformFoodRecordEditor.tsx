@@ -645,13 +645,13 @@ export default function PlatformFoodRecordEditor() {
   const totals = calculateTotals();
 
   if (loadingTenant) {
-    return <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+    return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
       <p className="text-gray-400">Carregando...</p>
     </div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-[#0a0a0a]">
       <div className="container mx-auto p-6 max-w-5xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
