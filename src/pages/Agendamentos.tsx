@@ -4,6 +4,7 @@ import {
   Plus, Edit, Trash2, Phone, ChevronLeft, ChevronRight,
   X, Lightbulb
 } from 'lucide-react';
+import { AgendamentosStatCard } from '@/components/agendamentos/AgendamentosStatCard';
 import './Agendamentos.css';
 
 type AppointmentStatus = 'pending' | 'confirmed' | 'completed';
@@ -33,13 +34,6 @@ export function Agendamentos() {
       phone: '19981661010',
       status: 'pending'
     }
-  ];
-
-  const stats = [
-    { label: 'Total Agendamentos', value: '1', icon: CalendarIcon, variant: 'total' },
-    { label: 'Hoje', value: '0', icon: Clock, variant: 'today' },
-    { label: 'Confirmados', value: '0', icon: CheckCircle, variant: 'confirmed' },
-    { label: 'Realizados', value: '0', icon: Check, variant: 'completed' }
   ];
 
   const timeSlots = ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
@@ -88,21 +82,39 @@ export function Agendamentos() {
       </div>
 
       {/* Stats */}
-      <div className="stats-grid">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <div key={index} className={`stat-card ${stat.variant}`}>
-              <div className="stat-header">
-                <div className="stat-label">{stat.label}</div>
-                <div className="stat-icon">
-                  <Icon size={20} />
-                </div>
-              </div>
-              <div className="stat-value">{stat.value}</div>
-            </div>
-          );
-        })}
+      <div className="stats-grid" style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+        gap: '20px',
+        marginBottom: '32px'
+      }}>
+        <AgendamentosStatCard
+          label="Total Agendamentos"
+          value={1}
+          icon={<CalendarIcon size={20} />}
+          variant="total"
+        />
+
+        <AgendamentosStatCard
+          label="Hoje"
+          value={0}
+          icon={<Clock size={20} />}
+          variant="today"
+        />
+
+        <AgendamentosStatCard
+          label="Confirmados"
+          value={0}
+          icon={<CheckCircle size={20} />}
+          variant="confirmed"
+        />
+
+        <AgendamentosStatCard
+          label="Realizados"
+          value={0}
+          icon={<Check size={20} />}
+          variant="completed"
+        />
       </div>
 
       {/* Appointments List */}
