@@ -343,15 +343,20 @@
 | `name` | text | ✅ | Nome alimento |
 | `brand` | text | ❌ | Marca |
 | `description` | text | ❌ | Descrição |
+| `barcode` | text | ❌ | Código de barras |
+| `category` | text | ❌ | Categoria (text direto) |
+| `source` | text | ❌ | Fonte (text direto) |
 | **Composição nutricional (por 100g):** | | | |
-| `energy_kcal` | decimal(10,2) | ❌ | Calorias |
-| `protein_g` | decimal(10,2) | ❌ | Proteínas |
-| `carbohydrate_g` | decimal(10,2) | ❌ | Carboidratos |
-| `fiber_g` | decimal(10,2) | ❌ | Fibras |
-| `lipid_g` | decimal(10,2) | ❌ | Gorduras |
-| `saturated_fat_g` | decimal(10,2) | ❌ | Gordura saturada |
-| `sodium_mg` | decimal(10,2) | ❌ | Sódio |
-| **Campos customização:** | | | |
+| `kcal_per_100g` | numeric | ❌ | Calorias |
+| `protein_per_100g` | numeric | ❌ | Proteínas |
+| `carb_per_100g` | numeric | ❌ | Carboidratos |
+| `fiber_per_100g` | numeric | ❌ | Fibras |
+| `fat_per_100g` | numeric | ❌ | Gorduras totais |
+| `saturated_fat_per_100g` | numeric | ❌ | Gordura saturada |
+| `sugars_per_100g` | numeric | ❌ | Açúcares |
+| `sodium_mg` | numeric | ❌ | Sódio (mg) |
+| **Metadados:** | | | |
+| `confidence_score` | integer | ❌ | Score confiança (0-100) |
 | `is_custom` | boolean | ✅ | Customizado? (default false) |
 | `created_by` | uuid | ❌ | FK → profiles.user_id |
 | `source_info` | text | ❌ | Info da fonte |
@@ -359,6 +364,12 @@
 | `active` | boolean | ✅ | Ativo? (default true) |
 | `created_at` | timestamptz | ✅ | Auto |
 | `updated_at` | timestamptz | ✅ | Auto |
+
+**⚠️ ATENÇÃO - Campos Nutricionais:**
+- Usar `kcal_per_100g` (NÃO `energy_kcal`)
+- Usar `protein_per_100g` (NÃO `protein_g`)
+- Usar `carb_per_100g` (NÃO `carbohydrate_g`)
+- Padrão: `{nutriente}_per_100g`
 
 **Índices:**
 - `idx_foods_name` ON (name)
@@ -386,6 +397,60 @@
 
 **Índices:**
 - `idx_measures_food` ON (food_id)
+
+---
+
+### `category_default_measures`
+**Descrição:** Medidas padrão sugeridas por categoria de alimento
+
+| Coluna | Tipo | Obrigatório | Descrição |
+|--------|------|-------------|-----------|
+| `id` | uuid | ✅ | PK |
+| `category` | text | ✅ | Nome categoria |
+| `reference_measure_id` | uuid | ❌ | FK → reference_measures |
+| `typical_grams` | numeric | ✅ | Gramas típicas |
+| `display_order` | integer | ❌ | Ordem exibição (default 0) |
+| `created_at` | timestamptz | ❌ | Auto |
+
+**Relacionamentos:**
+- `reference_measure_id` → `reference_measures.id`
+
+**Propósito:** 
+Define medidas padrão sugeridas automaticamente quando alimento é adicionado
+- Ex: Categoria "Frutas" → sugere "unidade média (100g)"
+- Ex: Categoria "Cereais" → sugere "colher de sopa (30g)"
+
+**Índices:**
+- `idx_category_defaults` ON (category)
+
+---
+
+### `food_usage_history`
+**Descrição:** Histórico de uso de alimentos (rastreamento para sugestões)
+
+| Coluna | Tipo | Obrigatório | Descrição |
+|--------|------|-------------|-----------|
+| `id` | uuid | ✅ | PK |
+| `food_id` | uuid | ❌ | FK → foods |
+| `user_id` | uuid | ❌ | FK → auth.users |
+| `meal_plan_id` | uuid | ❌ | FK → meal_plans |
+| `used_at` | timestamp | ❌ | Quando foi usado (default now()) |
+
+**Relacionamentos:**
+- `food_id` → `foods.id`
+- `user_id` → `auth.users.id`
+- `meal_plan_id` → `meal_plans.id`
+
+**Propósito:**
+Rastreia quais alimentos cada nutricionista mais usa para:
+- Sugestões automáticas ao criar planos
+- Autocomplete inteligente baseado em histórico
+- Analytics de alimentos mais populares
+
+**Índices:**
+- `idx_usage_food` ON (food_id)
+- `idx_usage_user` ON (user_id)
+- `idx_usage_date` ON (used_at DESC)
 
 ---
 
@@ -839,6 +904,20 @@ idx_leads_tenant_status (tenant_id, status)
 **Status/Enums:** Português
 - ✅ `'ativo'` (não `'active'`)
 - ✅ `'agendado'` (não `'scheduled'`)
+
+**Campos Nutricionais:** Padrão `{nutriente}_per_100g`
+- ✅ `kcal_per_100g` (não `energy_kcal`)
+- ✅ `protein_per_100g` (não `protein_g`)
+- ✅ `carb_per_100g` (não `carbohydrate_g`)
+- ✅ `fat_per_100g` (não `lipid_g`)
+
+### Campos Duplicados
+
+**Tabela `foods` tem campos duplicados:**
+- `category` (text) E `category_id` (FK) - usar `category_id`
+- `source` (text) E `source_id` (FK) - usar `source_id`
+
+**Recomendação:** Queries devem priorizar FKs ao invés de text direto
 
 ### Campos JSONB
 
