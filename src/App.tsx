@@ -13,7 +13,7 @@ import { Mensagens } from './pages/Mensagens';
 import { Lembretes } from './pages/Lembretes';
 import { AgenteIA } from './pages/AgenteIA';
 import { BaseConhecimento } from './pages/BaseConhecimento';
-import { Relatorios } from './pages/Relatorios';
+import Relatorios from './pages/Relatorios';
 import { Financeiro } from './pages/Financeiro';
 import { Configuracoes } from './pages/Configuracoes';
 
