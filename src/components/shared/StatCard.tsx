@@ -10,24 +10,32 @@ interface StatCardProps {
 const variantStyles = {
   primary: {
     accentColor: '#3b82f6',
-    accentLight: 'rgba(59, 130, 246, 0.1)'
+    accentLight: 'rgba(59, 130, 246, 0.1)',
+    iconBgLight: 'rgba(219, 234, 254, 1)',
+    iconBgDark: 'rgba(59, 130, 246, 0.1)'
   },
   success: {
     accentColor: '#10b981',
-    accentLight: 'rgba(16, 185, 129, 0.1)'
+    accentLight: 'rgba(16, 185, 129, 0.1)',
+    iconBgLight: 'rgba(209, 250, 229, 1)',
+    iconBgDark: 'rgba(16, 185, 129, 0.1)'
   },
   warning: {
     accentColor: '#f59e0b',
-    accentLight: 'rgba(245, 158, 11, 0.1)'
+    accentLight: 'rgba(245, 158, 11, 0.1)',
+    iconBgLight: 'rgba(254, 243, 199, 1)',
+    iconBgDark: 'rgba(245, 158, 11, 0.1)'
   },
   purple: {
     accentColor: '#8b5cf6',
-    accentLight: 'rgba(139, 92, 246, 0.1)'
+    accentLight: 'rgba(139, 92, 246, 0.1)',
+    iconBgLight: 'rgba(237, 233, 254, 1)',
+    iconBgDark: 'rgba(139, 92, 246, 0.1)'
   }
 };
 
 export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, variant }) => {
-  const { accentColor, accentLight } = variantStyles[variant];
+  const config = variantStyles[variant];
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
 
   return (
@@ -65,7 +73,7 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, variant 
           top: 0,
           bottom: 0,
           width: '0',
-          background: accentColor,
+          background: config.accentColor,
           transition: 'width 0.3s ease'
         }}
       />
@@ -75,14 +83,14 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, variant 
           width: '48px',
           height: '48px',
           borderRadius: '12px',
-          background: accentLight,
+          background: isDark ? config.iconBgDark : config.iconBgLight,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: '16px'
         }}
       >
-        <div style={{ color: accentColor, display: 'flex' }}>
+        <div style={{ color: config.accentColor, display: 'flex' }}>
           {icon}
         </div>
       </div>
