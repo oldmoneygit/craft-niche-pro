@@ -226,6 +226,72 @@ export default function PlatformFoodRecordEditor() {
     setMeals(updatedMeals);
   };
 
+  const handleUpdateFood = async (mealIndex: number, itemIndex: number, updates: { measure_id?: string; quantity?: number }) => {
+    const updatedMeals = [...meals];
+    const item = updatedMeals[mealIndex].items[itemIndex];
+
+    // Se mudou a medida, buscar novos dados
+    if (updates.measure_id && updates.measure_id !== item.measure_id) {
+      const { data: measure } = await supabase
+        .from('food_measures')
+        .select('measure_name, grams')
+        .eq('id', updates.measure_id)
+        .single();
+
+      if (measure) {
+        item.measure_id = updates.measure_id;
+        item.measure_name = measure.measure_name;
+        
+        // Buscar dados nutricionais do alimento
+        const { data: food } = await supabase
+          .from('foods')
+          .select('energy_kcal, protein_g, carbohydrate_g, lipid_g')
+          .eq('id', item.food_id)
+          .single();
+
+        if (food) {
+          const qty = updates.quantity || item.quantity;
+          const gramsTotal = measure.grams * qty;
+          const multiplier = gramsTotal / 100;
+
+          item.quantity = qty;
+          item.grams = gramsTotal;
+          item.kcal = (food.energy_kcal || 0) * multiplier;
+          item.protein = (food.protein_g || 0) * multiplier;
+          item.carb = (food.carbohydrate_g || 0) * multiplier;
+          item.fat = (food.lipid_g || 0) * multiplier;
+        }
+      }
+    } else if (updates.quantity && updates.quantity !== item.quantity) {
+      // Só mudou quantidade, recalcular com a mesma medida
+      const { data: measure } = await supabase
+        .from('food_measures')
+        .select('grams')
+        .eq('id', item.measure_id)
+        .single();
+
+      const { data: food } = await supabase
+        .from('foods')
+        .select('energy_kcal, protein_g, carbohydrate_g, lipid_g')
+        .eq('id', item.food_id)
+        .single();
+
+      if (measure && food) {
+        const gramsTotal = measure.grams * updates.quantity;
+        const multiplier = gramsTotal / 100;
+
+        item.quantity = updates.quantity;
+        item.grams = gramsTotal;
+        item.kcal = (food.energy_kcal || 0) * multiplier;
+        item.protein = (food.protein_g || 0) * multiplier;
+        item.carb = (food.carbohydrate_g || 0) * multiplier;
+        item.fat = (food.lipid_g || 0) * multiplier;
+      }
+    }
+
+    setMeals(updatedMeals);
+  };
+
   const handleShowFoodDetails = (item: FoodItem) => {
     setSelectedFoodForDetails(item);
     setIsDetailsModalOpen(true);
@@ -683,6 +749,7 @@ export default function PlatformFoodRecordEditor() {
                         item={item}
                         onRemove={() => handleRemoveFood(mealIndex, itemIndex)}
                         onShowDetails={() => handleShowFoodDetails(item)}
+                        onUpdate={(updates) => handleUpdateFood(mealIndex, itemIndex, updates)}
                       />
                       ))}
                     </div>
