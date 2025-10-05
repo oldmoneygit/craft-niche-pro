@@ -115,15 +115,14 @@
 }
 
 .stat-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   background: var(--accent-light);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-top: -4px;
 }
 
 .stat-icon svg {
@@ -133,32 +132,31 @@
 }
 
 .stat-value {
-  font-size: 56px;
+  font-size: 32px;
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1;
-  align-self: flex-start;
 }
 
 /* Cores específicas */
 .stat-card.total {
   --accent-color: #3b82f6;
-  --accent-light: #dbeafe;
+  --accent-light: rgba(59, 130, 246, 0.1);
 }
 
 .stat-card.today {
   --accent-color: #f59e0b;
-  --accent-light: #fef3c7;
+  --accent-light: rgba(245, 158, 11, 0.1);
 }
 
 .stat-card.confirmed {
   --accent-color: #10b981;
-  --accent-light: #d1fae5;
+  --accent-light: rgba(16, 185, 129, 0.1);
 }
 
 .stat-card.completed {
   --accent-color: #8b5cf6;
-  --accent-light: #ede9fe;
+  --accent-light: rgba(139, 92, 246, 0.1);
 }
 
 /* ==================== APPOINTMENTS SECTION ==================== */
