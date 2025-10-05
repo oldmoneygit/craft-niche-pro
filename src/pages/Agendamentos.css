@@ -96,14 +96,8 @@
 .stat-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.stat-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
 .stat-label {
