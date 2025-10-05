@@ -85,7 +85,7 @@ All colors MUST be HSL.
     --radius: 0.75rem;
     
     /* Sidebar */
-    --sidebar-background: 220 13% 18%;
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 220 9% 85%;
     --sidebar-primary: 220 9% 85%;
     --sidebar-primary-foreground: 220 13% 18%;
@@ -93,6 +93,9 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 220 13% 25%;
     --sidebar-ring: 160 84% 35%;
+    --sidebar-hover: 0 0% 96%;
+    --sidebar-active: 142 76% 96%;
+    --sidebar-shadow: 0 0% 0% / 0.05;
   }
 
   .dark {
@@ -107,6 +110,12 @@ All colors MUST be HSL.
     --ring: 160 84% 39%;
     --muted: 217 32% 18%;
     --muted-foreground: 215 20% 70%;
+    
+    /* Sidebar Dark */
+    --sidebar-background: 0 0% 15%;
+    --sidebar-hover: 0 0% 20%;
+    --sidebar-active: 142 76% 15%;
+    --sidebar-shadow: 0 0% 0% / 0.3;
   }
 }
 
