@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { 
   Calendar as CalendarIcon, Clock, CheckCircle, Check,
-  Plus, Edit, Trash2, Phone, ChevronLeft, ChevronRight,
-  X, Lightbulb
+  Plus, Edit, Trash2, Phone
 } from 'lucide-react';
 import { AgendamentosStatCard } from '@/components/agendamentos/AgendamentosStatCard';
+import { AgendamentoModal } from '@/components/agendamentos/AgendamentoModal';
 import './Agendamentos.css';
 
 type AppointmentStatus = 'pending' | 'confirmed' | 'completed';
@@ -20,9 +20,7 @@ interface Appointment {
 }
 
 export function Agendamentos() {
-  const [showModal, setShowModal] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(5);
-  const [selectedTime, setSelectedTime] = useState('10:00');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const appointments: Appointment[] = [
     {
@@ -36,23 +34,6 @@ export function Agendamentos() {
     }
   ];
 
-  const timeSlots = ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
-  const unavailableSlots = ['08:00', '15:00'];
-
-  const handleOpenModal = () => setShowModal(true);
-  const handleCloseModal = () => setShowModal(false);
-
-  const handleDayClick = (day: number) => {
-    if (day > 0 && day <= 31) {
-      setSelectedDate(day);
-    }
-  };
-
-  const handleTimeClick = (time: string) => {
-    if (!unavailableSlots.includes(time)) {
-      setSelectedTime(time);
-    }
-  };
 
   const handleEdit = (id: string) => {
     console.log('Edit:', id);
@@ -74,7 +55,7 @@ export function Agendamentos() {
           <p>Gerencie suas consultas e agendamentos</p>
         </div>
         <div className="header-actions">
-          <button className="btn btn-primary" onClick={handleOpenModal}>
+          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
             <Plus size={18} />
             Novo Agendamento
           </button>
@@ -173,137 +154,7 @@ export function Agendamentos() {
       </div>
 
       {/* Modal */}
-      {showModal && (
-        <div className="modal active" onClick={handleCloseModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2 className="modal-title">Novo Agendamento</h2>
-              <button className="close-btn" onClick={handleCloseModal}>
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* AI Suggestion */}
-            <div className="ai-suggestion">
-              <div className="ai-suggestion-icon">
-                <Lightbulb size={20} />
-              </div>
-              <div className="ai-suggestion-content">
-                <h4>Sugestão da IA</h4>
-                <p>Seu horário mais próximo disponível é <strong>dia 10 às 13h30</strong>. <a href="#appointments">Verifique suas consultas agendadas aqui</a>.</p>
-              </div>
-            </div>
-
-            <div className="modal-body">
-              {/* Calendar Section */}
-              <div className="calendar-section">
-                <div className="form-group">
-                  <label className="form-label">Selecione a Data</label>
-                  <div className="calendar">
-                    <div className="calendar-header">
-                      <span className="calendar-month">Outubro 2025</span>
-                      <div className="calendar-nav">
-                        <button className="nav-btn">
-                          <ChevronLeft size={16} />
-                        </button>
-                        <button className="nav-btn">
-                          <ChevronRight size={16} />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="calendar-grid">
-                      {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day) => (
-                        <div key={day} className="calendar-day-label">{day}</div>
-                      ))}
-                      {[29, 30].map((day) => (
-                        <div key={`prev-${day}`} className="calendar-day other-month">{day}</div>
-                      ))}
-                      {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
-                        <div
-                          key={day}
-                          className={`calendar-day ${day === 5 ? 'today' : ''} ${
-                            selectedDate === day ? 'selected' : ''
-                          } ${day === 2 ? 'has-appointment' : ''}`}
-                          onClick={() => handleDayClick(day)}
-                        >
-                          {day}
-                        </div>
-                      ))}
-                      {[1, 2].map((day) => (
-                        <div key={`next-${day}`} className="calendar-day other-month">{day}</div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Horários Disponíveis</label>
-                  <div className="time-slots">
-                    {timeSlots.map((time) => (
-                      <div
-                        key={time}
-                        className={`time-slot ${selectedTime === time ? 'selected' : ''} ${
-                          unavailableSlots.includes(time) ? 'unavailable' : ''
-                        }`}
-                        onClick={() => handleTimeClick(time)}
-                      >
-                        {time}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Form Section */}
-              <div className="form-section">
-                <div className="form-group">
-                  <label className="form-label">Cliente *</label>
-                  <select className="form-select">
-                    <option>Selecione um cliente</option>
-                    <option>Pamela Nascimento</option>
-                    <option>MARCÃO DA MASSA</option>
-                    <option>Jeferson de Lima</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Tipo de Consulta *</label>
-                  <select className="form-select">
-                    <option>Primeira Consulta</option>
-                    <option>Retorno</option>
-                    <option>Revisão de Plano</option>
-                    <option>Avaliação</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Observações</label>
-                  <textarea className="form-textarea" placeholder="Observações sobre a consulta..."></textarea>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Valor da Consulta</label>
-                  <input type="text" className="form-input" placeholder="R$ 0,00" />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Status do Pagamento</label>
-                  <select className="form-select">
-                    <option>Pendente</option>
-                    <option>Pago</option>
-                    <option>Parcelado</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <button className="btn-cancel" onClick={handleCloseModal}>Cancelar</button>
-              <button className="btn-submit">Criar Agendamento</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AgendamentoModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }
