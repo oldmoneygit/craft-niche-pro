@@ -100,8 +100,8 @@
 .stat-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 .stat-label {
@@ -114,15 +114,21 @@
 }
 
 .stat-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   background: var(--icon-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--stat-color);
   flex-shrink: 0;
+}
+
+.stat-icon svg {
+  width: 24px;
+  height: 24px;
+  color: var(--stat-color);
 }
 
 .stat-value {
@@ -370,21 +376,15 @@
 }
 
 .modal-content {
-  background: rgba(255, 255, 255, 0.98);
+  background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: 16px;
   width: 100%;
   max-width: 1000px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
   animation: slideUp 0.3s ease;
-}
-
-/* Dark mode modal */
-:root[data-theme="dark"] .modal-content,
-.dark .modal-content {
-  background: rgba(20, 20, 20, 0.98);
 }
 
 @keyframes slideUp {
@@ -485,13 +485,6 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 32px;
-  background: white;
-}
-
-/* Dark mode modal body */
-:root[data-theme="dark"] .modal-body,
-.dark .modal-body {
-  background: rgba(20, 20, 20, 0.98);
 }
 
 .form-group {
@@ -511,25 +504,14 @@
 .form-textarea {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border);
   border-radius: 10px;
-  background: #1a1a1a;
-  color: #fff;
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  color: var(--text-primary);
   font-size: 14px;
   font-family: inherit;
   transition: all 0.2s ease;
-}
-
-/* Dark mode form fields */
-:root[data-theme="dark"] .form-select,
-:root[data-theme="dark"] .form-input,
-:root[data-theme="dark"] .form-textarea,
-.dark .form-select,
-.dark .form-input,
-.dark .form-textarea {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
 }
 
 .form-select:focus,
@@ -547,17 +529,11 @@
 
 /* ==================== CALENDAR ==================== */
 .calendar {
-  background: #1a1a1a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 16px;
-}
-
-/* Dark mode calendar */
-:root[data-theme="dark"] .calendar,
-.dark .calendar {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--border);
 }
 
 .calendar-header {
@@ -624,10 +600,12 @@
   transition: all 0.2s ease;
   color: var(--text-primary);
   position: relative;
+  background: transparent;
 }
 
 .calendar-day:hover {
   background: var(--bg-secondary);
+  border: 1px solid var(--border);
 }
 
 .calendar-day.other-month {
@@ -666,22 +644,15 @@
 
 .time-slot {
   padding: 12px;
-  background: #1a1a1a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
   border-radius: 8px;
   text-align: center;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #fff;
-}
-
-/* Dark mode time slots */
-:root[data-theme="dark"] .time-slot,
-.dark .time-slot {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--border);
   color: var(--text-primary);
 }
 
@@ -716,13 +687,6 @@
   gap: 12px;
   padding: 20px 24px;
   border-top: 1px solid var(--border);
-  background: white;
-}
-
-/* Dark mode modal footer */
-:root[data-theme="dark"] .modal-footer,
-.dark .modal-footer {
-  background: rgba(20, 20, 20, 0.98);
 }
 
 .btn-cancel {
