@@ -96,8 +96,8 @@
 .stat-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  align-items: flex-start;
+  margin-bottom: 16px;
 }
 
 .stat-label {
@@ -109,28 +109,35 @@
 }
 
 .stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   background: var(--accent-light);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: all 0.3s;
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.1);
 }
 
 .stat-icon svg {
+  width: 20px;
+  height: 20px;
   color: var(--accent-color);
 }
 
 .stat-value {
-  font-size: 36px;
+  font-size: 32px;
   font-weight: 700;
   color: var(--text-primary);
-  line-height: 1;
+  margin-bottom: 8px;
 }
 
-/* Cores dos cards */
+/* Cores específicas */
 .stat-card.total {
   --accent-color: #3b82f6;
   --accent-light: rgba(59, 130, 246, 0.1);

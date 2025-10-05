@@ -94,9 +94,11 @@ export function Agendamentos() {
           return (
             <div key={index} className={`stat-card ${stat.variant}`}>
               <div className="stat-header">
-                <div className="stat-label">{stat.label}</div>
+                <div>
+                  <div className="stat-label">{stat.label}</div>
+                </div>
                 <div className="stat-icon">
-                  <Icon size={20} />
+                  <Icon size={24} />
                 </div>
               </div>
               <div className="stat-value">{stat.value}</div>
