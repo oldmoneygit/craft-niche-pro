@@ -36,6 +36,7 @@ import PlatformServices from "./pages/platform/PlatformServices";
 import PlatformFoodRecords from "./pages/platform/PlatformFoodRecords";
 import PlatformFoodRecordEditor from "./pages/platform/PlatformFoodRecordEditor";
 import PlatformAnamnesisForm from "./pages/platform/PlatformAnamnesisForm";
+import PlatformAnamnesisView from "./pages/platform/PlatformAnamnesisView";
 import { PlatformQuestionnairePreview } from "./pages/platform/PlatformQuestionnairePreview";
 import QuestionnairePublic from "./pages/QuestionnairePublic";
 import PublicQuestionnaireResponse from "./pages/public/PublicQuestionnaireResponse";
@@ -97,6 +98,7 @@ const App = () => (
               {/* Anamnesis Routes */}
               <Route path="/platform/:tenantId/anamnese/nova" element={<PlatformProtectedRoute><PlatformAnamnesisForm /></PlatformProtectedRoute>} />
               <Route path="/platform/:tenantId/anamnese/:anamnesisId" element={<PlatformProtectedRoute><PlatformAnamnesisForm /></PlatformProtectedRoute>} />
+              <Route path="/platform/:tenantId/anamnese/:anamnesisId/view" element={<PlatformProtectedRoute><PlatformAnamnesisView /></PlatformProtectedRoute>} />
 
               {/* Public Questionnaires */}
               <Route path="/questionnaire/:questionnaireId" element={<QuestionnairePublic />} />

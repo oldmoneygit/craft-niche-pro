@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { X, User, Phone, Mail, Calendar, UtensilsCrossed, ClipboardList, Eye, Send, Edit, Package, Plus, RefreshCw, Trash2, CheckCircle, MessageCircle } from 'lucide-react';
+import { X, User, Phone, Mail, Calendar, UtensilsCrossed, ClipboardList, Eye, Send, Edit, Package, Plus, RefreshCw, Trash2, CheckCircle, MessageCircle, FileText } from 'lucide-react';
+import { AnamnesisHistory } from '@/components/platform/AnamnesisHistory';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -34,7 +35,7 @@ export const ClientDetailsModal = ({ client, onClose, onUpdate }: ClientDetailsM
   const navigate = useNavigate();
   const { clientConfig } = useClientConfig();
   
-  const [activeTab, setActiveTab] = useState<'info' | 'services' | 'plan' | 'questionnaires' | 'appointments'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'services' | 'plan' | 'questionnaires' | 'appointments' | 'anamneses'>('info');
   const [activeMealPlan, setActiveMealPlan] = useState<any>(null);
   const [planNutrition, setPlanNutrition] = useState({
     kcal: 0,
@@ -210,7 +211,8 @@ export const ClientDetailsModal = ({ client, onClose, onUpdate }: ClientDetailsM
     { id: 'services', label: 'Serviços', icon: Package, badge: activeSubscriptions.length },
     { id: 'plan', label: 'Plano Alimentar', icon: UtensilsCrossed },
     { id: 'questionnaires', label: 'Questionários', icon: ClipboardList, badge: questionnaires.length },
-    { id: 'appointments', label: 'Consultas', icon: Calendar, badge: appointments.length }
+    { id: 'appointments', label: 'Consultas', icon: Calendar, badge: appointments.length },
+    { id: 'anamneses', label: 'Anamneses', icon: FileText }
   ];
 
   return (
@@ -727,6 +729,13 @@ export const ClientDetailsModal = ({ client, onClose, onUpdate }: ClientDetailsM
                         <p className="text-muted-foreground text-sm">Nenhuma consulta registrada</p>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* Tab: Anamneses */}
+                {activeTab === 'anamneses' && (
+                  <div>
+                    <AnamnesisHistory clientId={client.id} tenantId={client.tenant_id} />
                   </div>
                 )}
               </>
