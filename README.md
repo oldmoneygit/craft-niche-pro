@@ -4,6 +4,48 @@
 
 **URL**: https://lovable.dev/projects/4336999a-0c65-4077-a4dd-af35e2981d79
 
+## 📚 Documentação de Desenvolvimento
+
+### Arquivos Essenciais
+
+- **[SCHEMA.md](docs/SCHEMA.md)** - Documentação completa do banco de dados Supabase
+- **[database.types.ts](src/types/database.types.ts)** - Types TypeScript gerados do schema
+- **[PROMPT-TEMPLATE.md](docs/PROMPT-TEMPLATE.md)** - Template padronizado para implementações
+- **[WORKFLOW-GUIDE.md](docs/WORKFLOW-GUIDE.md)** - Guia completo de desenvolvimento sem erros
+
+### Workflow de Desenvolvimento
+
+**REGRA DE OURO:** Sempre consulte `docs/SCHEMA.md` antes de implementar features de banco de dados.
+
+#### Passo a Passo
+
+1. Consulte `docs/SCHEMA.md` para validar nomes de colunas, foreign keys e ENUMs
+2. Use `docs/PROMPT-TEMPLATE.md` para estruturar a implementação
+3. Siga `docs/WORKFLOW-GUIDE.md` para processo completo
+4. Valide tipos com `src/types/database.types.ts`
+
+#### Para IAs (Claude/Lovable/Bolt)
+
+Quando implementar features relacionadas ao banco:
+
+```
+IMPORTANTE: Consulte docs/SCHEMA.md antes de gerar código.
+Valide todos os nomes de colunas, foreign keys e ENUMs contra o schema.
+```
+
+### Evitando Erros Comuns
+
+❌ **Não faça:**
+- Adivinhar nomes de colunas
+- Usar valores de ENUM não documentados
+- Implementar sem consultar SCHEMA.md
+
+✅ **Faça:**
+- Sempre consulte SCHEMA.md primeiro
+- Valide nomes exatos de colunas
+- Confirme valores de ENUM permitidos
+- Teste queries no SQL Editor do Supabase antes de implementar
+
 ## How can I edit this code?
 
 There are several ways of editing your application.
