@@ -7,9 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Plus, Trash2, GripVertical, Clock, Save, Loader2, Utensils } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Clock, Save, Loader2, Utensils } from 'lucide-react';
 import { toast } from 'sonner';
 import { QuickFoodInput } from '@/components/platform/QuickFoodInput';
+import { RecordFoodItem } from '@/components/platform/RecordFoodItem';
+import { FoodDetailsModal } from '@/components/platform/FoodDetailsModal';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useTenantId } from '@/hooks/useTenantId';
@@ -54,6 +56,8 @@ export default function PlatformFoodRecordEditor() {
   const [showAddMealDialog, setShowAddMealDialog] = useState(false);
   const [newMealTime, setNewMealTime] = useState('08:00');
   const [newMealName, setNewMealName] = useState('');
+  const [selectedFoodForDetails, setSelectedFoodForDetails] = useState<FoodItem | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   useEffect(() => {
     if (clientId && tenantId) {
@@ -216,6 +220,16 @@ export default function PlatformFoodRecordEditor() {
     const updatedMeals = [...meals];
     updatedMeals[mealIndex].items = updatedMeals[mealIndex].items.filter((_, i) => i !== itemIndex);
     setMeals(updatedMeals);
+  };
+
+  const handleShowFoodDetails = (item: FoodItem) => {
+    setSelectedFoodForDetails(item);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleCloseDetails = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedFoodForDetails(null);
   };
 
   const handleSave = async () => {
@@ -623,31 +637,14 @@ export default function PlatformFoodRecordEditor() {
                   placeholder="🔍 Digite alimento..."
                 />
 
-                <div className="mt-4 space-y-2">
+                <div className="mt-4 space-y-3">
                   {meal.items.map((item, itemIndex) => (
-                    <div key={item.id} className="flex items-center gap-3 p-2 bg-gray-700/50 rounded">
-                      <GripVertical className="h-4 w-4 text-gray-500" />
-                      <div className="flex-1 text-gray-100">
-                        {item.food_name}
-                      </div>
-                      <div className="text-gray-300">
-                        {item.quantity} {item.measure_name}
-                      </div>
-                      <div className="text-gray-400">
-                        {Math.round(item.grams)}g
-                      </div>
-                      <div className="text-gray-100 font-medium">
-                        {Math.round(item.kcal)} kcal
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleRemoveFood(mealIndex, itemIndex)}
-                        className="text-red-400 hover:text-red-300"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <RecordFoodItem
+                      key={item.id}
+                      item={item}
+                      onRemove={() => handleRemoveFood(mealIndex, itemIndex)}
+                      onShowDetails={() => handleShowFoodDetails(item)}
+                    />
                   ))}
                 </div>
 
@@ -688,73 +685,78 @@ export default function PlatformFoodRecordEditor() {
                 Resumo do Dia
               </h3>
               
-              <div className="flex items-center justify-between">
-                <div className="grid grid-cols-4 gap-6">
-                  {/* Total Kcal - LARANJA */}
-                  <div className="text-center">
-                    <div className="text-orange-400 font-bold text-3xl">
-                      {Math.round(totals.kcal)}
-                    </div>
-                    <div className="text-orange-400/60 text-xs mt-1 font-medium">
-                      kcal
-                    </div>
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                {/* Total Kcal - LARANJA */}
+                <div className="text-center">
+                  <div className="text-orange-400 font-bold text-4xl">
+                    {Math.round(totals.kcal)}
                   </div>
-                  
-                  {/* Proteínas - AZUL */}
-                  <div className="text-center">
-                    <div className="text-blue-400 font-bold text-2xl">
-                      {Math.round(totals.protein)}g
-                    </div>
-                    <div className="text-blue-400/60 text-xs mt-1 font-medium">
-                      Proteínas
-                    </div>
-                  </div>
-                  
-                  {/* Carboidratos - ROXO */}
-                  <div className="text-center">
-                    <div className="text-purple-400 font-bold text-2xl">
-                      {Math.round(totals.carb)}g
-                    </div>
-                    <div className="text-purple-400/60 text-xs mt-1 font-medium">
-                      Carboidratos
-                    </div>
-                  </div>
-                  
-                  {/* Gorduras - AMARELO */}
-                  <div className="text-center">
-                    <div className="text-yellow-400 font-bold text-2xl">
-                      {Math.round(totals.fat)}g
-                    </div>
-                    <div className="text-yellow-400/60 text-xs mt-1 font-medium">
-                      Gorduras
-                    </div>
+                  <div className="text-orange-400/60 text-xs mt-1 font-medium">
+                    kcal
                   </div>
                 </div>
                 
-                <Button
-                  onClick={handleConvertToPlan}
-                  disabled={isConverting || !recordId}
-                  size="lg"
-                  className="bg-primary hover:bg-primary/90 
-                             disabled:opacity-50 disabled:cursor-not-allowed
-                             transition-all duration-200"
-                >
-                  {isConverting ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Criando plano...
-                    </>
-                  ) : (
-                    <>
-                      <Utensils className="mr-2 h-5 w-5" />
-                      Criar Plano Alimentar
-                    </>
-                  )}
-                </Button>
+                {/* Proteínas - AZUL */}
+                <div className="text-center">
+                  <div className="text-blue-400 font-bold text-3xl">
+                    {Math.round(totals.protein)}g
+                  </div>
+                  <div className="text-blue-400/60 text-xs mt-1 font-medium">
+                    Proteínas
+                  </div>
+                </div>
+                
+                {/* Carboidratos - ROXO */}
+                <div className="text-center">
+                  <div className="text-purple-400 font-bold text-3xl">
+                    {Math.round(totals.carb)}g
+                  </div>
+                  <div className="text-purple-400/60 text-xs mt-1 font-medium">
+                    Carboidratos
+                  </div>
+                </div>
+                
+                {/* Gorduras - AMARELO */}
+                <div className="text-center">
+                  <div className="text-yellow-400 font-bold text-3xl">
+                    {Math.round(totals.fat)}g
+                  </div>
+                  <div className="text-yellow-400/60 text-xs mt-1 font-medium">
+                    Gorduras
+                  </div>
+                </div>
               </div>
+              
+              <button 
+                onClick={handleConvertToPlan}
+                disabled={isConverting || !recordId}
+                className="w-full bg-green-600 hover:bg-green-700 
+                           text-white font-semibold py-3 rounded-lg 
+                           transition-colors flex items-center justify-center gap-2
+                           disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isConverting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Criando plano...
+                  </>
+                ) : (
+                  <>
+                    <Utensils className="w-5 h-5" />
+                    Criar Plano Alimentar a partir deste Recordatório
+                  </>
+                )}
+              </button>
             </CardContent>
           </Card>
         )}
+        
+        {/* Modal de Detalhes */}
+        <FoodDetailsModal 
+          food={selectedFoodForDetails}
+          isOpen={isDetailsModalOpen}
+          onClose={handleCloseDetails}
+        />
       </div>
 
       {/* Add Meal Dialog */}
