@@ -27,10 +27,13 @@ export function AnamnesisHistory({ clientId, tenantId }: AnamnesisHistoryProps) 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('🔍 AnamnesisHistory montado com:', { clientId, tenantId });
     loadAnamneses();
   }, [clientId]);
 
   const loadAnamneses = async () => {
+    console.log('🔍 Buscando anamneses para:', { clientId, tenantId });
+    
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -40,7 +43,14 @@ export function AnamnesisHistory({ clientId, tenantId }: AnamnesisHistoryProps) 
         .eq('tenant_id', tenantId)
         .order('anamnesis_date', { ascending: false });
 
-      if (error) throw error;
+      console.log('📊 Resultado da query:', { data, error, count: data?.length });
+
+      if (error) {
+        console.error('❌ Erro na query:', error);
+        throw error;
+      }
+      
+      console.log('✅ Anamneses carregadas:', data?.length || 0);
       setAnamneses((data as any) || []);
     } catch (error) {
       console.error('Erro ao carregar anamneses:', error);
