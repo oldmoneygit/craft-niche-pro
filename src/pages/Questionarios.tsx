@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, FileText, CheckCircle, MessageSquare, TrendingUp } from 'lucide-react';
 import { StatCard } from '@/components/shared/StatCard';
 import { QuestionarioCard } from '@/components/questionarios/QuestionarioCard';
@@ -7,7 +7,24 @@ import { QuestionarioModal } from '@/components/questionarios/QuestionarioModal'
 export default function Questionarios() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('Todos');
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const checkTheme = () => {
+      const theme = document.documentElement.getAttribute('data-theme') || 
+                    document.body.getAttribute('data-theme') ||
+                    (document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+      setIsDark(theme === 'dark');
+    };
+
+    checkTheme();
+
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+
+    return () => observer.disconnect();
+  }, []);
 
   const filters = ['Todos', 'Anamnese', 'Hábitos', 'Recordatório', 'Satisfação'];
 
@@ -139,7 +156,7 @@ export default function Questionarios() {
                 border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
                 background: activeFilter === filter ? '#10b981' : (isDark ? 'rgba(26, 26, 26, 0.7)' : 'rgba(255, 255, 255, 0.9)'),
                 backdropFilter: 'blur(10px)',
-                color: activeFilter === filter ? 'white' : (isDark ? '#a3a3a3' : '#6b7280'),
+                color: activeFilter === filter ? 'white' : (isDark ? '#a3a3a3' : '#374151'),
                 fontWeight: 600,
                 fontSize: '14px',
                 cursor: 'pointer',
@@ -154,7 +171,7 @@ export default function Questionarios() {
               onMouseLeave={(e) => {
                 if (activeFilter !== filter) {
                   e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
-                  e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
+                  e.currentTarget.style.color = isDark ? '#a3a3a3' : '#374151';
                 }
               }}
             >
