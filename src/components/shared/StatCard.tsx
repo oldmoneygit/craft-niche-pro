@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface StatCardProps {
   label: string;
@@ -32,13 +32,32 @@ const variantStyles = {
 
 export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, variant }) => {
   const config = variantStyles[variant];
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    // Verificar tema inicial
+    const checkTheme = () => {
+      const theme = document.documentElement.getAttribute('data-theme') || 
+                    document.body.getAttribute('data-theme') ||
+                    (document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+      setIsDark(theme === 'dark');
+    };
+
+    checkTheme();
+
+    // Observer para mudanças de tema
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div
       style={{
         background: isDark 
-          ? 'linear-gradient(135deg, rgba(26, 26, 26, 0.7) 0%, rgba(20, 20, 20, 0.8) 100%)' 
+          ? 'rgba(38, 38, 38, 0.6)' 
           : 'rgba(255, 255, 255, 0.9)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
