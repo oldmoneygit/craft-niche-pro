@@ -16,6 +16,8 @@ export const AgendamentoCalendar: React.FC<AgendamentoCalendarProps> = ({
 }) => {
   const timeSlots = ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
   const unavailableSlots = ['08:00', '15:00'];
+  
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -25,7 +27,7 @@ export const AgendamentoCalendar: React.FC<AgendamentoCalendarProps> = ({
           style={{
             fontSize: '13px',
             fontWeight: 600,
-            color: 'var(--text-primary)',
+            color: isDark ? '#fafafa' : '#171717',
             marginBottom: '8px',
             display: 'block'
           }}
@@ -34,8 +36,8 @@ export const AgendamentoCalendar: React.FC<AgendamentoCalendarProps> = ({
         </label>
         <div
           style={{
-            background: 'var(--bg-primary)',
-            border: '1px solid var(--border)',
+            background: isDark ? '#171717' : '#ffffff',
+            border: isDark ? '1px solid #404040' : '1px solid #e5e5e5',
             borderRadius: '12px',
             padding: '16px'
           }}
@@ -52,7 +54,7 @@ export const AgendamentoCalendar: React.FC<AgendamentoCalendarProps> = ({
               style={{
                 fontSize: '16px',
                 fontWeight: 600,
-                color: 'var(--text-primary)'
+                color: isDark ? '#fafafa' : '#171717'
               }}
             >
               Outubro 2025
@@ -63,30 +65,56 @@ export const AgendamentoCalendar: React.FC<AgendamentoCalendarProps> = ({
                   width: '32px',
                   height: '32px',
                   borderRadius: '8px',
-                  background: 'var(--bg-secondary)',
-                  border: '1px solid var(--border)',
+                  background: isDark ? '#0a0a0a' : '#fafafa',
+                  border: isDark ? '1px solid #404040' : '1px solid #e5e5e5',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#10b981';
+                  e.currentTarget.style.borderColor = '#10b981';
+                  const svg = e.currentTarget.querySelector('svg');
+                  if (svg) (svg as SVGElement).style.color = 'white';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = isDark ? '#0a0a0a' : '#fafafa';
+                  e.currentTarget.style.borderColor = isDark ? '#404040' : '#e5e5e5';
+                  const svg = e.currentTarget.querySelector('svg');
+                  if (svg) (svg as SVGElement).style.color = isDark ? '#d4d4d4' : '#404040';
                 }}
               >
-                <ChevronLeft style={{ width: '16px', height: '16px', color: 'var(--text-secondary)' }} />
+                <ChevronLeft style={{ width: '16px', height: '16px', color: isDark ? '#d4d4d4' : '#404040' }} />
               </button>
               <button
                 style={{
                   width: '32px',
                   height: '32px',
                   borderRadius: '8px',
-                  background: 'var(--bg-secondary)',
-                  border: '1px solid var(--border)',
+                  background: isDark ? '#0a0a0a' : '#fafafa',
+                  border: isDark ? '1px solid #404040' : '1px solid #e5e5e5',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#10b981';
+                  e.currentTarget.style.borderColor = '#10b981';
+                  const svg = e.currentTarget.querySelector('svg');
+                  if (svg) (svg as SVGElement).style.color = 'white';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = isDark ? '#0a0a0a' : '#fafafa';
+                  e.currentTarget.style.borderColor = isDark ? '#404040' : '#e5e5e5';
+                  const svg = e.currentTarget.querySelector('svg');
+                  if (svg) (svg as SVGElement).style.color = isDark ? '#d4d4d4' : '#404040';
                 }}
               >
-                <ChevronRight style={{ width: '16px', height: '16px', color: 'var(--text-secondary)' }} />
+                <ChevronRight style={{ width: '16px', height: '16px', color: isDark ? '#d4d4d4' : '#404040' }} />
               </button>
             </div>
           </div>
@@ -107,7 +135,7 @@ export const AgendamentoCalendar: React.FC<AgendamentoCalendarProps> = ({
                 style={{
                   fontSize: '11px',
                   fontWeight: 600,
-                  color: 'var(--text-muted)',
+                  color: isDark ? '#a3a3a3' : '#737373',
                   padding: '8px 4px'
                 }}
               >
@@ -125,7 +153,7 @@ export const AgendamentoCalendar: React.FC<AgendamentoCalendarProps> = ({
                   justifyContent: 'center',
                   borderRadius: '8px',
                   fontWeight: 600,
-                  color: 'var(--text-muted)',
+                  color: isDark ? '#a3a3a3' : '#737373',
                   opacity: 0.3
                 }}
               >
@@ -148,7 +176,7 @@ export const AgendamentoCalendar: React.FC<AgendamentoCalendarProps> = ({
                     justifyContent: 'center',
                     borderRadius: '8px',
                     fontWeight: 600,
-                    color: isSelected ? 'white' : 'var(--text-secondary)',
+                    color: isSelected ? 'white' : (isDark ? '#d4d4d4' : '#404040'),
                     cursor: 'pointer',
                     background: isSelected ? '#10b981' : 'transparent',
                     position: 'relative',
@@ -156,7 +184,7 @@ export const AgendamentoCalendar: React.FC<AgendamentoCalendarProps> = ({
                   }}
                   onMouseEnter={(e) => {
                     if (!isSelected) {
-                      e.currentTarget.style.background = 'var(--bg-secondary)';
+                      e.currentTarget.style.background = isDark ? '#0a0a0a' : '#fafafa';
                     }
                   }}
                   onMouseLeave={(e) => {
@@ -192,7 +220,7 @@ export const AgendamentoCalendar: React.FC<AgendamentoCalendarProps> = ({
                   justifyContent: 'center',
                   borderRadius: '8px',
                   fontWeight: 600,
-                  color: 'var(--text-muted)',
+                  color: isDark ? '#a3a3a3' : '#737373',
                   opacity: 0.3
                 }}
               >
@@ -209,7 +237,7 @@ export const AgendamentoCalendar: React.FC<AgendamentoCalendarProps> = ({
           style={{
             fontSize: '13px',
             fontWeight: 600,
-            color: 'var(--text-primary)',
+            color: isDark ? '#fafafa' : '#171717',
             marginBottom: '8px',
             display: 'block'
           }}
@@ -234,16 +262,26 @@ export const AgendamentoCalendar: React.FC<AgendamentoCalendarProps> = ({
                 disabled={isUnavailable}
                 style={{
                   padding: '10px',
-                  background: isSelected ? '#10b981' : 'var(--bg-primary)',
-                  border: `1px solid ${isSelected ? '#10b981' : 'var(--border)'}`,
+                  background: isSelected ? '#10b981' : (isDark ? '#171717' : '#ffffff'),
+                  border: `1px solid ${isSelected ? '#10b981' : (isDark ? '#404040' : '#e5e5e5')}`,
                   borderRadius: '8px',
                   textAlign: 'center',
                   fontSize: '13px',
                   fontWeight: 600,
-                  color: isSelected ? 'white' : 'var(--text-secondary)',
+                  color: isSelected ? 'white' : (isDark ? '#d4d4d4' : '#404040'),
                   cursor: isUnavailable ? 'not-allowed' : 'pointer',
                   opacity: isUnavailable ? 0.3 : 1,
                   transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isUnavailable && !isSelected) {
+                    e.currentTarget.style.background = isDark ? '#0a0a0a' : '#fafafa';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isUnavailable && !isSelected) {
+                    e.currentTarget.style.background = isDark ? '#171717' : '#ffffff';
+                  }
                 }}
               >
                 {time}

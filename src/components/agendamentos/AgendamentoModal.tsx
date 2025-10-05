@@ -21,6 +21,9 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({ isOpen, onCl
     }
   };
 
+  // Detectar tema atual
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
   return (
     <div
       style={{
@@ -40,23 +43,31 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({ isOpen, onCl
     >
       <div
         style={{
-          background: 'var(--bg-card)',
+          background: isDark 
+            ? 'rgba(38, 38, 38, 0.6)' 
+            : 'rgba(255, 255, 255, 0.9)',
           backdropFilter: 'blur(10px)',
           WebkitBackdropFilter: 'blur(10px)',
-          border: '1px solid var(--border)',
+          border: isDark 
+            ? '1px solid #404040' 
+            : '1px solid #e5e5e5',
           borderRadius: '16px',
           maxWidth: '900px',
           width: '100%',
           maxHeight: '90vh',
           overflowY: 'auto',
-          boxShadow: '0 24px 48px var(--shadow)'
+          boxShadow: isDark 
+            ? '0 24px 48px rgba(0, 0, 0, 0.3)' 
+            : '0 24px 48px rgba(0, 0, 0, 0.08)'
         }}
       >
         {/* Header */}
         <div
           style={{
             padding: '24px',
-            borderBottom: '1px solid var(--border)',
+            borderBottom: isDark 
+              ? '1px solid #404040' 
+              : '1px solid #e5e5e5',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center'
@@ -66,7 +77,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({ isOpen, onCl
             style={{
               fontSize: '24px',
               fontWeight: 700,
-              color: 'var(--text-primary)'
+              color: isDark ? '#fafafa' : '#171717'
             }}
           >
             Novo Agendamento
@@ -77,8 +88,10 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({ isOpen, onCl
               width: '32px',
               height: '32px',
               borderRadius: '8px',
-              background: 'var(--bg-primary)',
-              border: '1px solid var(--border)',
+              background: isDark ? '#171717' : '#ffffff',
+              border: isDark 
+                ? '1px solid #404040' 
+                : '1px solid #e5e5e5',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -88,13 +101,21 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({ isOpen, onCl
             onMouseEnter={(e) => {
               e.currentTarget.style.background = '#ef4444';
               e.currentTarget.style.borderColor = '#ef4444';
+              const svg = e.currentTarget.querySelector('svg');
+              if (svg) (svg as SVGElement).style.color = 'white';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'var(--bg-primary)';
-              e.currentTarget.style.borderColor = 'var(--border)';
+              e.currentTarget.style.background = isDark ? '#171717' : '#ffffff';
+              e.currentTarget.style.borderColor = isDark ? '#404040' : '#e5e5e5';
+              const svg = e.currentTarget.querySelector('svg');
+              if (svg) (svg as SVGElement).style.color = isDark ? '#d4d4d4' : '#404040';
             }}
           >
-            <X style={{ width: '20px', height: '20px', color: 'var(--text-secondary)' }} />
+            <X style={{ 
+              width: '20px', 
+              height: '20px', 
+              color: isDark ? '#d4d4d4' : '#404040' 
+            }} />
           </button>
         </div>
 
@@ -123,7 +144,9 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({ isOpen, onCl
         <div
           style={{
             padding: '24px',
-            borderTop: '1px solid var(--border)',
+            borderTop: isDark 
+              ? '1px solid #404040' 
+              : '1px solid #e5e5e5',
             display: 'flex',
             justifyContent: 'flex-end',
             gap: '12px'
@@ -133,14 +156,22 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({ isOpen, onCl
             onClick={onClose}
             style={{
               padding: '12px 24px',
-              background: 'var(--bg-primary)',
-              border: '1px solid var(--border)',
+              background: isDark ? '#171717' : '#ffffff',
+              border: isDark 
+                ? '1px solid #404040' 
+                : '1px solid #e5e5e5',
               borderRadius: '10px',
               fontSize: '14px',
               fontWeight: 600,
-              color: 'var(--text-secondary)',
+              color: isDark ? '#d4d4d4' : '#404040',
               cursor: 'pointer',
               transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = isDark ? '#262626' : '#fafafa';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = isDark ? '#171717' : '#ffffff';
             }}
           >
             Cancelar
