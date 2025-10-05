@@ -14,10 +14,10 @@ interface SaveTemplateModalProps {
   onClose: () => void;
   mealPlanId: string;
   currentPlan: {
-    calorie_target: number;
-    protein_target_g: number;
-    carb_target_g: number;
-    fat_target_g: number;
+    target_kcal: number;
+    target_protein: number;
+    target_carbs: number;
+    target_fats: number;
     goal?: string;
   };
 }
@@ -84,10 +84,10 @@ export function SaveTemplateModal({
           created_by: profile.id,
           name: name.trim(),
           description: description.trim() || null,
-          reference_calories: Math.round(currentPlan.calorie_target || 2000),
-          reference_protein: currentPlan.protein_target_g || 150,
-          reference_carbs: currentPlan.carb_target_g || 250,
-          reference_fat: currentPlan.fat_target_g || 67,
+          reference_calories: Math.round(currentPlan.target_kcal || 2000),
+          reference_protein: currentPlan.target_protein || 150,
+          reference_carbs: currentPlan.target_carbs || 250,
+          reference_fat: currentPlan.target_fats || 67,
           objective: currentPlan.goal || null,
           tags: tags.length > 0 ? tags : null
         })
@@ -240,10 +240,10 @@ export function SaveTemplateModal({
           {/* Preview dos valores de referência */}
           <div className="bg-muted p-3 rounded-md text-sm space-y-1">
             <p className="font-medium">Valores de referência:</p>
-            <p>Calorias: {Math.round(currentPlan.calorie_target || 0)} kcal</p>
-            <p>Proteínas: {(currentPlan.protein_target_g || 0).toFixed(1)}g</p>
-            <p>Carboidratos: {(currentPlan.carb_target_g || 0).toFixed(1)}g</p>
-            <p>Gorduras: {(currentPlan.fat_target_g || 0).toFixed(1)}g</p>
+            <p>Calorias: {Math.round(currentPlan.target_kcal || 0)} kcal</p>
+            <p>Proteínas: {(currentPlan.target_protein || 0).toFixed(1)}g</p>
+            <p>Carboidratos: {(currentPlan.target_carbs || 0).toFixed(1)}g</p>
+            <p>Gorduras: {(currentPlan.target_fats || 0).toFixed(1)}g</p>
           </div>
         </div>
         

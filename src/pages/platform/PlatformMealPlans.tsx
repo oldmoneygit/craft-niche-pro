@@ -292,9 +292,9 @@ export default function PlatformMealPlans() {
                         Plano Ativo
                       </span>
                     )}
-                    {plan.calorie_target && (
+                    {plan.target_kcal && (
                       <p className="text-xs text-muted-foreground mt-1">
-                        Meta: {plan.calorie_target} kcal/dia
+                        Meta: {plan.target_kcal} kcal/dia
                       </p>
                     )}
                   </div>

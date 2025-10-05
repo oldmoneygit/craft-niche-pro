@@ -385,10 +385,10 @@ export default function PlatformMealPlanViewer() {
       await supabase
         .from('meal_plans')
         .update({
-          calories_target: Math.round(totals.kcal),
-          protein_target_g: Math.round(totals.protein * 10) / 10,
-          carb_target_g: Math.round(totals.carb * 10) / 10,
-          fat_target_g: Math.round(totals.fat * 10) / 10,
+          target_kcal: Math.round(totals.kcal),
+          target_protein: Math.round(totals.protein * 10) / 10,
+          target_carbs: Math.round(totals.carb * 10) / 10,
+          target_fats: Math.round(totals.fat * 10) / 10,
           updated_at: new Date().toISOString()
         })
         .eq('id', planId);
@@ -504,7 +504,7 @@ export default function PlatformMealPlanViewer() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
                 <p className="text-sm text-muted-foreground mb-1">Meta</p>
-                <p className="text-2xl font-bold">{plan.calorie_target || '-'} kcal</p>
+                <p className="text-2xl font-bold">{plan.target_kcal || '-'} kcal</p>
               </div>
               <div className="text-center">
                 <p className="text-sm text-muted-foreground mb-1">Total</p>
@@ -651,10 +651,10 @@ export default function PlatformMealPlanViewer() {
         onClose={() => setShowSaveTemplateModal(false)}
         mealPlanId={planId!}
         currentPlan={{
-          calorie_target: totals.kcal,
-          protein_target_g: totals.protein,
-          carb_target_g: totals.carb,
-          fat_target_g: totals.fat,
+          target_kcal: totals.kcal,
+          target_protein: totals.protein,
+          target_carbs: totals.carb,
+          target_fats: totals.fat,
           goal: plan.goal
         }}
       />

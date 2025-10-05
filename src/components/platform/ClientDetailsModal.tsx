@@ -480,7 +480,7 @@ export const ClientDetailsModal = ({ client, onClose, onUpdate }: ClientDetailsM
                             <h4 className="font-semibold mb-4 text-center">Calorias Diárias</h4>
                             <div className="w-48 h-48 mx-auto mb-4">
                               <CircularProgressbar
-                                value={calculateNutritionProgress(planNutrition.kcal, activeMealPlan.calorie_target || 2000)}
+                                value={calculateNutritionProgress(planNutrition.kcal, activeMealPlan.target_kcal || 2000)}
                                 text={`${planNutrition.kcal.toFixed(0)}`}
                                 styles={buildStyles({
                                   textSize: '16px',
@@ -491,10 +491,10 @@ export const ClientDetailsModal = ({ client, onClose, onUpdate }: ClientDetailsM
                               />
                             </div>
                             <p className="text-center text-sm text-muted-foreground">
-                              Meta: {activeMealPlan.calorie_target || 2000} kcal
+                              Meta: {activeMealPlan.target_kcal || 2000} kcal
                             </p>
                             <p className="text-center text-xs text-muted-foreground mt-1">
-                              {calculateNutritionProgress(planNutrition.kcal, activeMealPlan.calorie_target || 2000)}% da meta
+                              {calculateNutritionProgress(planNutrition.kcal, activeMealPlan.target_kcal || 2000)}% da meta
                             </p>
                           </div>
 
@@ -508,17 +508,17 @@ export const ClientDetailsModal = ({ client, onClose, onUpdate }: ClientDetailsM
                                 <div className="flex justify-between text-sm mb-1">
                                   <span className="font-medium">Proteínas</span>
                                   <span className="font-bold">
-                                    {planNutrition.protein.toFixed(1)}g / {activeMealPlan.protein_target_g || 150}g
+                                    {planNutrition.protein.toFixed(1)}g / {activeMealPlan.target_protein || 150}g
                                   </span>
                                 </div>
                                 <div className="w-full bg-secondary rounded-full h-3">
                                   <div
                                     className="bg-blue-500 h-3 rounded-full transition-all"
-                                    style={{ width: `${Math.min(calculateNutritionProgress(planNutrition.protein, activeMealPlan.protein_target_g || 150), 100)}%` }}
+                                    style={{ width: `${Math.min(calculateNutritionProgress(planNutrition.protein, activeMealPlan.target_protein || 150), 100)}%` }}
                                   />
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                  {calculateNutritionProgress(planNutrition.protein, activeMealPlan.protein_target_g || 150)}%
+                                  {calculateNutritionProgress(planNutrition.protein, activeMealPlan.target_protein || 150)}%
                                 </p>
                               </div>
 
@@ -527,17 +527,17 @@ export const ClientDetailsModal = ({ client, onClose, onUpdate }: ClientDetailsM
                                 <div className="flex justify-between text-sm mb-1">
                                   <span className="font-medium">Carboidratos</span>
                                   <span className="font-bold">
-                                    {planNutrition.carb.toFixed(1)}g / {activeMealPlan.carb_target_g || 250}g
+                                    {planNutrition.carb.toFixed(1)}g / {activeMealPlan.target_carbs || 250}g
                                   </span>
                                 </div>
                                 <div className="w-full bg-secondary rounded-full h-3">
                                   <div
                                     className="bg-orange-500 h-3 rounded-full transition-all"
-                                    style={{ width: `${Math.min(calculateNutritionProgress(planNutrition.carb, activeMealPlan.carb_target_g || 250), 100)}%` }}
+                                    style={{ width: `${Math.min(calculateNutritionProgress(planNutrition.carb, activeMealPlan.target_carbs || 250), 100)}%` }}
                                   />
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                  {calculateNutritionProgress(planNutrition.carb, activeMealPlan.carb_target_g || 250)}%
+                                  {calculateNutritionProgress(planNutrition.carb, activeMealPlan.target_carbs || 250)}%
                                 </p>
                               </div>
 
@@ -546,17 +546,17 @@ export const ClientDetailsModal = ({ client, onClose, onUpdate }: ClientDetailsM
                                 <div className="flex justify-between text-sm mb-1">
                                   <span className="font-medium">Gorduras</span>
                                   <span className="font-bold">
-                                    {planNutrition.fat.toFixed(1)}g / {activeMealPlan.fat_target_g || 65}g
+                                    {planNutrition.fat.toFixed(1)}g / {activeMealPlan.target_fats || 65}g
                                   </span>
                                 </div>
                                 <div className="w-full bg-secondary rounded-full h-3">
                                   <div
                                     className="bg-yellow-500 h-3 rounded-full transition-all"
-                                    style={{ width: `${Math.min(calculateNutritionProgress(planNutrition.fat, activeMealPlan.fat_target_g || 65), 100)}%` }}
+                                    style={{ width: `${Math.min(calculateNutritionProgress(planNutrition.fat, activeMealPlan.target_fats || 65), 100)}%` }}
                                   />
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                  {calculateNutritionProgress(planNutrition.fat, activeMealPlan.fat_target_g || 65)}%
+                                  {calculateNutritionProgress(planNutrition.fat, activeMealPlan.target_fats || 65)}%
                                 </p>
                               </div>
                             </div>

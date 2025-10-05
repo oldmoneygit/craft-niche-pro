@@ -95,10 +95,10 @@ export function ComparePlansDialog({
     );
   }
   
-  const caloriesDiff = getDifference(plan1.calorie_target || 0, plan2.calorie_target || 0);
-  const proteinDiff = getDifference(plan1.protein_target_g || 0, plan2.protein_target_g || 0);
-  const carbsDiff = getDifference(plan1.carb_target_g || 0, plan2.carb_target_g || 0);
-  const fatDiff = getDifference(plan1.fat_target_g || 0, plan2.fat_target_g || 0);
+  const caloriesDiff = getDifference(plan1.target_kcal || 0, plan2.target_kcal || 0);
+  const proteinDiff = getDifference(plan1.target_protein || 0, plan2.target_protein || 0);
+  const carbsDiff = getDifference(plan1.target_carbs || 0, plan2.target_carbs || 0);
+  const fatDiff = getDifference(plan1.target_fats || 0, plan2.target_fats || 0);
   
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -137,10 +137,10 @@ export function ComparePlansDialog({
                   </div>
                 </div>
                 <div className="text-center font-medium">
-                  {Math.round(plan1.calorie_target || 0)} kcal
+                  {Math.round(plan1.target_kcal || 0)} kcal
                 </div>
                 <div className="text-center font-medium">
-                  {Math.round(plan2.calorie_target || 0)} kcal
+                  {Math.round(plan2.target_kcal || 0)} kcal
                 </div>
                 
                 {/* Proteínas */}
@@ -152,10 +152,10 @@ export function ComparePlansDialog({
                   </div>
                 </div>
                 <div className="text-center font-medium">
-                  {(plan1.protein_target_g || 0).toFixed(1)}g
+                  {(plan1.target_protein || 0).toFixed(1)}g
                 </div>
                 <div className="text-center font-medium">
-                  {(plan2.protein_target_g || 0).toFixed(1)}g
+                  {(plan2.target_protein || 0).toFixed(1)}g
                 </div>
                 
                 {/* Carboidratos */}
@@ -167,10 +167,10 @@ export function ComparePlansDialog({
                   </div>
                 </div>
                 <div className="text-center font-medium">
-                  {(plan1.carb_target_g || 0).toFixed(1)}g
+                  {(plan1.target_carbs || 0).toFixed(1)}g
                 </div>
                 <div className="text-center font-medium">
-                  {(plan2.carb_target_g || 0).toFixed(1)}g
+                  {(plan2.target_carbs || 0).toFixed(1)}g
                 </div>
                 
                 {/* Gorduras */}
@@ -182,10 +182,10 @@ export function ComparePlansDialog({
                   </div>
                 </div>
                 <div className="text-center font-medium">
-                  {(plan1.fat_target_g || 0).toFixed(1)}g
+                  {(plan1.target_fats || 0).toFixed(1)}g
                 </div>
                 <div className="text-center font-medium">
-                  {(plan2.fat_target_g || 0).toFixed(1)}g
+                  {(plan2.target_fats || 0).toFixed(1)}g
                 </div>
               </div>
             </CardContent>

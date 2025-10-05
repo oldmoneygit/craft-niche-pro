@@ -52,10 +52,10 @@ export function MealPlanHistory({
         version,
         is_active,
         status,
-        calorie_target,
-        protein_target_g,
-        carb_target_g,
-        fat_target_g,
+        target_kcal,
+        target_protein,
+        target_carbs,
+        target_fats,
         notes,
         created_at,
         updated_at,
@@ -92,8 +92,8 @@ export function MealPlanHistory({
   };
   
   const getCaloriesTrend = (plan: any) => {
-    const target = plan.calorie_target || 2000;
-    const actual = plan.calorie_target || 2000; // Por enquanto, usa o target
+    const target = plan.target_kcal || 2000;
+    const actual = plan.target_kcal || 2000; // Por enquanto, usa o target
     const diff = actual - target;
     const percentage = (diff / target) * 100;
     
@@ -212,28 +212,28 @@ export function MealPlanHistory({
                 <CardContent className="space-y-3">
                   {/* Macros resumidos */}
                   <div className="grid grid-cols-4 gap-2 text-xs">
-                    <div>
-                      <p className="text-muted-foreground">Calorias</p>
-                      <p className="font-medium">
-                        {Math.round(plan.calorie_target || 0)} kcal
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Proteínas</p>
-                      <p className="font-medium">
-                        {(plan.protein_target_g || 0).toFixed(1)}g
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Carbos</p>
-                      <p className="font-medium">
-                        {(plan.carb_target_g || 0).toFixed(1)}g
+                  <div>
+                    <p className="text-muted-foreground">Calorias</p>
+                    <p className="font-medium">
+                      {Math.round(plan.target_kcal || 0)} kcal
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Proteínas</p>
+                    <p className="font-medium">
+                      {(plan.target_protein || 0).toFixed(1)}g
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Carbos</p>
+                    <p className="font-medium">
+                      {(plan.target_carbs || 0).toFixed(1)}g
                       </p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Gorduras</p>
                       <p className="font-medium">
-                        {(plan.fat_target_g || 0).toFixed(1)}g
+                        {(plan.target_fats || 0).toFixed(1)}g
                       </p>
                     </div>
                   </div>
