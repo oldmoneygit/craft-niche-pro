@@ -454,8 +454,8 @@ export default function PlatformFoodRecordEditor() {
           .from('record_meals' as any)
           .insert({
             record_id: recordId,
-            meal_time: mealTemplate.time,
-            meal_name: mealTemplate.name,
+            time: mealTemplate.time,
+            name: mealTemplate.name,
             order_index: index,
             notes: ''
           })
@@ -645,7 +645,7 @@ export default function PlatformFoodRecordEditor() {
           protein_target_g: Math.round(totals.protein),
           carb_target_g: Math.round(totals.carbs),
           fat_target_g: Math.round(totals.fats),
-          status: 'active'
+          status: 'ativo'
         })
         .select()
         .single();
@@ -669,8 +669,8 @@ export default function PlatformFoodRecordEditor() {
           .from('meals' as any)
           .insert({
             meal_plan_id: (newPlan as any).id,
-            name: meal.meal_name,
-            time: meal.meal_time,
+            name: meal.name,
+            time: meal.time,
             order_index: meal.order_index || 0
           })
           .select()
@@ -681,7 +681,7 @@ export default function PlatformFoodRecordEditor() {
           continue;
         }
 
-        console.log(`✅ Meal "${meal.meal_name}" criada`);
+        console.log(`✅ Meal "${meal.name}" criada`);
 
         const items = meal.record_items.map((item: any) => ({
           meal_id: (newMeal as any).id,
