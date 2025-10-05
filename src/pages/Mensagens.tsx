@@ -55,7 +55,7 @@ export function Mensagens() {
       {/* Header */}
       <div className="mensagens-header">
         <div className="header-left">
-          <h1>Comunicação</h1>
+          <h1>Mensagens</h1>
           <p>Gerencie conversas e mensagens com seus clientes</p>
         </div>
         <div className="header-actions">
