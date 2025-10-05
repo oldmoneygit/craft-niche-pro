@@ -67,7 +67,7 @@
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 2px 12px var(--shadow);
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -88,7 +88,10 @@
 
 .stat-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px var(--shadow);
+  box-shadow: 0 12px 32px var(--shadow);
+  backdrop-filter: blur(30px);
+  background: linear-gradient(135deg, var(--bg-content) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .stat-card:hover::before {
@@ -140,22 +143,22 @@
 /* Cores específicas */
 .stat-card.total {
   --accent-color: #3b82f6;
-  --accent-light: rgba(59, 130, 246, 0.2);
+  --accent-light: #dbeafe;
 }
 
 .stat-card.today {
   --accent-color: #f59e0b;
-  --accent-light: rgba(245, 158, 11, 0.2);
+  --accent-light: #fef3c7;
 }
 
 .stat-card.confirmed {
   --accent-color: #10b981;
-  --accent-light: rgba(16, 185, 129, 0.2);
+  --accent-light: #d1fae5;
 }
 
 .stat-card.completed {
   --accent-color: #8b5cf6;
-  --accent-light: rgba(139, 92, 246, 0.2);
+  --accent-light: #ede9fe;
 }
 
 /* ==================== APPOINTMENTS SECTION ==================== */
