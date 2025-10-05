@@ -21,9 +21,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    document.documentElement.classList.remove('dark', 'light');
-    document.documentElement.classList.add(theme);
+    const root = document.documentElement;
+    const body = document.body;
+    
+    // Apply to both html and body for maximum compatibility
+    root.setAttribute('data-theme', theme);
+    body.setAttribute('data-theme', theme);
+    
+    root.classList.remove('dark', 'light');
+    root.classList.add(theme);
+    
+    body.classList.remove('dark', 'light');
+    body.classList.add(theme);
+    
     localStorage.setItem('korlab-theme', theme);
     
     // Log para debug
