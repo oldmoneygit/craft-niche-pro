@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Plus, Trash2, Clock, Save, Loader2, Utensils } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Clock, Save, Loader2, Utensils, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { QuickFoodInput } from '@/components/platform/QuickFoodInput';
 import { RecordFoodItem } from '@/components/platform/RecordFoodItem';
@@ -58,6 +58,7 @@ export default function PlatformFoodRecordEditor() {
   const [newMealName, setNewMealName] = useState('');
   const [selectedFoodForDetails, setSelectedFoodForDetails] = useState<FoodItem | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [expandedMealIndex, setExpandedMealIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (clientId && tenantId) {
@@ -230,6 +231,10 @@ export default function PlatformFoodRecordEditor() {
   const handleCloseDetails = () => {
     setIsDetailsModalOpen(false);
     setSelectedFoodForDetails(null);
+  };
+
+  const toggleMeal = (index: number) => {
+    setExpandedMealIndex(expandedMealIndex === index ? null : index);
   };
 
   const handleSave = async () => {
@@ -610,62 +615,99 @@ export default function PlatformFoodRecordEditor() {
         </div>
 
         {/* Meals */}
-        <div className="space-y-4 mb-6">
-          {meals.map((meal, mealIndex) => (
-            <Card key={mealIndex} className="bg-gray-800 border-gray-700">
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
+        <div className="space-y-3 mb-6">
+          {meals.map((meal, mealIndex) => {
+            const isExpanded = expandedMealIndex === mealIndex;
+            const mealKcal = Math.round(meal.items.reduce((sum, item) => sum + item.kcal, 0));
+            
+            return (
+              <Card key={mealIndex} className="bg-gray-800 border-gray-700 overflow-hidden">
+                {/* Header da Refeição - Sempre visível */}
+                <div 
+                  className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-750 transition-colors"
+                  onClick={() => toggleMeal(mealIndex)}
+                >
+                  <div className="flex items-center gap-3">
                     <Clock className="h-5 w-5 text-gray-400" />
-                    <span className="font-semibold text-gray-100">{meal.time} {meal.name}</span>
-                    <span className="text-sm text-gray-400">
-                      {Math.round(meal.items.reduce((sum, item) => sum + item.kcal, 0))} kcal
-                    </span>
+                    <div>
+                      <span className="font-semibold text-white text-base">
+                        {meal.time} - {meal.name}
+                      </span>
+                      <div className="text-sm text-gray-400 mt-0.5">
+                        {mealKcal} kcal
+                      </div>
+                    </div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleRemoveMeal(mealIndex)}
-                    className="text-red-400 hover:text-red-300"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                <QuickFoodInput
-                  onAdd={(foodData) => handleAddFood(mealIndex, foodData)}
-                  placeholder="🔍 Digite alimento..."
-                />
-
-                <div className="mt-4 space-y-3">
-                  {meal.items.map((item, itemIndex) => (
-                    <RecordFoodItem
-                      key={item.id}
-                      item={item}
-                      onRemove={() => handleRemoveFood(mealIndex, itemIndex)}
-                      onShowDetails={() => handleShowFoodDetails(item)}
-                    />
-                  ))}
-                </div>
-
-                {meal.items.length > 0 && (
-                  <div className="mt-3">
-                    <Textarea
-                      placeholder="Observações sobre esta refeição..."
-                      value={meal.notes}
-                      onChange={(e) => {
-                        const updated = [...meals];
-                        updated[mealIndex].notes = e.target.value;
-                        setMeals(updated);
+                  
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveMeal(mealIndex);
                       }}
-                      className="bg-gray-700 border-gray-600 text-gray-100"
-                      rows={2}
-                    />
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-gray-400 hover:text-white"
+                    >
+                      {isExpanded ? (
+                        <ChevronUp className="h-5 w-5" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5" />
+                      )}
+                    </Button>
                   </div>
-                )}
-              </div>
-            </Card>
-          ))}
+                </div>
+
+                {/* Conteúdo da Refeição - Expansível com animação */}
+                <div 
+                  className={`transition-all duration-300 ease-in-out ${
+                    isExpanded 
+                      ? 'max-h-[2000px] opacity-100' 
+                      : 'max-h-0 opacity-0 overflow-hidden'
+                  }`}
+                >
+                  <div className="px-4 pb-4 space-y-3">
+                    <QuickFoodInput
+                      onAdd={(foodData) => handleAddFood(mealIndex, foodData)}
+                      placeholder="🔍 Digite alimento..."
+                    />
+
+                    <div className="space-y-3">
+                      {meal.items.map((item, itemIndex) => (
+                        <RecordFoodItem
+                          key={item.id}
+                          item={item}
+                          onRemove={() => handleRemoveFood(mealIndex, itemIndex)}
+                          onShowDetails={() => handleShowFoodDetails(item)}
+                        />
+                      ))}
+                    </div>
+
+                    {meal.items.length > 0 && (
+                      <Textarea
+                        placeholder="Observações sobre esta refeição..."
+                        value={meal.notes}
+                        onChange={(e) => {
+                          const updated = [...meals];
+                          updated[mealIndex].notes = e.target.value;
+                          setMeals(updated);
+                        }}
+                        className="bg-gray-700 border-gray-600 text-gray-100"
+                        rows={2}
+                      />
+                    )}
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
         </div>
 
         <Button

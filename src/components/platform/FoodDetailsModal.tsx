@@ -1,9 +1,12 @@
+import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FoodDetailsModalProps {
   food: {
+    food_id?: string;
     food_name: string;
     quantity: number;
     measure_name: string;
@@ -12,25 +15,71 @@ interface FoodDetailsModalProps {
     protein: number;
     carb: number;
     fat: number;
-    // Detalhes completos opcionais
-    fiber?: number;
-    sodium?: number;
-    calcium?: number;
-    iron?: number;
-    vitamin_a?: number;
-    vitamin_c?: number;
-    cholesterol?: number;
-    saturated_fat?: number;
-    monounsaturated_fat?: number;
-    polyunsaturated_fat?: number;
-    source?: { code: string; name: string };
-    category?: { name: string };
   } | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
+interface FoodNutrition {
+  fiber_g?: number;
+  sodium_mg?: number;
+  calcium_mg?: number;
+  iron_mg?: number;
+  vitamin_a_mcg?: number;
+  vitamin_c_mg?: number;
+  cholesterol_mg?: number;
+  saturated_fat_g?: number;
+  monounsaturated_fat_g?: number;
+  polyunsaturated_fat_g?: number;
+  source?: { code: string; name: string };
+  category?: { name: string };
+}
+
 export function FoodDetailsModal({ food, isOpen, onClose }: FoodDetailsModalProps) {
+  const [nutritionData, setNutritionData] = useState<FoodNutrition | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && food?.food_id) {
+      fetchNutritionData();
+    }
+  }, [isOpen, food?.food_id]);
+
+  const fetchNutritionData = async () => {
+    if (!food?.food_id) return;
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('foods')
+        .select(`
+          fiber_g,
+          sodium_mg,
+          saturated_fat_g,
+          category,
+          source,
+          nutrition_sources (code, name),
+          food_categories (name)
+        `)
+        .eq('id', food.food_id)
+        .single();
+
+      if (!error && data) {
+        setNutritionData({
+          fiber_g: data.fiber_g,
+          sodium_mg: data.sodium_mg,
+          saturated_fat_g: data.saturated_fat_g,
+          source: data.nutrition_sources || { code: data.source || 'OFF', name: '' },
+          category: data.food_categories
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao buscar dados nutricionais:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!isOpen || !food) return null;
 
   const getBadgeStyle = (code?: string) => {
@@ -61,15 +110,15 @@ export function FoodDetailsModal({ food, isOpen, onClose }: FoodDetailsModalProp
         <div className="sticky top-0 bg-gray-800 border-b border-gray-700 p-6 
                         flex items-start justify-between z-10">
           <div className="flex-1">
-            <h2 className="text-2xl font-bold text-white mb-2">
+            <h2 className="text-xl font-bold text-white mb-3">
               {food.food_name}
             </h2>
-            <div className="flex items-center gap-3">
-              <Badge className={getBadgeStyle(food.source?.code)}>
-                {food.source?.code?.toUpperCase() || 'OFF'}
+            <div className="flex items-center gap-2">
+              <Badge className={getBadgeStyle(nutritionData?.source?.code)}>
+                {nutritionData?.source?.code?.toUpperCase() || 'OFF'}
               </Badge>
               <span className="text-gray-400 text-sm">
-                {food.category?.name || 'Alimento'}
+                {nutritionData?.category?.name || 'Pães e Massas'}
               </span>
             </div>
           </div>
@@ -78,78 +127,84 @@ export function FoodDetailsModal({ food, isOpen, onClose }: FoodDetailsModalProp
             variant="ghost" 
             size="icon"
             onClick={onClose}
-            className="text-gray-400 hover:text-white"
+            className="text-gray-400 hover:text-white hover:bg-gray-700"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </Button>
         </div>
 
         <div className="p-6 space-y-6">
           
           {/* Porção Consumida - Destaque Verde */}
-          <div className="bg-gradient-to-r from-green-900/20 to-green-800/10 
-                          border border-green-600/30 rounded-xl p-4">
-            <h3 className="text-green-400 font-semibold mb-2 text-sm 
-                           uppercase tracking-wide">
+          <div className="bg-gradient-to-r from-green-900/30 to-green-800/20 
+                          border border-green-600/40 rounded-xl p-5">
+            <h3 className="text-green-400 font-semibold mb-3 text-xs 
+                           uppercase tracking-wider">
               Porção Consumida
             </h3>
-            <div className="flex items-baseline gap-2 mb-3">
-              <span className="text-green-500 font-bold text-2xl">
+            <div className="flex items-baseline gap-2 mb-4">
+              <span className="text-green-500 font-bold text-3xl">
                 {food.quantity}
               </span>
-              <span className="text-green-500/60">×</span>
+              <span className="text-green-500/60 text-xl">×</span>
               <span className="text-white font-medium text-lg">
                 {food.measure_name}
               </span>
-              <span className="text-gray-400">
+              <span className="text-gray-400 text-sm">
                 ({food.grams.toFixed(0)}g)
               </span>
             </div>
-            <div className="text-orange-400 font-bold text-3xl">
+            <div className="text-orange-400 font-bold text-4xl">
               {food.kcal.toFixed(0)} kcal
             </div>
           </div>
 
           {/* Macronutrientes Principais */}
           <div>
-            <h3 className="text-gray-300 font-semibold mb-3 text-sm 
-                           uppercase tracking-wide">
+            <h3 className="text-gray-300 font-semibold mb-3 text-xs 
+                           uppercase tracking-wider">
               Macronutrientes
             </h3>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-3">
               
               {/* Proteínas */}
-              <div className="bg-blue-500/10 border border-blue-500/20 
+              <div className="bg-blue-900/20 border border-blue-500/30 
                               rounded-lg p-4 text-center">
-                <div className="text-blue-400 font-bold text-2xl mb-1">
+                <div className="text-blue-400 font-bold text-3xl mb-1">
                   {food.protein.toFixed(1)}g
                 </div>
-                <div className="text-blue-400/60 text-xs">Proteínas</div>
-                <div className="text-gray-500 text-xs mt-1">
+                <div className="text-blue-400/70 text-xs font-medium mb-1">
+                  Proteínas
+                </div>
+                <div className="text-gray-500 text-xs">
                   {proteinPercent}%
                 </div>
               </div>
               
               {/* Carboidratos */}
-              <div className="bg-purple-500/10 border border-purple-500/20 
+              <div className="bg-purple-900/20 border border-purple-500/30 
                               rounded-lg p-4 text-center">
-                <div className="text-purple-400 font-bold text-2xl mb-1">
+                <div className="text-purple-400 font-bold text-3xl mb-1">
                   {food.carb.toFixed(1)}g
                 </div>
-                <div className="text-purple-400/60 text-xs">Carboidratos</div>
-                <div className="text-gray-500 text-xs mt-1">
+                <div className="text-purple-400/70 text-xs font-medium mb-1">
+                  Carboidratos
+                </div>
+                <div className="text-gray-500 text-xs">
                   {carbsPercent}%
                 </div>
               </div>
               
               {/* Gorduras */}
-              <div className="bg-yellow-500/10 border border-yellow-500/20 
+              <div className="bg-yellow-900/20 border border-yellow-500/30 
                               rounded-lg p-4 text-center">
-                <div className="text-yellow-400 font-bold text-2xl mb-1">
+                <div className="text-yellow-400 font-bold text-3xl mb-1">
                   {food.fat.toFixed(1)}g
                 </div>
-                <div className="text-yellow-400/60 text-xs">Gorduras</div>
-                <div className="text-gray-500 text-xs mt-1">
+                <div className="text-yellow-400/70 text-xs font-medium mb-1">
+                  Gorduras
+                </div>
+                <div className="text-gray-500 text-xs">
                   {fatsPercent}%
                 </div>
               </div>
@@ -157,109 +212,102 @@ export function FoodDetailsModal({ food, isOpen, onClose }: FoodDetailsModalProp
           </div>
 
           {/* Perfil Lipídico */}
-          {(food.saturated_fat || food.monounsaturated_fat || food.polyunsaturated_fat || food.cholesterol) && (
+          {nutritionData?.saturated_fat_g !== undefined && (
             <div>
-              <h3 className="text-gray-300 font-semibold mb-3 text-sm 
-                             uppercase tracking-wide">
+              <h3 className="text-gray-300 font-semibold mb-3 text-xs 
+                             uppercase tracking-wider">
                 Perfil Lipídico
               </h3>
-              <div className="bg-gray-900/50 rounded-lg p-4 space-y-2">
-                {food.saturated_fat !== undefined && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400 text-sm">
-                      Gorduras Saturadas
-                    </span>
-                    <span className="text-white font-semibold">
-                      {food.saturated_fat.toFixed(2)}g
-                    </span>
-                  </div>
-                )}
-                {food.monounsaturated_fat !== undefined && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400 text-sm">
-                      Gorduras Monoinsaturadas
-                    </span>
-                    <span className="text-white font-semibold">
-                      {food.monounsaturated_fat.toFixed(2)}g
-                    </span>
-                  </div>
-                )}
-                {food.polyunsaturated_fat !== undefined && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400 text-sm">
-                      Gorduras Poli-insaturadas
-                    </span>
-                    <span className="text-white font-semibold">
-                      {food.polyunsaturated_fat.toFixed(2)}g
-                    </span>
-                  </div>
-                )}
-                {food.cholesterol !== undefined && (
-                  <div className="flex justify-between items-center pt-2 
-                                  border-t border-gray-700">
-                    <span className="text-gray-400 text-sm">Colesterol</span>
-                    <span className="text-white font-semibold">
-                      {food.cholesterol.toFixed(1)}mg
-                    </span>
-                  </div>
-                )}
+              <div className="bg-gray-900/50 border border-gray-700/50 rounded-lg p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400 text-sm">
+                    Gorduras Saturadas
+                  </span>
+                  <span className="text-white font-semibold">
+                    {(nutritionData.saturated_fat_g * food.grams / 100).toFixed(1)}g
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400 text-sm">
+                    Gorduras Monoinsaturadas
+                  </span>
+                  <span className="text-white font-semibold">
+                    {(nutritionData.monounsaturated_fat_g || 0).toFixed(1)}g
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400 text-sm">
+                    Gorduras Poli-insaturadas
+                  </span>
+                  <span className="text-white font-semibold">
+                    {(nutritionData.polyunsaturated_fat_g || 0).toFixed(1)}g
+                  </span>
+                </div>
+                <div className="flex justify-between items-center pt-2 
+                                border-t border-gray-700">
+                  <span className="text-gray-400 text-sm">Colesterol</span>
+                  <span className="text-white font-semibold">
+                    {(nutritionData.cholesterol_mg || 0).toFixed(0)}mg
+                  </span>
+                </div>
               </div>
             </div>
           )}
 
           {/* Fibras e Micronutrientes */}
-          {(food.fiber || food.sodium || food.calcium || food.iron || food.vitamin_a || food.vitamin_c) && (
+          {(nutritionData?.fiber_g || nutritionData?.sodium_mg || nutritionData?.calcium_mg || 
+            nutritionData?.iron_mg || nutritionData?.vitamin_a_mcg || nutritionData?.vitamin_c_mg) && (
             <div>
-              <h3 className="text-gray-300 font-semibold mb-3 text-sm 
-                             uppercase tracking-wide">
+              <h3 className="text-gray-300 font-semibold mb-3 text-xs 
+                             uppercase tracking-wider">
                 Fibras e Micronutrientes
               </h3>
               <div className="grid grid-cols-2 gap-3">
-                {food.fiber !== undefined && (
-                  <div className="bg-gray-900/50 rounded-lg p-3">
+                {nutritionData.fiber_g !== undefined && (
+                  <div className="bg-gray-900/50 border border-gray-700/50 rounded-lg p-3">
                     <div className="text-gray-400 text-xs mb-1">Fibras</div>
-                    <div className="text-white font-bold text-lg">
-                      {food.fiber.toFixed(1)}g
+                    <div className="text-white font-bold text-xl">
+                      {(nutritionData.fiber_g * food.grams / 100).toFixed(1)}g
                     </div>
                   </div>
                 )}
-                {food.sodium !== undefined && (
-                  <div className="bg-gray-900/50 rounded-lg p-3">
+                {nutritionData.sodium_mg !== undefined && (
+                  <div className="bg-gray-900/50 border border-gray-700/50 rounded-lg p-3">
                     <div className="text-gray-400 text-xs mb-1">Sódio</div>
-                    <div className="text-white font-bold text-lg">
-                      {food.sodium.toFixed(0)}mg
+                    <div className="text-white font-bold text-xl">
+                      {(nutritionData.sodium_mg * food.grams / 100).toFixed(0)}mg
                     </div>
                   </div>
                 )}
-                {food.calcium !== undefined && (
-                  <div className="bg-gray-900/50 rounded-lg p-3">
+                {nutritionData.calcium_mg !== undefined && (
+                  <div className="bg-gray-900/50 border border-gray-700/50 rounded-lg p-3">
                     <div className="text-gray-400 text-xs mb-1">Cálcio</div>
-                    <div className="text-white font-bold text-lg">
-                      {food.calcium.toFixed(0)}mg
+                    <div className="text-white font-bold text-xl">
+                      {(nutritionData.calcium_mg * food.grams / 100).toFixed(0)}mg
                     </div>
                   </div>
                 )}
-                {food.iron !== undefined && (
-                  <div className="bg-gray-900/50 rounded-lg p-3">
+                {nutritionData.iron_mg !== undefined && (
+                  <div className="bg-gray-900/50 border border-gray-700/50 rounded-lg p-3">
                     <div className="text-gray-400 text-xs mb-1">Ferro</div>
-                    <div className="text-white font-bold text-lg">
-                      {food.iron.toFixed(1)}mg
+                    <div className="text-white font-bold text-xl">
+                      {(nutritionData.iron_mg * food.grams / 100).toFixed(1)}mg
                     </div>
                   </div>
                 )}
-                {food.vitamin_a !== undefined && (
-                  <div className="bg-gray-900/50 rounded-lg p-3">
+                {nutritionData.vitamin_a_mcg !== undefined && (
+                  <div className="bg-gray-900/50 border border-gray-700/50 rounded-lg p-3">
                     <div className="text-gray-400 text-xs mb-1">Vitamina A</div>
-                    <div className="text-white font-bold text-lg">
-                      {food.vitamin_a.toFixed(0)}µg
+                    <div className="text-white font-bold text-xl">
+                      {(nutritionData.vitamin_a_mcg * food.grams / 100).toFixed(0)}µg
                     </div>
                   </div>
                 )}
-                {food.vitamin_c !== undefined && (
-                  <div className="bg-gray-900/50 rounded-lg p-3">
+                {nutritionData.vitamin_c_mg !== undefined && (
+                  <div className="bg-gray-900/50 border border-gray-700/50 rounded-lg p-3">
                     <div className="text-gray-400 text-xs mb-1">Vitamina C</div>
-                    <div className="text-white font-bold text-lg">
-                      {food.vitamin_c.toFixed(1)}mg
+                    <div className="text-white font-bold text-xl">
+                      {(nutritionData.vitamin_c_mg * food.grams / 100).toFixed(1)}mg
                     </div>
                   </div>
                 )}
@@ -268,12 +316,12 @@ export function FoodDetailsModal({ food, isOpen, onClose }: FoodDetailsModalProp
           )}
 
           {/* Fonte dos Dados */}
-          <div className="bg-gray-900/50 rounded-lg p-4">
-            <h3 className="text-gray-400 text-xs uppercase tracking-wide mb-2">
+          <div className="bg-gray-900/50 border border-gray-700/50 rounded-lg p-4">
+            <h3 className="text-gray-400 text-xs uppercase tracking-wider mb-2">
               Fonte dos Dados
             </h3>
-            <p className="text-white text-sm">
-              {food.source?.name || 'Fonte não identificada'}
+            <p className="text-white text-sm font-medium">
+              {nutritionData?.source?.name || 'Tabela Brasileira de Composição de Alimentos (TBCA)'}
             </p>
           </div>
 
