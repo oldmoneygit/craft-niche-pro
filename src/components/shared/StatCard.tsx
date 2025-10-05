@@ -10,27 +10,23 @@ interface StatCardProps {
 const variantStyles = {
   primary: {
     accentColor: '#3b82f6',
-    accentLight: 'rgba(59, 130, 246, 0.1)',
     iconBgLight: 'rgba(219, 234, 254, 1)',
-    iconBgDark: 'rgba(59, 130, 246, 0.1)'
+    iconBgDark: 'rgba(59, 130, 246, 0.15)'
   },
   success: {
     accentColor: '#10b981',
-    accentLight: 'rgba(16, 185, 129, 0.1)',
     iconBgLight: 'rgba(209, 250, 229, 1)',
-    iconBgDark: 'rgba(16, 185, 129, 0.1)'
+    iconBgDark: 'rgba(16, 185, 129, 0.15)'
   },
   warning: {
     accentColor: '#f59e0b',
-    accentLight: 'rgba(245, 158, 11, 0.1)',
     iconBgLight: 'rgba(254, 243, 199, 1)',
-    iconBgDark: 'rgba(245, 158, 11, 0.1)'
+    iconBgDark: 'rgba(245, 158, 11, 0.15)'
   },
   purple: {
     accentColor: '#8b5cf6',
-    accentLight: 'rgba(139, 92, 246, 0.1)',
     iconBgLight: 'rgba(237, 233, 254, 1)',
-    iconBgDark: 'rgba(139, 92, 246, 0.1)'
+    iconBgDark: 'rgba(139, 92, 246, 0.15)'
   }
 };
 
@@ -41,10 +37,14 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, variant 
   return (
     <div
       style={{
-        background: isDark ? 'rgba(26, 26, 26, 0.7)' : 'rgba(255, 255, 255, 0.9)',
+        background: isDark 
+          ? 'linear-gradient(135deg, rgba(26, 26, 26, 0.7) 0%, rgba(20, 20, 20, 0.8) 100%)' 
+          : 'rgba(255, 255, 255, 0.9)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
-        border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+        border: isDark 
+          ? '1px solid rgba(64, 64, 64, 0.3)' 
+          : '1px solid rgba(229, 231, 235, 0.8)',
         borderRadius: '16px',
         padding: '24px',
         transition: 'all 0.3s ease',
@@ -54,7 +54,9 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, variant 
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-4px)';
-        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.1)';
+        e.currentTarget.style.boxShadow = isDark 
+          ? '0 8px 24px rgba(0, 0, 0, 0.4)' 
+          : '0 8px 24px rgba(0, 0, 0, 0.1)';
         const border = e.currentTarget.querySelector('.stat-border') as HTMLElement;
         if (border) border.style.width = '4px';
       }}
