@@ -70,6 +70,8 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .stat-card::before {
@@ -96,8 +98,9 @@
 .stat-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 16px;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
 }
 
 .stat-label {
@@ -116,6 +119,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .stat-icon svg {
@@ -125,9 +129,11 @@
 }
 
 .stat-value {
-  font-size: 32px;
+  font-size: 48px;
   font-weight: 700;
   color: var(--text-primary);
+  line-height: 1;
+  align-self: flex-start;
 }
 
 /* Cores específicas */
