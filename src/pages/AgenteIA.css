@@ -120,23 +120,30 @@
 .quick-actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .action-btn {
-  padding: 10px 16px;
+  padding: 14px 18px;
   background: var(--bg-primary);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: flex-start;
+  gap: 12px;
   font-family: inherit;
+  text-align: left;
+}
+
+.action-btn svg {
+  flex-shrink: 0;
+  opacity: 0.7;
 }
 
 .action-btn:hover {
@@ -144,6 +151,20 @@
   color: white;
   border-color: var(--primary);
   transform: translateX(4px);
+}
+
+.action-btn:hover svg {
+  opacity: 1;
+}
+
+.action-btn:nth-child(2) {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.action-btn:nth-child(2) svg {
+  opacity: 1;
 }
 
 /* ==================== CHAT AREA ==================== */
