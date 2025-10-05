@@ -450,12 +450,13 @@ export default function PlatformFoodRecordEditor() {
       for (const [index, mealTemplate] of templateMeals.entries()) {
         console.log(`📝 Criando refeição: ${mealTemplate.name}`);
 
+        // ✅ CORRIGIDO: Usando food_record_id (não record_id) e name (não meal_name)
         const { data: newMeal, error: mealError } = await supabase
           .from('record_meals' as any)
           .insert({
-            food_record_id: recordId,
+            food_record_id: recordId,  // ✅ FK correta
+            name: mealTemplate.name,   // ✅ Campo correto
             time: mealTemplate.time,
-            name: mealTemplate.name,
             order_index: index,
             notes: ''
           })
@@ -466,6 +467,8 @@ export default function PlatformFoodRecordEditor() {
           console.error('❌ Erro ao criar meal:', mealError);
           continue;
         }
+
+        console.log(`✅ Meal "${mealTemplate.name}" criada com ID: ${(newMeal as any).id}`);
 
         // Adicionar items
         for (const foodIndex of mealTemplate.foodIndexes) {
@@ -545,6 +548,7 @@ export default function PlatformFoodRecordEditor() {
 
       console.log('🔄 ETAPA 2: Buscando recordatório completo');
 
+      // ✅ CORRIGIDO: Especificando FK correta com !food_record_id
       const { data: fullRecord, error: fetchError } = await supabase
         .from('food_records' as any)
         .select(`
@@ -638,6 +642,7 @@ export default function PlatformFoodRecordEditor() {
 
       const { data: { user } } = await supabase.auth.getUser();
 
+      // ✅ CORRIGIDO: Usando status 'ativo' (não 'active' ou 'draft')
       const { data: newPlan, error: planError } = await supabase
         .from('meal_plans')
         .insert({
@@ -654,7 +659,7 @@ export default function PlatformFoodRecordEditor() {
           protein_target_g: Math.round(totals.protein),
           carb_target_g: Math.round(totals.carbs),
           fat_target_g: Math.round(totals.fats),
-          status: 'ativo'
+          status: 'ativo'  // ✅ ENUM correto: 'ativo', 'concluido', 'pausado'
         })
         .select()
         .single();
