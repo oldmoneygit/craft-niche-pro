@@ -199,7 +199,7 @@ export default function PlatformAnamnesisForm() {
         toast.success('Anamnese criada com sucesso!');
       }
 
-      navigate(`/platform/${tenantId}/clientes`);
+      navigate(-1); // Volta para a página anterior
     } catch (error: any) {
       console.error('Erro ao salvar anamnese:', error);
       toast.error('Erro ao salvar: ' + (error.message || 'Desconhecido'));
