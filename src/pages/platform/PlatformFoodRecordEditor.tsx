@@ -621,7 +621,7 @@ export default function PlatformFoodRecordEditor() {
             const mealKcal = Math.round(meal.items.reduce((sum, item) => sum + item.kcal, 0));
             
             return (
-              <Card key={mealIndex} className="bg-gray-800 border-gray-700 overflow-hidden">
+              <Card key={mealIndex} className="bg-gray-800 border-gray-700">
                 {/* Header da Refeição - Sempre visível */}
                 <div 
                   className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-750 transition-colors"
@@ -666,14 +666,8 @@ export default function PlatformFoodRecordEditor() {
                 </div>
 
                 {/* Conteúdo da Refeição - Expansível com animação */}
-                <div 
-                  className={`transition-all duration-300 ease-in-out ${
-                    isExpanded 
-                      ? 'max-h-[2000px] opacity-100' 
-                      : 'max-h-0 opacity-0 overflow-hidden'
-                  }`}
-                >
-                  <div className="px-4 pb-4 space-y-3">
+                {isExpanded && (
+                  <div className="px-4 pb-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
                     <QuickFoodInput
                       onAdd={(foodData) => handleAddFood(mealIndex, foodData)}
                       placeholder="🔍 Digite alimento..."
@@ -704,7 +698,7 @@ export default function PlatformFoodRecordEditor() {
                       />
                     )}
                   </div>
-                </div>
+                )}
               </Card>
             );
           })}
