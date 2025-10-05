@@ -12,7 +12,7 @@
 2. [record_meals](#record_meals) - Refeições do recordatório
 3. [record_items](#record_items) - Alimentos nas refeições
 4. [meal_plans](#meal_plans) - Planos alimentares
-5. [meals](#meals) - Refeições dos planos
+5. [meal_plan_meals](#meal_plan_meals) - Refeições dos planos
 6. [meal_items](#meal_items) - Alimentos nos planos
 7. [foods](#foods) - Catálogo de alimentos
 8. [food_measures](#food_measures) - Medidas dos alimentos
@@ -129,7 +129,7 @@ status IN ('ativo', 'concluido', 'pausado')
 
 ---
 
-### `meals`
+### `meal_plan_meals`
 **Descrição:** Refeições dentro de um plano alimentar
 
 | Coluna | Tipo | Obrigatório | Descrição |
@@ -137,9 +137,9 @@ status IN ('ativo', 'concluido', 'pausado')
 | `id` | uuid | ✅ | PK |
 | `meal_plan_id` | uuid | ✅ | FK → meal_plans.id |
 | `name` | text | ✅ | Nome da refeição |
-| `time` | time | ❌ | Horário |
+| `time` | text | ❌ | Horário |
 | `order_index` | integer | ❌ | Ordem |
-| `notes` | text | ❌ | Observações |
+| `created_at` | timestamptz | ✅ | Auto |
 
 **Relacionamentos:**
 - `meal_plan_id` → `meal_plans.id`
@@ -152,7 +152,7 @@ status IN ('ativo', 'concluido', 'pausado')
 | Coluna | Tipo | Obrigatório | Descrição |
 |--------|------|-------------|-----------|
 | `id` | uuid | ✅ | PK |
-| `meal_id` | uuid | ❌ | FK → meals.id |
+| `meal_id` | uuid | ❌ | FK → meal_plan_meals.id |
 | `food_id` | uuid | ❌ | FK → foods.id |
 | `measure_id` | uuid | ❌ | FK → food_measures.id |
 | `quantity` | numeric | ✅ | Quantidade |
@@ -163,7 +163,7 @@ status IN ('ativo', 'concluido', 'pausado')
 | `fat_total` | numeric | ❌ | Total gorduras |
 
 **Relacionamentos:**
-- `meal_id` → `meals.id`
+- `meal_id` → `meal_plan_meals.id`
 - `food_id` → `foods.id`
 - `measure_id` → `food_measures.id`
 
@@ -301,7 +301,7 @@ tenants
        │         └─→ record_items → foods
        │                            └─→ food_measures
        └─→ meal_plans
-            └─→ meals
+            └─→ meal_plan_meals
                  └─→ meal_items → foods
                                   └─→ food_measures
 ```
