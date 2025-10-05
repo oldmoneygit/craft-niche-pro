@@ -657,10 +657,10 @@ export default function PlatformFoodRecordEditor() {
           end_date: new Date(new Date((fullRecord as any).record_date).setDate(new Date((fullRecord as any).record_date).getDate() + 30)).toISOString().split('T')[0],
           plan_data: {},
           status: 'ativo',
-          calorie_target: Math.round(totals.kcal),
-          protein_target_g: Math.round(totals.protein),
-          carb_target_g: Math.round(totals.carbs),
-          fat_target_g: Math.round(totals.fats)
+          target_kcal: Math.round(totals.kcal),
+          target_protein: Math.round(totals.protein),
+          target_carbs: Math.round(totals.carbs),
+          target_fats: Math.round(totals.fats)
         })
         .select()
         .single();
