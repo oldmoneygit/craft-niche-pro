@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Eye, Edit, Share2, HelpCircle, Clock, FileText, TrendingUp } from 'lucide-react';
 
 interface QuestionarioCardProps {
@@ -52,15 +52,36 @@ export const QuestionarioCard: React.FC<QuestionarioCardProps> = ({
   onShare
 }) => {
   const config = categoryConfig[category];
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const checkTheme = () => {
+      const theme = document.documentElement.getAttribute('data-theme') || 
+                    document.body.getAttribute('data-theme') ||
+                    (document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+      setIsDark(theme === 'dark');
+    };
+
+    checkTheme();
+
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div
       style={{
-        background: isDark ? 'rgba(26, 26, 26, 0.7)' : 'rgba(255, 255, 255, 0.9)',
+        background: isDark 
+          ? 'rgba(38, 38, 38, 0.6)' 
+          : 'rgba(255, 255, 255, 0.9)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
-        border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+        border: isDark 
+          ? '1px solid rgba(64, 64, 64, 0.3)' 
+          : '1px solid rgba(229, 231, 235, 0.8)',
         borderRadius: '16px',
         padding: '28px',
         transition: 'all 0.3s ease',
@@ -70,7 +91,9 @@ export const QuestionarioCard: React.FC<QuestionarioCardProps> = ({
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-6px)';
-        e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 0, 0, 0.1)';
+        e.currentTarget.style.boxShadow = isDark 
+          ? '0 12px 32px rgba(0, 0, 0, 0.4)' 
+          : '0 12px 32px rgba(0, 0, 0, 0.1)';
         e.currentTarget.style.borderColor = config.color;
         const border = e.currentTarget.querySelector('.category-border') as HTMLElement;
         if (border) border.style.width = '4px';
@@ -78,7 +101,9 @@ export const QuestionarioCard: React.FC<QuestionarioCardProps> = ({
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
         e.currentTarget.style.boxShadow = 'none';
-        e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
+        e.currentTarget.style.borderColor = isDark 
+          ? 'rgba(64, 64, 64, 0.3)' 
+          : 'rgba(229, 231, 235, 0.8)';
         const border = e.currentTarget.querySelector('.category-border') as HTMLElement;
         if (border) border.style.width = '0';
       }}
@@ -96,7 +121,6 @@ export const QuestionarioCard: React.FC<QuestionarioCardProps> = ({
         }}
       />
 
-      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
         <span
           style={{
@@ -131,7 +155,6 @@ export const QuestionarioCard: React.FC<QuestionarioCardProps> = ({
         </span>
       </div>
 
-      {/* Title & Description */}
       <h3 style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
         {title}
       </h3>
@@ -139,30 +162,20 @@ export const QuestionarioCard: React.FC<QuestionarioCardProps> = ({
         {description}
       </p>
 
-      {/* Meta */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
-          <HelpCircle style={{ width: '18px', height: '18px', color: config.color }} />
-          <span style={{ fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>{questions}</span> perguntas
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
-          <Clock style={{ width: '18px', height: '18px', color: config.color }} />
-          <span style={{ fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>~{duration} min</span>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
-          <FileText style={{ width: '18px', height: '18px', color: config.color }} />
-          <span style={{ fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>{responses}</span> respostas
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
-          <TrendingUp style={{ width: '18px', height: '18px', color: config.color }} />
-          <span style={{ fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>{completion !== null ? `${completion}%` : '-'}</span> conclusão
-        </div>
+        {[
+          { icon: HelpCircle, value: questions, label: 'perguntas' },
+          { icon: Clock, value: `~${duration} min`, label: '' },
+          { icon: FileText, value: responses, label: 'respostas' },
+          { icon: TrendingUp, value: completion !== null ? `${completion}%` : '-', label: 'conclusão' }
+        ].map((item, idx) => (
+          <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
+            <item.icon style={{ width: '18px', height: '18px', color: config.color }} />
+            <span style={{ fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>{item.value}</span> {item.label}
+          </div>
+        ))}
       </div>
 
-      {/* Actions */}
       <div style={{ display: 'flex', gap: '8px', paddingTop: '20px', borderTop: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)' }}>
         {[
           { icon: Eye, label: 'Visualizar', action: onView },
