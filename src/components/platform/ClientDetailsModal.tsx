@@ -84,7 +84,7 @@ export const ClientDetailsModal = ({ client, onClose, onUpdate }: ClientDetailsM
         )
       `)
       .eq('client_id', client.id)
-      .eq('active', true)
+      .eq('is_active', true)
       .maybeSingle();
 
     setActiveMealPlan(mealPlanData);

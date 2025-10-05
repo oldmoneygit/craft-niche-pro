@@ -172,9 +172,15 @@ export default function PlatformMealPlans() {
       .insert({
         tenant_id: originalPlan.tenant_id,
         client_id: originalPlan.client_id,
-        title: `${originalPlan.title} (Cópia)`,
-        active: false,
-        calories_target: originalPlan.calories_target,
+        name: `${originalPlan.name} (Cópia)`,
+        start_date: originalPlan.start_date,
+        end_date: originalPlan.end_date,
+        plan_data: originalPlan.plan_data,
+        is_active: false,
+        target_kcal: originalPlan.target_kcal,
+        target_protein: originalPlan.target_protein,
+        target_carbs: originalPlan.target_carbs,
+        target_fats: originalPlan.target_fats,
         notes: originalPlan.notes
       } as any)
       .select()

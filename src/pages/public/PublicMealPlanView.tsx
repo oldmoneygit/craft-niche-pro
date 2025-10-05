@@ -31,8 +31,8 @@ export default function PublicMealPlanView() {
       setPlan(planData);
 
       const { data: mealsData } = await supabase
-        .from('meals')
-        .select('*, meal_foods(*)')
+        .from('meal_plan_meals')
+        .select('*, meal_items(*, foods(*), food_measures(*))')
         .eq('meal_plan_id', planData.id)
         .order('order_index');
 
