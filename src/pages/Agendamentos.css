@@ -100,7 +100,7 @@
 .stat-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 12px;
 }
 
@@ -110,6 +110,7 @@
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  flex: 1;
 }
 
 .stat-icon {
@@ -121,6 +122,7 @@
   align-items: center;
   justify-content: center;
   color: var(--stat-color);
+  flex-shrink: 0;
 }
 
 .stat-value {
@@ -483,6 +485,13 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 32px;
+  background: white;
+}
+
+/* Dark mode modal body */
+:root[data-theme="dark"] .modal-body,
+.dark .modal-body {
+  background: rgba(20, 20, 20, 0.98);
 }
 
 .form-group {
@@ -502,23 +511,25 @@
 .form-textarea {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.3);
-  color: var(--text-primary);
+  background: #1a1a1a;
+  color: #fff;
   font-size: 14px;
   font-family: inherit;
   transition: all 0.2s ease;
 }
 
-/* Light mode form fields */
-:root:not([data-theme="dark"]) .form-select,
-:root:not([data-theme="dark"]) .form-input,
-:root:not([data-theme="dark"]) .form-textarea,
-:root:not(.dark) .form-select,
-:root:not(.dark) .form-input,
-:root:not(.dark) .form-textarea {
-  background: rgba(0, 0, 0, 0.05);
+/* Dark mode form fields */
+:root[data-theme="dark"] .form-select,
+:root[data-theme="dark"] .form-input,
+:root[data-theme="dark"] .form-textarea,
+.dark .form-select,
+.dark .form-input,
+.dark .form-textarea {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
 }
 
 .form-select:focus,
@@ -536,16 +547,17 @@
 
 /* ==================== CALENDAR ==================== */
 .calendar {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--border);
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 16px;
 }
 
-/* Light mode calendar */
-:root:not([data-theme="dark"]) .calendar,
-:root:not(.dark) .calendar {
-  background: rgba(0, 0, 0, 0.05);
+/* Dark mode calendar */
+:root[data-theme="dark"] .calendar,
+.dark .calendar {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
 }
 
 .calendar-header {
@@ -654,21 +666,23 @@
 
 .time-slot {
   padding: 12px;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--border);
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   text-align: center;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: var(--text-primary);
+  color: #fff;
 }
 
-/* Light mode time slots */
-:root:not([data-theme="dark"]) .time-slot,
-:root:not(.dark) .time-slot {
-  background: rgba(0, 0, 0, 0.05);
+/* Dark mode time slots */
+:root[data-theme="dark"] .time-slot,
+.dark .time-slot {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
 }
 
 .time-slot:hover {
@@ -702,6 +716,13 @@
   gap: 12px;
   padding: 20px 24px;
   border-top: 1px solid var(--border);
+  background: white;
+}
+
+/* Dark mode modal footer */
+:root[data-theme="dark"] .modal-footer,
+.dark .modal-footer {
+  background: rgba(20, 20, 20, 0.98);
 }
 
 .btn-cancel {
