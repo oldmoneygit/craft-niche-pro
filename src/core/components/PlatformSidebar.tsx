@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import './PlatformSidebar.css';
 import {
   Users,
   MessageCircle,
@@ -193,7 +194,7 @@ export function PlatformSidebar() {
             <SidebarMenu>
               {coreMenuItems.filter(item => item.enabled).map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild data-tooltip={item.title}>
                     <NavLink to={item.url} className={getNavClassName(item.url)}>
                       <item.icon className="h-4 w-4" />
                       {state !== "collapsed" && (
@@ -222,7 +223,7 @@ export function PlatformSidebar() {
               <SidebarMenu>
                 {businessSpecificItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
+                    <SidebarMenuButton asChild data-tooltip={item.title}>
                       <NavLink to={item.url} className={getNavClassName(item.url)}>
                         <item.icon className="h-4 w-4" />
                         {state !== "collapsed" && <span>{item.title}</span>}
@@ -242,7 +243,7 @@ export function PlatformSidebar() {
             <SidebarMenu>
               {settingsItems.filter(item => item.enabled).map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild data-tooltip={item.title}>
                     <NavLink to={item.url} className={getNavClassName(item.url)}>
                       <item.icon className="h-4 w-4" />
                       {state !== "collapsed" && <span>{item.title}</span>}
