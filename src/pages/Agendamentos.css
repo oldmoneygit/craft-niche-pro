@@ -93,15 +93,15 @@
   transform: scaleY(1);
 }
 
-.stat-top {
+.stat-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
+  align-items: flex-start;
+  margin-bottom: 16px;
 }
 
 .stat-label {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -109,32 +109,25 @@
 }
 
 .stat-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   background: var(--accent-light);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.3s;
-}
-
-.stat-card:hover .stat-icon {
-  transform: scale(1.1);
 }
 
 .stat-icon svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   color: var(--accent-color);
 }
 
 .stat-value {
-  font-size: 48px;
+  font-size: 32px;
   font-weight: 700;
   color: var(--text-primary);
-  line-height: 1;
 }
 
 /* Cores específicas */
