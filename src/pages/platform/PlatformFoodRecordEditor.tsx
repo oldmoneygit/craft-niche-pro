@@ -176,7 +176,9 @@ export default function PlatformFoodRecordEditor() {
       items: []
     };
 
+    const newMealIndex = meals.length;
     setMeals([...meals, newMeal]);
+    setExpandedMealIndex(newMealIndex); // ✨ Nova refeição vem expandida
     setShowAddMealDialog(false);
     setNewMealTime('08:00');
     setNewMealName('');
