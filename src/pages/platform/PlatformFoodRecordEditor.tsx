@@ -29,6 +29,7 @@ interface FoodItem {
   carb: number;
   fat: number;
   order: number;
+  source_code?: string;
 }
 
 interface Meal {
@@ -116,7 +117,7 @@ export default function PlatformFoodRecordEditor() {
               carb_total,
               fat_total,
               order_index,
-              foods (name),
+              foods (name, source),
               food_measures (measure_name)
             )
           )
@@ -154,7 +155,8 @@ export default function PlatformFoodRecordEditor() {
           protein: item.protein_total,
           carb: item.carb_total,
           fat: item.fat_total,
-          order: item.order_index || 0
+          order: item.order_index || 0,
+          source_code: item.foods?.source || 'off'
         }))
       }));
 
@@ -187,7 +189,7 @@ export default function PlatformFoodRecordEditor() {
   const handleAddFood = async (mealIndex: number, foodData: any) => {
     const { data: food } = await supabase
       .from('foods')
-      .select('name')
+      .select('name, source')
       .eq('id', foodData.food_id)
       .single();
 
@@ -209,7 +211,8 @@ export default function PlatformFoodRecordEditor() {
       protein: foodData.protein_total,
       carb: foodData.carb_total,
       fat: foodData.fat_total,
-      order: meals[mealIndex].items.length
+      order: meals[mealIndex].items.length,
+      source_code: food?.source || 'off'
     };
 
     const updatedMeals = [...meals];
@@ -675,12 +678,12 @@ export default function PlatformFoodRecordEditor() {
 
                     <div className="space-y-3">
                       {meal.items.map((item, itemIndex) => (
-                        <RecordFoodItem
-                          key={item.id}
-                          item={item}
-                          onRemove={() => handleRemoveFood(mealIndex, itemIndex)}
-                          onShowDetails={() => handleShowFoodDetails(item)}
-                        />
+                      <RecordFoodItem
+                        key={item.id}
+                        item={item}
+                        onRemove={() => handleRemoveFood(mealIndex, itemIndex)}
+                        onShowDetails={() => handleShowFoodDetails(item)}
+                      />
                       ))}
                     </div>
 

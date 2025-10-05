@@ -85,7 +85,7 @@ export function FoodDetailsModal({ food, isOpen, onClose }: FoodDetailsModalProp
   const getBadgeStyle = (code?: string) => {
     const c = code?.toLowerCase();
     if (c === 'taco' || c === 'tbca') return 'bg-green-600 text-white';
-    if (c === 'usda') return 'bg-blue-600 text-white';
+    if (c === 'usda') return 'bg-purple-600 text-white';
     if (c === 'ibge') return 'bg-orange-600 text-white';
     return 'bg-gray-600 text-white';
   };

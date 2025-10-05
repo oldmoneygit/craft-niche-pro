@@ -14,13 +14,13 @@ interface RecordFoodItemProps {
     protein: number;
     carb: number;
     fat: number;
+    source_code?: string;
   };
-  source?: { code: string; name: string };
   onRemove: () => void;
   onShowDetails: () => void;
 }
 
-export function RecordFoodItem({ item, source, onRemove, onShowDetails }: RecordFoodItemProps) {
+export function RecordFoodItem({ item, onRemove, onShowDetails }: RecordFoodItemProps) {
   
   const getBadgeStyle = (code?: string) => {
     const c = code?.toLowerCase();
@@ -28,7 +28,7 @@ export function RecordFoodItem({ item, source, onRemove, onShowDetails }: Record
       return 'bg-green-600 hover:bg-green-700 text-white';
     }
     if (c === 'usda') {
-      return 'bg-blue-600 hover:bg-blue-700 text-white';
+      return 'bg-purple-600 hover:bg-purple-700 text-white';
     }
     if (c === 'ibge') {
       return 'bg-orange-600 hover:bg-orange-700 text-white';
@@ -60,8 +60,8 @@ export function RecordFoodItem({ item, source, onRemove, onShowDetails }: Record
           </button>
           
           {/* Badge */}
-          <Badge className={getBadgeStyle(source?.code)}>
-            {source?.code?.toUpperCase() || 'OFF'}
+          <Badge className={getBadgeStyle(item.source_code)}>
+            {item.source_code?.toUpperCase() || 'OFF'}
           </Badge>
           
           {/* Botão Delete */}
