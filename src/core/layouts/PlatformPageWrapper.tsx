@@ -17,7 +17,10 @@ export default function PlatformPageWrapper({ children, title }: PlatformPageWra
   
   // Initialize the client config context
   useEffect(() => {
-    setClientId(actualClientId);
+    // Apenas chama setClientId se o ID for válido (não é UUID de tenant)
+    if (actualClientId && !actualClientId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+      setClientId(actualClientId);
+    }
   }, [actualClientId, setClientId]);
 
   return (

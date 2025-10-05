@@ -20,6 +20,13 @@ export function ClientConfigProvider({ children }: { children: React.ReactNode }
   const [currentClientId, setCurrentClientId] = useState<string | null>(null);
 
   const setClientId = (clientId: string) => {
+    // Validação: evita processar IDs inválidos (UUIDs longos de tenant, etc)
+    if (!clientId || clientId.includes('-') && clientId.length > 20) {
+      console.warn('ClientConfigContext: Invalid clientId format (looks like tenant_id), skipping:', clientId);
+      setLoading(false);
+      return;
+    }
+
     // Evita recarregar se já está carregando o mesmo cliente
     if (currentClientId === clientId && clientConfig) {
       return;
