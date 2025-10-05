@@ -326,8 +326,45 @@ export default function PlatformMealPlanViewer() {
       setIsSaving(true);
       console.log('💾 Salvando alterações no banco...');
 
-      // Para cada refeição, sincronizar meal_items
-      for (const meal of meals) {
+      // 🗑️ ETAPA 0: Excluir refeições vazias (sem alimentos)
+      const emptyMeals = meals.filter(meal => 
+        !meal.meal_items || meal.meal_items.length === 0
+      );
+      
+      if (emptyMeals.length > 0) {
+        console.log(`🗑️ Excluindo ${emptyMeals.length} refeição(ões) vazia(s)...`);
+        
+        for (const emptyMeal of emptyMeals) {
+          // Só tentar deletar se não for temporária
+          if (!emptyMeal.id.startsWith('temp-')) {
+            await supabase
+              .from('meal_plan_meals')
+              .delete()
+              .eq('id', emptyMeal.id);
+            
+            console.log(`✅ Refeição "${emptyMeal.name}" excluída`);
+          }
+        }
+        
+        // Remover do estado local também
+        const filteredMeals = meals.filter(meal => 
+          meal.meal_items && meal.meal_items.length > 0
+        );
+        setMeals(filteredMeals);
+        
+        toast({
+          title: '🗑️ Refeições vazias excluídas',
+          description: `${emptyMeals.length} refeição(ões) sem alimentos foi(ram) removida(s)`
+        });
+      }
+
+      // Recarregar refeições após exclusão
+      const remainingMeals = meals.filter(meal => 
+        meal.meal_items && meal.meal_items.length > 0
+      );
+
+      // Para cada refeição restante, sincronizar meal_items
+      for (const meal of remainingMeals) {
         // 1. Buscar IDs existentes no banco
         const { data: existingItems } = await supabase
           .from('meal_items')
