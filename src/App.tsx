@@ -10,7 +10,7 @@ import Recordatorio from './pages/Recordatorio';
 import { FeedbacksSemanais } from './pages/FeedbacksSemanais';
 import Servicos from './pages/Servicos';
 import { Mensagens } from './pages/Mensagens';
-import { Lembretes } from './pages/Lembretes';
+import Lembretes from './pages/Lembretes';
 import { AgenteIA } from './pages/AgenteIA';
 import { BaseConhecimento } from './pages/BaseConhecimento';
 import Relatorios from './pages/Relatorios';
