@@ -311,23 +311,14 @@ export default function PlatformFoodRecordEditor() {
   };
 
   const handleConvertToPlan = async () => {
+    // Validar apenas recordId antes de buscar
     if (!recordId) {
       toast.error('Salve o recordatório antes de criar um plano');
       return;
     }
 
-    if (!clientId || !tenantId) {
-      toast.error('Cliente não identificado');
-      return;
-    }
-
-    if (meals.length === 0) {
-      toast.error('Adicione pelo menos uma refeição ao recordatório');
-      return;
-    }
-
-    if (!meals.some(m => m.items.length > 0)) {
-      toast.error('Adicione alimentos às refeições antes de criar o plano');
+    if (!tenantId) {
+      toast.error('Tenant não identificado');
       return;
     }
 
@@ -336,7 +327,7 @@ export default function PlatformFoodRecordEditor() {
       
       console.log('🔄 Convertendo recordatório para plano...');
 
-      // 1. BUSCAR RECORDATÓRIO COMPLETO
+      // 1. BUSCAR RECORDATÓRIO COMPLETO DO BANCO
       const { data: fullRecord, error: fetchError } = await supabase
         .from('food_records' as any)
         .select(`
@@ -354,8 +345,41 @@ export default function PlatformFoodRecordEditor() {
         .single();
 
       if (fetchError || !fullRecord) {
-        throw new Error('Erro ao buscar recordatório');
+        console.error('❌ Erro ao buscar:', fetchError);
+        toast.error('Erro ao carregar recordatório');
+        return;
       }
+
+      // Debug: verificar dados do banco
+      console.log('📋 Record completo:', {
+        id: (fullRecord as any).id,
+        client_id: (fullRecord as any).client_id,
+        meals: (fullRecord as any).record_meals?.length,
+        date: (fullRecord as any).record_date
+      });
+
+      // Validar client_id dos dados do banco
+      if (!(fullRecord as any).client_id) {
+        toast.error('Recordatório sem cliente associado');
+        return;
+      }
+
+      // Validar se tem refeições
+      if (!(fullRecord as any).record_meals || (fullRecord as any).record_meals.length === 0) {
+        toast.error('Adicione pelo menos uma refeição ao recordatório');
+        return;
+      }
+
+      // Validar se tem itens
+      const hasItems = (fullRecord as any).record_meals.some((m: any) => 
+        m.record_items && m.record_items.length > 0
+      );
+      if (!hasItems) {
+        toast.error('Adicione alimentos às refeições antes de criar o plano');
+        return;
+      }
+
+      console.log('✅ Cliente encontrado:', (fullRecord as any).client_id);
 
       console.log('📋 Recordatório carregado:', {
         meals: (fullRecord as any).record_meals.length,
@@ -389,7 +413,7 @@ export default function PlatformFoodRecordEditor() {
       const { data: newPlan, error: planError } = await supabase
         .from('meal_plans')
         .insert({
-          client_id: clientId,
+          client_id: (fullRecord as any).client_id, // Usar client_id do banco
           tenant_id: tenantId,
           name: planName,
           start_date: new Date().toISOString().split('T')[0],
