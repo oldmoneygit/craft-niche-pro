@@ -5,6 +5,7 @@ import { UserProfile } from './UserProfile';
 import { useSidebar } from '@/hooks/useSidebar';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { useAppointmentsBadge } from '@/hooks/useAppointmentsBadge';
+import './styles.css';
 import {
   Home,
   Users,
@@ -27,7 +28,6 @@ import {
   Moon,
   Zap
 } from 'lucide-react';
-import './styles.css';
 
 export const Sidebar: React.FC = () => {
   const { isCollapsed, toggle } = useSidebar();
