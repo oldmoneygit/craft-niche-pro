@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { Clientes } from './pages/Clientes';
@@ -38,6 +38,8 @@ function App() {
           <Route path="/relatorios" element={<Relatorios />} />
           <Route path="/financeiro" element={<Financeiro />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
+          {/* Redirect old /platform/* routes to main routes */}
+          <Route path="/platform/:slug" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
     </BrowserRouter>
