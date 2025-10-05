@@ -10,7 +10,7 @@
 ## 📋 ÍNDICE DE MÓDULOS
 
 1. [Multi-Tenancy](#multi-tenancy) - Sistema de tenants e usuários
-2. [Clientes](#clientes) - Gestão de pacientes
+2. [Clientes](#clientes) - Gestão de pacientes e anamneses
 3. [Agendamentos](#agendamentos) - Consultas e serviços
 4. [Alimentos](#alimentos) - Banco nutricional completo
 5. [Recordatório](#recordatório) - Registro alimentar
@@ -89,7 +89,7 @@
 ## 👥 CLIENTES {#clientes}
 
 ### `clients`
-**Descrição:** Pacientes/clientes
+**Descrição:** Pacientes/clientes (cadastro básico)
 
 | Coluna | Tipo | Obrigatório | Descrição |
 |--------|------|-------------|-----------|
@@ -131,6 +131,67 @@
 - `idx_clients_age` ON (age)
 - `idx_clients_goal` ON (goal)
 - `idx_clients_activity_level` ON (activity_level)
+
+---
+
+### `anamneses`
+**Descrição:** Avaliação inicial completa do paciente (anamnese nutricional detalhada)
+
+| Coluna | Tipo | Obrigatório | Descrição |
+|--------|------|-------------|-----------|
+| `id` | uuid | ✅ | PK |
+| `tenant_id` | uuid | ✅ | FK → tenants |
+| `client_id` | uuid | ✅ | FK → clients |
+| `anamnesis_date` | date | ✅ | Data da anamnese |
+| `created_by` | uuid | ❌ | FK → profiles.user_id |
+| **Dados antropométricos:** | | | |
+| `current_weight` | decimal | ❌ | Peso atual (kg) |
+| `target_weight` | decimal | ❌ | Peso alvo (kg) |
+| `height` | decimal | ❌ | Altura (cm) |
+| `waist_circumference` | decimal | ❌ | Cintura (cm) |
+| `hip_circumference` | decimal | ❌ | Quadril (cm) |
+| **Objetivo e motivação:** | | | |
+| `main_goal` | text | ✅ | Objetivo principal |
+| `motivation` | text | ❌ | Motivação |
+| **Histórico de saúde:** | | | |
+| `medical_conditions` | text | ❌ | Condições médicas |
+| `current_medications` | text | ❌ | Medicamentos atuais |
+| `family_history` | text | ❌ | Histórico familiar |
+| `recent_exams` | jsonb | ❌ | Exames recentes |
+| **Restrições alimentares:** | | | |
+| `allergies` | text | ❌ | Alergias |
+| `food_intolerances` | text | ❌ | Intolerâncias |
+| `dietary_restrictions` | text | ❌ | Restrições |
+| `food_preferences` | text | ❌ | Preferências |
+| `food_dislikes` | text | ❌ | Aversões |
+| **Hábitos alimentares:** | | | |
+| `meals_per_day` | integer | ❌ | Refeições/dia |
+| `water_intake_liters` | decimal | ❌ | Água (litros/dia) |
+| `eating_out_frequency` | text | ❌ | Frequência come fora |
+| `previous_diets` | text | ❌ | Dietas anteriores |
+| **Estilo de vida:** | | | |
+| `physical_activity` | text | ❌ | Atividade física |
+| `occupation` | text | ❌ | Ocupação |
+| `marital_status` | text | ❌ | Estado civil |
+| `household_size` | integer | ❌ | Pessoas na casa |
+| `sleep_hours` | decimal | ❌ | Horas de sono |
+| `stress_level` | text | ❌ | Nível de estresse |
+| `smoking` | text | ❌ | Fumante? |
+| `alcohol_consumption` | text | ❌ | Consumo álcool |
+| **Observações profissionais:** | | | |
+| `clinical_observations` | text | ❌ | Observações clínicas |
+| `professional_notes` | text | ❌ | Notas do profissional |
+| `created_at` | timestamptz | ✅ | Auto |
+| `updated_at` | timestamptz | ✅ | Auto |
+
+**Relacionamentos:**
+- `tenant_id` → `tenants.id`
+- `client_id` → `clients.id`
+- `created_by` → `auth.users.id`
+
+**Índices:**
+- `idx_anamneses_client` ON (client_id)
+- `idx_anamneses_date` ON (anamnesis_date)
 
 ---
 
