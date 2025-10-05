@@ -98,7 +98,7 @@
 .stat-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
   margin-bottom: 20px;
 }
@@ -129,7 +129,7 @@
 }
 
 .stat-value {
-  font-size: 48px;
+  font-size: 56px;
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1;
