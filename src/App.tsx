@@ -8,7 +8,7 @@ import { PlanosAlimentares } from './pages/PlanosAlimentares';
 import Questionarios from './pages/Questionarios';
 import { Recordatorio } from './pages/Recordatorio';
 import { FeedbacksSemanais } from './pages/FeedbacksSemanais';
-import { Servicos } from './pages/Servicos';
+import Servicos from './pages/Servicos';
 import { Mensagens } from './pages/Mensagens';
 import { Lembretes } from './pages/Lembretes';
 import { AgenteIA } from './pages/AgenteIA';
