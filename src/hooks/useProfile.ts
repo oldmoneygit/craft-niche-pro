@@ -21,9 +21,12 @@ export function useProfile() {
 
   const fetchProfile = async () => {
     if (!user) {
+      console.log('👤 useProfile: No user, skipping fetch');
       setLoading(false);
       return;
     }
+
+    console.log('👤 useProfile: Fetching profile for user:', user.id);
 
     try {
       const { data, error } = await supabase
@@ -32,14 +35,17 @@ export function useProfile() {
         .eq('user_id', user.id)
         .maybeSingle();
 
+      console.log('👤 useProfile: Query result:', { data, error });
+
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error('❌ Error fetching profile:', error);
         toast({
           title: 'Erro',
           description: 'Não foi possível carregar o perfil.',
           variant: 'destructive',
         });
       } else {
+        console.log('✅ Profile loaded successfully:', data);
         setProfile(data);
       }
     } catch (error) {
