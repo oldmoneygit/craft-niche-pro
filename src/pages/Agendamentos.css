@@ -70,9 +70,6 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 .stat-card::before {
@@ -96,10 +93,11 @@
   transform: scaleY(1);
 }
 
-.stat-header {
+.stat-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 24px;
 }
 
 .stat-label {
@@ -133,7 +131,7 @@
 }
 
 .stat-value {
-  font-size: 56px;
+  font-size: 48px;
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1;
