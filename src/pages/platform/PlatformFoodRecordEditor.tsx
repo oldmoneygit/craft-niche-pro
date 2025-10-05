@@ -680,7 +680,7 @@ export default function PlatformFoodRecordEditor() {
 
       for (const meal of (fullRecord as any).record_meals) {
         const { data: newMeal, error: mealError } = await supabase
-          .from('meals' as any)
+          .from('meal_plan_meals' as any)
           .insert({
             meal_plan_id: (newPlan as any).id,
             name: meal.name,
