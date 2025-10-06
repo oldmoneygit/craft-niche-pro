@@ -575,11 +575,17 @@ export default function PublicQuestionnaireResponse() {
                           onClick={() => handleAnswerChange(currentQuestion.id, option.text)}
                           className={`group w-full text-left p-4 rounded-xl border-2 transition-all duration-300 transform cursor-pointer ${
                             answers[currentQuestion.id] === option.text
-                              ? 'border-emerald-500 bg-emerald-500 text-white shadow-lg scale-[1.02]'
-                              : 'border-emerald-500 bg-white text-gray-900 hover:bg-emerald-500 hover:text-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]'
+                              ? 'border-emerald-500 bg-emerald-500 shadow-lg scale-[1.02]'
+                              : 'border-emerald-500 bg-white hover:bg-emerald-500 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]'
                           }`}
                         >
-                          <span className="text-base font-medium">{option.text}</span>
+                          <span className={`text-base font-medium ${
+                            answers[currentQuestion.id] === option.text 
+                              ? 'text-white' 
+                              : 'text-gray-900 group-hover:text-white'
+                          }`}>
+                            {option.text}
+                          </span>
                         </button>
                       </div>
                     ))}
@@ -600,11 +606,11 @@ export default function PublicQuestionnaireResponse() {
                           onClick={() => handleAnswerChange(currentQuestion.id, option.text, 'checkbox')}
                           className={`group w-full text-left p-4 rounded-xl border-2 transition-all duration-300 flex items-center gap-3 transform cursor-pointer ${
                             (answers[currentQuestion.id] as string[] || []).includes(option.text)
-                              ? 'border-emerald-500 bg-emerald-500 text-white shadow-lg scale-[1.02]'
-                              : 'border-emerald-500 bg-white text-gray-900 hover:bg-emerald-500 hover:text-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]'
+                              ? 'border-emerald-500 bg-emerald-500 shadow-lg scale-[1.02]'
+                              : 'border-emerald-500 bg-white hover:bg-emerald-500 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]'
                           }`}
                         >
-                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-300 ${
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
                             (answers[currentQuestion.id] as string[] || []).includes(option.text)
                               ? 'bg-white border-white'
                               : 'border-emerald-500 bg-transparent group-hover:border-white group-hover:bg-white/20'
@@ -615,7 +621,13 @@ export default function PublicQuestionnaireResponse() {
                               </svg>
                             )}
                           </div>
-                          <span className="text-base font-medium flex-1">{option.text}</span>
+                          <span className={`text-base font-medium flex-1 ${
+                            (answers[currentQuestion.id] as string[] || []).includes(option.text) 
+                              ? 'text-white' 
+                              : 'text-gray-900 group-hover:text-white'
+                          }`}>
+                            {option.text}
+                          </span>
                         </button>
                       </div>
                     ))}
