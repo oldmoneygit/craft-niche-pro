@@ -5,11 +5,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus } from 'lucide-react';
+import { Plus, FileText, Sparkles } from 'lucide-react';
 import { QuestionBuilder } from './QuestionBuilder';
 import { useQuestionnaires, type Question, type Questionnaire } from '@/hooks/useQuestionnaires';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { QUESTIONNAIRE_TEMPLATES, getTemplateById } from '@/lib/questionnaireTemplates';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface QuestionnaireModalProps {
   open: boolean;
@@ -53,6 +60,17 @@ export function QuestionnaireModal({ open, onOpenChange, questionnaire }: Questi
     setDescription('');
     setEstimatedTime('15');
     setQuestions([]);
+  };
+
+  const loadTemplate = (templateId: string) => {
+    const template = getTemplateById(templateId);
+    if (!template) return;
+
+    setTitle(template.name);
+    setCategory(template.category);
+    setDescription(template.description);
+    setEstimatedTime(String(template.estimatedTime));
+    setQuestions(template.questions.map((q, idx) => ({ ...q, order_index: idx })));
   };
 
   const addQuestion = () => {
@@ -175,12 +193,81 @@ export function QuestionnaireModal({ open, onOpenChange, questionnaire }: Questi
             </div>
           </div>
 
+          {/* Templates */}
+          {!isEditing && questions.length === 0 && (
+            <div className="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+                  <Sparkles className="w-6 h-6 text-emerald-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                    Use um template pronto
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    Economize tempo começando com um questionário pré-configurado
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {QUESTIONNAIRE_TEMPLATES.map((template) => (
+                      <button
+                        key={template.id}
+                        onClick={() => loadTemplate(template.id)}
+                        className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-emerald-500 dark:hover:border-emerald-500 hover:shadow-md transition-all text-left group"
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          <FileText className="w-4 h-4 text-emerald-600 group-hover:text-emerald-500" />
+                          <span className="font-semibold text-sm text-gray-900 dark:text-white">
+                            {template.name}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                          {template.description}
+                        </p>
+                        <div className="text-xs text-gray-500 dark:text-gray-500">
+                          {template.questions.length} perguntas • {template.estimatedTime} min
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Perguntas */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold text-sm text-gray-900 dark:text-white">
                 Perguntas ({questions.length})
               </h3>
+              {questions.length > 0 && !isEditing && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Sparkles className="w-4 h-4" />
+                      Usar Template
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-64">
+                    {QUESTIONNAIRE_TEMPLATES.map((template) => (
+                      <DropdownMenuItem
+                        key={template.id}
+                        onClick={() => {
+                          if (confirm('Isso irá substituir as perguntas atuais. Deseja continuar?')) {
+                            loadTemplate(template.id);
+                          }
+                        }}
+                        className="flex flex-col items-start gap-1 py-3"
+                      >
+                        <div className="font-medium">{template.name}</div>
+                        <div className="text-xs text-gray-500">
+                          {template.questions.length} perguntas
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
 
             <DndContext
