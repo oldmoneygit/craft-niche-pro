@@ -47,7 +47,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background/95 backdrop-blur-xl border-border/50">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background border-border/50">
         <DialogHeader className="border-b border-border pb-4">
           <DialogTitle className="text-2xl font-bold flex items-center gap-3 text-foreground">
             <span className="text-3xl">📋</span>
