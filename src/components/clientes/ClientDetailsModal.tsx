@@ -4,13 +4,16 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   X, User, Mail, Phone, Calendar, Activity, Target, Ruler, Weight,
-  Package, FileText, ClipboardList, FileQuestion, Loader2, Eye, Edit, Trash2
+  Package, FileText, ClipboardList, FileQuestion, Loader2, Eye, Edit, Trash2, Plus
 } from 'lucide-react';
 import { ClientWithStats } from '@/hooks/useClientsData';
 import { format } from 'date-fns';
 import { AnamneseForm } from '@/components/platform/AnamneseForm';
 import { AnamneseViewer } from '@/components/platform/AnamneseViewer';
 import { useDeleteAnamnese } from '@/hooks/useAnamnese';
+import { EditClientModal } from './EditClientModal';
+import { AgendamentoModal } from '@/components/agendamentos/AgendamentoModal';
+import { SendQuestionnaireModal } from '@/components/questionnaires/SendQuestionnaireModal';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +36,9 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
   const [viewingAnamnese, setViewingAnamnese] = useState<any | null>(null);
   const [editingAnamnese, setEditingAnamnese] = useState(false);
   const [deletingAnamneseId, setDeletingAnamneseId] = useState<string | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+  const [showQuestionnaireModal, setShowQuestionnaireModal] = useState(false);
   
   const deleteAnamnese = useDeleteAnamnese();
 
@@ -264,25 +270,37 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
         {/* Body */}
         <div className="p-8 overflow-y-auto max-h-[500px]">
           {activeTab === 'info' && (
-            <div className="grid grid-cols-2 gap-6">
-              <InfoItem icon={Phone} label="Telefone" value={client.phone || 'Não informado'} />
-              <InfoItem icon={Mail} label="Email" value={client.email || 'Não informado'} />
-              <InfoItem 
-                icon={User} 
-                label="Idade" 
-                value={calculateAge(client.birth_date) ? `${calculateAge(client.birth_date)} anos` : 'Não informado'} 
-              />
-              <InfoItem icon={Calendar} label="Data de Nascimento" value={formatDate(client.birth_date)} />
-              <InfoItem icon={Ruler} label="Altura" value={client.height_cm ? `${client.height_cm} cm` : 'Não informado'} />
-              <InfoItem icon={Weight} label="Peso Atual" value={client.weight_kg ? `${client.weight_kg} kg` : 'Não informado'} />
-              <InfoItem icon={Target} label="Objetivo" value={client.goal ? goalLabels[client.goal] : 'Não informado'} />
-              <InfoItem icon={Activity} label="Nível de Atividade" value={client.activity_level ? activityLabels[client.activity_level] : 'Não informado'} />
-              
-              {client.notes && (
-                <div className="col-span-2">
-                  <InfoItem icon={User} label="Observações" value={client.notes} />
-                </div>
-              )}
+            <div>
+              <div className="flex justify-end mb-4">
+                <button
+                  onClick={() => setShowEditModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-white transition-all hover:scale-105"
+                  style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+                >
+                  <Edit size={16} />
+                  Editar Informações
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                <InfoItem icon={Phone} label="Telefone" value={client.phone || 'Não informado'} />
+                <InfoItem icon={Mail} label="Email" value={client.email || 'Não informado'} />
+                <InfoItem 
+                  icon={User} 
+                  label="Idade" 
+                  value={calculateAge(client.birth_date) ? `${calculateAge(client.birth_date)} anos` : 'Não informado'} 
+                />
+                <InfoItem icon={Calendar} label="Data de Nascimento" value={formatDate(client.birth_date)} />
+                <InfoItem icon={Ruler} label="Altura" value={client.height_cm ? `${client.height_cm} cm` : 'Não informado'} />
+                <InfoItem icon={Weight} label="Peso Atual" value={client.weight_kg ? `${client.weight_kg} kg` : 'Não informado'} />
+                <InfoItem icon={Target} label="Objetivo" value={client.goal ? goalLabels[client.goal] : 'Não informado'} />
+                <InfoItem icon={Activity} label="Nível de Atividade" value={client.activity_level ? activityLabels[client.activity_level] : 'Não informado'} />
+                
+                {client.notes && (
+                  <div className="col-span-2">
+                    <InfoItem icon={User} label="Observações" value={client.notes} />
+                  </div>
+                )}
+              </div>
             </div>
           )}
           
@@ -341,7 +359,15 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
               ) : (
                 <div className="text-center py-12">
                   <Package size={64} style={{ color: 'var(--text-muted)' }} className="mx-auto mb-3" />
-                  <p style={{ color: 'var(--text-muted)' }}>Nenhum serviço contratado</p>
+                  <p style={{ color: 'var(--text-muted)' }} className="mb-4">Nenhum serviço contratado</p>
+                  <button
+                    onClick={() => navigate('/servicos')}
+                    className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:scale-105 inline-flex items-center gap-2"
+                    style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+                  >
+                    <Plus size={18} />
+                    Contratar Serviço
+                  </button>
                 </div>
               )}
             </div>
@@ -419,12 +445,23 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
           )}
 
           {activeTab === 'appointments' && (
-            <div className="space-y-3">
-              {appointmentsLoading ? (
-                <div className="animate-pulse space-y-3">
-                  {[1,2,3].map(i => <div key={i} className="h-20 rounded-xl" style={{ background: 'var(--bg-secondary)' }} />)}
-                </div>
-              ) : appointments && appointments.length > 0 ? (
+            <div>
+              <div className="flex justify-end mb-4">
+                <button
+                  onClick={() => setShowAppointmentModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-white transition-all hover:scale-105"
+                  style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+                >
+                  <Plus size={16} />
+                  Criar Consulta
+                </button>
+              </div>
+              <div className="space-y-3">
+                {appointmentsLoading ? (
+                  <div className="animate-pulse space-y-3">
+                    {[1,2,3].map(i => <div key={i} className="h-20 rounded-xl" style={{ background: 'var(--bg-secondary)' }} />)}
+                  </div>
+                ) : appointments && appointments.length > 0 ? (
                 appointments.map(apt => {
                   const statusColors: Record<string, { bg: string; text: string }> = {
                     'agendado': { bg: 'rgba(59, 130, 246, 0.1)', text: '#3b82f6' },
@@ -605,47 +642,59 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
           )}
 
           {activeTab === 'questionnaires' && (
-            <div className="space-y-4">
-              {questionnairesLoading ? (
-                <div className="animate-pulse">
-                  <div className="h-24 rounded-xl" style={{ background: 'var(--bg-secondary)' }} />
-                </div>
-              ) : questionnaireResponses && questionnaireResponses.length > 0 ? (
-                questionnaireResponses.map(response => (
-                  <div 
-                    key={response.id}
-                    className="p-5 rounded-xl border"
-                    style={{
-                      background: 'var(--bg-card)',
-                      backdropFilter: 'blur(20px)',
-                      borderColor: 'var(--border)'
-                    }}
-                  >
-                    <h4 className="font-semibold text-base mb-2" style={{ color: 'var(--text-primary)' }}>
-                      {response.questionnaires?.title}
-                    </h4>
-                    <p className="text-sm mb-3" style={{ color: 'var(--text-muted)' }}>
-                      Respondido em {new Date(response.created_at).toLocaleDateString('pt-BR')}
-                    </p>
-                    
-                    {response.answers && typeof response.answers === 'object' && (
-                      <div className="space-y-2">
-                        {Object.entries(response.answers as Record<string, any>).map(([key, value]) => (
-                          <div key={key} className="text-sm">
-                            <span style={{ color: 'var(--text-muted)' }}>{key}:</span>
-                            <span className="ml-2 font-medium" style={{ color: 'var(--text-primary)' }}>{String(value)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+            <div>
+              <div className="flex justify-end mb-4">
+                <button
+                  onClick={() => setShowQuestionnaireModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-white transition-all hover:scale-105"
+                  style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+                >
+                  <Plus size={16} />
+                  Enviar Questionário
+                </button>
+              </div>
+              <div className="space-y-4">
+                {questionnairesLoading ? (
+                  <div className="animate-pulse">
+                    <div className="h-24 rounded-xl" style={{ background: 'var(--bg-secondary)' }} />
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <FileQuestion size={64} style={{ color: 'var(--text-muted)' }} className="mx-auto mb-3" />
-                  <p style={{ color: 'var(--text-muted)' }}>Nenhum questionário respondido</p>
+                ) : questionnaireResponses && questionnaireResponses.length > 0 ? (
+                  questionnaireResponses.map(response => (
+                    <div 
+                      key={response.id}
+                      className="p-5 rounded-xl border"
+                      style={{
+                        background: 'var(--bg-card)',
+                        backdropFilter: 'blur(20px)',
+                        borderColor: 'var(--border)'
+                      }}
+                    >
+                      <h4 className="font-semibold text-base mb-2" style={{ color: 'var(--text-primary)' }}>
+                        {response.questionnaires?.title}
+                      </h4>
+                      <p className="text-sm mb-3" style={{ color: 'var(--text-muted)' }}>
+                        Respondido em {new Date(response.created_at).toLocaleDateString('pt-BR')}
+                      </p>
+                      
+                      {response.answers && typeof response.answers === 'object' && (
+                        <div className="space-y-2">
+                          {Object.entries(response.answers as Record<string, any>).map(([key, value]) => (
+                            <div key={key} className="text-sm">
+                              <span style={{ color: 'var(--text-muted)' }}>{key}:</span>
+                              <span className="ml-2 font-medium" style={{ color: 'var(--text-primary)' }}>{String(value)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                  ) : (
+                    <div className="text-center py-12">
+                      <FileQuestion size={64} style={{ color: 'var(--text-muted)' }} className="mx-auto mb-3" />
+                      <p style={{ color: 'var(--text-muted)' }}>Nenhum questionário respondido</p>
+                    </div>
+                  )}
                 </div>
-              )}
             </div>
           )}
         </div>
@@ -688,6 +737,31 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Client Modal */}
+      {showEditModal && (
+        <EditClientModal 
+          client={client} 
+          onClose={() => setShowEditModal(false)} 
+        />
+      )}
+
+      {/* Appointment Modal */}
+      {showAppointmentModal && (
+        <AgendamentoModal
+          isOpen={showAppointmentModal}
+          onClose={() => setShowAppointmentModal(false)}
+          clientId={client.id}
+          clientName={client.name}
+        />
+      )}
+
+      {/* Send Questionnaire Modal */}
+      <SendQuestionnaireModal
+        open={showQuestionnaireModal}
+        onOpenChange={setShowQuestionnaireModal}
+        questionnaireId={null}
+      />
     </div>
   );
 }
