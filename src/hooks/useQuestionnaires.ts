@@ -94,7 +94,7 @@ export function useQuestionnaires() {
             ...q,
             questions: mappedQuestions,
             question_count: mappedQuestions.length,
-            response_count: total,
+            response_count: completed,
             completion_rate,
           };
         })
