@@ -1,4 +1,4 @@
-import { Eye, Edit, Send, Clock, HelpCircle, FileText, Power, Trash2 } from 'lucide-react';
+import { Eye, Edit, Send, Clock, HelpCircle, FileText, Power, Trash } from 'lucide-react';
 import type { Questionnaire } from '@/hooks/useQuestionnaires';
 
 interface QuestionnaireCardProps {
@@ -147,7 +147,7 @@ export function QuestionnaireCard({
           onClick={onDelete}
           className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-red-500/10 hover:border-red-500 hover:text-red-600 dark:hover:text-red-400 transition-all"
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash className="w-4 h-4" />
           Excluir
         </button>
       </div>
