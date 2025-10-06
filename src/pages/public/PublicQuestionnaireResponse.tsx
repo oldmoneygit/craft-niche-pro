@@ -51,9 +51,10 @@ export default function PublicQuestionnaireResponse() {
 
       setResponseId(response.id);
 
+      // Buscar questionário
       const { data: questionnaireData, error: qError } = await supabase
         .from('questionnaires')
-        .select('id, title, description, questions')
+        .select('id, title, description')
         .eq('id', response.questionnaire_id)
         .single();
 
@@ -63,10 +64,39 @@ export default function PublicQuestionnaireResponse() {
         return;
       }
 
-      setQuestionnaire(questionnaireData);
+      // Buscar perguntas da tabela questionnaire_questions
+      const { data: questionsData, error: questionsError } = await supabase
+        .from('questionnaire_questions')
+        .select('*')
+        .eq('questionnaire_id', response.questionnaire_id)
+        .order('order_index', { ascending: true });
+
+      if (questionsError) {
+        console.error('Erro ao carregar perguntas:', questionsError);
+        setError('Erro ao carregar perguntas do questionário');
+        setLoading(false);
+        return;
+      }
+
+      // Mapear perguntas para o formato esperado pelo componente
+      const mappedQuestions = (questionsData || []).map((q: any) => ({
+        id: q.id,
+        question: q.question_text,
+        type: q.question_type,
+        options: q.options || [],
+        required: q.is_required
+      }));
+
+      console.log('Perguntas carregadas:', mappedQuestions);
+
+      setQuestionnaire({
+        ...questionnaireData,
+        questions: mappedQuestions
+      });
       setLoading(false);
 
     } catch (err: any) {
+      console.error('Erro inesperado:', err);
       setError('Erro inesperado ao carregar questionário');
       setLoading(false);
     }
