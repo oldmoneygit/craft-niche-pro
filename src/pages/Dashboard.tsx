@@ -2,6 +2,7 @@ import {
   Calendar, Users, CheckCircle, Clock, 
   DollarSign, AlertTriangle, Bell 
 } from 'lucide-react';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
 import './Dashboard.css';
 
 interface StatCard {
@@ -29,34 +30,77 @@ interface InactiveClient {
 }
 
 export function Dashboard() {
+  const { data: dashboardData, isLoading, error } = useDashboardStats();
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="dashboard">
+        <div className="dashboard-header">
+          <div className="header-left">
+            <h1>Bem-vindo de volta! 👋</h1>
+            <p>Carregando dados...</p>
+          </div>
+        </div>
+        
+        <div className="stats-grid">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="stat-card today animate-pulse">
+              <div className="stat-header">
+                <div className="stat-label" style={{ background: '#e5e7eb', height: '20px', width: '80px', borderRadius: '4px' }}></div>
+                <div className="stat-icon" style={{ background: '#e5e7eb', borderRadius: '50%' }}></div>
+              </div>
+              <div className="stat-value" style={{ background: '#e5e7eb', height: '32px', width: '60px', borderRadius: '4px' }}></div>
+              <div className="stat-change" style={{ background: '#e5e7eb', height: '16px', width: '120px', borderRadius: '4px' }}></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="dashboard">
+        <div className="dashboard-header">
+          <div className="header-left">
+            <h1>Bem-vindo de volta! 👋</h1>
+            <p style={{ color: '#ef4444' }}>Erro ao carregar dados: {error.message}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const stats: StatCard[] = [
     {
       label: 'HOJE',
-      value: 0,
+      value: dashboardData?.todayAppointments || 0,
       change: 'Consultas agendadas',
       icon: Calendar,
       variant: 'today'
     },
     {
       label: 'ESTE MÊS',
-      value: 3,
+      value: dashboardData?.monthNewClients || 0,
       change: 'Novos clientes',
-      changeType: 'positive',
+      changeType: dashboardData?.monthNewClients ? 'positive' : 'neutral',
       icon: Users,
       variant: 'month'
     },
     {
       label: 'CONFIRMAÇÕES',
-      value: 0,
+      value: dashboardData?.pendingConfirmations || 0,
       change: 'Pendentes (48h)',
       icon: CheckCircle,
       variant: 'pending'
     },
     {
       label: 'INATIVOS',
-      value: 2,
+      value: dashboardData?.inactiveClients || 0,
       change: '30+ dias sem consulta',
-      changeType: 'negative',
+      changeType: dashboardData?.inactiveClients ? 'negative' : 'neutral',
       icon: Clock,
       variant: 'inactive'
     }
@@ -73,14 +117,15 @@ export function Dashboard() {
       title: 'Vencimento de Serviços',
       description: 'Serviços contratados próximos do vencimento (7 dias)',
       icon: AlertTriangle,
-      variant: 'services'
+      variant: 'services',
+      count: dashboardData?.expiringServices || 0
     },
     {
       title: 'Confirmações Pendentes',
       description: 'Consultas nas próximas 48h que ainda não foram confirmadas',
       icon: CheckCircle,
       variant: 'confirmations',
-      count: 0
+      count: dashboardData?.pendingConfirmations || 0
     },
     {
       title: 'Lembretes Pendentes',
@@ -91,20 +136,7 @@ export function Dashboard() {
     }
   ];
 
-  const inactiveClients: InactiveClient[] = [
-    {
-      id: '1',
-      name: 'Jeferson de lima',
-      phone: '19981669495',
-      avatar: 'J'
-    },
-    {
-      id: '2',
-      name: 'MARCAO DA MASSA',
-      phone: '19981661010',
-      avatar: 'M'
-    }
-  ];
+  const inactiveClients: InactiveClient[] = dashboardData?.inactiveClientsList || [];
 
   const handleContactClient = (clientId: string) => {
     console.log('Contacting client:', clientId);
@@ -117,7 +149,7 @@ export function Dashboard() {
       <div className="dashboard-header">
         <div className="header-left">
           <h1>Bem-vindo de volta! 👋</h1>
-          <p>Hoje você tem <strong>0</strong> consultas agendadas</p>
+          <p>Hoje você tem <strong>{dashboardData?.todayAppointments || 0}</strong> consultas agendadas</p>
         </div>
       </div>
 
