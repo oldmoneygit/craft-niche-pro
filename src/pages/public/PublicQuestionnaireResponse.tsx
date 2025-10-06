@@ -152,12 +152,17 @@ export default function PublicQuestionnaireResponse() {
       const weight = question.weight || 1;
       let questionScore = 0;
 
-      if (question.type === 'single_select') {
+      // Tipos de escolha única: single_select, single_choice, radio
+      if (['single_select', 'single_choice', 'radio'].includes(question.type)) {
         questionScore = question.optionScores?.[answer] || 0;
-      } else if (question.type === 'multi_select' && Array.isArray(answer)) {
+      } 
+      // Tipos de múltipla escolha: multi_select, multiple_choice, checkbox
+      else if (['multi_select', 'multiple_choice', 'checkbox'].includes(question.type) && Array.isArray(answer)) {
         const scores = answer.map(opt => question.optionScores?.[opt] || 0);
         questionScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-      } else if (question.type === 'scale') {
+      } 
+      // Escala de 1-10
+      else if (question.type === 'scale') {
         questionScore = (answer / 10) * 100;
       }
 
