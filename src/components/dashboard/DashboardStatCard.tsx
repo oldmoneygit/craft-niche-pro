@@ -89,6 +89,7 @@ export function DashboardStatCard({
           style={{
             color: trend === 'positive' ? '#10b981' :
                    trend === 'negative' ? '#ef4444' :
+                   variant === 'today' ? accentColor :
                    variant === 'pending' ? accentColor :
                    '#ffffff'
           }}
