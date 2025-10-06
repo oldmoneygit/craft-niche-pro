@@ -83,14 +83,10 @@ export function useQuestionnaires() {
             order_index: q.order_index,
             scorable: q.scorable || false,
             weight: q.weight || 1,
-            optionScores: q.option_scores || {}
-          }));
-          
-          console.log('=== LOADED QUESTIONS FROM DB ===');
-          console.log('Raw questions from DB:', questions);
-          console.log('Mapped questions:', mappedQuestions);
+          optionScores: q.option_scores || {}
+        }));
 
-          return {
+        return {
             ...q,
             questions: mappedQuestions,
             question_count: mappedQuestions.length,

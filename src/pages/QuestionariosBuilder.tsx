@@ -152,7 +152,6 @@ export default function QuestionariosBuilder() {
     try {
       if (id) {
         // Update existing
-        console.log('=== SAVING QUESTIONNAIRE (UPDATE) ===');
         const questionsToSave = questions.map(q => ({
           question_text: q.text,
           question_type: q.type,
@@ -163,7 +162,6 @@ export default function QuestionariosBuilder() {
           weight: q.weight || 1,
           option_scores: q.optionScores || {}
         }));
-        console.log('Questions to save:', questionsToSave);
         
         await updateQuestionnaire.mutateAsync({
           id,

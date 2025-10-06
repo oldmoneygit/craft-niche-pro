@@ -62,10 +62,6 @@ export function QuestionnaireResponsesModal({
 
       if (error) throw error;
       
-      console.log('=== RESPONSES FETCHED ===');
-      console.log('Total responses:', data?.length);
-      console.log('Responses data:', data);
-      
       setResponses(data || []);
       setFilteredResponses(data || []);
     } catch (error) {
@@ -163,12 +159,6 @@ export function QuestionnaireResponsesModal({
             <div className="space-y-6">
               {questions.map((question, index) => {
                 const answer = selectedResponse.answers?.[question.id];
-                
-                console.log('=== QUESTION ANSWER ===');
-                console.log('Question ID:', question.id);
-                console.log('Question text:', question.question_text);
-                console.log('All answers:', selectedResponse.answers);
-                console.log('Answer for this question:', answer);
                 
                 return (
                   <div 

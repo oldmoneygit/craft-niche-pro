@@ -29,21 +29,6 @@ export function QuestionnaireViewModal({
   const color = categoryColors[questionnaire.category as keyof typeof categoryColors] || categoryColors.outro;
   const questions = questionnaire.questions as any[] || [];
   
-  // Debug detalhado
-  console.log('=== QUESTIONNAIRE DATA ===');
-  console.log('Full questionnaire:', questionnaire);
-  console.log('Questions:', questions);
-  questions.forEach((q, i) => {
-    console.log(`Question ${i + 1}:`, {
-      question: q.question,
-      type: q.type,
-      scorable: q.scorable,
-      weight: q.weight,
-      options: q.options,
-      optionScores: q.optionScores
-    });
-  });
-  
   // Verificar se tem perguntas pontuáveis
   const scorableQuestions = questions.filter(q => q.scorable);
   const hasScoringSystem = scorableQuestions.length > 0;

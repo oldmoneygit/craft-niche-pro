@@ -109,10 +109,6 @@ export default function Questionarios() {
       .eq('questionnaire_id', questionnaire.id)
       .order('order_index', { ascending: true });
 
-    console.log('=== QUESTIONS FOR RESPONSES MODAL ===');
-    console.log('Questions from DB:', questions);
-    console.log('Question IDs:', questions?.map(q => q.id));
-
     setSelectedForResponses({
       id: questionnaire.id,
       title: questionnaire.title,

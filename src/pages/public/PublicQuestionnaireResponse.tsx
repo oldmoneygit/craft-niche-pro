@@ -90,10 +90,6 @@ export default function PublicQuestionnaireResponse() {
         optionScores: q.option_scores || {}
       }));
 
-      console.log('=== QUESTIONS FOR ANSWERING ===');
-      console.log('Questions being used for answering:', mappedQuestions);
-      console.log('Question IDs for answering:', mappedQuestions.map((q: any) => q.id));
-
       setQuestionnaire({
         ...questionnaireData,
         questions: mappedQuestions
@@ -177,10 +173,6 @@ export default function PublicQuestionnaireResponse() {
     setError('');
 
     try {
-      console.log('=== SUBMITTING ANSWERS ===');
-      console.log('Answers object:', answers);
-      console.log('Question IDs:', questionnaire?.questions.map((q: any) => q.id));
-      
       const finalScore = calculateScore(answers, questionnaire?.questions || []);
       const phoneClean = respondentData.phone.replace(/\D/g, '');
       
