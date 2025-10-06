@@ -23,7 +23,7 @@ export interface Question {
 export default function QuestionariosBuilder() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const tenantId = useTenantId();
+  const { tenantId } = useTenantId();
   const { createQuestionnaire, updateQuestionnaire } = useQuestionnaires();
 
   const [title, setTitle] = useState('');

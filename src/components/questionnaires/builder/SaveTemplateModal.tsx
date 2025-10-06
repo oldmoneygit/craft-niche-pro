@@ -28,7 +28,7 @@ interface SaveTemplateModalProps {
 }
 
 export function SaveTemplateModal({ open, onOpenChange, questionnaireData }: SaveTemplateModalProps) {
-  const tenantId = useTenantId();
+  const { tenantId } = useTenantId();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('anamnese');

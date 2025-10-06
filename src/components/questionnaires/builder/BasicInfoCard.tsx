@@ -29,7 +29,7 @@ export function BasicInfoCard({
   onLoadTemplate,
   onOpenAI
 }: BasicInfoCardProps) {
-  const tenantId = useTenantId();
+  const { tenantId } = useTenantId();
   const [defaultTemplates, setDefaultTemplates] = useState<any[]>([]);
   const [myTemplates, setMyTemplates] = useState<any[]>([]);
   const [loadingTemplate, setLoadingTemplate] = useState(false);
