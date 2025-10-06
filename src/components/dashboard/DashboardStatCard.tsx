@@ -28,52 +28,72 @@ export function DashboardStatCard({
 
   return (
     <div
-      className="stat-card relative overflow-hidden rounded-[20px] p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+      className="stat-card relative overflow-hidden transition-all duration-300 hover:-translate-y-1"
       style={{
         background: 'var(--bg-card)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         border: '1px solid var(--border)',
-        boxShadow: '0 4px 24px var(--shadow)'
+        boxShadow: '0 4px 24px var(--shadow)',
+        borderRadius: '20px',
+        padding: '28px'
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = accentColor;
+        e.currentTarget.style.boxShadow = '0 8px 32px var(--shadow)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = 'var(--border)';
+        e.currentTarget.style.boxShadow = '0 4px 24px var(--shadow)';
       }}
     >
       {/* Barra superior colorida */}
       <div
-        className="absolute top-0 left-0 right-0 h-1"
+        className="absolute top-0 left-0 right-0"
         style={{
+          height: '4px',
           background: `linear-gradient(90deg, ${accentColor} 0%, transparent 100%)`
         }}
       />
 
-      {/* Header: Label + Ícone */}
-      <div className="flex justify-between items-start mb-4">
+      {/* Header: Label à esquerda + Ícone à direita */}
+      <div className="flex justify-between items-start" style={{ marginBottom: '16px' }}>
         <div
-          className="text-[13px] font-semibold uppercase tracking-wider"
-          style={{ color: 'var(--text-muted)' }}
+          style={{ 
+            fontSize: '13px',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            color: 'var(--text-muted)'
+          }}
         >
           {label}
         </div>
 
         <div
-          className="w-12 h-12 rounded-xl flex items-center justify-center"
           style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             background: `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}dd 100%)`
           }}
         >
-          <Icon className="w-6 h-6 text-white" strokeWidth={2} />
+          <Icon style={{ width: '24px', height: '24px', color: 'white', strokeWidth: 2 }} />
         </div>
       </div>
 
-      {/* Valor */}
+      {/* Valor grande */}
       <div
-        className="text-[36px] font-bold leading-none mb-2"
-        style={{ color: 'var(--text-primary)' }}
+        style={{ 
+          fontSize: '36px',
+          fontWeight: 700,
+          lineHeight: 1,
+          marginBottom: '8px',
+          color: 'var(--text-primary)'
+        }}
       >
         {value}
       </div>
@@ -81,14 +101,19 @@ export function DashboardStatCard({
       {/* Descrição/Mudança */}
       {description && (
         <div
-          className={`text-[13px] font-semibold flex items-center gap-1 ${
-            trend === 'positive' ? 'text-emerald-600' :
-            trend === 'negative' ? 'text-red-600' :
-            'text-neutral-600 dark:text-neutral-400'
-          }`}
+          style={{
+            fontSize: '13px',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            color: trend === 'positive' ? '#10b981' :
+                   trend === 'negative' ? '#ef4444' :
+                   'var(--text-secondary)'
+          }}
         >
           {trend === 'positive' && (
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
           )}
