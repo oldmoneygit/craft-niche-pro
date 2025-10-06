@@ -127,7 +127,7 @@ export function CreateMealPlanModal({ open, onOpenChange }: CreateMealPlanModalP
 
   const handleSubmit = async () => {
     try {
-      // 1. Criar o plano com totais calculados
+      // 1. Criar o plano com metas definidas pelo usuário
       const { data: plan, error: planError } = await supabase
         .from('meal_plans')
         .insert([{
@@ -139,10 +139,10 @@ export function CreateMealPlanModal({ open, onOpenChange }: CreateMealPlanModalP
           end_date: formData.endDate || null,
           status: 'ativo',
           goal: formData.goal || null,
-          target_kcal: totalNutrients.calories || null,
-          target_protein: totalNutrients.protein || null,
-          target_carbs: totalNutrients.carbs || null,
-          target_fats: totalNutrients.fats || null,
+          target_kcal: formData.targetKcal ? parseFloat(formData.targetKcal) : null,
+          target_protein: formData.targetProtein ? parseFloat(formData.targetProtein) : null,
+          target_carbs: formData.targetCarbs ? parseFloat(formData.targetCarbs) : null,
+          target_fats: formData.targetFats ? parseFloat(formData.targetFats) : null,
         }])
         .select()
         .maybeSingle();
