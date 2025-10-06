@@ -29,9 +29,6 @@ export function QuestionnaireViewModal({
   const color = categoryColors[questionnaire.category as keyof typeof categoryColors] || categoryColors.outro;
   const questions = questionnaire.questions as any[] || [];
   
-  // Debug: verificar estrutura das perguntas
-  console.log('Questions data:', questions);
-  
   // Verificar se tem perguntas pontuáveis
   const scorableQuestions = questions.filter(q => q.scorable);
   const hasScoringSystem = scorableQuestions.length > 0;
@@ -140,14 +137,13 @@ export function QuestionnaireViewModal({
                     <div className="ml-11 mt-3 space-y-2">
                       {question.options.map((option: any, optIndex: number) => {
                         const optionText = typeof option === 'string' ? option : option.text || option.label || option;
-                        const optionScore = question.scorable && question.optionScores ? question.optionScores[optionText] : null;
-                        
-                        console.log('Option:', optionText, 'Score:', optionScore, 'All scores:', question.optionScores);
+                        const hasScores = question.scorable && question.optionScores && Object.keys(question.optionScores).length > 0;
+                        const optionScore = hasScores ? (question.optionScores[optionText] ?? 0) : null;
                         
                         return (
                           <div 
                             key={option.id || optIndex}
-                            className="flex items-center justify-between gap-2 p-2.5 bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors"
+                            className="flex items-center justify-between gap-3 p-3 bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors"
                           >
                             <div className="flex items-center gap-2 flex-1">
                               <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${
@@ -159,8 +155,8 @@ export function QuestionnaireViewModal({
                                 {optionText}
                               </span>
                             </div>
-                            {optionScore !== null && optionScore !== undefined && (
-                              <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                            {question.scorable && optionScore !== null && (
+                              <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 font-semibold">
                                 {optionScore} pts
                               </Badge>
                             )}
