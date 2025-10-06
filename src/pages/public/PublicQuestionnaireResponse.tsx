@@ -1091,46 +1091,254 @@ export default function PublicQuestionnaireResponse() {
 
   // STEP 3: Review
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 flex items-center justify-center p-4">
-      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
-        <h2 className="text-3xl font-bold text-gray-900 mb-6">Revise suas respostas</h2>
-        
-        <div className="space-y-4 mb-8 max-h-96 overflow-y-auto">
-          {questionnaire.questions.map((q: any, idx: number) => (
-            <div key={q.id} className="bg-gray-50 rounded-lg p-4">
-              <p className="font-semibold text-gray-900 mb-2">
-                {idx + 1}. {q.question}
-              </p>
-              <p className="text-gray-600">
-                {Array.isArray(answers[q.id]) 
-                  ? answers[q.id].join(', ') 
-                  : answers[q.id] || 'Não respondido'}
-              </p>
+    <div className="min-h-screen flex items-center justify-center p-0 sm:p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+      {/* Container responsivo - com frame no desktop, sem frame no mobile */}
+      <div 
+        className="w-full h-screen sm:h-auto sm:max-w-[420px] sm:shadow-2xl"
+        style={{
+          background: typeof window !== 'undefined' && window.innerWidth >= 640 ? '#1f2937' : 'transparent',
+          borderRadius: typeof window !== 'undefined' && window.innerWidth >= 640 ? '36px' : '0',
+          padding: typeof window !== 'undefined' && window.innerWidth >= 640 ? '12px' : '0'
+        }}
+      >
+        <div 
+          className="flex flex-col h-full"
+          style={{
+            background: 'white',
+            borderRadius: typeof window !== 'undefined' && window.innerWidth >= 640 ? '28px' : '0',
+            overflow: 'hidden',
+            minHeight: typeof window !== 'undefined' && window.innerWidth >= 640 ? '760px' : '100vh'
+          }}
+        >
+          {/* Header Verde */}
+          <div 
+            style={{
+              background: '#10b981',
+              color: 'white',
+              padding: '20px',
+              textAlign: 'center'
+            }}
+          >
+            <div 
+              style={{
+                width: '56px',
+                height: '56px',
+                background: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px'
+              }}
+            >
+              <CheckCircle2 className="w-8 h-8 text-white" />
             </div>
-          ))}
-        </div>
-
-        <div className="flex gap-4">
-          <button
-            onClick={() => setCurrentStep('questions')}
-            className="flex-1 px-6 py-3 border-2 border-emerald-500 text-emerald-600 font-semibold rounded-xl hover:bg-emerald-50 transition-all"
-          >
-            Editar Respostas
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="flex-1 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl shadow-lg transition-all disabled:opacity-50"
-          >
-            {submitting ? 'Enviando...' : 'Enviar Respostas'}
-          </button>
-        </div>
-
-        {error && (
-          <div className="mt-4 bg-red-50 border-2 border-red-200 rounded-xl p-4 text-sm text-red-800">
-            {error}
+            <h3 
+              style={{
+                fontSize: '20px',
+                fontWeight: '700',
+                marginBottom: '8px',
+                lineHeight: '1.3'
+              }}
+            >
+              Revise suas respostas
+            </h3>
+            <p 
+              style={{
+                fontSize: '13px',
+                opacity: '0.9',
+                lineHeight: '1.4'
+              }}
+            >
+              Confira suas respostas antes de enviar
+            </p>
           </div>
-        )}
+
+          {/* Content - Lista de Respostas */}
+          <div 
+            className="flex-1 overflow-y-auto"
+            style={{
+              padding: '24px',
+              background: 'white'
+            }}
+          >
+            <div 
+              style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: '20px',
+                animation: 'slideIn 0.3s ease' 
+              }}
+            >
+              <style>{`
+                @keyframes slideIn {
+                  from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                  }
+                  to {
+                    opacity: 1;
+                    transform: translateY(0);
+                  }
+                }
+              `}</style>
+
+              {questionnaire.questions.map((q: any, idx: number) => {
+                const answer = answers[q.id];
+                const hasAnswer = answer && (Array.isArray(answer) ? answer.length > 0 : answer.toString().trim() !== '');
+                
+                return (
+                  <div 
+                    key={q.id}
+                    style={{
+                      background: '#f9fafb',
+                      borderRadius: '12px',
+                      padding: '16px',
+                      border: '1px solid #e5e7eb'
+                    }}
+                  >
+                    <div 
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        marginBottom: '12px'
+                      }}
+                    >
+                      <span 
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          background: '#10b981',
+                          color: 'white',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '12px',
+                          fontWeight: '700',
+                          marginRight: '10px',
+                          flexShrink: 0
+                        }}
+                      >
+                        {idx + 1}
+                      </span>
+                      <p 
+                        style={{
+                          fontSize: '15px',
+                          fontWeight: '600',
+                          color: '#1f2937',
+                          lineHeight: '1.4',
+                          flex: 1
+                        }}
+                      >
+                        {q.question}
+                      </p>
+                    </div>
+                    <div style={{ paddingLeft: '34px' }}>
+                      <p 
+                        style={{
+                          fontSize: '14px',
+                          color: hasAnswer ? '#4b5563' : '#9ca3af',
+                          lineHeight: '1.5',
+                          fontStyle: hasAnswer ? 'normal' : 'italic'
+                        }}
+                      >
+                        {Array.isArray(answer) 
+                          ? (answer.length > 0 ? answer.join(', ') : 'Não respondido')
+                          : (answer || 'Não respondido')}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Footer com Botões */}
+          <div 
+            style={{
+              padding: '20px',
+              borderTop: '1px solid #e5e7eb',
+              display: 'flex',
+              gap: '12px',
+              background: 'white'
+            }}
+          >
+            <button
+              onClick={() => {
+                setCurrentQuestionIndex(0);
+                setCurrentStep('questions');
+              }}
+              style={{
+                flex: 1,
+                padding: '14px',
+                borderRadius: '12px',
+                border: '2px solid #10b981',
+                background: 'white',
+                color: '#10b981',
+                fontSize: '15px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#f0fdf4';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'white';
+              }}
+            >
+              Editar Respostas
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={submitting}
+              style={{
+                flex: 1,
+                padding: '14px',
+                borderRadius: '12px',
+                border: 'none',
+                background: submitting ? '#9ca3af' : '#10b981',
+                color: 'white',
+                fontSize: '15px',
+                fontWeight: '600',
+                cursor: submitting ? 'not-allowed' : 'pointer',
+                opacity: submitting ? 0.6 : 1,
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (!submitting) {
+                  e.currentTarget.style.background = '#059669';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!submitting) {
+                  e.currentTarget.style.background = '#10b981';
+                }
+              }}
+            >
+              {submitting ? 'Enviando...' : 'Enviar Respostas'}
+            </button>
+          </div>
+
+          {/* Mensagem de Erro */}
+          {error && (
+            <div 
+              style={{
+                margin: '0 20px 20px',
+                padding: '16px',
+                background: '#fef2f2',
+                border: '2px solid #fecaca',
+                borderRadius: '12px',
+                color: '#991b1b',
+                fontSize: '14px',
+                lineHeight: '1.5'
+              }}
+            >
+              {error}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
