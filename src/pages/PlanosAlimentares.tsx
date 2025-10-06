@@ -306,6 +306,10 @@ export default function PlanosAlimentares() {
                   protein={`${Math.round(realTotals.protein || plan.target_protein || 0)}g`}
                   fat={`${Math.round(realTotals.fats || plan.target_fats || 0)}g`}
                   carbs={`${Math.round(realTotals.carbs || plan.target_carbs || 0)}g`}
+                  targetCalories={plan.target_kcal}
+                  targetProtein={plan.target_protein}
+                  targetCarbs={plan.target_carbs}
+                  targetFats={plan.target_fats}
                   onStatusChange={handleStatusChange}
                   onView={() => handleView(plan.id)}
                   onEdit={() => handleEdit(plan.id)}

@@ -13,6 +13,10 @@ interface PlanoCardProps {
   protein: string;
   fat: string;
   carbs: string;
+  targetCalories?: number;
+  targetProtein?: number;
+  targetCarbs?: number;
+  targetFats?: number;
   avatarColor?: string;
   onStatusChange?: (newStatus: 'ativo' | 'pendente' | 'concluido') => void;
   onView?: () => void;
@@ -58,6 +62,10 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
   protein,
   fat,
   carbs,
+  targetCalories,
+  targetProtein,
+  targetCarbs,
+  targetFats,
   avatarColor,
   onStatusChange,
   onView,
@@ -269,33 +277,57 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
         ))}
       </div>
 
-      {/* Meta Section */}
-      <div style={{ 
-        marginBottom: '18px',
-        padding: '14px 16px',
-        background: isDark ? 'rgba(16, 185, 129, 0.08)' : 'rgba(16, 185, 129, 0.06)',
-        borderRadius: '12px',
-        borderLeft: '3px solid #10b981'
-      }}>
+      {/* Metas Nutricionais Section */}
+      {(targetCalories || targetProtein || targetCarbs || targetFats) && (
         <div style={{ 
-          fontSize: '11px', 
-          fontWeight: 700, 
-          color: '#10b981', 
-          textTransform: 'uppercase', 
-          letterSpacing: '0.8px',
-          marginBottom: '6px'
+          marginBottom: '18px',
+          padding: '14px 16px',
+          background: isDark ? 'rgba(16, 185, 129, 0.08)' : 'rgba(16, 185, 129, 0.06)',
+          borderRadius: '12px',
+          borderLeft: '3px solid #10b981'
         }}>
-          Meta do Plano
+          <div style={{ 
+            fontSize: '11px', 
+            fontWeight: 700, 
+            color: '#10b981', 
+            textTransform: 'uppercase', 
+            letterSpacing: '0.8px',
+            marginBottom: '10px'
+          }}>
+            Metas Nutricionais Diárias
+          </div>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '8px'
+          }}>
+            {targetCalories && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', color: isDark ? '#9ca3af' : '#6b7280', fontWeight: 500 }}>Calorias:</span>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#f59e0b' }}>{targetCalories} kcal</span>
+              </div>
+            )}
+            {targetProtein && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', color: isDark ? '#9ca3af' : '#6b7280', fontWeight: 500 }}>Proteínas:</span>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#3b82f6' }}>{targetProtein}g</span>
+              </div>
+            )}
+            {targetCarbs && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', color: isDark ? '#9ca3af' : '#6b7280', fontWeight: 500 }}>Carboidratos:</span>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#10b981' }}>{targetCarbs}g</span>
+              </div>
+            )}
+            {targetFats && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', color: isDark ? '#9ca3af' : '#6b7280', fontWeight: 500 }}>Gorduras:</span>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#ef4444' }}>{targetFats}g</span>
+              </div>
+            )}
+          </div>
         </div>
-        <div style={{ 
-          fontSize: '14px', 
-          fontWeight: 600, 
-          color: isDark ? '#e5e7eb' : '#374151',
-          lineHeight: 1.5
-        }}>
-          {objective}
-        </div>
-      </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', paddingTop: '18px', borderTop: isDark ? '1px solid rgba(64, 64, 64, 0.2)' : '1px solid rgba(229, 231, 235, 0.5)' }}>
         {[
