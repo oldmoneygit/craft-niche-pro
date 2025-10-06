@@ -85,6 +85,10 @@ export function useQuestionnaires() {
             weight: q.weight || 1,
             optionScores: q.option_scores || {}
           }));
+          
+          console.log('=== LOADED QUESTIONS FROM DB ===');
+          console.log('Raw questions from DB:', questions);
+          console.log('Mapped questions:', mappedQuestions);
 
           return {
             ...q,

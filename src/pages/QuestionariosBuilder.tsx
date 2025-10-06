@@ -152,21 +152,25 @@ export default function QuestionariosBuilder() {
     try {
       if (id) {
         // Update existing
+        console.log('=== SAVING QUESTIONNAIRE (UPDATE) ===');
+        const questionsToSave = questions.map(q => ({
+          question_text: q.text,
+          question_type: q.type,
+          options: q.options && q.options.length > 0 ? q.options : null,
+          is_required: q.required,
+          order_index: q.order_index,
+          scorable: q.scorable || false,
+          weight: q.weight || 1,
+          option_scores: q.optionScores || {}
+        }));
+        console.log('Questions to save:', questionsToSave);
+        
         await updateQuestionnaire.mutateAsync({
           id,
           title,
           category,
           description,
-          questions: questions.map(q => ({
-            question_text: q.text,
-            question_type: q.type,
-            options: q.options && q.options.length > 0 ? q.options : null,
-            is_required: q.required,
-            order_index: q.order_index,
-            scorable: q.scorable || false,
-            weight: q.weight || 1,
-            option_scores: q.optionScores || {}
-          }))
+          questions: questionsToSave
         });
       } else {
         // Create new
