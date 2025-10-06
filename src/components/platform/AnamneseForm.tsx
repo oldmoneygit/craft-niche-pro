@@ -4,6 +4,8 @@ import { useTenantId } from '@/hooks/useTenantId';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Save } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -158,8 +160,7 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
             Objetivos / Motivo da Consulta *
           </Label>
-          <textarea
-            className="w-full px-5 py-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-2xl focus:ring-2 focus:ring-green-500/50 focus:border-green-500 transition-all text-foreground placeholder:text-gray-400 resize-none"
+          <Textarea
             rows={3}
             placeholder="Descreva os objetivos e motivo da consulta..."
             value={mainGoal}
@@ -184,10 +185,9 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Restrições Alimentares */}
             <div>
               <Label className="block text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">Restrições Alimentares</Label>
-              <textarea
+              <Textarea
                 rows={2}
                 placeholder="Vegetariano, vegano, sem glúten, etc..."
-                className="w-full px-4 py-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-2xl text-foreground focus:border-green-500/50 focus:ring-2 focus:ring-green-500/20 transition-all placeholder:text-gray-400 resize-none"
                 value={dietaryRestrictions}
                 onChange={(e) => setDietaryRestrictions(e.target.value)}
               />
@@ -196,10 +196,9 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Bebida Alcoólica */}
             <div>
               <Label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Consumo de Álcool</Label>
-              <textarea
+              <Textarea
                 rows={2}
                 placeholder="Frequência e tipo de bebida..."
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-foreground focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all placeholder:text-gray-400"
                 value={alcoholConsumption}
                 onChange={(e) => setAlcoholConsumption(e.target.value)}
               />
@@ -208,10 +207,9 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Fumante */}
             <div>
               <Label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Tabagismo</Label>
-              <textarea
+              <Textarea
                 rows={2}
                 placeholder="Fumante, ex-fumante, quantidade..."
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-foreground focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all placeholder:text-gray-400"
                 value={smoking}
                 onChange={(e) => setSmoking(e.target.value)}
               />
@@ -220,11 +218,11 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Sono */}
             <div>
               <Label className="block text-sm font-semibold mb-2">Horas de Sono</Label>
-              <input
+              <Input
                 type="number"
                 step="0.5"
                 placeholder="Ex: 7.5"
-                className="w-32 px-3 py-2 border rounded-lg bg-background text-foreground"
+                className="w-32"
                 value={sleepHours || ''}
                 onChange={(e) => setSleepHours(e.target.value ? parseFloat(e.target.value) : null)}
               />
@@ -233,10 +231,9 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Exercícios */}
             <div>
               <Label className="block text-sm font-semibold mb-2">Atividade Física</Label>
-              <textarea
+              <Textarea
                 rows={2}
                 placeholder="Frequência e tipo de exercício..."
-                className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                 value={physicalActivity}
                 onChange={(e) => setPhysicalActivity(e.target.value)}
               />
@@ -245,10 +242,9 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Frequência Come Fora */}
             <div>
               <Label className="block text-sm font-semibold mb-2">Frequência de Refeições Fora de Casa</Label>
-              <textarea
+              <Textarea
                 rows={2}
                 placeholder="Ex: Almoço 3x/semana no trabalho..."
-                className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                 value={eatingOutFrequency}
                 onChange={(e) => setEatingOutFrequency(e.target.value)}
               />
@@ -257,10 +253,10 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Mora com quantas pessoas */}
             <div>
               <Label className="block text-sm font-semibold mb-2">Composição Familiar</Label>
-              <input
+              <Input
                 type="number"
                 placeholder="Nº de pessoas na residência"
-                className="w-48 px-3 py-2 border rounded-lg bg-background text-foreground"
+                className="w-48"
                 value={householdSize || ''}
                 onChange={(e) => setHouseholdSize(e.target.value ? parseInt(e.target.value) : null)}
               />
@@ -269,10 +265,9 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Nível de Estresse */}
             <div>
               <Label className="block text-sm font-semibold mb-2">Nível de Estresse</Label>
-              <input
+              <Input
                 type="text"
                 placeholder="Ex: Alto, Moderado, Baixo..."
-                className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                 value={stressLevel}
                 onChange={(e) => setStressLevel(e.target.value)}
               />
@@ -281,10 +276,10 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Refeições por Dia */}
             <div>
               <Label className="block text-sm font-semibold mb-2">Número de Refeições por Dia</Label>
-              <input
+              <Input
                 type="number"
                 placeholder="Ex: 4"
-                className="w-32 px-3 py-2 border rounded-lg bg-background text-foreground"
+                className="w-32"
                 value={mealsPerDay || ''}
                 onChange={(e) => setMealsPerDay(e.target.value ? parseInt(e.target.value) : null)}
               />
@@ -307,10 +302,9 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Condições Médicas */}
             <div>
               <Label className="text-sm font-semibold mb-2 block">Condições Médicas / Patologias</Label>
-              <textarea
+              <Textarea
                 rows={3}
                 placeholder="Diabetes, hipertensão, problemas de tireoide, etc..."
-                className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                 value={medicalConditions}
                 onChange={(e) => setMedicalConditions(e.target.value)}
               />
@@ -319,10 +313,9 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Medicamentos */}
             <div>
               <Label className="text-sm font-semibold mb-2 block">Medicamentos em Uso</Label>
-              <textarea
+              <Textarea
                 rows={3}
                 placeholder="Liste os medicamentos e dosagens..."
-                className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                 value={currentMedications}
                 onChange={(e) => setCurrentMedications(e.target.value)}
               />
@@ -331,10 +324,9 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Histórico Familiar */}
             <div>
               <Label className="text-sm font-semibold mb-2 block">Histórico Familiar</Label>
-              <textarea
+              <Textarea
                 rows={3}
                 placeholder="Doenças na família (pais, avós, irmãos)..."
-                className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                 value={familyHistory}
                 onChange={(e) => setFamilyHistory(e.target.value)}
               />
@@ -358,11 +350,10 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
               {/* Peso Atual */}
               <div>
                 <Label className="text-sm font-semibold mb-2 block">Peso Atual (kg)</Label>
-                <input
+                <Input
                   type="number"
                   step="0.1"
                   placeholder="Ex: 75.5"
-                  className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                   value={currentWeight || ''}
                   onChange={(e) => setCurrentWeight(e.target.value ? parseFloat(e.target.value) : null)}
                 />
@@ -371,11 +362,10 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
               {/* Altura */}
               <div>
                 <Label className="text-sm font-semibold mb-2 block">Altura (cm)</Label>
-                <input
+                <Input
                   type="number"
                   step="0.1"
                   placeholder="Ex: 175"
-                  className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                   value={height || ''}
                   onChange={(e) => setHeight(e.target.value ? parseFloat(e.target.value) : null)}
                 />
@@ -384,11 +374,10 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
               {/* Peso Meta */}
               <div>
                 <Label className="text-sm font-semibold mb-2 block">Peso Meta (kg)</Label>
-                <input
+                <Input
                   type="number"
                   step="0.1"
                   placeholder="Ex: 70"
-                  className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                   value={targetWeight || ''}
                   onChange={(e) => setTargetWeight(e.target.value ? parseFloat(e.target.value) : null)}
                 />
@@ -397,11 +386,10 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
               {/* Circunferência da Cintura */}
               <div>
                 <Label className="text-sm font-semibold mb-2 block">Circunferência da Cintura (cm)</Label>
-                <input
+                <Input
                   type="number"
                   step="0.1"
                   placeholder="Ex: 90"
-                  className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                   value={waistCircumference || ''}
                   onChange={(e) => setWaistCircumference(e.target.value ? parseFloat(e.target.value) : null)}
                 />
@@ -410,11 +398,10 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
               {/* Circunferência do Quadril */}
               <div>
                 <Label className="text-sm font-semibold mb-2 block">Circunferência do Quadril (cm)</Label>
-                <input
+                <Input
                   type="number"
                   step="0.1"
                   placeholder="Ex: 100"
-                  className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                   value={hipCircumference || ''}
                   onChange={(e) => setHipCircumference(e.target.value ? parseFloat(e.target.value) : null)}
                 />
@@ -423,11 +410,10 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
               {/* Ingestão Hídrica */}
               <div>
                 <Label className="text-sm font-semibold mb-2 block">Ingestão Hídrica (litros/dia)</Label>
-                <input
+                <Input
                   type="number"
                   step="0.5"
                   placeholder="Ex: 2"
-                  className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                   value={waterIntake || ''}
                   onChange={(e) => setWaterIntake(e.target.value ? parseFloat(e.target.value) : null)}
                 />
@@ -451,10 +437,9 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Alergias */}
             <div>
               <Label className="text-sm font-semibold mb-2 block">Alergias Alimentares</Label>
-              <textarea
+              <Textarea
                 rows={2}
                 placeholder="Alergias a alimentos específicos..."
-                className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                 value={allergies}
                 onChange={(e) => setAllergies(e.target.value)}
               />
@@ -463,10 +448,9 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Intolerâncias */}
             <div>
               <Label className="text-sm font-semibold mb-2 block">Intolerâncias Alimentares</Label>
-              <textarea
+              <Textarea
                 rows={2}
                 placeholder="Lactose, glúten, etc..."
-                className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                 value={foodIntolerances}
                 onChange={(e) => setFoodIntolerances(e.target.value)}
               />
@@ -475,10 +459,9 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Preferências */}
             <div>
               <Label className="text-sm font-semibold mb-2 block">Preferências Alimentares</Label>
-              <textarea
+              <Textarea
                 rows={2}
                 placeholder="Alimentos que gosta e consome com frequência..."
-                className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                 value={foodPreferences}
                 onChange={(e) => setFoodPreferences(e.target.value)}
               />
@@ -487,10 +470,9 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Aversões */}
             <div>
               <Label className="text-sm font-semibold mb-2 block">Aversões Alimentares</Label>
-              <textarea
+              <Textarea
                 rows={2}
                 placeholder="Alimentos que não gosta..."
-                className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                 value={foodDislikes}
                 onChange={(e) => setFoodDislikes(e.target.value)}
               />
@@ -513,10 +495,9 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Observações Clínicas */}
             <div>
               <Label className="text-sm font-semibold mb-2 block">Observações Clínicas</Label>
-              <textarea
+              <Textarea
                 rows={3}
                 placeholder="Impressões sobre o quadro clínico do paciente..."
-                className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                 value={clinicalObservations}
                 onChange={(e) => setClinicalObservations(e.target.value)}
               />
@@ -525,10 +506,9 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
             {/* Notas Profissionais */}
             <div>
               <Label className="text-sm font-semibold mb-2 block">Notas do Profissional</Label>
-              <textarea
+              <Textarea
                 rows={3}
                 placeholder="Anotações sobre a conduta, estratégias, etc..."
-                className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
                 value={professionalNotes}
                 onChange={(e) => setProfessionalNotes(e.target.value)}
               />
