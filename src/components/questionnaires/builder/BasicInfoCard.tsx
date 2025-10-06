@@ -32,6 +32,7 @@ export function BasicInfoCard({
   const tenantId = useTenantId();
   const [defaultTemplates, setDefaultTemplates] = useState<any[]>([]);
   const [myTemplates, setMyTemplates] = useState<any[]>([]);
+  const [loadingTemplate, setLoadingTemplate] = useState(false);
 
   useEffect(() => {
     loadTemplates();
@@ -64,9 +65,16 @@ export function BasicInfoCard({
       {/* Templates Dropdown */}
       <div className="mb-4">
         <Label className="text-gray-700 dark:text-gray-300">Começar com Template</Label>
-        <Select onValueChange={(value) => onLoadTemplate(value)}>
+        <Select 
+          onValueChange={async (value) => {
+            setLoadingTemplate(true);
+            await onLoadTemplate(value);
+            setLoadingTemplate(false);
+          }}
+          disabled={loadingTemplate}
+        >
           <SelectTrigger className="mt-1.5">
-            <SelectValue placeholder="Criar do zero" />
+            <SelectValue placeholder={loadingTemplate ? "Carregando template..." : "Criar do zero"} />
           </SelectTrigger>
           <SelectContent>
             {defaultTemplates.length > 0 && (
@@ -98,9 +106,20 @@ export function BasicInfoCard({
         </Select>
       </div>
 
+      {/* Loading Indicator */}
+      {loadingTemplate && (
+        <div className="mb-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl flex items-center gap-3">
+          <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+            Carregando template...
+          </span>
+        </div>
+      )}
+
       {/* Botão IA */}
       <Button
         onClick={onOpenAI}
+        disabled={loadingTemplate}
         className="w-full mb-6 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white shadow-lg shadow-purple-500/30"
       >
         <Sparkles className="w-5 h-5 mr-2" />
@@ -115,13 +134,14 @@ export function BasicInfoCard({
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Ex: Avaliação de Hábitos Alimentares"
           className="mt-1.5"
+          disabled={loadingTemplate}
         />
       </div>
 
       {/* Categoria */}
       <div className="mb-4">
         <Label className="text-gray-700 dark:text-gray-300">Categoria</Label>
-        <Select value={category} onValueChange={setCategory}>
+        <Select value={category} onValueChange={setCategory} disabled={loadingTemplate}>
           <SelectTrigger className="mt-1.5">
             <SelectValue />
           </SelectTrigger>
@@ -143,6 +163,7 @@ export function BasicInfoCard({
           placeholder="Descreva o objetivo deste questionário..."
           rows={3}
           className="mt-1.5"
+          disabled={loadingTemplate}
         />
       </div>
     </div>
