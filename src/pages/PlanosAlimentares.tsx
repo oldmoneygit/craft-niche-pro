@@ -362,15 +362,13 @@ export default function PlanosAlimentares() {
                           {new Date(plan.end_date).toLocaleDateString('pt-BR')}
                         </span>
                       </div>
-                      {plan.target_kcal && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-                          <FileText style={{ width: '18px', height: '18px', color: colors.iconColor }} />
-                          <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>Meta Calórica:</span>
-                          <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
-                            {plan.target_kcal} kcal
-                          </span>
-                        </div>
-                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                        <FileText style={{ width: '18px', height: '18px', color: colors.iconColor }} />
+                        <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>Meta Calórica:</span>
+                        <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
+                          {plan.target_kcal ? `${plan.target_kcal} kcal` : 'Não definida'}
+                        </span>
+                      </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
                         <List style={{ width: '18px', height: '18px', color: colors.iconColor }} />
                         <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>Refeições:</span>
