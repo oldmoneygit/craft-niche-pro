@@ -318,90 +318,263 @@ export default function PublicQuestionnaireResponse() {
   // STEP 1: Info
   if (currentStep === 'info') {
     return (
-      <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-yellow-400/30 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-400/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-pink-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-        </div>
-
-        <div className="w-full max-w-md relative z-10 animate-fade-in">
-          <div className="shadow-2xl rounded-2xl border-0 bg-white/90 backdrop-blur-xl p-8">
-            <div className="text-center space-y-4 mb-8">
-              <div className="mx-auto w-20 h-20 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-2xl flex items-center justify-center animate-scale-in shadow-lg">
-                <Sparkles className="w-10 h-10 text-white animate-pulse" />
+      <div className="min-h-screen flex items-center justify-center p-0 sm:p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+        {/* Container responsivo - com frame no desktop, sem frame no mobile */}
+        <div 
+          className="w-full h-screen sm:h-auto sm:max-w-[420px] sm:shadow-2xl"
+          style={{
+            background: typeof window !== 'undefined' && window.innerWidth >= 640 ? '#1f2937' : 'transparent',
+            borderRadius: typeof window !== 'undefined' && window.innerWidth >= 640 ? '36px' : '0',
+            padding: typeof window !== 'undefined' && window.innerWidth >= 640 ? '12px' : '0'
+          }}
+        >
+          <div 
+            className="flex flex-col h-full"
+            style={{
+              background: 'white',
+              borderRadius: typeof window !== 'undefined' && window.innerWidth >= 640 ? '28px' : '0',
+              overflow: 'hidden',
+              minHeight: typeof window !== 'undefined' && window.innerWidth >= 640 ? '760px' : '100vh'
+            }}
+          >
+            {/* Header Verde */}
+            <div 
+              style={{
+                background: '#10b981',
+                color: 'white',
+                padding: '20px',
+                textAlign: 'center'
+              }}
+            >
+              <div 
+                style={{
+                  width: '56px',
+                  height: '56px',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  borderRadius: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 16px'
+                }}
+              >
+                <Sparkles className="w-8 h-8 text-white" />
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
+              <h3 
+                style={{
+                  fontSize: '20px',
+                  fontWeight: '700',
+                  marginBottom: '8px',
+                  lineHeight: '1.3'
+                }}
+              >
                 {questionnaire.title}
-              </h1>
+              </h3>
               {questionnaire.description && (
-                <p className="text-base text-gray-600 leading-relaxed">
+                <p 
+                  style={{
+                    fontSize: '13px',
+                    opacity: '0.9',
+                    lineHeight: '1.4'
+                  }}
+                >
                   {questionnaire.description}
                 </p>
               )}
             </div>
-            
-            <div className="space-y-5">
-              <div className="space-y-2 group">
-                <label htmlFor="name" className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <User className="w-4 h-4 text-violet-500" />
-                  Nome completo *
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  value={respondentData.name}
-                  onChange={(e) => setRespondentData({ ...respondentData, name: e.target.value })}
-                  placeholder="Digite seu nome"
-                  className="w-full border-2 border-gray-200 rounded-xl p-3 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/20 transition-all duration-300 text-base"
-                  required
-                />
-              </div>
 
-              <div className="space-y-2 group">
-                <label htmlFor="phone" className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <Phone className="w-4 h-4 text-violet-500" />
-                  Telefone *
-                </label>
-                <input
-                  id="phone"
-                  type="tel"
-                  value={respondentData.phone}
-                  onChange={(e) => {
-                    let phone = e.target.value.replace(/\D/g, '');
-                    if (phone.length <= 11) {
-                      if (phone.length > 10) {
-                        phone = phone.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
-                      } else if (phone.length > 6) {
-                        phone = phone.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
-                      } else if (phone.length > 2) {
-                        phone = phone.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
-                      }
+            {/* Content */}
+            <div 
+              className="flex-1 overflow-y-auto"
+              style={{
+                padding: '24px',
+                background: 'white'
+              }}
+            >
+              <div style={{ animation: 'slideIn 0.3s ease' }}>
+                <style>{`
+                  @keyframes slideIn {
+                    from {
+                      opacity: 0;
+                      transform: translateY(10px);
                     }
-                    setRespondentData({...respondentData, phone});
-                  }}
-                  placeholder="(00) 00000-0000"
-                  className="w-full border-2 border-gray-200 rounded-xl p-3 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/20 transition-all duration-300 text-base"
-                  required
-                />
-              </div>
+                    to {
+                      opacity: 1;
+                      transform: translateY(0);
+                    }
+                  }
+                `}</style>
 
-              <div className="space-y-2 group">
-                <label htmlFor="email" className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <Mail className="w-4 h-4 text-violet-500" />
-                  E-mail (opcional)
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={respondentData.email}
-                  onChange={(e) => setRespondentData({ ...respondentData, email: e.target.value })}
-                  placeholder="seu@email.com"
-                  className="w-full border-2 border-gray-200 rounded-xl p-3 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/20 transition-all duration-300 text-base"
-                />
-              </div>
+                <div style={{ marginBottom: '24px' }}>
+                  <label 
+                    htmlFor="name" 
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    <User className="w-4 h-4" style={{ color: '#10b981' }} />
+                    Nome completo *
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    value={respondentData.name}
+                    onChange={(e) => setRespondentData({ ...respondentData, name: e.target.value })}
+                    placeholder="Digite seu nome"
+                    style={{
+                      width: '100%',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: '2px solid #e5e7eb',
+                      fontSize: '15px',
+                      color: '#374151',
+                      transition: 'all 0.2s ease',
+                      outline: 'none'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#10b981';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                    required
+                  />
+                </div>
 
+                <div style={{ marginBottom: '24px' }}>
+                  <label 
+                    htmlFor="phone" 
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    <Phone className="w-4 h-4" style={{ color: '#10b981' }} />
+                    Telefone *
+                  </label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    value={respondentData.phone}
+                    onChange={(e) => {
+                      let phone = e.target.value.replace(/\D/g, '');
+                      if (phone.length <= 11) {
+                        if (phone.length > 10) {
+                          phone = phone.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+                        } else if (phone.length > 6) {
+                          phone = phone.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+                        } else if (phone.length > 2) {
+                          phone = phone.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+                        }
+                      }
+                      setRespondentData({...respondentData, phone});
+                    }}
+                    placeholder="(00) 00000-0000"
+                    style={{
+                      width: '100%',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: '2px solid #e5e7eb',
+                      fontSize: '15px',
+                      color: '#374151',
+                      transition: 'all 0.2s ease',
+                      outline: 'none'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#10b981';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                    required
+                  />
+                </div>
+
+                <div style={{ marginBottom: '24px' }}>
+                  <label 
+                    htmlFor="email" 
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    <Mail className="w-4 h-4" style={{ color: '#10b981' }} />
+                    E-mail (opcional)
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={respondentData.email}
+                    onChange={(e) => setRespondentData({ ...respondentData, email: e.target.value })}
+                    placeholder="seu@email.com"
+                    style={{
+                      width: '100%',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: '2px solid #e5e7eb',
+                      fontSize: '15px',
+                      color: '#374151',
+                      transition: 'all 0.2s ease',
+                      outline: 'none'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#10b981';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  />
+                </div>
+
+                {error && (
+                  <div 
+                    style={{
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      background: '#fef2f2',
+                      border: '2px solid #fecaca',
+                      color: '#991b1b',
+                      fontSize: '14px',
+                      marginBottom: '16px',
+                      animation: 'slideIn 0.3s ease'
+                    }}
+                  >
+                    {error}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div 
+              style={{
+                padding: '20px',
+                borderTop: '1px solid #e5e7eb',
+                background: 'white'
+              }}
+            >
               <button
                 onClick={() => {
                   if (!respondentData.name || respondentData.name.trim().length < 3) {
@@ -415,16 +588,27 @@ export default function PublicQuestionnaireResponse() {
                   setError('');
                   setCurrentStep('questions');
                 }}
-                className="w-full mt-6 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: '#10b981',
+                  color: 'white',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#059669';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#10b981';
+                }}
               >
-                <span className="text-lg">Iniciar Questionário</span>
+                Iniciar Questionário
               </button>
-
-              {error && (
-                <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 text-sm text-red-800 animate-fade-in">
-                  {error}
-                </div>
-              )}
             </div>
           </div>
         </div>
