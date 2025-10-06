@@ -81,7 +81,7 @@ export function SaveTemplateModal({ open, onOpenChange, questionnaireData }: Sav
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Salvar como Template</DialogTitle>
+          <DialogTitle className="text-xl font-bold">💾 Salvar como Template</DialogTitle>
           <DialogDescription>
             Salve este questionário para reutilizar no futuro
           </DialogDescription>
@@ -89,7 +89,7 @@ export function SaveTemplateModal({ open, onOpenChange, questionnaireData }: Sav
 
         <div className="space-y-4 py-4">
           <div>
-            <Label>Nome do Template *</Label>
+            <Label className="text-gray-700 dark:text-gray-300 font-semibold">Nome do Template *</Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -99,7 +99,7 @@ export function SaveTemplateModal({ open, onOpenChange, questionnaireData }: Sav
           </div>
 
           <div>
-            <Label>Descrição</Label>
+            <Label className="text-gray-700 dark:text-gray-300 font-semibold">Descrição</Label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -110,7 +110,7 @@ export function SaveTemplateModal({ open, onOpenChange, questionnaireData }: Sav
           </div>
 
           <div>
-            <Label>Categoria</Label>
+            <Label className="text-gray-700 dark:text-gray-300 font-semibold">Categoria</Label>
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger className="mt-1.5">
                 <SelectValue />
@@ -126,12 +126,30 @@ export function SaveTemplateModal({ open, onOpenChange, questionnaireData }: Sav
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
+            disabled={loading}
+            className="border-gray-300 dark:border-gray-600"
+          >
             Cancelar
           </Button>
-          <Button onClick={handleSave} disabled={loading}>
-            {loading ? 'Salvando...' : 'Salvar Template'}
+          <Button 
+            onClick={handleSave} 
+            disabled={loading}
+            className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30"
+          >
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                Salvando...
+              </>
+            ) : (
+              <>
+                💾 Salvar Template
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
