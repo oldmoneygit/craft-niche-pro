@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { useCreateMealPlan, useMealPlanDetail } from '@/hooks/useMealPlansData';
 import { useClientsData } from '@/hooks/useClientsData';
-import { Plus, ChevronRight, ChevronLeft, Check, Info, Calculator } from 'lucide-react';
+import { Plus, ChevronRight, ChevronLeft, Check, Info, Calculator, Trash2 } from 'lucide-react';
 import { MEAL_TYPE_LABELS, MEAL_TYPE_ICONS } from '@/types/meal-plans';
 import { useToast } from '@/hooks/use-toast';
 import { MealFoodBuilder } from './MealFoodBuilder';
@@ -49,6 +49,9 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
     notes: ''
   });
   const [selectedMeals, setSelectedMeals] = useState<string[]>(['breakfast', 'lunch', 'dinner']);
+  const [customMeals, setCustomMeals] = useState<Array<{ key: string; name: string; time: string; icon: string }>>([]);
+  const [showCustomMealForm, setShowCustomMealForm] = useState(false);
+  const [newCustomMeal, setNewCustomMeal] = useState({ name: '', time: '', icon: '🍴' });
   const [mealFoods, setMealFoods] = useState<Record<string, any[]>>({
     breakfast: [],
     morning_snack: [],
@@ -100,8 +103,8 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
         };
 
         editingPlan.meals.forEach((meal: any) => {
-          const defaultMeal = DEFAULT_MEALS.find(m => m.name === meal.name);
-          const mealKey = defaultMeal?.key;
+          const matchedMeal = allMeals.find(m => m.name === meal.name);
+          const mealKey = matchedMeal?.key;
           
           if (mealKey && meal.items) {
             foodsByMeal[mealKey] = meal.items.map((item: any) => ({
@@ -136,6 +139,9 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
         notes: ''
       });
       setSelectedMeals(['breakfast', 'lunch', 'dinner']);
+      setCustomMeals([]);
+      setShowCustomMealForm(false);
+      setNewCustomMeal({ name: '', time: '', icon: '🍴' });
       setMealFoods({
         breakfast: [],
         morning_snack: [],
@@ -269,8 +275,8 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
         plan = newPlan;
       }
       
-      // 2. Criar refeições
-      const mealsToCreate = DEFAULT_MEALS
+      // 2. Criar refeições (padrão + customizadas)
+      const mealsToCreate = allMeals
         .filter(meal => selectedMeals.includes(meal.key))
         .map((meal, index) => ({
           meal_plan_id: plan.id,
@@ -290,7 +296,7 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
         // 3. Criar itens (alimentos) de cada refeição
         if (createdMeals) {
           for (const meal of createdMeals) {
-            const mealKey = DEFAULT_MEALS.find(m => m.name === meal.name)?.key;
+            const mealKey = allMeals.find(m => m.name === meal.name)?.key;
             if (!mealKey) continue;
 
             const foods = mealFoods[mealKey] || [];
@@ -338,6 +344,9 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
         notes: ''
       });
       setSelectedMeals(['breakfast', 'lunch', 'dinner']);
+      setCustomMeals([]);
+      setShowCustomMealForm(false);
+      setNewCustomMeal({ name: '', time: '', icon: '🍴' });
       setMealFoods({
         breakfast: [],
         morning_snack: [],
@@ -365,6 +374,41 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
         : [...prev, mealKey]
     );
   };
+
+  const handleAddCustomMeal = () => {
+    if (!newCustomMeal.name.trim() || !newCustomMeal.time) {
+      toast({ variant: "destructive", title: "Erro", description: "Preencha o nome e horário da refeição" });
+      return;
+    }
+
+    const mealKey = `custom_${Date.now()}`;
+    const customMeal = {
+      key: mealKey,
+      name: newCustomMeal.name,
+      time: newCustomMeal.time,
+      icon: newCustomMeal.icon
+    };
+
+    setCustomMeals(prev => [...prev, customMeal]);
+    setSelectedMeals(prev => [...prev, mealKey]);
+    setMealFoods(prev => ({ ...prev, [mealKey]: [] }));
+    setNewCustomMeal({ name: '', time: '', icon: '🍴' });
+    setShowCustomMealForm(false);
+    
+    toast({ title: "Refeição adicionada!", description: "Refeição personalizada criada com sucesso" });
+  };
+
+  const handleRemoveCustomMeal = (mealKey: string) => {
+    setCustomMeals(prev => prev.filter(m => m.key !== mealKey));
+    setSelectedMeals(prev => prev.filter(k => k !== mealKey));
+    setMealFoods(prev => {
+      const newFoods = { ...prev };
+      delete newFoods[mealKey];
+      return newFoods;
+    });
+  };
+
+  const allMeals = [...DEFAULT_MEALS, ...customMeals];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -547,7 +591,10 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
                   Escolha quais refeições farão parte do plano alimentar do cliente.
                 </p>
               </div>
+              
+              {/* Refeições Padrão */}
               <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Refeições Padrão</h4>
                 {DEFAULT_MEALS.map(meal => (
                   <div 
                     key={meal.key} 
@@ -571,6 +618,122 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
                   </div>
                 ))}
               </div>
+
+              {/* Refeições Personalizadas */}
+              {customMeals.length > 0 && (
+                <div className="space-y-3 mt-6">
+                  <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Refeições Personalizadas</h4>
+                  {customMeals.map(meal => (
+                    <div 
+                      key={meal.key} 
+                      className="flex items-center gap-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-700 hover:border-purple-500 transition-colors"
+                    >
+                      <Checkbox
+                        checked={selectedMeals.includes(meal.key)}
+                        onCheckedChange={() => toggleMeal(meal.key)}
+                        className="w-5 h-5 rounded border-purple-300 data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500"
+                      />
+                      <div className="flex-1 cursor-pointer" onClick={() => toggleMeal(meal.key)}>
+                        <div className="font-semibold text-gray-900 dark:text-white flex items-center gap-3">
+                          <span className="text-2xl">{meal.icon}</span>
+                          {meal.name}
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          Horário: {meal.time}
+                        </div>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveCustomMeal(meal.key);
+                        }}
+                        className="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Botão e Formulário para Adicionar Refeição Personalizada */}
+              {!showCustomMealForm ? (
+                <Button
+                  type="button"
+                  onClick={() => setShowCustomMealForm(true)}
+                  className="w-full mt-4 bg-purple-500 hover:bg-purple-600 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Refeição Personalizada
+                </Button>
+              ) : (
+                <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-xl space-y-3">
+                  <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-200">Nova Refeição Personalizada</h4>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs text-gray-700 dark:text-gray-300">Nome *</Label>
+                      <Input
+                        value={newCustomMeal.name}
+                        onChange={e => setNewCustomMeal(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder="Ex: Lanche da Tarde"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-gray-700 dark:text-gray-300">Horário *</Label>
+                      <Input
+                        type="time"
+                        value={newCustomMeal.time}
+                        onChange={e => setNewCustomMeal(prev => ({ ...prev, time: e.target.value }))}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-xs text-gray-700 dark:text-gray-300 mb-2 block">Ícone</Label>
+                    <div className="flex gap-2 flex-wrap">
+                      {['🍴', '🥗', '🍎', '🥤', '🍞', '🥪', '🍕', '🍜', '🍰', '☕', '🥗', '🍳'].map(emoji => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() => setNewCustomMeal(prev => ({ ...prev, icon: emoji }))}
+                          className={`text-2xl p-2 rounded-lg transition-all ${
+                            newCustomMeal.icon === emoji 
+                              ? 'bg-purple-200 dark:bg-purple-700 scale-110' 
+                              : 'bg-white dark:bg-gray-800 hover:bg-purple-100 dark:hover:bg-purple-900/30'
+                          }`}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      type="button"
+                      onClick={handleAddCustomMeal}
+                      className="flex-1 bg-purple-500 hover:bg-purple-600 text-white"
+                    >
+                      <Check className="w-4 h-4 mr-2" />
+                      Adicionar
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setShowCustomMealForm(false);
+                        setNewCustomMeal({ name: '', time: '', icon: '🍴' });
+                      }}
+                      className="flex-1"
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -594,7 +757,7 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
               {/* Lista de refeições selecionadas */}
               <div className="space-y-4">
                 {selectedMeals.map(mealKey => {
-                  const meal = DEFAULT_MEALS.find(m => m.key === mealKey);
+                  const meal = allMeals.find(m => m.key === mealKey);
                   if (!meal) return null;
                   
                   return (
@@ -602,7 +765,7 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
                       key={mealKey}
                       mealType={mealKey}
                       mealLabel={meal.name}
-                      mealEmoji={MEAL_TYPE_EMOJIS[mealKey]}
+                      mealEmoji={meal.icon}
                       foods={mealFoods[mealKey] || []}
                       onAddFood={(food) => handleAddFood(mealKey, food)}
                       onRemoveFood={(index) => handleRemoveFood(mealKey, index)}
