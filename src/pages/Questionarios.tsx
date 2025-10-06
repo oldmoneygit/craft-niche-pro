@@ -7,6 +7,8 @@ import { QuestionnaireCard } from '@/components/questionnaires/QuestionnaireCard
 import { QuestionnaireModal } from '@/components/questionnaires/QuestionnaireModal';
 import { SendQuestionnaireModal } from '@/components/questionnaires/SendQuestionnaireModal';
 import { MyTemplatesModal } from '@/components/questionnaires/MyTemplatesModal';
+import { QuestionnaireViewModal } from '@/components/questionnaires/QuestionnaireViewModal';
+import { QuestionnaireShareModal } from '@/components/questionnaires/QuestionnaireShareModal';
 import { useQuestionnaires, type Questionnaire } from '@/hooks/useQuestionnaires';
 import {
   AlertDialog,
@@ -24,8 +26,11 @@ export default function Questionarios() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [sendModalOpen, setSendModalOpen] = useState(false);
   const [templatesModalOpen, setTemplatesModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState<Questionnaire | null>(null);
   const [selectedForSend, setSelectedForSend] = useState<{ id: string; title: string } | null>(null);
+  const [selectedForShare, setSelectedForShare] = useState<{ id: string; title: string } | null>(null);
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [questionnaireToDelete, setQuestionnaireToDelete] = useState<{ id: string; title: string } | null>(null);
@@ -54,8 +59,8 @@ export default function Questionarios() {
   };
 
   const handleView = (questionnaire: any) => {
-    // TODO: Implementar visualização detalhada
-    console.log('View', questionnaire);
+    setSelectedQuestionnaire(questionnaire);
+    setViewModalOpen(true);
   };
 
   const handleEdit = (questionnaire: any) => {
@@ -63,8 +68,8 @@ export default function Questionarios() {
   };
 
   const handleSend = (questionnaire: any) => {
-    setSelectedForSend({ id: questionnaire.id, title: questionnaire.title });
-    setSendModalOpen(true);
+    setSelectedForShare({ id: questionnaire.id, title: questionnaire.title });
+    setShareModalOpen(true);
   };
 
   const handleToggleActive = async (questionnaire: any) => {
@@ -229,6 +234,23 @@ export default function Questionarios() {
         open={templatesModalOpen}
         onOpenChange={setTemplatesModalOpen}
       />
+
+      {selectedQuestionnaire && (
+        <QuestionnaireViewModal
+          open={viewModalOpen}
+          onOpenChange={setViewModalOpen}
+          questionnaire={selectedQuestionnaire as any}
+        />
+      )}
+
+      {selectedForShare && (
+        <QuestionnaireShareModal
+          open={shareModalOpen}
+          onOpenChange={setShareModalOpen}
+          questionnaireId={selectedForShare.id}
+          questionnaireTitle={selectedForShare.title}
+        />
+      )}
 
       {/* Alert Dialog de Confirmação */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

@@ -19,6 +19,7 @@ import { BaseConhecimento } from './pages/BaseConhecimento';
 import Relatorios from './pages/Relatorios';
 import Financeiro from './pages/Financeiro';
 import { Configuracoes } from './pages/Configuracoes';
+import PublicQuestionnaireResponse from './pages/public/PublicQuestionnaireResponse';
 
 // Create a client for React Query
 const queryClient = new QueryClient({
@@ -35,6 +36,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
+          {/* Rota pública para resposta de questionário */}
+          <Route path="/questionario/:token" element={<PublicQuestionnaireResponse />} />
+          
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/clientes" element={<Clientes />} />
