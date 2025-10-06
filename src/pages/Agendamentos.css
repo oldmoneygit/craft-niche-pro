@@ -566,3 +566,147 @@
     width: 100%;
   }
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .calendar-section {
+  background: rgba(38, 38, 38, 0.6);
+  border-color: #404040;
+}
+
+[data-theme="dark"] .calendar-mini-stats {
+  background: #171717;
+}
+
+[data-theme="dark"] .mini-stat-value {
+  color: #fafafa;
+}
+
+[data-theme="dark"] .mini-stat-label {
+  color: #a3a3a3;
+}
+
+[data-theme="dark"] .calendar-header h3 {
+  color: #fafafa;
+}
+
+[data-theme="dark"] .calendar-header button {
+  background: #171717;
+  border-color: #404040;
+  color: #fafafa;
+}
+
+[data-theme="dark"] .calendar-weekday {
+  color: #a3a3a3;
+}
+
+[data-theme="dark"] .calendar-day {
+  color: #fafafa;
+}
+
+[data-theme="dark"] .calendar-day:hover {
+  background: rgba(38, 38, 38, 0.6);
+  border-color: rgba(64, 64, 64, 0.5);
+}
+
+[data-theme="dark"] .more-count {
+  color: #a3a3a3;
+}
+
+[data-theme="dark"] .next-appointments-section {
+  background: #171717;
+  border-color: #404040;
+}
+
+[data-theme="dark"] .next-appointments-title {
+  color: #fafafa;
+}
+
+[data-theme="dark"] .next-appointment-item {
+  background: rgba(38, 38, 38, 0.5);
+  border-color: rgba(64, 64, 64, 0.5);
+}
+
+[data-theme="dark"] .next-appointment-item:hover {
+  background: rgba(38, 38, 38, 0.8);
+  border-color: #404040;
+}
+
+[data-theme="dark"] .next-appointment-day {
+  color: #fafafa;
+}
+
+[data-theme="dark"] .next-appointment-month {
+  color: #a3a3a3;
+}
+
+[data-theme="dark"] .next-appointment-client {
+  color: #fafafa;
+}
+
+[data-theme="dark"] .next-appointment-time {
+  color: #a3a3a3;
+}
+
+[data-theme="dark"] .day-appointments-section {
+  background: rgba(38, 38, 38, 0.6);
+  border-color: #404040;
+}
+
+[data-theme="dark"] .section-header-appointments {
+  border-bottom-color: #404040;
+}
+
+[data-theme="dark"] .day-title {
+  color: #fafafa;
+}
+
+[data-theme="dark"] .summary-card {
+  background: #171717;
+  border-color: #404040;
+}
+
+[data-theme="dark"] .summary-card:hover {
+  background: rgba(23, 23, 23, 0.8);
+  border-color: #404040;
+}
+
+[data-theme="dark"] .summary-card-value {
+  color: #fafafa;
+}
+
+[data-theme="dark"] .summary-card-label {
+  color: #a3a3a3;
+}
+
+[data-theme="dark"] .loading-state,
+[data-theme="dark"] .empty-state {
+  color: #a3a3a3;
+}
+
+[data-theme="dark"] .appointment-card {
+  background: #171717;
+  border-color: #404040;
+}
+
+[data-theme="dark"] .appointment-card:hover {
+  background: rgba(23, 23, 23, 0.8);
+  border-color: #404040;
+}
+
+[data-theme="dark"] .client-name {
+  color: #fafafa;
+}
+
+[data-theme="dark"] .appointment-type {
+  color: #a3a3a3;
+}
+
+[data-theme="dark"] .action-btn {
+  background: rgba(38, 38, 38, 0.5);
+  border-color: #404040;
+}
+
+[data-theme="dark"] .action-btn:hover {
+  background: rgba(38, 38, 38, 0.8);
+  border-color: #404040;
+}

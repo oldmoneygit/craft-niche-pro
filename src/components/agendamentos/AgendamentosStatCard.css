@@ -1,3 +1,14 @@
 .agendamentos-stat-card:hover .agendamentos-stat-border {
   opacity: 1 !important;
 }
+
+/* Dark Mode Specific Styles */
+[data-theme="dark"] .agendamentos-stat-card {
+  background: rgba(38, 38, 38, 0.6) !important;
+  border-color: #404040 !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .agendamentos-stat-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
