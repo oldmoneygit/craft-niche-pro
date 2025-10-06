@@ -171,12 +171,34 @@ export function QuestionnaireResponsesModal({
     return phone;
   };
 
-  const getAnswerDisplay = (questionId: string, answer: any) => {
-    if (!answer) return 'Não respondido';
-    if (Array.isArray(answer)) {
-      return answer.length > 0 ? answer.join(', ') : 'Não respondido';
+  const getAnswerDisplay = (question: any, answer: any) => {
+    if (!answer) return { text: 'Não respondido', score: null };
+    
+    // Para perguntas de escala (1-10)
+    if (question.question_type === 'scale') {
+      const score = answer;
+      return { text: answer.toString(), score: score };
     }
-    return answer.toString();
+    
+    // Para respostas múltiplas (array)
+    if (Array.isArray(answer)) {
+      if (answer.length === 0) return { text: 'Não respondido', score: null };
+      
+      const scores = answer.map((opt: string) => question.option_scores?.[opt] || null).filter(s => s !== null);
+      const avgScore = scores.length > 0 ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length * 10) / 10 : null;
+      
+      return { 
+        text: answer.join(', '), 
+        score: avgScore 
+      };
+    }
+    
+    // Para resposta única
+    const score = question.option_scores?.[answer] || null;
+    return { 
+      text: answer.toString(), 
+      score: score 
+    };
   };
 
   if (selectedResponse) {
@@ -235,6 +257,7 @@ export function QuestionnaireResponsesModal({
             <div className="space-y-6">
               {questions.map((question, index) => {
                 const answer = selectedResponse.answers?.[question.id];
+                const answerDisplay = getAnswerDisplay(question, answer);
                 
                 return (
                   <div 
@@ -246,12 +269,20 @@ export function QuestionnaireResponsesModal({
                         {index + 1}
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900 dark:text-white text-base mb-2">
-                          {question.question_text}
-                        </p>
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <p className="font-semibold text-gray-900 dark:text-white text-base flex-1">
+                            {question.question_text}
+                          </p>
+                          {question.scorable && answerDisplay.score !== null && (
+                            <div className="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap">
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              {answerDisplay.score} pts
+                            </div>
+                          )}
+                        </div>
                         <div className="bg-white dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
                           <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                            {getAnswerDisplay(question.id, answer)}
+                            {answerDisplay.text}
                           </p>
                         </div>
                       </div>
