@@ -48,12 +48,12 @@ export function LeadCard({ lead, onContact, onSchedule, onDelete }: LeadCardProp
           {lead.name}
         </h4>
 
-        {/* Badge "Capturado pela IA" */}
-        {lead.source === 'ai_chat' && (
-          <span className="inline-block px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold rounded-lg mb-3">
-            Capturado pela IA
-          </span>
-        )}
+      {/* Badge "Capturado pela IA" */}
+      {lead.source === 'ai_chat' && (
+        <span className="inline-block px-3 py-1.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[11px] font-semibold rounded-full mb-3 tracking-wide">
+          Capturado pela IA
+        </span>
+      )}
 
         {/* Telefone */}
         {lead.phone && (
@@ -95,7 +95,7 @@ export function LeadCard({ lead, onContact, onSchedule, onDelete }: LeadCardProp
         {lead.status === 'pending' && (
           <button
             onClick={() => onContact(lead.id)}
-            className="flex-1 px-4 py-2 bg-emerald-500 text-white rounded-xl font-semibold hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 bg-emerald-500 text-white rounded-lg font-semibold hover:bg-emerald-600 hover:shadow-lg hover:shadow-emerald-500/30 transition-all flex items-center justify-center gap-2 text-[13px]"
           >
             <MessageCircle className="w-4 h-4" />
             Contatar
@@ -105,7 +105,7 @@ export function LeadCard({ lead, onContact, onSchedule, onDelete }: LeadCardProp
         {lead.status === 'contacted' && (
           <button
             onClick={() => onSchedule(lead.id)}
-            className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 hover:shadow-lg hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2 text-[13px]"
           >
             <Calendar className="w-4 h-4" />
             Agendar
@@ -114,7 +114,7 @@ export function LeadCard({ lead, onContact, onSchedule, onDelete }: LeadCardProp
         
         <button
           onClick={() => onDelete(lead.id)}
-          className="p-2 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+          className="p-2.5 border border-border text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-400 transition-all"
           title="Excluir lead"
         >
           <X className="w-4 h-4" />

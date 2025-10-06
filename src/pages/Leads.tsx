@@ -201,7 +201,6 @@ export function Leads() {
             id="pending"
             title="PENDENTES"
             count={leadsByStatus.pending.length}
-            color="#f59e0b"
             leads={leadsByStatus.pending}
             onContact={handleContact}
             onSchedule={handleSchedule}
@@ -212,7 +211,6 @@ export function Leads() {
             id="contacted"
             title="CONTACTADOS"
             count={leadsByStatus.contacted.length}
-            color="#3b82f6"
             leads={leadsByStatus.contacted}
             onContact={handleContact}
             onSchedule={handleSchedule}
@@ -223,7 +221,6 @@ export function Leads() {
             id="scheduled"
             title="AGENDADOS"
             count={leadsByStatus.scheduled.length}
-            color="#10b981"
             leads={leadsByStatus.scheduled}
             onContact={handleContact}
             onSchedule={handleSchedule}
