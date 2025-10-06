@@ -109,13 +109,19 @@ export function QuestionnaireViewModal({
                     question.type === 'checkbox') && 
                    question.options && question.options.length > 0 && (
                     <div className="ml-11 mt-3 space-y-2">
-                      {question.options.map((option: string, optIndex: number) => (
+                      {question.options.map((option: any, optIndex: number) => (
                         <div 
-                          key={optIndex}
-                          className="flex items-center gap-2 p-2 bg-white dark:bg-gray-900/50 rounded border border-gray-200 dark:border-gray-600"
+                          key={option.id || optIndex}
+                          className="flex items-center gap-2 p-2.5 bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors"
                         >
-                          <div className="w-4 h-4 rounded-full border-2 border-gray-300 dark:border-gray-600 flex-shrink-0" />
-                          <span className="text-sm text-gray-700 dark:text-gray-300">{option}</span>
+                          <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${
+                            question.type === 'multi_select' || question.type === 'checkbox' 
+                              ? 'rounded border-emerald-400' 
+                              : 'border-emerald-400'
+                          }`} />
+                          <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                            {typeof option === 'string' ? option : option.text || option.label || option}
+                          </span>
                         </div>
                       ))}
                     </div>
