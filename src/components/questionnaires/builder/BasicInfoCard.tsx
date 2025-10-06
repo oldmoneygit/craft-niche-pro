@@ -38,13 +38,13 @@ export function BasicInfoCard({
   }, [tenantId]);
 
   const loadTemplates = async () => {
-    const { data: defaults } = await supabase
+    const { data: defaults } = await (supabase as any)
       .from('questionnaire_templates')
       .select('*')
       .eq('is_default', true)
       .order('name');
 
-    const { data: userTemplates } = await supabase
+    const { data: userTemplates } = await (supabase as any)
       .from('questionnaire_templates')
       .select('*')
       .eq('tenant_id', tenantId)

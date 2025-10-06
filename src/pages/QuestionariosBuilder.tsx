@@ -71,7 +71,7 @@ export default function QuestionariosBuilder() {
   const handleLoadTemplate = async (templateId: string) => {
     if (!templateId) return;
 
-    const { data: template } = await supabase
+    const { data: template } = await (supabase as any)
       .from('questionnaire_templates')
       .select('*')
       .eq('id', templateId)

@@ -48,7 +48,7 @@ export function SaveTemplateModal({ open, onOpenChange, questionnaireData }: Sav
     setLoading(true);
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('questionnaire_templates')
         .insert({
           tenant_id: tenantId,
