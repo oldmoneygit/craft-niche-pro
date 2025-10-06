@@ -89,7 +89,7 @@ export function TemplateCard({ template, onView, onEdit, onDelete }: TemplateCar
           variant="outline"
           size="sm"
           onClick={() => onView(template)}
-          className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="flex-1 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-200/60 hover:border-gray-400 dark:hover:bg-gray-700/80 dark:hover:border-gray-500 transition-all"
         >
           <Eye className="w-4 h-4 mr-1.5" />
           Visualizar
@@ -98,7 +98,7 @@ export function TemplateCard({ template, onView, onEdit, onDelete }: TemplateCar
           variant="outline"
           size="sm"
           onClick={() => onEdit(template)}
-          className="flex-1 border-emerald-300 dark:border-emerald-600 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+          className="flex-1 border-emerald-300 dark:border-emerald-600 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100/80 hover:border-emerald-400 dark:hover:bg-emerald-900/40 dark:hover:border-emerald-500 transition-all"
         >
           <Edit className="w-4 h-4 mr-1.5" />
           Editar
@@ -107,7 +107,7 @@ export function TemplateCard({ template, onView, onEdit, onDelete }: TemplateCar
           variant="outline"
           size="sm"
           onClick={() => onDelete(template)}
-          className="border-red-300 dark:border-red-600 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+          className="border-red-300 dark:border-red-600 text-red-700 dark:text-red-400 hover:bg-red-100/80 hover:border-red-400 dark:hover:bg-red-900/40 dark:hover:border-red-500 transition-all"
         >
           <Trash2 className="w-4 h-4" />
         </Button>

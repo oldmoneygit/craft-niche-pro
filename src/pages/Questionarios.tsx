@@ -109,14 +109,14 @@ export default function Questionarios() {
             <Button
               onClick={() => setTemplatesModalOpen(true)}
               variant="outline"
-              className="flex items-center gap-2 px-6 py-3 border-emerald-500 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl font-semibold shadow-lg transition-all duration-300"
+              className="flex items-center gap-2 px-6 py-3 border-emerald-400 dark:border-emerald-600 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100/60 hover:border-emerald-500 dark:hover:bg-emerald-900/30 dark:hover:border-emerald-500 rounded-xl font-semibold shadow-lg transition-all duration-300"
             >
               <BookTemplate className="w-5 h-5" />
               Meus Templates
             </Button>
             <Button
               onClick={() => navigate('/questionarios/novo')}
-              className="flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-semibold shadow-lg shadow-emerald-500/30 transition-all duration-300"
+              className="flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 dark:hover:bg-emerald-600 text-white rounded-xl font-semibold shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/40 transition-all duration-300"
             >
               <Plus className="w-5 h-5" />
               Novo Questionário
@@ -163,8 +163,8 @@ export default function Questionarios() {
               onClick={() => setActiveCategory(category.key)}
               className={`px-6 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 whitespace-nowrap ${
                 activeCategory === category.key
-                  ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                  ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600'
+                  : 'text-gray-700 dark:text-gray-400 hover:bg-gray-200/70 hover:text-gray-800 dark:hover:bg-gray-700/70 dark:hover:text-gray-300'
               }`}
             >
               {category.label}
@@ -188,7 +188,7 @@ export default function Questionarios() {
             </p>
             <Button
               onClick={() => navigate('/questionarios/novo')}
-              className="bg-emerald-500 hover:bg-emerald-600"
+              className="bg-emerald-500 hover:bg-emerald-600 dark:hover:bg-emerald-600 transition-all"
             >
               <Plus className="w-4 h-4 mr-2" />
               Criar Primeiro Questionário

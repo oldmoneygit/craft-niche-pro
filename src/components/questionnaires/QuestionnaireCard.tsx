@@ -50,10 +50,10 @@ export function QuestionnaireCard({
           )}
           <button
             onClick={onToggleActive}
-            className={`p-1.5 rounded-lg transition-colors ${
+            className={`p-1.5 rounded-lg transition-all ${
               questionnaire.is_active
-                ? 'bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20'
-                : 'bg-gray-500/10 text-gray-600 hover:bg-gray-500/20'
+                ? 'bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20 hover:text-emerald-800 dark:text-emerald-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-500/30'
+                : 'bg-gray-500/10 text-gray-700 hover:bg-gray-500/20 hover:text-gray-800 dark:text-gray-500 dark:hover:text-gray-400 dark:hover:bg-gray-500/30'
             }`}
             title={questionnaire.is_active ? 'Desativar' : 'Ativar'}
           >
@@ -121,7 +121,7 @@ export function QuestionnaireCard({
       <div className="grid grid-cols-2 gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
         <button
           onClick={onView}
-          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-emerald-500/10 hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
+          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-gray-100 hover:border-gray-400 dark:hover:bg-gray-700/80 dark:hover:border-gray-500 transition-all"
         >
           <Eye className="w-4 h-4" />
           Visualizar
@@ -129,7 +129,7 @@ export function QuestionnaireCard({
         
         <button
           onClick={onEdit}
-          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-blue-500/10 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all"
+          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-gray-100 hover:border-gray-400 dark:hover:bg-gray-700/80 dark:hover:border-gray-500 transition-all"
         >
           <Edit className="w-4 h-4" />
           Editar
@@ -137,7 +137,7 @@ export function QuestionnaireCard({
         
         <button
           onClick={onSend}
-          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-purple-500/10 hover:border-purple-500 hover:text-purple-600 dark:hover:text-purple-400 transition-all"
+          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-gray-100 hover:border-gray-400 dark:hover:bg-gray-700/80 dark:hover:border-gray-500 transition-all"
         >
           <Send className="w-4 h-4" />
           Enviar
@@ -145,7 +145,7 @@ export function QuestionnaireCard({
 
         <button
           onClick={onDelete}
-          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-red-500/10 hover:border-red-500 hover:text-red-600 dark:hover:text-red-400 transition-all"
+          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-red-300 dark:border-red-600 text-red-700 dark:text-red-400 text-xs font-semibold hover:bg-red-100/80 hover:border-red-400 dark:hover:bg-red-900/40 dark:hover:border-red-500 transition-all"
         >
           <Trash className="w-4 h-4" />
           Excluir
