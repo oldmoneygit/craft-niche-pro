@@ -85,11 +85,13 @@ export function DashboardStatCard({
       {/* DESCRIÇÃO - Abaixo do valor */}
       {description && (
         <div
-          className={`text-[13px] font-semibold flex items-center gap-1 ${
-            trend === 'positive' ? 'text-emerald-600 dark:text-emerald-400' :
-            trend === 'negative' ? 'text-red-600 dark:text-red-400' :
-            'text-neutral-600 dark:text-neutral-400'
-          }`}
+          className="text-[13px] font-semibold flex items-center gap-1"
+          style={{
+            color: trend === 'positive' ? '#10b981' :
+                   trend === 'negative' ? '#ef4444' :
+                   variant === 'pending' ? accentColor :
+                   '#ffffff'
+          }}
         >
           {trend === 'positive' && (
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="flex-shrink-0">
