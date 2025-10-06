@@ -147,13 +147,37 @@ export default function PlanosAlimentares() {
         {/* Header Actions */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
           <div></div>
-          <Button 
+          <button 
             onClick={() => setCreateModalOpen(true)}
-            className="bg-primary hover:bg-primary/90 text-white"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '12px 24px',
+              background: '#10b981',
+              color: 'white',
+              borderRadius: '12px',
+              fontWeight: 600,
+              fontSize: '14px',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#059669';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 20px rgba(16, 185, 129, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#10b981';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+            }}
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-5 h-5" />
             Criar Novo Plano
-          </Button>
+          </button>
         </div>
 
         {/* Stats */}
@@ -195,142 +219,305 @@ export default function PlanosAlimentares() {
             <p className="text-muted-foreground mb-4">
               Crie seu primeiro plano alimentar para começar.
             </p>
-            <Button onClick={() => setCreateModalOpen(true)} className="bg-primary hover:bg-primary/90">
+            <Button onClick={() => setCreateModalOpen(true)} className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30">
               <Plus className="w-4 h-4 mr-2" />
               Criar Primeiro Plano
             </Button>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '24px' }}>
-            {plans.map((plan: any) => (
-              <div
-                key={plan.id}
-                style={{
-                  background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                  border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
-                  borderRadius: '16px',
-                  padding: '28px',
-                  transition: 'all 0.3s ease',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: '18px' }}>
-                      {plan.client?.name?.substring(0, 2).toUpperCase() || 'NA'}
-                    </div>
-                    <div>
-                      <h3 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
-                        {plan.client?.name || 'Cliente'}
-                      </h3>
-                      <p style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
-                        {plan.goal ? `Objetivo: ${plan.goal}` : 'Sem objetivo definido'}
-                      </p>
-                    </div>
-                  </div>
-                  <div style={{ padding: '6px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 700, background: plan.status === 'ativo' ? '#10b981' : '#6b7280', color: 'white', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    {plan.status}
-                  </div>
-                </div>
+            {plans.map((plan: any) => {
+              const statusColors = {
+                'ativo': { 
+                  bg: '#10b981', 
+                  border: '#10b981',
+                  gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  iconColor: '#10b981',
+                  shadow: 'rgba(16, 185, 129, 0.3)'
+                },
+                'pausado': { 
+                  bg: '#f59e0b', 
+                  border: '#f59e0b',
+                  gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                  iconColor: '#f59e0b',
+                  shadow: 'rgba(245, 158, 11, 0.3)'
+                },
+                'concluido': { 
+                  bg: '#6b7280', 
+                  border: '#6b7280',
+                  gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+                  iconColor: '#6b7280',
+                  shadow: 'rgba(107, 114, 128, 0.3)'
+                }
+              };
+              const colors = statusColors[plan.status as keyof typeof statusColors] || statusColors['ativo'];
 
-                <div style={{ marginBottom: '20px' }}>
-                  <div style={{ fontSize: '16px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '12px' }}>
-                    {plan.name}
-                  </div>
-                  <div style={{ display: 'grid', gap: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-                      <Calendar style={{ width: '18px', height: '18px', color: '#10b981' }} />
-                      <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>Início:</span>
-                      <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
-                        {new Date(plan.start_date).toLocaleDateString('pt-BR')}
-                      </span>
+              return (
+                <div
+                  key={plan.id}
+                  className="group relative"
+                  style={{
+                    background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                    border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.5)',
+                    borderRadius: '16px',
+                    padding: '28px',
+                    transition: 'all 0.3s ease',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-8px)';
+                    e.currentTarget.style.boxShadow = `0 20px 40px ${colors.shadow}`;
+                    e.currentTarget.style.borderColor = colors.border;
+                    const border = e.currentTarget.querySelector('.plan-border') as HTMLElement;
+                    if (border) border.style.width = '4px';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                    e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.5)';
+                    const border = e.currentTarget.querySelector('.plan-border') as HTMLElement;
+                    if (border) border.style.width = '0';
+                  }}
+                >
+                  {/* Borda lateral colorida */}
+                  <div
+                    className="plan-border"
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: '0',
+                      background: colors.border,
+                      transition: 'width 0.3s ease',
+                      borderTopLeftRadius: '16px',
+                      borderBottomLeftRadius: '16px'
+                    }}
+                  />
+
+                  {/* Header com cliente e badge */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ 
+                        width: '48px', 
+                        height: '48px', 
+                        borderRadius: '50%', 
+                        background: colors.gradient,
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        color: 'white', 
+                        fontWeight: 700, 
+                        fontSize: '18px',
+                        boxShadow: `0 4px 12px ${colors.shadow}`
+                      }}>
+                        {plan.client?.name?.substring(0, 2).toUpperCase() || 'NA'}
+                      </div>
+                      <div>
+                        <h3 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+                          {plan.client?.name || 'Cliente'}
+                        </h3>
+                        <p style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
+                          {plan.goal ? `Objetivo: ${plan.goal}` : 'Sem objetivo definido'}
+                        </p>
+                      </div>
                     </div>
-                    {plan.target_kcal && (
+                    {/* Badge de status com cor sólida */}
+                    <div style={{ 
+                      padding: '6px 14px', 
+                      borderRadius: '20px', 
+                      fontSize: '12px', 
+                      fontWeight: 700, 
+                      background: colors.bg,
+                      color: 'white', 
+                      textTransform: 'uppercase', 
+                      letterSpacing: '0.5px',
+                      boxShadow: `0 4px 12px ${colors.shadow}`
+                    }}>
+                      {plan.status}
+                    </div>
+                  </div>
+
+                  {/* Título do plano */}
+                  <div style={{ marginBottom: '20px' }}>
+                    <div style={{ fontSize: '16px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '12px' }}>
+                      {plan.name}
+                    </div>
+                    {/* Meta rows com ícones coloridos */}
+                    <div style={{ display: 'grid', gap: '10px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-                        <FileText style={{ width: '18px', height: '18px', color: '#10b981' }} />
-                        <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>Meta Calórica:</span>
+                        <Calendar style={{ width: '18px', height: '18px', color: colors.iconColor }} />
+                        <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>Início:</span>
                         <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
-                          {plan.target_kcal} kcal
+                          {new Date(plan.start_date).toLocaleDateString('pt-BR')}
                         </span>
                       </div>
-                    )}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-                      <List style={{ width: '18px', height: '18px', color: '#10b981' }} />
-                      <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>Refeições:</span>
-                      <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
-                        {plan.meals?.length || 0}
-                      </span>
+                      {plan.target_kcal && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                          <FileText style={{ width: '18px', height: '18px', color: colors.iconColor }} />
+                          <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>Meta Calórica:</span>
+                          <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
+                            {plan.target_kcal} kcal
+                          </span>
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                        <List style={{ width: '18px', height: '18px', color: colors.iconColor }} />
+                        <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>Refeições:</span>
+                        <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
+                          {plan.meals?.length || 0}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', paddingTop: '20px', borderTop: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)' }}>
-                  <button
-                    onClick={() => handleView(plan.id)}
-                    style={{
-                      padding: '10px',
-                      borderRadius: '10px',
-                      border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
-                      background: 'transparent',
-                      color: isDark ? '#a3a3a3' : '#6b7280',
-                      fontWeight: 600,
-                      fontSize: '13px',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <Eye style={{ width: '16px', height: '16px' }} />
-                  </button>
-                  <button
-                    onClick={() => handleDuplicate(plan.id)}
-                    style={{
-                      padding: '10px',
-                      borderRadius: '10px',
-                      border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
-                      background: 'transparent',
-                      color: isDark ? '#a3a3a3' : '#6b7280',
-                      fontWeight: 600,
-                      fontSize: '13px',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <Copy style={{ width: '16px', height: '16px' }} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(plan.id)}
-                    style={{
-                      padding: '10px',
-                      borderRadius: '10px',
-                      border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
-                      background: 'transparent',
-                      color: '#ef4444',
-                      fontWeight: 600,
-                      fontSize: '13px',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <Trash2 style={{ width: '16px', height: '16px' }} />
-                  </button>
+                  {/* Área de macros com background verde suave */}
+                  {(plan.target_protein || plan.target_carbs || plan.target_fats) && (
+                    <div style={{ 
+                      display: 'grid', 
+                      gridTemplateColumns: 'repeat(3, 1fr)', 
+                      gap: '12px', 
+                      marginBottom: '20px', 
+                      padding: '16px', 
+                      background: 'rgba(16, 185, 129, 0.05)',
+                      border: '1px solid rgba(16, 185, 129, 0.1)',
+                      borderRadius: '12px' 
+                    }}>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+                          {plan.target_protein || 0}g
+                        </div>
+                        <div style={{ fontSize: '11px', color: isDark ? '#a3a3a3' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                          Proteínas
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+                          {plan.target_fats || 0}g
+                        </div>
+                        <div style={{ fontSize: '11px', color: isDark ? '#a3a3a3' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                          Gorduras
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+                          {plan.target_carbs || 0}g
+                        </div>
+                        <div style={{ fontSize: '11px', color: isDark ? '#a3a3a3' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                          Carboidratos
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Botões de ação com cores específicas no hover */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', paddingTop: '20px', borderTop: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)' }}>
+                    {/* Botão Ver - verde no hover */}
+                    <button
+                      onClick={() => handleView(plan.id)}
+                      style={{
+                        padding: '10px',
+                        borderRadius: '10px',
+                        border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+                        background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)',
+                        color: isDark ? '#a3a3a3' : '#6b7280',
+                        fontWeight: 600,
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(16, 185, 129, 0.1)';
+                        e.currentTarget.style.borderColor = '#10b981';
+                        e.currentTarget.style.color = '#10b981';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.2)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)';
+                        e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
+                        e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      <Eye style={{ width: '16px', height: '16px' }} />
+                    </button>
+                    {/* Botão Duplicar - azul no hover */}
+                    <button
+                      onClick={() => handleDuplicate(plan.id)}
+                      style={{
+                        padding: '10px',
+                        borderRadius: '10px',
+                        border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+                        background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)',
+                        color: isDark ? '#a3a3a3' : '#6b7280',
+                        fontWeight: 600,
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+                        e.currentTarget.style.borderColor = '#3b82f6';
+                        e.currentTarget.style.color = '#3b82f6';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.2)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)';
+                        e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
+                        e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      <Copy style={{ width: '16px', height: '16px' }} />
+                    </button>
+                    {/* Botão Excluir - vermelho no hover */}
+                    <button
+                      onClick={() => handleDelete(plan.id)}
+                      style={{
+                        padding: '10px',
+                        borderRadius: '10px',
+                        border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+                        background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)',
+                        color: isDark ? '#a3a3a3' : '#6b7280',
+                        fontWeight: 600,
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                        e.currentTarget.style.borderColor = '#ef4444';
+                        e.currentTarget.style.color = '#ef4444';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.2)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)';
+                        e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
+                        e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      <Trash2 style={{ width: '16px', height: '16px' }} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
