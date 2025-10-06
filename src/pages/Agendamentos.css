@@ -1,3 +1,12 @@
+/* Modal dark mode background */
+[data-theme="dark"] {
+  --modal-bg: #1a1a1a;
+}
+
+:root {
+  --modal-bg: #fafafa;
+}
+
 .agendamentos-page {
   max-width: 1600px;
   margin: 0 auto;
