@@ -2,10 +2,19 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useTenantId = () => {
-  const [tenantId, setTenantId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  // 🔧 MOCK TEMPORÁRIO - Remover quando implementar autenticação
+  const MOCK_TENANT_ID = '2429b7ea-da52-4fbb-8bbe-c678facfd260';
+  
+  const [tenantId, setTenantId] = useState<string | null>(MOCK_TENANT_ID);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Mock: retornar imediatamente com tenant_id hardcoded
+    console.log('🔧 [useTenantId] MODO MOCK - tenant_id:', MOCK_TENANT_ID);
+    setTenantId(MOCK_TENANT_ID);
+    setLoading(false);
+    
+    /* TODO: Restaurar quando implementar autenticação
     const fetchTenantId = async () => {
       try {
         console.log('🔍 [useTenantId] Buscando usuário autenticado...');
@@ -44,6 +53,7 @@ export const useTenantId = () => {
     };
 
     fetchTenantId();
+    */
   }, []);
 
   return { tenantId, loading };
