@@ -63,18 +63,24 @@ export function QuestionnaireResponsesModal({
       let maxQuestionScore = 0;
 
       // Encontrar score máximo possível para esta pergunta
-      if (question.optionScores && Object.keys(question.optionScores).length > 0) {
-        const scores = Object.values(question.optionScores) as number[];
+      if (question.option_scores && Object.keys(question.option_scores).length > 0) {
+        const scores = Object.values(question.option_scores) as number[];
         maxQuestionScore = Math.max(...scores);
+      } else if (question.question_type === 'scale') {
+        maxQuestionScore = 10;
       }
 
       // Calcular score da resposta
-      if (['single_select', 'single_choice', 'radio'].includes(question.type) && answer) {
-        questionScore = question.optionScores?.[answer] || 0;
+      if (['single_select', 'single_choice', 'radio'].includes(question.question_type) && answer) {
+        questionScore = question.option_scores?.[answer] || 0;
       } 
-      else if (['multi_select', 'multiple_choice', 'checkbox'].includes(question.type) && Array.isArray(answer)) {
-        const scores = answer.map((opt: string) => question.optionScores?.[opt] || 0);
+      else if (['multi_select', 'multiple_choice', 'checkbox'].includes(question.question_type) && Array.isArray(answer)) {
+        const scores = answer.map((opt: string) => question.option_scores?.[opt] || 0);
         questionScore = scores.length > 0 ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length : 0;
+      }
+      else if (question.question_type === 'scale') {
+        questionScore = answer; // Scale já é 1-10
+        maxQuestionScore = 10;
       }
 
       totalScore += questionScore * weight;
