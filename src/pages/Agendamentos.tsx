@@ -1,46 +1,152 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  Calendar as CalendarIcon, Clock, CheckCircle, Check,
-  Plus, Edit, Trash2, Phone
+  Calendar as CalendarIcon, Clock, CheckCircle, Check, Plus, 
+  ChevronLeft, ChevronRight, X as XIcon
 } from 'lucide-react';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, 
+  isSameDay, isToday, addMonths, subMonths } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { supabase } from '@/integrations/supabase/client';
+import { useTenantId } from '@/hooks/useTenantId';
 import { AgendamentosStatCard } from '@/components/agendamentos/AgendamentosStatCard';
 import { AgendamentoModal } from '@/components/agendamentos/AgendamentoModal';
+import { toast } from 'sonner';
 import './Agendamentos.css';
-
-type AppointmentStatus = 'pending' | 'confirmed' | 'completed';
 
 interface Appointment {
   id: string;
-  client: string;
+  client_id: string;
+  datetime: string;
   type: string;
-  date: string;
-  time: string;
-  phone: string;
-  status: AppointmentStatus;
+  status: string;
+  value: number;
+  notes: string;
+  clients: {
+    id: string;
+    name: string;
+    phone: string;
+    email: string;
+  };
 }
 
 export function Agendamentos() {
+  const { tenantId } = useTenantId();
+  const queryClient = useQueryClient();
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
 
-  const appointments: Appointment[] = [
-    {
-      id: '1',
-      client: 'MARCÃO DA MASSA',
-      type: 'Primeira Consulta',
-      date: '02/10/2025',
-      time: '14:00',
-      phone: '19981661010',
-      status: 'pending'
+  // Query appointments
+  const { data: appointments, isLoading } = useQuery({
+    queryKey: ['appointments', tenantId, currentMonth],
+    queryFn: async () => {
+      if (!tenantId) return [];
+      
+      const monthStart = startOfMonth(currentMonth);
+      const monthEnd = endOfMonth(currentMonth);
+      
+      const { data, error } = await supabase
+        .from('appointments')
+        .select(`
+          *,
+          clients (
+            id,
+            name,
+            phone,
+            email
+          )
+        `)
+        .eq('tenant_id', tenantId)
+        .gte('datetime', monthStart.toISOString())
+        .lte('datetime', monthEnd.toISOString())
+        .order('datetime', { ascending: true });
+      
+      if (error) throw error;
+      return data as Appointment[];
+    },
+    enabled: !!tenantId
+  });
+
+  // Stats
+  const stats = useMemo(() => {
+    if (!appointments) return { total: 0, today: 0, confirmed: 0, completed: 0 };
+    
+    const today = new Date();
+    return {
+      total: appointments.length,
+      today: appointments.filter(apt => isSameDay(new Date(apt.datetime), today)).length,
+      confirmed: appointments.filter(apt => apt.status === 'confirmado').length,
+      completed: appointments.filter(apt => apt.status === 'realizado').length
+    };
+  }, [appointments]);
+
+  // Appointments for selected day
+  const dayAppointments = useMemo(() => {
+    if (!appointments) return [];
+    return appointments
+      .filter(apt => isSameDay(new Date(apt.datetime), selectedDate))
+      .sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime());
+  }, [appointments, selectedDate]);
+
+  // Calendar days
+  const monthDays = useMemo(() => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    return eachDayOfInterval({ start: monthStart, end: monthEnd });
+  }, [currentMonth]);
+
+  // Mutations
+  const updateStatus = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await supabase
+        .from('appointments')
+        .update({ status })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      toast.success('Status atualizado!');
     }
-  ];
+  });
 
+  const deleteAppointment = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('appointments')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      toast.success('Consulta cancelada');
+    }
+  });
 
-  const handleEdit = (id: string) => {
-    console.log('Edit:', id);
+  const getAppointmentsForDay = (day: Date) => {
+    return appointments?.filter(apt => isSameDay(new Date(apt.datetime), day)) || [];
   };
 
-  const handleDelete = (id: string) => {
-    console.log('Delete:', id);
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'realizado': return '#10b981';
+      case 'confirmado': return '#3b82f6';
+      case 'cancelado': return '#ef4444';
+      default: return '#f59e0b';
+    }
+  };
+
+  const handleEdit = (appointment: Appointment) => {
+    setEditingAppointment(appointment);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingAppointment(null);
   };
 
   return (
@@ -63,98 +169,161 @@ export function Agendamentos() {
       </div>
 
       {/* Stats */}
-      <div className="stats-grid" style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-        gap: '20px',
-        marginBottom: '32px'
-      }}>
+      <div className="stats-grid">
         <AgendamentosStatCard
           label="Total Agendamentos"
-          value={1}
+          value={stats.total}
           icon={<CalendarIcon size={20} />}
           variant="total"
         />
-
         <AgendamentosStatCard
           label="Hoje"
-          value={0}
+          value={stats.today}
           icon={<Clock size={20} />}
           variant="today"
         />
-
         <AgendamentosStatCard
           label="Confirmados"
-          value={0}
+          value={stats.confirmed}
           icon={<CheckCircle size={20} />}
           variant="confirmed"
         />
-
         <AgendamentosStatCard
           label="Realizados"
-          value={0}
+          value={stats.completed}
           icon={<Check size={20} />}
           variant="completed"
         />
       </div>
 
-      {/* Appointments List */}
-      <div className="appointments-section">
-        <div className="section-header">
-          <h2 className="section-title">Próximos Agendamentos</h2>
-          <div className="filter-tabs">
-            <button className="tab active">Todos</button>
-            <button className="tab">Pendentes</button>
-            <button className="tab">Confirmados</button>
+      {/* Main Content */}
+      <div className="appointments-content">
+        {/* Calendar */}
+        <div className="calendar-section">
+          <div className="calendar-container">
+            <div className="calendar-header">
+              <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
+                <ChevronLeft size={20} />
+              </button>
+              <h3>{format(currentMonth, 'MMMM yyyy', { locale: ptBR })}</h3>
+              <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+                <ChevronRight size={20} />
+              </button>
+            </div>
+
+            <div className="calendar-grid">
+              {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
+                <div key={day} className="calendar-weekday">{day}</div>
+              ))}
+              
+              {monthDays.map(day => {
+                const dayApts = getAppointmentsForDay(day);
+                const isSelected = isSameDay(day, selectedDate);
+                const isCurrentDay = isToday(day);
+                
+                return (
+                  <div
+                    key={day.toISOString()}
+                    onClick={() => setSelectedDate(day)}
+                    className={`calendar-day ${isSelected ? 'selected' : ''} ${isCurrentDay ? 'today' : ''}`}
+                  >
+                    <span className="day-number">{format(day, 'd')}</span>
+                    {dayApts.length > 0 && (
+                      <div className="appointment-dots">
+                        {dayApts.slice(0, 3).map((apt) => (
+                          <div
+                            key={apt.id}
+                            className="appointment-dot"
+                            style={{ backgroundColor: getStatusColor(apt.status) }}
+                          />
+                        ))}
+                        {dayApts.length > 3 && (
+                          <span className="more-count">+{dayApts.length - 3}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        <div className="appointments-list">
-          {appointments.map((appointment) => (
-            <div key={appointment.id} className={`appointment-card ${appointment.status}`}>
-              <div className="appointment-header">
-                <div>
-                  <div className="appointment-client">{appointment.client}</div>
-                  <span className="appointment-type">{appointment.type}</span>
-                </div>
-                <span className={`appointment-status status-${appointment.status}`}>
-                  {appointment.status === 'pending' ? 'Agendado' : 
-                   appointment.status === 'confirmed' ? 'Confirmado' : 'Realizado'}
-                </span>
-              </div>
+        {/* Day Appointments List */}
+        <div className="day-appointments-section">
+          <h3 className="day-title">
+            {format(selectedDate, "d 'de' MMMM", { locale: ptBR })}
+          </h3>
 
-              <div className="appointment-info">
-                <div className="info-item">
-                  <CalendarIcon size={16} />
-                  <span>{appointment.date}</span>
-                </div>
-                <div className="info-item">
-                  <Clock size={16} />
-                  <span>{appointment.time}</span>
-                </div>
-                <div className="info-item">
-                  <Phone size={16} />
-                  <span>{appointment.phone}</span>
-                </div>
-              </div>
-
-              <div className="appointment-actions">
-                <button className="action-btn btn-edit" onClick={() => handleEdit(appointment.id)}>
-                  <Edit size={16} />
-                  Editar
-                </button>
-                <button className="action-btn btn-delete" onClick={() => handleDelete(appointment.id)}>
-                  <Trash2 size={16} />
-                  Cancelar
-                </button>
-              </div>
+          {isLoading ? (
+            <div className="loading-state">Carregando...</div>
+          ) : dayAppointments.length === 0 ? (
+            <div className="empty-state">
+              <CalendarIcon size={48} />
+              <p>Nenhuma consulta agendada para este dia</p>
             </div>
-          ))}
+          ) : (
+            <div className="appointments-list">
+              {dayAppointments.map((apt) => (
+                <div key={apt.id} className={`appointment-card status-${apt.status}`}>
+                  <div className="appointment-time">
+                    {format(new Date(apt.datetime), 'HH:mm')}
+                  </div>
+                  
+                  <div className="appointment-info">
+                    <h4 className="client-name">{apt.clients.name}</h4>
+                    <p className="appointment-type">{apt.type}</p>
+                  </div>
+                  
+                  <span className={`status-badge ${apt.status}`}>
+                    {apt.status === 'agendado' ? 'Agendado' :
+                     apt.status === 'confirmado' ? 'Confirmado' :
+                     apt.status === 'realizado' ? 'Realizado' : 'Cancelado'}
+                  </span>
+                  
+                  <div className="appointment-actions">
+                    {apt.status === 'agendado' && (
+                      <button 
+                        className="action-btn btn-confirm"
+                        onClick={() => updateStatus.mutate({ id: apt.id, status: 'confirmado' })}
+                      >
+                        <Check size={16} />
+                      </button>
+                    )}
+                    {apt.status === 'confirmado' && (
+                      <button 
+                        className="action-btn btn-complete"
+                        onClick={() => updateStatus.mutate({ id: apt.id, status: 'realizado' })}
+                      >
+                        <CheckCircle size={16} />
+                      </button>
+                    )}
+                    <button 
+                      className="action-btn btn-edit"
+                      onClick={() => handleEdit(apt)}
+                    >
+                      Editar
+                    </button>
+                    <button 
+                      className="action-btn btn-cancel"
+                      onClick={() => deleteAppointment.mutate(apt.id)}
+                    >
+                      <XIcon size={16} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Modal */}
-      <AgendamentoModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <AgendamentoModal 
+        isOpen={isModalOpen} 
+        onClose={handleCloseModal}
+        appointment={editingAppointment}
+      />
     </div>
   );
 }
