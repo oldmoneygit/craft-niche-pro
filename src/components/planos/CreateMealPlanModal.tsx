@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,9 +8,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { useCreateMealPlan } from '@/hooks/useMealPlansData';
 import { useClientsData } from '@/hooks/useClientsData';
-import { Plus, ChevronRight, ChevronLeft, Check } from 'lucide-react';
+import { Plus, ChevronRight, ChevronLeft, Check, Info, Calculator } from 'lucide-react';
 import { MEAL_TYPE_LABELS, MEAL_TYPE_ICONS } from '@/types/meal-plans';
 import { useToast } from '@/hooks/use-toast';
+import { MealFoodBuilder } from './MealFoodBuilder';
+import { supabase } from '@/integrations/supabase/client';
+import { useTenantId } from '@/hooks/useTenantId';
+import { useQueryClient } from '@tanstack/react-query';
+
+const MEAL_TYPE_EMOJIS: Record<string, string> = {
+  breakfast: '☀️',
+  morning_snack: '🍎',
+  lunch: '🍽️',
+  afternoon_snack: '🥤',
+  dinner: '🍲',
+  supper: '🥛',
+};
 
 interface CreateMealPlanModalProps {
   open: boolean;
@@ -41,10 +54,36 @@ export function CreateMealPlanModal({ open, onOpenChange }: CreateMealPlanModalP
     notes: ''
   });
   const [selectedMeals, setSelectedMeals] = useState<string[]>(['breakfast', 'lunch', 'dinner']);
+  const [mealFoods, setMealFoods] = useState<Record<string, any[]>>({
+    breakfast: [],
+    morning_snack: [],
+    lunch: [],
+    afternoon_snack: [],
+    dinner: [],
+    supper: [],
+  });
 
   const { clients } = useClientsData();
   const createMealPlan = useCreateMealPlan();
   const { toast } = useToast();
+  const { tenantId } = useTenantId();
+  const queryClient = useQueryClient();
+
+  // Calcular totais automaticamente
+  const totalNutrients = useMemo(() => {
+    let totals = { calories: 0, protein: 0, carbs: 0, fats: 0 };
+    
+    Object.values(mealFoods).forEach(foods => {
+      foods.forEach(item => {
+        totals.calories += item.calculatedNutrients.calories;
+        totals.protein += item.calculatedNutrients.protein;
+        totals.carbs += item.calculatedNutrients.carbs;
+        totals.fats += item.calculatedNutrients.fats;
+      });
+    });
+    
+    return totals;
+  }, [mealFoods]);
 
   const nextStep = () => {
     // Validação da etapa 1
@@ -62,43 +101,110 @@ export function CreateMealPlanModal({ open, onOpenChange }: CreateMealPlanModalP
         return;
       }
     }
+
+    // Validação da etapa 3
+    if (step === 3) {
+      if (selectedMeals.length === 0) {
+        toast({ variant: "destructive", title: "Erro", description: "Selecione pelo menos uma refeição" });
+        return;
+      }
+    }
     
-    setStep(prev => Math.min(prev + 1, 3));
+    setStep(prev => Math.min(prev + 1, 4));
   };
 
   const prevStep = () => {
     setStep(prev => Math.max(prev - 1, 1));
   };
 
-  const handleSubmit = async () => {
-    if (selectedMeals.length === 0) {
-      toast({ variant: "destructive", title: "Erro", description: "Selecione pelo menos uma refeição" });
-      return;
-    }
+  const handleAddFood = (mealType: string, foodData: any) => {
+    setMealFoods(prev => ({
+      ...prev,
+      [mealType]: [...prev[mealType], foodData]
+    }));
+  };
 
+  const handleRemoveFood = (mealType: string, index: number) => {
+    setMealFoods(prev => ({
+      ...prev,
+      [mealType]: prev[mealType].filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleSubmit = async () => {
     try {
-      const meals = DEFAULT_MEALS
+      // 1. Criar o plano com totais calculados
+      const { data: plan, error: planError } = await supabase
+        .from('meal_plans')
+        .insert([{
+          tenant_id: tenantId,
+          client_id: formData.clientId,
+          name: formData.name,
+          notes: formData.notes || null,
+          start_date: formData.startDate,
+          end_date: formData.endDate || null,
+          status: 'ativo',
+          goal: formData.goal || null,
+          target_kcal: totalNutrients.calories || null,
+          target_protein: totalNutrients.protein || null,
+          target_carbs: totalNutrients.carbs || null,
+          target_fats: totalNutrients.fats || null,
+        }])
+        .select()
+        .maybeSingle();
+      
+      if (planError) throw planError;
+      if (!plan) throw new Error('Erro ao criar plano');
+      
+      // 2. Criar refeições
+      const mealsToCreate = DEFAULT_MEALS
         .filter(meal => selectedMeals.includes(meal.key))
         .map((meal, index) => ({
+          meal_plan_id: plan.id,
           name: meal.name,
           time: meal.time,
-          orderIndex: index
+          order_index: index,
         }));
+      
+      if (mealsToCreate.length > 0) {
+        const { data: createdMeals, error: mealsError } = await supabase
+          .from('meal_plan_meals')
+          .insert(mealsToCreate)
+          .select();
+        
+        if (mealsError) throw mealsError;
+        
+        // 3. Criar itens (alimentos) de cada refeição
+        if (createdMeals) {
+          for (const meal of createdMeals) {
+            const mealKey = DEFAULT_MEALS.find(m => m.name === meal.name)?.key;
+            if (!mealKey) continue;
 
-      await createMealPlan.mutateAsync({
-        clientId: formData.clientId,
-        name: formData.name,
-        startDate: formData.startDate,
-        endDate: formData.endDate || undefined,
-        goal: formData.goal || undefined,
-        targetKcal: formData.targetKcal ? Number(formData.targetKcal) : undefined,
-        targetProtein: formData.targetProtein ? Number(formData.targetProtein) : undefined,
-        targetCarbs: formData.targetCarbs ? Number(formData.targetCarbs) : undefined,
-        targetFats: formData.targetFats ? Number(formData.targetFats) : undefined,
-        notes: formData.notes || undefined,
-        meals
-      });
-
+            const foods = mealFoods[mealKey] || [];
+            
+            if (foods.length > 0) {
+              const itemsToCreate = foods.map((item) => ({
+                meal_id: meal.id,
+                food_id: item.food.id,
+                measure_id: item.measure?.id || null,
+                quantity: item.quantity,
+                kcal_total: item.calculatedNutrients.calories,
+                protein_total: item.calculatedNutrients.protein,
+                carb_total: item.calculatedNutrients.carbs,
+                fat_total: item.calculatedNutrients.fats,
+                grams_total: item.measure ? item.measure.grams * item.quantity : item.quantity,
+              }));
+              
+              const { error: itemsError } = await supabase
+                .from('meal_items')
+                .insert(itemsToCreate);
+              
+              if (itemsError) throw itemsError;
+            }
+          }
+        }
+      }
+      
       toast({ title: "Sucesso!", description: "Plano alimentar criado com sucesso" });
 
       // Reset and close
@@ -116,6 +222,15 @@ export function CreateMealPlanModal({ open, onOpenChange }: CreateMealPlanModalP
         notes: ''
       });
       setSelectedMeals(['breakfast', 'lunch', 'dinner']);
+      setMealFoods({
+        breakfast: [],
+        morning_snack: [],
+        lunch: [],
+        afternoon_snack: [],
+        dinner: [],
+        supper: [],
+      });
+      queryClient.invalidateQueries({ queryKey: ['meal-plans'] });
       onOpenChange(false);
     } catch (error) {
       console.error('Erro ao criar plano:', error);
@@ -141,7 +256,7 @@ export function CreateMealPlanModal({ open, onOpenChange }: CreateMealPlanModalP
               Criar Novo Plano Alimentar
             </DialogTitle>
             <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full">
-              Etapa {step}/3
+              Etapa {step}/4
             </span>
           </div>
           
@@ -149,7 +264,7 @@ export function CreateMealPlanModal({ open, onOpenChange }: CreateMealPlanModalP
           <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div 
               className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 transition-all duration-500"
-              style={{ width: `${(step / 3) * 100}%` }}
+              style={{ width: `${(step / 4) * 100}%` }}
             />
           </div>
         </DialogHeader>
@@ -339,6 +454,87 @@ export function CreateMealPlanModal({ open, onOpenChange }: CreateMealPlanModalP
             </div>
           )}
 
+          {/* Etapa 4: Adicionar Alimentos */}
+          {step === 4 && (
+            <div className="space-y-5">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-1">
+                      Adicione alimentos às refeições
+                    </p>
+                    <p className="text-xs text-blue-700 dark:text-blue-300">
+                      Os valores nutricionais serão calculados automaticamente conforme você adiciona alimentos.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Lista de refeições selecionadas */}
+              <div className="space-y-4">
+                {selectedMeals.map(mealKey => {
+                  const meal = DEFAULT_MEALS.find(m => m.key === mealKey);
+                  if (!meal) return null;
+                  
+                  return (
+                    <MealFoodBuilder
+                      key={mealKey}
+                      mealType={mealKey}
+                      mealLabel={meal.name}
+                      mealEmoji={MEAL_TYPE_EMOJIS[mealKey]}
+                      foods={mealFoods[mealKey] || []}
+                      onAddFood={(food) => handleAddFood(mealKey, food)}
+                      onRemoveFood={(index) => handleRemoveFood(mealKey, index)}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Totais Calculados */}
+              <div className="mt-6 p-6 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl">
+                <h4 className="text-lg font-bold text-emerald-900 dark:text-emerald-100 mb-4 flex items-center gap-2">
+                  <Calculator className="w-5 h-5" />
+                  Totais Nutricionais Calculados
+                </h4>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                      {totalNutrients.calories.toFixed(0)}
+                    </div>
+                    <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 uppercase">
+                      kcal
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                      {totalNutrients.protein.toFixed(1)}g
+                    </div>
+                    <div className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase">
+                      Proteínas
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">
+                      {totalNutrients.carbs.toFixed(1)}g
+                    </div>
+                    <div className="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase">
+                      Carboidratos
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">
+                      {totalNutrients.fats.toFixed(1)}g
+                    </div>
+                    <div className="text-xs font-semibold text-orange-700 dark:text-orange-300 uppercase">
+                      Gorduras
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Navegação */}
           <div className="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
             <div>
@@ -363,7 +559,7 @@ export function CreateMealPlanModal({ open, onOpenChange }: CreateMealPlanModalP
                 Cancelar
               </Button>
 
-              {step < 3 ? (
+              {step < 4 ? (
                 <Button
                   onClick={nextStep}
                   className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-semibold shadow-lg shadow-emerald-500/30 transition-all duration-300 border-0"
