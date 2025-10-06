@@ -269,6 +269,34 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
         ))}
       </div>
 
+      {/* Meta Section */}
+      <div style={{ 
+        marginBottom: '18px',
+        padding: '14px 16px',
+        background: isDark ? 'rgba(16, 185, 129, 0.08)' : 'rgba(16, 185, 129, 0.06)',
+        borderRadius: '12px',
+        borderLeft: '3px solid #10b981'
+      }}>
+        <div style={{ 
+          fontSize: '11px', 
+          fontWeight: 700, 
+          color: '#10b981', 
+          textTransform: 'uppercase', 
+          letterSpacing: '0.8px',
+          marginBottom: '6px'
+        }}>
+          Meta do Plano
+        </div>
+        <div style={{ 
+          fontSize: '14px', 
+          fontWeight: 600, 
+          color: isDark ? '#e5e7eb' : '#374151',
+          lineHeight: 1.5
+        }}>
+          {objective}
+        </div>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', paddingTop: '18px', borderTop: isDark ? '1px solid rgba(64, 64, 64, 0.2)' : '1px solid rgba(229, 231, 235, 0.5)' }}>
         {[
           { icon: Eye, label: 'Ver', action: onView },
