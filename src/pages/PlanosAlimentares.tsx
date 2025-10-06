@@ -272,20 +272,12 @@ export default function PlanosAlimentares() {
               // Função de mudança de status
               const handleStatusChange = async (newStatus: 'ativo' | 'pendente' | 'concluido') => {
                 try {
-                  console.log('Tentando atualizar status para:', newStatus, 'Plan ID:', plan.id);
-                  
-                  const { data, error } = await supabase
+                  const { error } = await supabase
                     .from('meal_plans')
                     .update({ status: newStatus })
-                    .eq('id', plan.id)
-                    .select();
+                    .eq('id', plan.id);
                   
-                  if (error) {
-                    console.error('Erro do Supabase:', error);
-                    throw error;
-                  }
-                  
-                  console.log('Status atualizado com sucesso:', data);
+                  if (error) throw error;
                   
                   queryClient.invalidateQueries({ queryKey: ['meal-plans'] });
                   toast({
