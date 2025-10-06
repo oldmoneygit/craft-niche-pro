@@ -35,38 +35,52 @@ export function Leads() {
       return;
     }
     
-    const leadId = active.id as string;
-    const newStatus = over.id as string;
+    // ✅ Verificar se dropou sobre uma coluna (não sobre um card)
+    const overData = over.data.current;
     
     console.log('🔍 Drag End Debug:', {
-      leadId,
-      newStatus,
       overId: over.id,
-      activeId: active.id,
-      overIdType: typeof over.id,
-      newStatusType: typeof newStatus
+      overData,
+      overType: overData?.type,
+      isColumn: overData?.type === 'column'
     });
     
-    const lead = leads?.find(l => l.id === leadId);
+    if (overData?.type !== 'column') {
+      console.warn('⚠️ Só é permitido soltar sobre colunas, não sobre cards');
+      setActiveId(null);
+      return;
+    }
     
-    if (!lead) {
+    const leadId = active.id as string;
+    const newStatus = overData.status as string;
+    
+    console.log('✅ Drop válido sobre coluna:', { leadId, newStatus });
+    
+    const currentLead = leads?.find(l => l.id === leadId);
+    
+    if (!currentLead) {
       console.warn('⚠️ Lead não encontrado:', leadId);
       setActiveId(null);
       return;
     }
     
-    console.log('📋 Lead encontrado:', { 
-      currentStatus: lead.status, 
-      newStatus,
-      willUpdate: lead.status !== newStatus 
+    // Não fazer nada se já está no status correto
+    if (currentLead.status === newStatus) {
+      console.log('ℹ️ Lead já está neste status');
+      setActiveId(null);
+      return;
+    }
+    
+    console.log('🔄 Atualizando status:', {
+      leadName: currentLead.name,
+      from: currentLead.status,
+      to: newStatus
     });
     
-    if (lead.status !== newStatus) {
-      try {
-        await updateLeadStatus.mutateAsync({ leadId, newStatus });
-      } catch (error) {
-        console.error('❌ Erro ao atualizar status:', error);
-      }
+    try {
+      await updateLeadStatus.mutateAsync({ leadId, newStatus });
+    } catch (error) {
+      console.error('❌ Erro ao atualizar status:', error);
     }
     
     setActiveId(null);

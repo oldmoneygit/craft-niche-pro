@@ -25,12 +25,17 @@ export function KanbanColumn({
   onSchedule,
   onDelete
 }: KanbanColumnProps) {
-  const { setNodeRef } = useDroppable({ id });
+  const { setNodeRef, isOver } = useDroppable({ 
+    id,
+    data: { type: 'column', status: id } // ✅ Metadados para validação
+  });
   
   return (
     <div
       ref={setNodeRef}
-      className="flex flex-col h-full min-h-[600px]"
+      className={`flex flex-col h-full min-h-[600px] transition-all ${
+        isOver ? 'ring-2 ring-emerald-500 scale-[1.02]' : ''
+      }`}
     >
       {/* Header da coluna */}
       <div 
