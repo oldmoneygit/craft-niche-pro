@@ -49,9 +49,17 @@ export function useQuestionnaires() {
 
       if (error) throw error;
 
-      // Calcular taxa de conclusão para cada questionário
+      // Buscar perguntas e calcular taxa de conclusão para cada questionário
       const questionnairesWithStats = await Promise.all(
         data.map(async (q) => {
+          // Buscar perguntas do questionário
+          const { data: questions } = await supabase
+            .from('questionnaire_questions')
+            .select('*')
+            .eq('questionnaire_id', q.id)
+            .order('order_index', { ascending: true });
+
+          // Buscar respostas para calcular taxa de conclusão
           const { data: responses } = await supabase
             .from('questionnaire_responses')
             .select('status')
@@ -61,8 +69,21 @@ export function useQuestionnaires() {
           const completed = responses?.filter(r => r.status === 'completed').length || 0;
           const completion_rate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
+          // Mapear perguntas para o formato correto
+          const mappedQuestions = (questions || []).map(q => ({
+            id: q.id,
+            question: q.question_text,
+            type: q.question_type,
+            options: q.options || [],
+            required: q.is_required,
+            section: q.section,
+            order_index: q.order_index
+          }));
+
           return {
             ...q,
+            questions: mappedQuestions,
+            question_count: mappedQuestions.length,
             response_count: total,
             completion_rate,
           };
