@@ -176,7 +176,11 @@ export function QuestionnaireShareModal({
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Fechar
             </Button>
-            <Button onClick={copyToClipboard} disabled={!publicLink || loading}>
+            <Button 
+              onClick={copyToClipboard} 
+              disabled={!publicLink || loading}
+              className="bg-emerald-500 hover:bg-emerald-600 text-white"
+            >
               <Copy className="w-4 h-4 mr-2" />
               Copiar Link
             </Button>
