@@ -401,3 +401,53 @@ All colors MUST be HSL.
   animation: spin 1s linear infinite;
 }
 
+/* Calendar Dark Mode Styles */
+[data-theme="dark"] .rdp {
+  --rdp-cell-size: 36px;
+  --rdp-accent-color: #10b981;
+  --rdp-background-color: rgba(16, 185, 129, 0.1);
+  --rdp-accent-color-dark: #059669;
+}
+
+[data-theme="dark"] .rdp-caption_label {
+  color: #fafafa !important;
+}
+
+[data-theme="dark"] .rdp-head_cell {
+  color: #a3a3a3 !important;
+}
+
+[data-theme="dark"] .rdp-day {
+  color: #fafafa !important;
+}
+
+[data-theme="dark"] .rdp-day_outside {
+  color: #737373 !important;
+  opacity: 0.5;
+}
+
+[data-theme="dark"] .rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
+  background-color: rgba(38, 38, 38, 0.6) !important;
+}
+
+[data-theme="dark"] .rdp-day_selected {
+  background-color: #10b981 !important;
+  color: white !important;
+}
+
+[data-theme="dark"] .rdp-day_today:not(.rdp-day_selected) {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+  color: #fafafa !important;
+}
+
+[data-theme="dark"] button[name="previous-month"],
+[data-theme="dark"] button[name="next-month"] {
+  color: #fafafa !important;
+}
+
+[data-theme="dark"] button[name="previous-month"]:hover,
+[data-theme="dark"] button[name="next-month"]:hover {
+  background-color: rgba(38, 38, 38, 0.6) !important;
+}
+
+
