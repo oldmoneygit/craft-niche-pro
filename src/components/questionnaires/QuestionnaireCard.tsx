@@ -11,6 +11,7 @@ interface QuestionnaireCardProps {
   onSend: () => void;
   onToggleActive: () => void;
   onDelete: () => void;
+  onViewResponses?: () => void;
 }
 
 export function QuestionnaireCard({ 
@@ -19,7 +20,8 @@ export function QuestionnaireCard({
   onEdit, 
   onSend, 
   onToggleActive,
-  onDelete
+  onDelete,
+  onViewResponses
 }: QuestionnaireCardProps) {
   const categoryColors = {
     anamnese: { badge: 'bg-blue-500', border: 'border-blue-500', icon: 'text-blue-500', bg: 'bg-blue-500' },
@@ -90,7 +92,16 @@ export function QuestionnaireCard({
           <div className="text-xs text-gray-500 dark:text-gray-400">duração</div>
         </div>
         
-        <div className="text-center">
+        <div 
+          className={`text-center ${onViewResponses && questionnaire.response_count > 0 ? 'cursor-pointer hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 rounded-lg p-2 -m-2 transition-all' : ''}`}
+          onClick={(e) => {
+            if (onViewResponses && questionnaire.response_count > 0) {
+              e.stopPropagation();
+              onViewResponses();
+            }
+          }}
+          title={questionnaire.response_count > 0 ? 'Ver respostas' : undefined}
+        >
           <div className="flex items-center justify-center gap-1 text-sm text-gray-700 dark:text-gray-300 mb-1">
             <FileText className="w-4 h-4" />
             <span className="font-bold">{questionnaire.response_count}</span>

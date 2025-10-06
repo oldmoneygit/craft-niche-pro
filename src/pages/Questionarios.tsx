@@ -9,7 +9,9 @@ import { SendQuestionnaireModal } from '@/components/questionnaires/SendQuestion
 import { MyTemplatesModal } from '@/components/questionnaires/MyTemplatesModal';
 import { QuestionnaireViewModal } from '@/components/questionnaires/QuestionnaireViewModal';
 import { QuestionnaireShareModal } from '@/components/questionnaires/QuestionnaireShareModal';
+import { QuestionnaireResponsesModal } from '@/components/questionnaires/QuestionnaireResponsesModal';
 import { useQuestionnaires, type Questionnaire } from '@/hooks/useQuestionnaires';
+import { supabase } from '@/integrations/supabase/client';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,9 +30,11 @@ export default function Questionarios() {
   const [templatesModalOpen, setTemplatesModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [responsesModalOpen, setResponsesModalOpen] = useState(false);
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState<Questionnaire | null>(null);
   const [selectedForSend, setSelectedForSend] = useState<{ id: string; title: string } | null>(null);
   const [selectedForShare, setSelectedForShare] = useState<{ id: string; title: string } | null>(null);
+  const [selectedForResponses, setSelectedForResponses] = useState<{ id: string; title: string; questions: any[] } | null>(null);
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [questionnaireToDelete, setQuestionnaireToDelete] = useState<{ id: string; title: string } | null>(null);
@@ -95,6 +99,22 @@ export default function Questionarios() {
       setDeleteDialogOpen(false);
       setQuestionnaireToDelete(null);
     }
+  };
+
+  const handleViewResponses = async (questionnaire: any) => {
+    // Buscar perguntas do questionário
+    const { data: questions } = await supabase
+      .from('questionnaire_questions')
+      .select('*')
+      .eq('questionnaire_id', questionnaire.id)
+      .order('order_index', { ascending: true });
+
+    setSelectedForResponses({
+      id: questionnaire.id,
+      title: questionnaire.title,
+      questions: questions || []
+    });
+    setResponsesModalOpen(true);
   };
 
   return (
@@ -210,6 +230,7 @@ export default function Questionarios() {
                 onSend={() => handleSend(questionnaire)}
                 onToggleActive={() => handleToggleActive(questionnaire)}
                 onDelete={() => handleDelete(questionnaire)}
+                onViewResponses={() => handleViewResponses(questionnaire)}
               />
             ))}
           </div>
@@ -249,6 +270,16 @@ export default function Questionarios() {
           onOpenChange={setShareModalOpen}
           questionnaireId={selectedForShare.id}
           questionnaireTitle={selectedForShare.title}
+        />
+      )}
+
+      {selectedForResponses && (
+        <QuestionnaireResponsesModal
+          open={responsesModalOpen}
+          onOpenChange={setResponsesModalOpen}
+          questionnaireId={selectedForResponses.id}
+          questionnaireTitle={selectedForResponses.title}
+          questions={selectedForResponses.questions}
         />
       )}
 
