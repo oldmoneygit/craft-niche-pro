@@ -23,63 +23,51 @@ export function LeadCard({ lead, onContact, onSchedule, onDelete }: LeadCardProp
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
-    cursor: 'move'
-  };
-
-  const cardStyle = {
-    background: 'hsl(var(--card))',
-    backdropFilter: 'blur(20px)',
-    borderColor: 'hsl(var(--border))',
-    ...style
+    opacity: isDragging ? 0.5 : 1
   };
 
   return (
     <div
       ref={setNodeRef}
-      style={cardStyle}
+      style={style}
       {...attributes}
-      className="p-4 rounded-xl border hover:shadow-lg transition-all"
+      className={`lead-card ${lead.source === 'ai_chat' ? 'ai-captured' : ''}`}
     >
       {/* Área de drag - apenas o conteúdo, não os botões */}
-      <div {...listeners} className="cursor-move mb-3">
-        {/* Nome */}
-        <h4 className="font-semibold text-base mb-2 text-foreground">
-          {lead.name}
-        </h4>
+      <div {...listeners} className="cursor-move">
+        {/* Header */}
+        <div className="lead-header">
+          <h4 className="lead-name">{lead.name}</h4>
+          {lead.source === 'ai_chat' && (
+            <span className="lead-badge">Capturado pela IA</span>
+          )}
+        </div>
 
-      {/* Badge "Capturado pela IA" */}
-      {lead.source === 'ai_chat' && (
-        <span className="inline-block px-3 py-1.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[11px] font-semibold rounded-full mb-3 tracking-wide">
-          Capturado pela IA
-        </span>
-      )}
+        {/* Info */}
+        <div className="lead-info">
+          {lead.phone && (
+            <div className="info-item">
+              <Phone className="w-[18px] h-[18px]" />
+              <span>{lead.phone}</span>
+            </div>
+          )}
+          
+          {lead.email && (
+            <div className="info-item">
+              <span className="truncate">{lead.email}</span>
+            </div>
+          )}
+          
+          {lead.preferred_time_description && (
+            <div className="info-item">
+              <Clock className="w-[18px] h-[18px]" />
+              <span>Prefere: {lead.preferred_time_description}</span>
+            </div>
+          )}
+        </div>
 
-        {/* Telefone */}
-        {lead.phone && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-            <Phone className="w-4 h-4" />
-            <span>{lead.phone}</span>
-          </div>
-        )}
-
-        {/* Email */}
-        {lead.email && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-            <span className="truncate">{lead.email}</span>
-          </div>
-        )}
-
-        {/* Preferência de horário */}
-        {lead.preferred_time_description && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-            <Clock className="w-4 h-4" />
-            <span>Prefere: {lead.preferred_time_description}</span>
-          </div>
-        )}
-
-        {/* Data de captura */}
-        <p className="text-xs text-muted-foreground">
+        {/* Meta */}
+        <div className="lead-meta">
           Capturado em {new Date(lead.created_at).toLocaleDateString('pt-BR', {
             day: '2-digit',
             month: '2-digit',
@@ -87,38 +75,65 @@ export function LeadCard({ lead, onContact, onSchedule, onDelete }: LeadCardProp
             hour: '2-digit',
             minute: '2-digit'
           })}
-        </p>
+        </div>
       </div>
 
       {/* Botões de ação - SEM drag listeners */}
-      <div className="flex gap-2">
+      <div className="lead-actions">
         {lead.status === 'pending' && (
-          <button
-            onClick={() => onContact(lead.id)}
-            className="flex-1 px-4 py-2.5 bg-emerald-500 text-white rounded-lg font-semibold hover:bg-emerald-600 hover:shadow-lg hover:shadow-emerald-500/30 transition-all flex items-center justify-center gap-2 text-[13px]"
-          >
-            <MessageCircle className="w-4 h-4" />
-            Contatar
-          </button>
+          <>
+            <button
+              onClick={() => onContact(lead.id)}
+              className="btn btn-contact"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Contatar
+            </button>
+            <button
+              onClick={() => onSchedule(lead.id)}
+              className="btn btn-schedule"
+            >
+              <Calendar className="w-4 h-4" />
+              Agendar
+            </button>
+            <button
+              onClick={() => onDelete(lead.id)}
+              className="btn btn-reject"
+              title="Excluir lead"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </>
         )}
         
         {lead.status === 'contacted' && (
-          <button
-            onClick={() => onSchedule(lead.id)}
-            className="flex-1 px-4 py-2.5 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 hover:shadow-lg hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2 text-[13px]"
-          >
-            <Calendar className="w-4 h-4" />
-            Agendar
-          </button>
+          <>
+            <button
+              onClick={() => onSchedule(lead.id)}
+              className="btn btn-schedule"
+            >
+              <Calendar className="w-4 h-4" />
+              Agendar
+            </button>
+            <button
+              onClick={() => onDelete(lead.id)}
+              className="btn btn-reject"
+              title="Excluir lead"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </>
         )}
         
-        <button
-          onClick={() => onDelete(lead.id)}
-          className="p-2.5 border border-border text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-400 transition-all"
-          title="Excluir lead"
-        >
-          <X className="w-4 h-4" />
-        </button>
+        {lead.status === 'scheduled' && (
+          <button
+            onClick={() => onDelete(lead.id)}
+            className="btn btn-reject"
+            title="Excluir lead"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </div>
   );

@@ -23,11 +23,11 @@
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid hsl(var(--border));
+  border-bottom: 2px solid hsl(var(--border));
 }
 
 .kanban-column-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -35,29 +35,28 @@
 }
 
 .kanban-column-count {
-  min-width: 32px;
+  width: 32px;
   height: 32px;
-  padding: 0 10px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
 }
 
 .kanban-column[data-status="pending"] .kanban-column-count {
-  background: hsl(38 92% 50% / 0.15);
+  background: rgba(245, 158, 11, 0.15);
   color: #f59e0b;
 }
 
 .kanban-column[data-status="contacted"] .kanban-column-count {
-  background: hsl(217 91% 60% / 0.15);
+  background: rgba(59, 130, 246, 0.15);
   color: #3b82f6;
 }
 
 .kanban-column[data-status="scheduled"] .kanban-column-count {
-  background: hsl(160 84% 39% / 0.15);
+  background: rgba(16, 185, 129, 0.15);
   color: #10b981;
 }
 
@@ -100,10 +99,133 @@
   cursor: move;
 }
 
+.lead-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.lead-name {
+  font-size: 17px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin: 0;
+}
+
+.lead-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.lead-info {
+  margin-bottom: 16px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: hsl(var(--muted-foreground));
+}
+
+.info-item:last-child {
+  margin-bottom: 0;
+}
+
+.info-item svg {
+  width: 18px;
+  height: 18px;
+  color: hsl(var(--muted-foreground));
+  flex-shrink: 0;
+}
+
+.lead-meta {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  padding-top: 16px;
+  margin-bottom: 16px;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.lead-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+}
+
+.btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-contact {
+  background: #10b981;
+  color: white;
+}
+
+.btn-contact:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-schedule {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-schedule:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-reject {
+  background: transparent;
+  border: 1px solid hsl(var(--border));
+  color: #ef4444;
+  padding: 10px;
+  flex: 0;
+  width: 44px;
+  justify-content: center;
+}
+
+.btn-reject:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+  transform: translateY(-2px);
+}
+
 /* ==================== EMPTY STATE ==================== */
 .kanban-empty-state {
   text-align: center;
-  padding: 64px 24px;
+  padding: 48px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -112,11 +234,11 @@
 }
 
 .kanban-empty-state svg {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   margin-bottom: 16px;
   color: hsl(var(--muted-foreground));
-  opacity: 0.3;
+  opacity: 0.4;
   stroke-width: 1.5;
 }
 
@@ -138,7 +260,12 @@
 }
 
 @media (max-width: 768px) {
-  .lead-card .flex {
+  .lead-actions {
     flex-wrap: wrap;
+  }
+
+  .btn-reject {
+    flex: 1;
+    width: auto;
   }
 }
