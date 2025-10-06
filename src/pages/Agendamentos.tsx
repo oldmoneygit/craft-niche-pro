@@ -200,20 +200,36 @@ export function Agendamentos() {
       <div className="appointments-content">
         {/* Calendar */}
         <div className="calendar-section">
+          {/* Mini Stats */}
+          <div className="calendar-mini-stats">
+            <div className="mini-stat">
+              <span className="mini-stat-value" style={{ color: '#f59e0b' }}>{stats.today}</span>
+              <span className="mini-stat-label">Hoje</span>
+            </div>
+            <div className="mini-stat">
+              <span className="mini-stat-value" style={{ color: '#3b82f6' }}>{stats.confirmed}</span>
+              <span className="mini-stat-label">Confirm.</span>
+            </div>
+            <div className="mini-stat">
+              <span className="mini-stat-value" style={{ color: '#10b981' }}>{stats.completed}</span>
+              <span className="mini-stat-label">Realiz.</span>
+            </div>
+          </div>
+
           <div className="calendar-container">
             <div className="calendar-header">
               <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
-                <ChevronLeft size={20} />
+                <ChevronLeft size={18} />
               </button>
               <h3>{format(currentMonth, 'MMMM yyyy', { locale: ptBR })}</h3>
               <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
-                <ChevronRight size={20} />
+                <ChevronRight size={18} />
               </button>
             </div>
 
             <div className="calendar-grid">
-              {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
-                <div key={day} className="calendar-weekday">{day}</div>
+              {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, idx) => (
+                <div key={`${day}-${idx}`} className="calendar-weekday">{day}</div>
               ))}
               
               {monthDays.map(day => {
@@ -230,15 +246,15 @@ export function Agendamentos() {
                     <span className="day-number">{format(day, 'd')}</span>
                     {dayApts.length > 0 && (
                       <div className="appointment-dots">
-                        {dayApts.slice(0, 3).map((apt) => (
+                        {dayApts.slice(0, 2).map((apt) => (
                           <div
                             key={apt.id}
                             className="appointment-dot"
                             style={{ backgroundColor: getStatusColor(apt.status) }}
                           />
                         ))}
-                        {dayApts.length > 3 && (
-                          <span className="more-count">+{dayApts.length - 3}</span>
+                        {dayApts.length > 2 && (
+                          <span className="more-count">+{dayApts.length - 2}</span>
                         )}
                       </div>
                     )}
@@ -251,9 +267,38 @@ export function Agendamentos() {
 
         {/* Day Appointments List */}
         <div className="day-appointments-section">
-          <h3 className="day-title">
-            {format(selectedDate, "d 'de' MMMM", { locale: ptBR })}
-          </h3>
+          <div className="section-header-appointments">
+            <h3 className="day-title">
+              {format(selectedDate, "d 'de' MMMM", { locale: ptBR })}
+            </h3>
+            <span style={{ 
+              fontSize: '13px', 
+              color: 'hsl(var(--muted-foreground))',
+              fontWeight: 500
+            }}>
+              {dayAppointments.length} {dayAppointments.length === 1 ? 'consulta' : 'consultas'}
+            </span>
+          </div>
+
+          {/* Summary Cards */}
+          <div className="appointments-summary">
+            <div className="summary-card">
+              <span className="summary-card-value">{appointments?.length || 0}</span>
+              <span className="summary-card-label">Total do Mês</span>
+            </div>
+            <div className="summary-card">
+              <span className="summary-card-value" style={{ color: '#3b82f6' }}>
+                {appointments?.filter(a => a.status === 'confirmado').length || 0}
+              </span>
+              <span className="summary-card-label">Confirmados</span>
+            </div>
+            <div className="summary-card">
+              <span className="summary-card-value" style={{ color: '#f59e0b' }}>
+                {appointments?.filter(a => a.status === 'agendado').length || 0}
+              </span>
+              <span className="summary-card-label">Pendentes</span>
+            </div>
+          </div>
 
           {isLoading ? (
             <div className="loading-state">Carregando...</div>
@@ -263,56 +308,58 @@ export function Agendamentos() {
               <p>Nenhuma consulta agendada para este dia</p>
             </div>
           ) : (
-            <div className="appointments-list">
-              {dayAppointments.map((apt) => (
-                <div key={apt.id} className={`appointment-card status-${apt.status}`}>
-                  <div className="appointment-time">
-                    {format(new Date(apt.datetime), 'HH:mm')}
-                  </div>
-                  
-                  <div className="appointment-info">
-                    <h4 className="client-name">{apt.clients.name}</h4>
-                    <p className="appointment-type">{apt.type}</p>
-                  </div>
-                  
-                  <span className={`status-badge ${apt.status}`}>
-                    {apt.status === 'agendado' ? 'Agendado' :
-                     apt.status === 'confirmado' ? 'Confirmado' :
-                     apt.status === 'realizado' ? 'Realizado' : 'Cancelado'}
-                  </span>
-                  
-                  <div className="appointment-actions">
-                    {apt.status === 'agendado' && (
+            <div className="appointments-scroll">
+              <div className="appointments-list">
+                {dayAppointments.map((apt) => (
+                  <div key={apt.id} className={`appointment-card status-${apt.status}`}>
+                    <div className="appointment-time">
+                      {format(new Date(apt.datetime), 'HH:mm')}
+                    </div>
+                    
+                    <div className="appointment-info">
+                      <h4 className="client-name">{apt.clients.name}</h4>
+                      <p className="appointment-type">{apt.type}</p>
+                    </div>
+                    
+                    <span className={`status-badge ${apt.status}`}>
+                      {apt.status === 'agendado' ? 'Agendado' :
+                       apt.status === 'confirmado' ? 'Confirmado' :
+                       apt.status === 'realizado' ? 'Realizado' : 'Cancelado'}
+                    </span>
+                    
+                    <div className="appointment-actions">
+                      {apt.status === 'agendado' && (
+                        <button 
+                          className="action-btn btn-confirm"
+                          onClick={() => updateStatus.mutate({ id: apt.id, status: 'confirmado' })}
+                        >
+                          <Check size={16} />
+                        </button>
+                      )}
+                      {apt.status === 'confirmado' && (
+                        <button 
+                          className="action-btn btn-complete"
+                          onClick={() => updateStatus.mutate({ id: apt.id, status: 'realizado' })}
+                        >
+                          <CheckCircle size={16} />
+                        </button>
+                      )}
                       <button 
-                        className="action-btn btn-confirm"
-                        onClick={() => updateStatus.mutate({ id: apt.id, status: 'confirmado' })}
+                        className="action-btn btn-edit"
+                        onClick={() => handleEdit(apt)}
                       >
-                        <Check size={16} />
+                        Editar
                       </button>
-                    )}
-                    {apt.status === 'confirmado' && (
                       <button 
-                        className="action-btn btn-complete"
-                        onClick={() => updateStatus.mutate({ id: apt.id, status: 'realizado' })}
+                        className="action-btn btn-cancel"
+                        onClick={() => deleteAppointment.mutate(apt.id)}
                       >
-                        <CheckCircle size={16} />
+                        <XIcon size={16} />
                       </button>
-                    )}
-                    <button 
-                      className="action-btn btn-edit"
-                      onClick={() => handleEdit(apt)}
-                    >
-                      Editar
-                    </button>
-                    <button 
-                      className="action-btn btn-cancel"
-                      onClick={() => deleteAppointment.mutate(apt.id)}
-                    >
-                      <XIcon size={16} />
-                    </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </div>
