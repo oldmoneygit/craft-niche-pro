@@ -475,7 +475,7 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                   <Calendar size={64} style={{ color: 'var(--text-muted)' }} className="mx-auto mb-3" />
                   <p style={{ color: 'var(--text-muted)' }} className="mb-4">Nenhuma consulta registrada</p>
                   <button
-                    onClick={() => navigate(`/appointments?action=new&clientId=${client.id}`)}
+                    onClick={() => navigate(`/agendamentos?action=new&clientId=${client.id}`)}
                     className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:scale-105"
                     style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
                   >

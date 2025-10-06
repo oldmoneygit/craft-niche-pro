@@ -72,7 +72,7 @@ export function Clientes() {
 
   const handleSchedule = (clientId: string, clientName: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/appointments?action=new&clientId=${clientId}&clientName=${encodeURIComponent(clientName)}`);
+    navigate(`/agendamentos?action=new&clientId=${clientId}&clientName=${encodeURIComponent(clientName)}`);
   };
 
   const calculateAge = (birthDate: string | null) => {
