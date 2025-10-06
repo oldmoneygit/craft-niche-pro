@@ -7,14 +7,21 @@
 
 /* ==================== KANBAN COLUMN ==================== */
 .kanban-column {
-  background: hsl(var(--card) / 0.7);
-  backdrop-filter: blur(10px);
-  border: 1px solid hsl(var(--border));
+  background: var(--bg-card, rgba(255, 255, 255, 0.7));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border, hsl(var(--border)));
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 2px 12px hsl(var(--foreground) / 0.08);
+  box-shadow: 0 4px 24px var(--shadow, rgba(0, 0, 0, 0.08));
   transition: all 0.3s ease;
   min-height: 600px;
+}
+
+[data-theme="dark"] .kanban-column {
+  background: rgba(38, 38, 38, 0.6);
+  border-color: #404040;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
 }
 
 .kanban-column-header {
@@ -23,7 +30,11 @@
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 2px solid hsl(var(--border));
+  border-bottom: 2px solid #e5e5e5;
+}
+
+[data-theme="dark"] .kanban-column-header {
+  border-bottom-color: #404040;
 }
 
 .kanban-column-title {
@@ -31,7 +42,11 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: hsl(var(--muted-foreground));
+  color: #737373;
+}
+
+[data-theme="dark"] .kanban-column-title {
+  color: #a3a3a3;
 }
 
 .kanban-column-count {
@@ -62,8 +77,8 @@
 
 /* ==================== LEAD CARD ==================== */
 .lead-card {
-  background: hsl(var(--background));
-  border: 1px solid hsl(var(--border));
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 16px;
@@ -71,6 +86,11 @@
   cursor: default;
   position: relative;
   overflow: hidden;
+}
+
+[data-theme="dark"] .lead-card {
+  background: #171717;
+  border-color: #404040;
 }
 
 .lead-card::before {
@@ -86,13 +106,22 @@
 
 .lead-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px hsl(var(--foreground) / 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] .lead-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 /* Cores por status */
 .lead-card.status-pending {
-  background: hsl(var(--background));
-  border: 1px solid hsl(var(--border));
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+}
+
+[data-theme="dark"] .lead-card.status-pending {
+  background: #171717;
+  border-color: #404040;
 }
 
 .lead-card.status-pending::before {
@@ -138,8 +167,12 @@
 .lead-name {
   font-size: 17px;
   font-weight: 600;
-  color: hsl(var(--foreground));
+  color: #171717;
   margin: 0;
+}
+
+[data-theme="dark"] .lead-name {
+  color: #fafafa;
 }
 
 .lead-badge {
@@ -164,7 +197,11 @@
   gap: 10px;
   margin-bottom: 10px;
   font-size: 14px;
-  color: hsl(var(--muted-foreground));
+  color: #737373;
+}
+
+[data-theme="dark"] .info-item {
+  color: #a3a3a3;
 }
 
 .info-item:last-child {
@@ -174,16 +211,25 @@
 .info-item svg {
   width: 18px;
   height: 18px;
-  color: hsl(var(--muted-foreground));
+  color: #737373;
   flex-shrink: 0;
+}
+
+[data-theme="dark"] .info-item svg {
+  color: #a3a3a3;
 }
 
 .lead-meta {
   font-size: 12px;
-  color: hsl(var(--muted-foreground));
+  color: #737373;
   padding-top: 16px;
   margin-bottom: 16px;
-  border-top: 1px solid hsl(var(--border));
+  border-top: 1px solid #e5e5e5;
+}
+
+[data-theme="dark"] .lead-meta {
+  color: #a3a3a3;
+  border-top-color: #404040;
 }
 
 .lead-actions {
@@ -236,12 +282,16 @@
 
 .btn-reject {
   background: transparent;
-  border: 1px solid hsl(var(--border));
+  border: 1px solid #e5e5e5;
   color: #ef4444;
   padding: 10px;
   flex: 0;
   width: 44px;
   justify-content: center;
+}
+
+[data-theme="dark"] .btn-reject {
+  border-color: #404040;
 }
 
 .btn-reject:hover {
@@ -265,15 +315,23 @@
   width: 56px;
   height: 56px;
   margin-bottom: 16px;
-  color: hsl(var(--muted-foreground));
+  color: #737373;
   opacity: 0.4;
   stroke-width: 1.5;
 }
 
+[data-theme="dark"] .kanban-empty-state svg {
+  color: #a3a3a3;
+}
+
 .kanban-empty-state p {
   font-size: 14px;
-  color: hsl(var(--muted-foreground));
+  color: #737373;
   font-weight: 500;
+}
+
+[data-theme="dark"] .kanban-empty-state p {
+  color: #a3a3a3;
 }
 
 /* ==================== RESPONSIVE ==================== */
