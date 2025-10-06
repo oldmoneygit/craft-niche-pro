@@ -4,11 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   X, User, Mail, Phone, Calendar, Activity, Target, Ruler, Weight,
-  Package, FileText, ClipboardList, FileQuestion, Loader2
+  Package, FileText, ClipboardList, FileQuestion, Loader2, Eye, Edit
 } from 'lucide-react';
 import { ClientWithStats } from '@/hooks/useClientsData';
 import { format } from 'date-fns';
 import { AnamneseForm } from '@/components/platform/AnamneseForm';
+import { AnamneseViewer } from '@/components/platform/AnamneseViewer';
 
 interface ClientDetailsModalProps {
   client: ClientWithStats;
@@ -18,6 +19,8 @@ interface ClientDetailsModalProps {
 export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'info' | 'services' | 'plans' | 'questionnaires' | 'appointments' | 'anamneses'>('info');
+  const [viewingAnamnese, setViewingAnamnese] = useState<any | null>(null);
+  const [editingAnamnese, setEditingAnamnese] = useState(false);
 
   // Fetch services
   const { data: clientServices, isLoading: servicesLoading } = useQuery({
@@ -488,7 +491,96 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
           )}
 
           {activeTab === 'anamneses' && (
-            <AnamneseForm clientId={client.id} />
+            <>
+              {editingAnamnese ? (
+                <div>
+                  <button
+                    onClick={() => setEditingAnamnese(false)}
+                    className="mb-4 text-sm text-green-600 hover:text-green-700 font-semibold"
+                  >
+                    ← Voltar para lista
+                  </button>
+                  <AnamneseForm clientId={client.id} />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {anamnesesLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-green-500" />
+                    </div>
+                  ) : anamneses && anamneses.length > 0 ? (
+                    <>
+                      {anamneses.map((anamnese: any) => (
+                        <div 
+                          key={anamnese.id}
+                          className="p-5 rounded-xl border transition-all hover:shadow-md"
+                          style={{
+                            background: 'var(--bg-card)',
+                            backdropFilter: 'blur(20px)',
+                            borderColor: 'var(--border)'
+                          }}
+                        >
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h4 className="font-semibold text-base" style={{ color: 'var(--text-primary)' }}>
+                                Anamnese - {new Date(anamnese.created_at).toLocaleDateString('pt-BR')}
+                              </h4>
+                              <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+                                Última atualização: {new Date(anamnese.updated_at).toLocaleDateString('pt-BR')}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg mb-4">
+                            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Objetivo Principal:</p>
+                            <p className="text-sm text-gray-900 dark:text-gray-100 line-clamp-2">
+                              {anamnese.main_goal || 'Não informado'}
+                            </p>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setViewingAnamnese(anamnese)}
+                              className="flex-1 px-4 py-2 rounded-lg font-semibold text-white transition-all hover:scale-105"
+                              style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+                            >
+                              <Eye className="w-4 h-4 inline mr-2" />
+                              Ver Relatório
+                            </button>
+                            <button
+                              onClick={() => setEditingAnamnese(true)}
+                              className="px-4 py-2 rounded-lg font-semibold border-2 border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all"
+                            >
+                              <Edit className="w-4 h-4 inline mr-2" />
+                              Editar
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      <button
+                        onClick={() => setEditingAnamnese(true)}
+                        className="w-full px-4 py-3 rounded-xl font-semibold border-2 border-dashed border-green-400 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all"
+                      >
+                        + Nova Anamnese
+                      </button>
+                    </>
+                  ) : (
+                    <div className="text-center py-12">
+                      <ClipboardList size={64} style={{ color: 'var(--text-muted)' }} className="mx-auto mb-3" />
+                      <p style={{ color: 'var(--text-muted)' }} className="mb-4">Nenhuma anamnese cadastrada</p>
+                      <button
+                        onClick={() => setEditingAnamnese(true)}
+                        className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:scale-105"
+                        style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+                      >
+                        Criar Primeira Anamnese
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           )}
 
           {activeTab === 'questionnaires' && (
@@ -537,6 +629,15 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
           )}
         </div>
       </div>
+
+      {/* Modal de visualização da anamnese */}
+      {viewingAnamnese && (
+        <AnamneseViewer
+          anamnese={viewingAnamnese}
+          clientName={client.name}
+          onClose={() => setViewingAnamnese(null)}
+        />
+      )}
     </div>
   );
 }
