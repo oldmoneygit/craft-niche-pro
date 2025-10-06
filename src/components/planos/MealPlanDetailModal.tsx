@@ -47,7 +47,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background border-border">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background/95 backdrop-blur-xl border-border/50">
         <DialogHeader className="border-b border-border pb-4">
           <DialogTitle className="text-2xl font-bold flex items-center gap-3 text-foreground">
             <span className="text-3xl">📋</span>
@@ -58,7 +58,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
         </DialogHeader>
 
         {/* Header com informações do cliente - Design melhorado */}
-        <div className="bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 rounded-2xl p-6 border border-primary/20">
+        <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-primary/20">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl shadow-lg">
               {plan.client.name.substring(0, 2).toUpperCase()}
@@ -127,7 +127,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
         {/* Macros Totais - Design melhorado com cores */}
         <div className="grid grid-cols-4 gap-3">
           {/* KCAL - Verde */}
-          <div className="bg-gradient-to-br from-primary/10 to-primary/20 dark:from-primary/20 dark:to-primary/30 rounded-xl p-4 border-2 border-primary/30 dark:border-primary/50">
+          <div className="bg-card/40 backdrop-blur-sm rounded-xl p-4 border-2 border-primary/30">
             <div className="text-3xl font-extrabold text-primary mb-1">{Math.round(totals.kcal)}</div>
             <div className="text-xs font-bold text-primary uppercase tracking-wider">KCAL</div>
             {plan.target_kcal && (
@@ -136,7 +136,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
           </div>
 
           {/* Proteínas - Azul */}
-          <div className="bg-gradient-to-br from-secondary/10 to-secondary/20 dark:from-secondary/20 dark:to-secondary/30 rounded-xl p-4 border-2 border-secondary/30 dark:border-secondary/50">
+          <div className="bg-card/40 backdrop-blur-sm rounded-xl p-4 border-2 border-secondary/30">
             <div className="text-3xl font-extrabold text-secondary mb-1">{Math.round(totals.protein)}g</div>
             <div className="text-xs font-bold text-secondary uppercase tracking-wider">Proteínas</div>
             {plan.target_protein && (
@@ -145,7 +145,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
           </div>
 
           {/* Gorduras - Laranja */}
-          <div className="bg-gradient-to-br from-warning/10 to-warning/20 dark:from-warning/20 dark:to-warning/30 rounded-xl p-4 border-2 border-warning/30 dark:border-warning/50">
+          <div className="bg-card/40 backdrop-blur-sm rounded-xl p-4 border-2 border-warning/30">
             <div className="text-3xl font-extrabold text-warning mb-1">{Math.round(totals.fats)}g</div>
             <div className="text-xs font-bold text-warning uppercase tracking-wider">Gorduras</div>
             {plan.target_fats && (
@@ -154,7 +154,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
           </div>
 
           {/* Carboidratos - Roxo */}
-          <div className="bg-gradient-to-br from-accent/10 to-accent/20 dark:from-accent/20 dark:to-accent/30 rounded-xl p-4 border-2 border-accent/30 dark:border-accent/50">
+          <div className="bg-card/40 backdrop-blur-sm rounded-xl p-4 border-2 border-accent/30">
             <div className="text-3xl font-extrabold text-accent mb-1">{Math.round(totals.carbs)}g</div>
             <div className="text-xs font-bold text-accent uppercase tracking-wider">Carboidratos</div>
             {plan.target_carbs && (
@@ -185,7 +185,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
                   <AccordionItem 
                     key={meal.id} 
                     value={meal.id}
-                    className="border border-border rounded-xl overflow-hidden bg-card hover:shadow-md transition-shadow"
+                    className="border border-border/50 rounded-xl overflow-hidden bg-card/40 backdrop-blur-sm hover:shadow-lg transition-shadow"
                   >
                     <AccordionTrigger className="hover:no-underline px-5 py-4 hover:bg-accent/5">
                       <div className="flex items-center justify-between w-full pr-4">
@@ -213,7 +213,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
                           </div>
                         ) : (
                           meal.items.map((item) => (
-                            <div key={item.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border hover:shadow-sm transition-shadow">
+                            <div key={item.id} className="flex items-center justify-between p-4 bg-card/30 backdrop-blur-sm rounded-lg border border-border/50 hover:shadow-sm transition-shadow">
                               <div className="flex-1">
                                 <div className="font-semibold text-foreground">{item.food.name}</div>
                                 <div className="text-sm text-muted-foreground mt-1">
@@ -243,7 +243,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
 
         {/* Observações - Design melhorado */}
         {plan.notes && (
-          <div className="bg-warning/10 dark:bg-warning/20 rounded-xl p-5 border-2 border-warning/30">
+          <div className="bg-card/40 backdrop-blur-sm rounded-xl p-5 border-2 border-warning/30">
             <div className="font-bold text-warning mb-2 flex items-center gap-2">
               <span>📝</span>
               Observações
