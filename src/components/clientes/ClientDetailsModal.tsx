@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { ClientWithStats } from '@/hooks/useClientsData';
 import { format } from 'date-fns';
+import { AnamneseForm } from '@/components/platform/AnamneseForm';
 
 interface ClientDetailsModalProps {
   client: ClientWithStats;
@@ -487,70 +488,7 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
           )}
 
           {activeTab === 'anamneses' && (
-            <div className="space-y-4">
-              {anamnesesLoading ? (
-                <div className="animate-pulse">
-                  <div className="h-40 rounded-xl" style={{ background: 'var(--bg-secondary)' }} />
-                </div>
-              ) : anamneses && anamneses.length > 0 ? (
-                anamneses.map((ana: any) => (
-                  <div 
-                    key={ana.id}
-                    className="p-5 rounded-xl border"
-                    style={{
-                      background: 'var(--bg-card)',
-                      backdropFilter: 'blur(20px)',
-                      borderColor: 'var(--border)'
-                    }}
-                  >
-                    <h4 className="font-semibold text-base mb-4" style={{ color: 'var(--text-primary)' }}>
-                      Anamnese - {new Date(ana.anamnesis_date || ana.created_at).toLocaleDateString('pt-BR')}
-                    </h4>
-                    
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      {ana.current_weight && (
-                        <div>
-                          <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Peso</p>
-                          <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{ana.current_weight} kg</p>
-                        </div>
-                      )}
-                      {ana.height && (
-                        <div>
-                          <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Altura</p>
-                          <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{ana.height} cm</p>
-                        </div>
-                      )}
-                      {ana.waist_circumference && (
-                        <div>
-                          <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Cintura</p>
-                          <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{ana.waist_circumference} cm</p>
-                        </div>
-                      )}
-                      {ana.physical_activity && (
-                        <div>
-                          <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Atividade</p>
-                          <p className="font-semibold capitalize" style={{ color: 'var(--text-primary)' }}>
-                            {String(ana.physical_activity).replace('_', ' ')}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {ana.main_goal && (
-                      <div className="mt-4 pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
-                        <p className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>Objetivo Principal:</p>
-                        <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{ana.main_goal}</p>
-                      </div>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <ClipboardList size={64} style={{ color: 'var(--text-muted)' }} className="mx-auto mb-3" />
-                  <p style={{ color: 'var(--text-muted)' }}>Nenhuma anamnese registrada</p>
-                </div>
-              )}
-            </div>
+            <AnamneseForm clientId={client.id} />
           )}
 
           {activeTab === 'questionnaires' && (
