@@ -35,26 +35,26 @@ export function Leads() {
       return;
     }
     
-    // ✅ Verificar se dropou sobre uma coluna (não sobre um card)
     const overData = over.data.current;
-    
-    console.log('🔍 Drag End Debug:', {
-      overId: over.id,
-      overData,
-      overType: overData?.type,
-      isColumn: overData?.type === 'column'
-    });
-    
-    if (overData?.type !== 'column') {
-      console.warn('⚠️ Só é permitido soltar sobre colunas, não sobre cards');
-      setActiveId(null);
-      return;
-    }
-    
     const leadId = active.id as string;
-    const newStatus = overData.status as string;
+    let newStatus: string;
     
-    console.log('✅ Drop válido sobre coluna:', { leadId, newStatus });
+    // ✅ Aceitar drop tanto sobre colunas quanto sobre cards
+    if (overData?.type === 'column') {
+      // Dropou sobre a coluna (área vazia)
+      newStatus = overData.status as string;
+      console.log('✅ Drop sobre coluna vazia:', { leadId, newStatus });
+    } else {
+      // Dropou sobre um card - pegar o status do card de destino
+      const targetLead = leads?.find(l => l.id === over.id);
+      if (!targetLead) {
+        console.warn('⚠️ Drop inválido');
+        setActiveId(null);
+        return;
+      }
+      newStatus = targetLead.status;
+      console.log('✅ Drop sobre card:', { leadId, targetStatus: newStatus });
+    }
     
     const currentLead = leads?.find(l => l.id === leadId);
     
