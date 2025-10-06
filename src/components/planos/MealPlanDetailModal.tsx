@@ -47,55 +47,55 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
-        <DialogHeader className="border-b pb-4">
-          <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background border-border">
+        <DialogHeader className="border-b border-border pb-4">
+          <DialogTitle className="text-2xl font-bold flex items-center gap-3 text-foreground">
             <span className="text-3xl">📋</span>
-            <span className="bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">
+            <span className="text-primary font-bold">
               {plan.name}
             </span>
           </DialogTitle>
         </DialogHeader>
 
         {/* Header com informações do cliente - Design melhorado */}
-        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 rounded-2xl p-6 border border-emerald-200/50 dark:border-emerald-800/50">
+        <div className="bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 rounded-2xl p-6 border border-primary/20">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+            <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl shadow-lg">
               {plan.client.name.substring(0, 2).toUpperCase()}
             </div>
             <div>
-              <div className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-                <User className="w-5 h-5 text-emerald-600" />
+              <div className="font-bold text-lg text-foreground flex items-center gap-2">
+                <User className="w-5 h-5 text-primary" />
                 {plan.client.name}
               </div>
               {plan.client.email && (
-                <div className="text-sm text-gray-600 dark:text-gray-400">{plan.client.email}</div>
+                <div className="text-sm text-muted-foreground">{plan.client.email}</div>
               )}
             </div>
           </div>
 
-          <div className="h-px bg-gradient-to-r from-transparent via-emerald-300 dark:via-emerald-700 to-transparent mb-4" />
+          <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent mb-4" />
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="flex items-start gap-2">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                <Calendar className="w-4 h-4 text-emerald-600" />
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Calendar className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">Início</div>
-                <div className="font-semibold text-gray-900 dark:text-white text-sm">
+                <div className="text-xs text-muted-foreground font-medium">Início</div>
+                <div className="font-semibold text-foreground text-sm">
                   {new Date(plan.start_date).toLocaleDateString('pt-BR')}
                 </div>
               </div>
             </div>
             {plan.end_date && (
               <div className="flex items-start gap-2">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <Calendar className="w-4 h-4 text-emerald-600" />
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Calendar className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">Término</div>
-                  <div className="font-semibold text-gray-900 dark:text-white text-sm">
+                  <div className="text-xs text-muted-foreground font-medium">Término</div>
+                  <div className="font-semibold text-foreground text-sm">
                     {new Date(plan.end_date).toLocaleDateString('pt-BR')}
                   </div>
                 </div>
@@ -103,22 +103,22 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
             )}
             {plan.goal && (
               <div className="flex items-start gap-2">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <Target className="w-4 h-4 text-emerald-600" />
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Target className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">Objetivo</div>
-                  <div className="font-semibold text-gray-900 dark:text-white text-sm capitalize">{plan.goal.replace('_', ' ')}</div>
+                  <div className="text-xs text-muted-foreground font-medium">Objetivo</div>
+                  <div className="font-semibold text-foreground text-sm capitalize">{plan.goal.replace('_', ' ')}</div>
                 </div>
               </div>
             )}
             <div className="flex items-start gap-2">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                <TrendingUp className="w-4 h-4 text-emerald-600" />
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">Status</div>
-                <div className="font-semibold text-emerald-600 text-sm capitalize">{plan.status}</div>
+                <div className="text-xs text-muted-foreground font-medium">Status</div>
+                <div className="font-semibold text-primary text-sm capitalize">{plan.status}</div>
               </div>
             </div>
           </div>
@@ -127,45 +127,45 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
         {/* Macros Totais - Design melhorado com cores */}
         <div className="grid grid-cols-4 gap-3">
           {/* KCAL - Verde */}
-          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/40 dark:to-emerald-900/40 rounded-xl p-4 border-2 border-emerald-200 dark:border-emerald-800">
-            <div className="text-3xl font-extrabold text-emerald-600 mb-1">{Math.round(totals.kcal)}</div>
-            <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">KCAL</div>
+          <div className="bg-gradient-to-br from-primary/10 to-primary/20 dark:from-primary/20 dark:to-primary/30 rounded-xl p-4 border-2 border-primary/30 dark:border-primary/50">
+            <div className="text-3xl font-extrabold text-primary mb-1">{Math.round(totals.kcal)}</div>
+            <div className="text-xs font-bold text-primary uppercase tracking-wider">KCAL</div>
             {plan.target_kcal && (
-              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Meta: {plan.target_kcal}</div>
+              <div className="text-xs text-muted-foreground mt-1">Meta: {plan.target_kcal}</div>
             )}
           </div>
 
           {/* Proteínas - Azul */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/40 dark:to-blue-900/40 rounded-xl p-4 border-2 border-blue-200 dark:border-blue-800">
-            <div className="text-3xl font-extrabold text-blue-600 mb-1">{Math.round(totals.protein)}g</div>
-            <div className="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider">Proteínas</div>
+          <div className="bg-gradient-to-br from-secondary/10 to-secondary/20 dark:from-secondary/20 dark:to-secondary/30 rounded-xl p-4 border-2 border-secondary/30 dark:border-secondary/50">
+            <div className="text-3xl font-extrabold text-secondary mb-1">{Math.round(totals.protein)}g</div>
+            <div className="text-xs font-bold text-secondary uppercase tracking-wider">Proteínas</div>
             {plan.target_protein && (
-              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Meta: {plan.target_protein}g</div>
+              <div className="text-xs text-muted-foreground mt-1">Meta: {plan.target_protein}g</div>
             )}
           </div>
 
           {/* Gorduras - Laranja */}
-          <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/40 dark:to-orange-900/40 rounded-xl p-4 border-2 border-orange-200 dark:border-orange-800">
-            <div className="text-3xl font-extrabold text-orange-600 mb-1">{Math.round(totals.fats)}g</div>
-            <div className="text-xs font-bold text-orange-700 dark:text-orange-400 uppercase tracking-wider">Gorduras</div>
+          <div className="bg-gradient-to-br from-warning/10 to-warning/20 dark:from-warning/20 dark:to-warning/30 rounded-xl p-4 border-2 border-warning/30 dark:border-warning/50">
+            <div className="text-3xl font-extrabold text-warning mb-1">{Math.round(totals.fats)}g</div>
+            <div className="text-xs font-bold text-warning uppercase tracking-wider">Gorduras</div>
             {plan.target_fats && (
-              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Meta: {plan.target_fats}g</div>
+              <div className="text-xs text-muted-foreground mt-1">Meta: {plan.target_fats}g</div>
             )}
           </div>
 
           {/* Carboidratos - Roxo */}
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/40 dark:to-purple-900/40 rounded-xl p-4 border-2 border-purple-200 dark:border-purple-800">
-            <div className="text-3xl font-extrabold text-purple-600 mb-1">{Math.round(totals.carbs)}g</div>
-            <div className="text-xs font-bold text-purple-700 dark:text-purple-400 uppercase tracking-wider">Carboidratos</div>
+          <div className="bg-gradient-to-br from-accent/10 to-accent/20 dark:from-accent/20 dark:to-accent/30 rounded-xl p-4 border-2 border-accent/30 dark:border-accent/50">
+            <div className="text-3xl font-extrabold text-accent mb-1">{Math.round(totals.carbs)}g</div>
+            <div className="text-xs font-bold text-accent uppercase tracking-wider">Carboidratos</div>
             {plan.target_carbs && (
-              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Meta: {plan.target_carbs}g</div>
+              <div className="text-xs text-muted-foreground mt-1">Meta: {plan.target_carbs}g</div>
             )}
           </div>
         </div>
 
         {/* Refeições - Design melhorado */}
         <div>
-          <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-foreground">
             <span className="text-2xl">🍽️</span>
             <span>Refeições</span>
           </h3>
@@ -185,22 +185,22 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
                   <AccordionItem 
                     key={meal.id} 
                     value={meal.id}
-                    className="border rounded-xl overflow-hidden bg-white dark:bg-gray-800 hover:shadow-md transition-shadow"
+                    className="border border-border rounded-xl overflow-hidden bg-card hover:shadow-md transition-shadow"
                   >
-                    <AccordionTrigger className="hover:no-underline px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                    <AccordionTrigger className="hover:no-underline px-5 py-4 hover:bg-accent/5">
                       <div className="flex items-center justify-between w-full pr-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-xl shadow-lg">
+                          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xl shadow-lg">
                             {meal.name.includes('Café') ? '☕' : meal.name.includes('Almoço') ? '🍽️' : meal.name.includes('Jantar') ? '🍲' : '🥗'}
                           </div>
                           <div>
-                            <div className="font-bold text-left text-gray-900 dark:text-white">{meal.name}</div>
+                            <div className="font-bold text-left text-foreground">{meal.name}</div>
                             {meal.time && (
-                              <div className="text-sm text-gray-500 dark:text-gray-400 text-left">{meal.time}</div>
+                              <div className="text-sm text-muted-foreground text-left">{meal.time}</div>
                             )}
                           </div>
                         </div>
-                        <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                        <div className="text-sm font-semibold text-primary">
                           {Math.round(mealTotals.kcal)} kcal • {meal.items.length} {meal.items.length === 1 ? 'item' : 'itens'}
                         </div>
                       </div>
@@ -208,26 +208,26 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
                     <AccordionContent className="px-5 pb-4">
                       <div className="space-y-2 pt-2">
                         {meal.items.length === 0 ? (
-                          <div className="text-center text-gray-500 dark:text-gray-400 py-8 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                          <div className="text-center text-muted-foreground py-8 bg-muted/50 rounded-lg">
                             Nenhum alimento adicionado ainda
                           </div>
                         ) : (
                           meal.items.map((item) => (
-                            <div key={item.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-sm transition-shadow">
+                            <div key={item.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border hover:shadow-sm transition-shadow">
                               <div className="flex-1">
-                                <div className="font-semibold text-gray-900 dark:text-white">{item.food.name}</div>
-                                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                <div className="font-semibold text-foreground">{item.food.name}</div>
+                                <div className="text-sm text-muted-foreground mt-1">
                                   {item.quantity} {item.measure?.measure_name || 'porção(ões)'} 
-                                  <span className="text-gray-400 dark:text-gray-500"> • </span>
+                                  <span className="text-muted-foreground/70"> • </span>
                                   <span className="font-medium">{item.grams_total?.toFixed(0)}g</span>
                                 </div>
                               </div>
                               <div className="text-right">
-                                <div className="text-lg font-bold text-emerald-600">{item.kcal_total?.toFixed(0)} kcal</div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 space-x-2">
-                                  <span className="text-blue-600 dark:text-blue-400 font-medium">P: {item.protein_total?.toFixed(1)}g</span>
-                                  <span className="text-purple-600 dark:text-purple-400 font-medium">C: {item.carb_total?.toFixed(1)}g</span>
-                                  <span className="text-orange-600 dark:text-orange-400 font-medium">G: {item.fat_total?.toFixed(1)}g</span>
+                                <div className="text-lg font-bold text-primary">{item.kcal_total?.toFixed(0)} kcal</div>
+                                <div className="text-xs text-muted-foreground mt-1 space-x-2">
+                                  <span className="text-secondary font-medium">P: {item.protein_total?.toFixed(1)}g</span>
+                                  <span className="text-accent font-medium">C: {item.carb_total?.toFixed(1)}g</span>
+                                  <span className="text-warning font-medium">G: {item.fat_total?.toFixed(1)}g</span>
                                 </div>
                               </div>
                             </div>
@@ -243,16 +243,16 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
 
         {/* Observações - Design melhorado */}
         {plan.notes && (
-          <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 rounded-xl p-5 border-2 border-amber-200 dark:border-amber-900">
-            <div className="font-bold text-amber-900 dark:text-amber-400 mb-2 flex items-center gap-2">
+          <div className="bg-warning/10 dark:bg-warning/20 rounded-xl p-5 border-2 border-warning/30">
+            <div className="font-bold text-warning mb-2 flex items-center gap-2">
               <span>📝</span>
               Observações
             </div>
-            <div className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">{plan.notes}</div>
+            <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{plan.notes}</div>
           </div>
         )}
 
-        <div className="flex justify-end gap-2 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex justify-end gap-2 pt-6 border-t border-border">
           <Button 
             variant="outline" 
             onClick={() => onOpenChange(false)}
