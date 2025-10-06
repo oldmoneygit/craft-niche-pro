@@ -7,12 +7,13 @@ interface PlanoCardProps {
   objective: string;
   status: 'active' | 'pending' | 'expired';
   planTitle: string;
-  createdDate: string;
-  duration: string;
+  startDate: string;
+  endDate: string;
   calories: string;
   protein: string;
   fat: string;
   carbs: string;
+  meals?: number;
   avatarColor?: string;
 }
 
@@ -40,12 +41,13 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
   objective,
   status,
   planTitle,
-  createdDate,
-  duration,
+  startDate,
+  endDate,
   calories,
   protein,
   fat,
   carbs,
+  meals,
   avatarColor
 }) => {
   const [isDark, setIsDark] = useState(false);
@@ -136,9 +138,10 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
         </div>
         <div style={{ display: 'grid', gap: '10px' }}>
           {[
-            { icon: Calendar, label: 'Criado em:', value: createdDate },
-            { icon: Clock, label: 'Duração:', value: duration },
-            { icon: Flame, label: 'Calorias/dia:', value: calories }
+            { icon: Calendar, label: 'Início:', value: startDate },
+            { icon: Calendar, label: 'Fim:', value: endDate },
+            { icon: Flame, label: 'Meta Calórica:', value: calories },
+            ...(meals !== undefined ? [{ icon: Clock, label: 'Refeições:', value: meals.toString() }] : [])
           ].map(({ icon: Icon, label, value }) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
               <Icon style={{ width: '18px', height: '18px', color: config.color }} />
