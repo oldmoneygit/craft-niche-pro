@@ -118,13 +118,15 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
   }
 
   return (
-    <div className="space-y-4 p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+    <div className="space-y-6 p-6">
+      {/* Header com Glassmorphism */}
+      <div className="flex justify-between items-center mb-8 p-6 rounded-3xl bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 shadow-lg">
         <div>
-          <h3 className="text-xl font-bold text-foreground">Anamnese Nutricional</h3>
+          <h3 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+            Anamnese Nutricional
+          </h3>
           {anamnese && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               Última atualização: {format(new Date(anamnese.updated_at), 'dd/MM/yyyy HH:mm')}
             </p>
           )}
@@ -132,7 +134,7 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
         <Button
           onClick={handleSave}
           disabled={saveMutation.isPending}
-          className="bg-green-500 hover:bg-green-600 text-white"
+          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 font-semibold"
         >
           {saveMutation.isPending ? (
             <>
@@ -148,35 +150,44 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
         </Button>
       </div>
 
-      {/* Caso Clínico - Sempre visível */}
-      <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-2 border-green-200 dark:border-green-800 rounded-2xl p-5 shadow-sm">
-        <Label className="block text-sm font-bold mb-3 text-green-900 dark:text-green-100">
-          Objetivos / Motivo da Consulta *
-        </Label>
-        <textarea
-          className="w-full px-4 py-3 bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-foreground placeholder:text-gray-400"
-          rows={3}
-          placeholder="Objetivos do cliente, motivo da consulta..."
-          value={mainGoal}
-          onChange={(e) => setMainGoal(e.target.value)}
-        />
+      {/* Caso Clínico - Card Glassmorphic */}
+      <div className="relative group">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-3xl opacity-20 group-hover:opacity-30 blur transition duration-300"></div>
+        <div className="relative bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-3xl p-6 shadow-xl">
+          <Label className="block text-sm font-bold mb-3 text-gray-800 dark:text-gray-200 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+            Objetivos / Motivo da Consulta *
+          </Label>
+          <textarea
+            className="w-full px-5 py-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-2xl focus:ring-2 focus:ring-green-500/50 focus:border-green-500 transition-all text-foreground placeholder:text-gray-400 resize-none"
+            rows={3}
+            placeholder="Descreva os objetivos e motivo da consulta..."
+            value={mainGoal}
+            onChange={(e) => setMainGoal(e.target.value)}
+          />
+        </div>
       </div>
 
-      {/* Seções Colapsáveis */}
-      <Accordion type="multiple" defaultValue={['lifestyle']} className="space-y-3">
+      {/* Seções Colapsáveis com Glassmorphism */}
+      <Accordion type="multiple" defaultValue={['lifestyle']} className="space-y-4">
         {/* Seção 1: Hábitos de Vida */}
-        <AccordionItem value="lifestyle" className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-          <AccordionTrigger className="px-6 py-4 text-lg font-bold hover:no-underline hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-gray-100">
-            Hábitos de Vida
-          </AccordionTrigger>
-          <AccordionContent className="px-6 pb-6 space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+        <AccordionItem value="lifestyle" className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-3xl opacity-0 group-hover:opacity-10 blur transition duration-300"></div>
+          <div className="relative bg-white/50 dark:bg-gray-900/50 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
+            <AccordionTrigger className="px-8 py-5 text-lg font-bold hover:no-underline hover:bg-white/30 dark:hover:bg-gray-800/30 transition-all duration-300 text-gray-800 dark:text-gray-100">
+              <span className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500"></span>
+                Hábitos de Vida
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="px-8 pb-6 space-y-5 pt-4">
             {/* Restrições Alimentares */}
             <div>
-              <Label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Restrições Alimentares</Label>
+              <Label className="block text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">Restrições Alimentares</Label>
               <textarea
                 rows={2}
                 placeholder="Vegetariano, vegano, sem glúten, etc..."
-                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-foreground focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all placeholder:text-gray-400"
+                className="w-full px-4 py-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-2xl text-foreground focus:border-green-500/50 focus:ring-2 focus:ring-green-500/20 transition-all placeholder:text-gray-400 resize-none"
                 value={dietaryRestrictions}
                 onChange={(e) => setDietaryRestrictions(e.target.value)}
               />
@@ -279,14 +290,20 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
               />
             </div>
           </AccordionContent>
+          </div>
         </AccordionItem>
 
         {/* Seção 2: Patologias e Medicamentos */}
-        <AccordionItem value="pathologies" className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-          <AccordionTrigger className="px-6 py-4 text-lg font-bold hover:no-underline hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-gray-100">
-            Condições de Saúde
-          </AccordionTrigger>
-          <AccordionContent className="px-6 pb-6 space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+        <AccordionItem value="pathologies" className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-red-400 to-pink-400 rounded-3xl opacity-0 group-hover:opacity-10 blur transition duration-300"></div>
+          <div className="relative bg-white/50 dark:bg-gray-900/50 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
+            <AccordionTrigger className="px-8 py-5 text-lg font-bold hover:no-underline hover:bg-white/30 dark:hover:bg-gray-800/30 transition-all duration-300 text-gray-800 dark:text-gray-100">
+              <span className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-gradient-to-r from-red-500 to-pink-500"></span>
+                Condições de Saúde
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="px-8 pb-6 space-y-5 pt-4">
             {/* Condições Médicas */}
             <div>
               <Label className="text-sm font-semibold mb-2 block">Condições Médicas / Patologias</Label>
@@ -323,14 +340,20 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
               />
             </div>
           </AccordionContent>
+          </div>
         </AccordionItem>
 
         {/* Seção 3: Dados Antropométricos */}
-        <AccordionItem value="anthropometric" className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-          <AccordionTrigger className="px-6 py-4 text-lg font-bold hover:no-underline hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-gray-100">
-            Dados Antropométricos
-          </AccordionTrigger>
-          <AccordionContent className="px-6 pb-6 space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+        <AccordionItem value="anthropometric" className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-3xl opacity-0 group-hover:opacity-10 blur transition duration-300"></div>
+          <div className="relative bg-white/50 dark:bg-gray-900/50 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
+            <AccordionTrigger className="px-8 py-5 text-lg font-bold hover:no-underline hover:bg-white/30 dark:hover:bg-gray-800/30 transition-all duration-300 text-gray-800 dark:text-gray-100">
+              <span className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500"></span>
+                Dados Antropométricos
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="px-8 pb-6 space-y-5 pt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Peso Atual */}
               <div>
@@ -411,14 +434,20 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
               </div>
             </div>
           </AccordionContent>
+          </div>
         </AccordionItem>
 
         {/* Seção 4: Hábitos Alimentares */}
-        <AccordionItem value="dietary" className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-          <AccordionTrigger className="px-6 py-4 text-lg font-bold hover:no-underline hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-gray-100">
-            Hábitos Alimentares
-          </AccordionTrigger>
-          <AccordionContent className="px-6 pb-6 space-y-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+        <AccordionItem value="dietary" className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-400 to-amber-400 rounded-3xl opacity-0 group-hover:opacity-10 blur transition duration-300"></div>
+          <div className="relative bg-white/50 dark:bg-gray-900/50 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
+            <AccordionTrigger className="px-8 py-5 text-lg font-bold hover:no-underline hover:bg-white/30 dark:hover:bg-gray-800/30 transition-all duration-300 text-gray-800 dark:text-gray-100">
+              <span className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-500"></span>
+                Hábitos Alimentares
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="px-8 pb-6 space-y-4 pt-4">
             {/* Alergias */}
             <div>
               <Label className="text-sm font-semibold mb-2 block">Alergias Alimentares</Label>
@@ -467,14 +496,20 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
               />
             </div>
           </AccordionContent>
+          </div>
         </AccordionItem>
 
         {/* Seção 5: Observações do Profissional */}
-        <AccordionItem value="observations" className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-          <AccordionTrigger className="px-6 py-4 text-lg font-bold hover:no-underline hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-gray-100">
-            Observações Profissionais
-          </AccordionTrigger>
-          <AccordionContent className="px-6 pb-6 space-y-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+        <AccordionItem value="observations" className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-400 to-emerald-400 rounded-3xl opacity-0 group-hover:opacity-10 blur transition duration-300"></div>
+          <div className="relative bg-white/50 dark:bg-gray-900/50 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
+            <AccordionTrigger className="px-8 py-5 text-lg font-bold hover:no-underline hover:bg-white/30 dark:hover:bg-gray-800/30 transition-all duration-300 text-gray-800 dark:text-gray-100">
+              <span className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500"></span>
+                Observações Profissionais
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="px-8 pb-6 space-y-4 pt-4">
             {/* Observações Clínicas */}
             <div>
               <Label className="text-sm font-semibold mb-2 block">Observações Clínicas</Label>
@@ -499,6 +534,7 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
               />
             </div>
           </AccordionContent>
+          </div>
         </AccordionItem>
       </Accordion>
     </div>
