@@ -190,18 +190,19 @@ Itens individuais de cada template.
 ## 📊 QUESTIONÁRIOS {#questionários}
 
 **Última atualização desta seção:** 06/10/2025  
-**Status:** ✅ Sistema completo e funcional com pontuação
+**Status:** ✅ Sistema completo e funcional com pontuação e visualização detalhada
 
 ### 🎯 VISÃO GERAL DO MÓDULO
 
 O sistema de questionários permite criar avaliações personalizadas para clientes com:
-- ✅ Múltiplos tipos de perguntas (single_choice, multiple_choice, text, scale, number)
-- ✅ Sistema de pontuação configurável por pergunta (0-100 pontos)
+- ✅ Múltiplos tipos de perguntas (single_select, multi_select, text, scale, number)
+- ✅ Sistema de pontuação configurável por pergunta (0-100 pontos por opção)
 - ✅ Pesos diferentes para cada pergunta (1-10)
 - ✅ Acesso público via token (sem autenticação)
 - ✅ Templates reutilizáveis
-- ✅ Rastreamento de respostas individuais
-- ✅ Migração de dados executada com sucesso
+- ✅ Rastreamento de respostas individuais com pontuação visível
+- ✅ Visualização de score individual por resposta selecionada
+- ✅ Cálculo automático de pontuação final (0-100%)
 
 ### 📊 FLUXO COMPLETO
 
@@ -209,58 +210,304 @@ O sistema de questionários permite criar avaliações personalizadas para clien
 1. CRIAÇÃO DO QUESTIONÁRIO (Nutricionista)
    ↓
 2. CRIAÇÃO DAS PERGUNTAS (com pontuações opcionais)
+   - Define se é scorable (conta pontos)
+   - Define weight (peso 1-10)
+   - Define option_scores (0-100 por opção)
    ↓
 3. ENVIO PARA CLIENTE (cria response + public_token)
    ↓
 4. CLIENTE ACESSA VIA LINK PÚBLICO (sem login)
    ↓
-5. CLIENTE RESPONDE (answers salvos com question_id como chave)
+5. CLIENTE RESPONDE (answers salvos em response_answers)
    ↓
-6. CÁLCULO AUTOMÁTICO DE PONTUAÇÃO (0-100)
+6. CÁLCULO AUTOMÁTICO DE PONTUAÇÃO
+   - Para cada pergunta scorable:
+     * pontos = (option_score / 100) * weight
+   - Score final = (soma_pontos / soma_max_pontos) * 100
    ↓
-7. NUTRICIONISTA VISUALIZA RESPOSTAS E SCORE
+7. NUTRICIONISTA VISUALIZA RESPOSTAS
+   - Score total (0-100%)
+   - Score individual por resposta selecionada
 ```
 
-### `questionnaires`
+### 🗂️ ESTRUTURA DE TABELAS
+
+#### `questionnaires`
 Template de questionário criado pelo nutricionista
 
-**Relacionamentos:** tenant_id → tenants, ← questionnaire_questions (1:N), ← questionnaire_responses (1:N)
+**Campos principais:**
+- `id`: uuid (PK)
+- `tenant_id`: uuid (FK → tenants)
+- `title`: text - Título do questionário
+- `description`: text - Descrição
+- `questions`: jsonb - **DEPRECATED** (usar questionnaire_questions)
+- `active`: boolean
+- `category`: text
+- `estimated_time`: integer - Tempo estimado em minutos
+- `created_at`, `updated_at`: timestamps
 
-### `questionnaire_questions`
+**Relacionamentos:** 
+- tenant_id → tenants
+- ← questionnaire_questions (1:N)
+- ← questionnaire_responses (1:N)
+
+#### `questionnaire_questions`
 Perguntas individuais com sistema de pontuação
 
-**Campos críticos:**
-- `scorable`: boolean - Se conta pontos
-- `weight`: integer (1-10) - Peso da pergunta
-- `option_scores`: jsonb - Pontuação de cada opção
-- `options`: jsonb - Array de opções
+**Campos principais:**
+- `id`: uuid (PK)
+- `questionnaire_id`: uuid (FK → questionnaires)
+- `question_text`: text - Texto da pergunta
+- `question_type`: text - Tipo: 'single_select', 'multi_select', 'text', 'scale', 'number'
+- `options`: jsonb - Array de opções para select
+  ```json
+  [
+    {"id": "opt-uuid-1", "text": "Opção 1"},
+    {"id": "opt-uuid-2", "text": "Opção 2"}
+  ]
+  ```
+- `scorable`: boolean - Se conta pontos (default: false)
+- `weight`: integer (1-10) - Peso da pergunta (default: 1)
+- `option_scores`: jsonb - Pontuação de cada opção (0-100)
+  ```json
+  {
+    "opt-uuid-1": 80,
+    "opt-uuid-2": 50
+  }
+  ```
+- `order_index`: integer - Ordem de exibição
+- `section`: text - Seção/agrupamento
+- `is_required`: boolean
 
-### `questionnaire_responses`
-Respostas enviadas aos clientes
+**⚠️ CAMPOS CRÍTICOS:**
+- `question_type`: Usa snake_case (não camelCase)
+- `option_scores`: Chaves são option.id, valores são scores (0-100)
 
-**⚠️ ESTRUTURA CRÍTICA `answers` (jsonb):**
+**Relacionamentos:**
+- questionnaire_id → questionnaires
+- ← response_answers (1:N)
+
+#### `questionnaire_responses`
+Respostas criadas para envio aos clientes
+
+**Campos principais:**
+- `id`: uuid (PK)
+- `tenant_id`: uuid (FK → tenants)
+- `questionnaire_id`: uuid (FK → questionnaires)
+- `client_id`: uuid (FK → clients, nullable)
+- `respondent_name`: text
+- `respondent_phone`: text
+- `respondent_email`: text
+- `public_token`: text - Token único para acesso público
+- `status`: text - 'pending', 'in_progress', 'completed'
+- `answers`: jsonb - **DEPRECATED** (usar response_answers)
+- `score`: integer - Pontuação final calculada (0-100)
+- `started_at`, `completed_at`, `created_at`: timestamps
+
+**⚠️ IMPORTANTE:**
+- `public_token` permite acesso sem autenticação
+- `answers` é legado, usar `response_answers` table
+- `score` é calculado automaticamente ao completar
+
+**Relacionamentos:**
+- questionnaire_id → questionnaires
+- client_id → clients (nullable)
+- ← response_answers (1:N)
+
+#### `response_answers`
+Respostas individuais para cada pergunta
+
+**Campos principais:**
+- `id`: uuid (PK)
+- `response_id`: uuid (FK → questionnaire_responses)
+- `question_id`: uuid (FK → questionnaire_questions)
+- `answer_value`: jsonb - Valor da resposta
+  - Single select: `"opt-uuid-1"`
+  - Multi select: `["opt-uuid-1", "opt-uuid-2"]`
+  - Text/Number: `"texto livre"` ou `42`
+  - Scale: `7` (número 1-10)
+- `created_at`: timestamp
+
+**⚠️ ESTRUTURA CRÍTICA `answer_value`:**
 ```json
-{
-  "question-uuid-1": "option-uuid-a",
-  "question-uuid-2": ["option-uuid-x", "option-uuid-y"]
+// Single select
+"option-uuid-abc"
+
+// Multi select
+["option-uuid-1", "option-uuid-2"]
+
+// Text
+"Resposta em texto livre"
+
+// Scale (1-10)
+7
+
+// Number
+150
+```
+
+**Relacionamentos:**
+- response_id → questionnaire_responses
+- question_id → questionnaire_questions
+
+#### `questionnaire_templates`
+Templates reutilizáveis de questionários
+
+**Campos principais:**
+- `id`: uuid (PK)
+- `tenant_id`: uuid (FK → tenants, nullable para templates padrão)
+- `name`: text
+- `description`: text
+- `category`: text
+- `template_data`: jsonb - Estrutura completa do questionário
+- `is_default`: boolean - Se é template do sistema
+- `created_at`, `updated_at`: timestamps
+
+### 📐 SISTEMA DE PONTUAÇÃO DETALHADO
+
+#### Tipos de Perguntas e Pontuação
+
+1. **Single Select (scorable)**
+   - Uma opção selecionada
+   - Score da opção definido em `option_scores[option_id]` (0-100)
+   - Pontos = (score / 100) * weight
+
+2. **Multi Select (scorable)**
+   - Múltiplas opções selecionadas
+   - Score médio das opções selecionadas
+   - Pontos = (score_médio / 100) * weight
+
+3. **Scale (1-10)**
+   - Sempre scorable
+   - Score = valor selecionado (1-10)
+   - Max score = 10
+   - Pontos = (valor / 10) * weight
+
+4. **Text / Number**
+   - Não são scorables
+   - Não entram no cálculo de pontuação
+
+#### Fórmula de Cálculo
+
+```javascript
+// Para cada pergunta scorable:
+if (question.scorable) {
+  let questionScore = 0;
+  let maxQuestionScore = 100; // ou 10 para scale
+  
+  // Calcular score baseado no tipo
+  if (question_type === 'scale') {
+    questionScore = answer_value; // 1-10
+    maxQuestionScore = 10;
+  } else if (question_type === 'single_select') {
+    questionScore = option_scores[answer_value]; // 0-100
+  } else if (question_type === 'multi_select') {
+    const scores = answer_value.map(opt => option_scores[opt]);
+    questionScore = avg(scores); // média
+  }
+  
+  // Aplicar peso
+  const weight = question.weight || 1;
+  totalScore += (questionScore / maxQuestionScore) * weight;
+  maxPossibleScore += weight;
 }
-```
-**CHAVE:** question.id (não option.id!)
 
-### 🔧 MIGRAÇÃO 06/10/2025
-Migração `20251006222703` corrigiu respostas antigas convertendo chaves de `option_id` para `question_id`.
-
-### 📐 CÁLCULO DE PONTUAÇÃO
-```
-pontos_pergunta = (score_opção / 100) * weight
-pontuação_final = (soma_pontos / soma_weights) * 100
+// Score final
+finalScore = (totalScore / maxPossibleScore) * 100; // 0-100%
 ```
 
-### 🎨 COMPONENTES
-- `src/pages/QuestionariosBuilder.tsx` - Builder
-- `src/pages/public/PublicQuestionnaireResponse.tsx` - Resposta pública
-- `src/components/questionnaires/QuestionnaireResponsesModal.tsx` - Visualização
-- `src/hooks/useQuestionnaires.ts` - Gerenciamento
+### 🎨 COMPONENTES PRINCIPAIS
+
+#### Builder e Gestão
+- `src/pages/QuestionariosBuilder.tsx` - Construtor de questionários
+- `src/components/questionnaires/builder/BasicInfoCard.tsx` - Info básica
+- `src/components/questionnaires/builder/QuestionsBuilderCard.tsx` - Editor de perguntas
+- `src/components/questionnaires/builder/QuestionEditor.tsx` - Editor individual
+- `src/components/questionnaires/FeedbackRangeEditor.tsx` - Config de feedback
+
+#### Resposta Pública (Cliente)
+- `src/pages/public/PublicQuestionnaireResponse.tsx` - Interface pública
+- `src/components/questionnaires/QuestionnairePlayer.tsx` - Player de perguntas
+
+#### Visualização de Respostas (Nutricionista)
+- `src/components/questionnaires/QuestionnaireResponsesModal.tsx` - Modal principal
+  - Exibe score total (0-100%)
+  - Exibe score individual ao lado de cada resposta selecionada
+  - Badge verde com pontos: "✓ 80 pts"
+  - Calcula médias para multi-select
+
+#### Templates
+- `src/components/questionnaires/TemplateCard.tsx` - Card de template
+- `src/components/questionnaires/TemplatePreviewModal.tsx` - Preview
+- `src/components/questionnaires/MyTemplatesModal.tsx` - Gestão
+
+#### Compartilhamento
+- `src/components/questionnaires/QuestionnaireShareModal.tsx` - Envio
+- `src/components/questionnaires/SendQuestionnaireModal.tsx` - Config de envio
+
+### 🔧 HOOKS E SERVIÇOS
+
+#### `src/hooks/useQuestionnaires.ts`
+```typescript
+// Principais funções:
+- fetchQuestionnaires() // Lista todos
+- fetchQuestionnaireById(id) // Busca um específico
+- createQuestionnaire(data) // Cria novo
+- updateQuestionnaire(id, data) // Atualiza
+- deleteQuestionnaire(id) // Remove
+- fetchResponses(questionnaireId) // Lista respostas
+- createResponse(data) // Cria nova resposta
+- updateResponse(id, data) // Atualiza resposta
+- calculateScore(questions, answers) // Calcula pontuação
+```
+
+### 🔒 RLS POLICIES
+
+**questionnaires:**
+- Users manage own questionnaires (tenant_id check)
+- Public can view via response token
+
+**questionnaire_questions:**
+- Users CRUD questions from their tenant questionnaires
+- Public can view questions via response token
+
+**questionnaire_responses:**
+- Users manage own responses (tenant_id check)
+- Public can select/update response by token
+
+**response_answers:**
+- Users manage answers from their tenant responses
+- Public can insert/update answers with token
+
+### ⚠️ PONTOS DE ATENÇÃO PARA IA
+
+1. **Campos em snake_case:**
+   - `question_type` (não `type`)
+   - `option_scores` (não `optionScores`)
+   - `question_text` (não `questionText`)
+
+2. **Estrutura answers:**
+   - Tabela `response_answers` é a fonte principal
+   - Campo `answers` em `questionnaire_responses` é LEGADO
+   - Chave é `question_id` (não `option_id`)
+
+3. **Visualização de scores:**
+   - Modal mostra badge verde com pontos ao lado de cada resposta
+   - Formato: "✓ 80 pts"
+   - Só aparece se `question.scorable === true`
+   - Para multi-select, mostra média dos scores
+
+4. **Tipos de perguntas:**
+   - `single_select` - uma opção
+   - `multi_select` - múltiplas opções
+   - `scale` - escala 1-10
+   - `text` - texto livre
+   - `number` - número livre
+
+5. **Cálculo automático:**
+   - Score é calculado no frontend ao visualizar
+   - Pode ser salvo no backend após cálculo
+   - Sempre baseado em `option_scores` e `weight`
 
 ---
 
