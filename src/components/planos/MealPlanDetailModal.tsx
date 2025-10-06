@@ -63,7 +63,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
         </DialogHeader>
 
         {/* Header com informações do cliente - Design melhorado */}
-        <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10">
+        <div className="bg-black/5 dark:bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-black/10 dark:border-white/10">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl shadow-lg">
               {plan.client.name.substring(0, 2).toUpperCase()}
@@ -132,7 +132,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
         {/* Macros Totais - Design melhorado com cores */}
         <div className="grid grid-cols-4 gap-3">
           {/* KCAL - Verde */}
-          <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-primary/20 hover:border-primary/40 transition-all">
+          <div className="bg-black/5 dark:bg-white/5 backdrop-blur-md rounded-xl p-4 border border-primary/20 hover:border-primary/40 transition-all">
             <div className="text-3xl font-extrabold text-primary mb-1">{Math.round(totals.kcal)}</div>
             <div className="text-xs font-bold text-primary uppercase tracking-wider">KCAL</div>
             {plan.target_kcal && (
@@ -141,7 +141,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
           </div>
 
           {/* Proteínas - Azul */}
-          <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-secondary/20 hover:border-secondary/40 transition-all">
+          <div className="bg-black/5 dark:bg-white/5 backdrop-blur-md rounded-xl p-4 border border-secondary/20 hover:border-secondary/40 transition-all">
             <div className="text-3xl font-extrabold text-secondary mb-1">{Math.round(totals.protein)}g</div>
             <div className="text-xs font-bold text-secondary uppercase tracking-wider">Proteínas</div>
             {plan.target_protein && (
@@ -150,7 +150,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
           </div>
 
           {/* Gorduras - Laranja */}
-          <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-warning/20 hover:border-warning/40 transition-all">
+          <div className="bg-black/5 dark:bg-white/5 backdrop-blur-md rounded-xl p-4 border border-warning/20 hover:border-warning/40 transition-all">
             <div className="text-3xl font-extrabold text-warning mb-1">{Math.round(totals.fats)}g</div>
             <div className="text-xs font-bold text-warning uppercase tracking-wider">Gorduras</div>
             {plan.target_fats && (
@@ -159,7 +159,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
           </div>
 
           {/* Carboidratos - Roxo */}
-          <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-accent/20 hover:border-accent/40 transition-all">
+          <div className="bg-black/5 dark:bg-white/5 backdrop-blur-md rounded-xl p-4 border border-accent/20 hover:border-accent/40 transition-all">
             <div className="text-3xl font-extrabold text-accent mb-1">{Math.round(totals.carbs)}g</div>
             <div className="text-xs font-bold text-accent uppercase tracking-wider">Carboidratos</div>
             {plan.target_carbs && (
@@ -190,9 +190,9 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
                   <AccordionItem 
                     key={meal.id} 
                     value={meal.id}
-                    className="border border-white/10 rounded-xl overflow-hidden bg-white/5 backdrop-blur-md hover:bg-white/10 hover:shadow-lg transition-all"
+                    className="border border-black/10 dark:border-white/10 rounded-xl overflow-hidden bg-black/5 dark:bg-white/5 backdrop-blur-md hover:bg-black/10 dark:hover:bg-white/10 hover:shadow-lg transition-all"
                   >
-                    <AccordionTrigger className="hover:no-underline px-5 py-4 hover:bg-white/5 transition-all">
+                    <AccordionTrigger className="hover:no-underline px-5 py-4 hover:bg-black/5 dark:hover:bg-white/5 transition-all">
                       <div className="flex items-center justify-between w-full pr-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xl shadow-lg">
@@ -213,12 +213,12 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
                     <AccordionContent className="px-5 pb-4">
                       <div className="space-y-2 pt-2">
                         {meal.items.length === 0 ? (
-                          <div className="text-center text-muted-foreground py-8 bg-white/5 rounded-lg border border-white/10">
+                          <div className="text-center text-muted-foreground py-8 bg-black/5 dark:bg-white/5 rounded-lg border border-black/10 dark:border-white/10">
                             Nenhum alimento adicionado ainda
                           </div>
                         ) : (
                           meal.items.map((item) => (
-                            <div key={item.id} className="flex items-center justify-between p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 hover:bg-white/10 hover:shadow-md transition-all">
+                            <div key={item.id} className="flex items-center justify-between p-4 bg-black/5 dark:bg-white/5 backdrop-blur-sm rounded-lg border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 hover:shadow-md transition-all">
                               <div className="flex-1">
                                 <div className="font-semibold text-foreground">{item.food.name}</div>
                                 <div className="text-sm text-muted-foreground mt-1">
@@ -248,7 +248,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
 
         {/* Observações - Design melhorado */}
         {plan.notes && (
-          <div className="bg-white/5 backdrop-blur-md rounded-xl p-5 border border-warning/20">
+          <div className="bg-black/5 dark:bg-white/5 backdrop-blur-md rounded-xl p-5 border border-warning/20">
             <div className="font-bold text-warning mb-2 flex items-center gap-2">
               <span>📝</span>
               Observações
