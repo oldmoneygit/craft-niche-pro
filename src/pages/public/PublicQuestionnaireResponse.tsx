@@ -142,35 +142,56 @@ export default function PublicQuestionnaireResponse() {
   };
 
   const calculateScore = (answers: Record<string, any>, questions: Question[]): number => {
+    console.log('=== CALCULATING SCORE ===');
+    console.log('Answers:', answers);
+    console.log('Questions:', questions);
+    
     let totalScore = 0;
     let totalWeight = 0;
 
     questions.forEach(question => {
-      if (!question.scorable) return;
+      console.log(`\n--- Question ID: ${question.id} ---`);
+      console.log('Scorable:', question.scorable);
+      console.log('Type:', question.type);
+      
+      if (!question.scorable) {
+        console.log('Skipping - not scorable');
+        return;
+      }
 
       const answer = answers[question.id];
+      console.log('Answer:', answer);
+      console.log('Option scores:', question.optionScores);
+      
       const weight = question.weight || 1;
       let questionScore = 0;
 
       // Tipos de escolha única: single_select, single_choice, radio
       if (['single_select', 'single_choice', 'radio'].includes(question.type)) {
         questionScore = question.optionScores?.[answer] || 0;
+        console.log(`Single choice score: ${questionScore}`);
       } 
       // Tipos de múltipla escolha: multi_select, multiple_choice, checkbox
       else if (['multi_select', 'multiple_choice', 'checkbox'].includes(question.type) && Array.isArray(answer)) {
         const scores = answer.map(opt => question.optionScores?.[opt] || 0);
         questionScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+        console.log(`Multi choice scores: ${scores}, average: ${questionScore}`);
       } 
       // Escala de 1-10
       else if (question.type === 'scale') {
         questionScore = (answer / 10) * 100;
+        console.log(`Scale score: ${questionScore}`);
       }
 
+      console.log(`Weight: ${weight}, Question score: ${questionScore}`);
       totalScore += questionScore * weight;
       totalWeight += weight;
+      console.log(`Running total: ${totalScore}, total weight: ${totalWeight}`);
     });
 
-    return totalWeight > 0 ? Math.round(totalScore / totalWeight) : 0;
+    const finalScore = totalWeight > 0 ? Math.round(totalScore / totalWeight) : 0;
+    console.log(`\n=== FINAL SCORE: ${finalScore} ===\n`);
+    return finalScore;
   };
 
   const handleSubmit = async () => {
