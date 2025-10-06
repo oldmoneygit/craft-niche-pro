@@ -15,25 +15,45 @@ interface AgendamentoModalProps {
   onClose: () => void;
   clientId?: string;
   clientName?: string;
+  leadData?: {
+    id: string;
+    name: string;
+    phone: string;
+    email?: string;
+    preferred_time_description?: string;
+    preferred_datetime?: string;
+  };
 }
 
 export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({ 
   isOpen, 
   onClose,
   clientId: preselectedClientId,
-  clientName: preselectedClientName
+  clientName: preselectedClientName,
+  leadData
 }) => {
   const { tenantId } = useTenantId();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [selectedTime, setSelectedTime] = useState<string>('10:00');
+  // Parse preferred time from lead
+  const suggestedDateTime = React.useMemo(() => {
+    if (!leadData?.preferred_datetime) return { date: new Date(), time: '10:00' };
+    
+    const preferredDate = new Date(leadData.preferred_datetime);
+    const time = `${preferredDate.getHours().toString().padStart(2, '0')}:${preferredDate.getMinutes().toString().padStart(2, '0')}`;
+    
+    return { date: preferredDate, time };
+  }, [leadData]);
+  
+  const [selectedDate, setSelectedDate] = useState<Date>(suggestedDateTime.date);
+  const [selectedTime, setSelectedTime] = useState<string>(suggestedDateTime.time);
   const [clientId, setClientId] = useState<string>(preselectedClientId || '');
   const [appointmentType, setAppointmentType] = useState<string>('primeira_consulta');
-  const [notes, setNotes] = useState<string>('');
+  const [notes, setNotes] = useState<string>(leadData?.preferred_time_description ? `Preferência: ${leadData.preferred_time_description}` : '');
   const [value, setValue] = useState<string>('');
   const [paymentStatus, setPaymentStatus] = useState<string>('pending');
+  const [isCreatingClient, setIsCreatingClient] = useState(false);
 
   // Fetch clients for dropdown
   const { data: clients } = useQuery({
@@ -49,8 +69,68 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       if (error) throw error;
       return data;
     },
-    enabled: !!tenantId && !preselectedClientId
+    enabled: !!tenantId && !preselectedClientId && !leadData
   });
+
+  // Auto-create or find client from lead data
+  React.useEffect(() => {
+    if (!leadData || !tenantId || clientId) return;
+    
+    const findOrCreateClient = async () => {
+      setIsCreatingClient(true);
+      
+      try {
+        // First, try to find existing client by phone
+        const { data: existingClients, error: searchError } = await supabase
+          .from('clients')
+          .select('id, name')
+          .eq('tenant_id', tenantId)
+          .eq('phone', leadData.phone.replace(/\D/g, ''));
+        
+        if (searchError) throw searchError;
+        
+        if (existingClients && existingClients.length > 0) {
+          // Client found
+          setClientId(existingClients[0].id);
+          toast({
+            title: 'Cliente encontrado!',
+            description: `Cliente "${existingClients[0].name}" já existe no sistema`,
+          });
+        } else {
+          // Create new client
+          const { data: newClient, error: createError } = await supabase
+            .from('clients')
+            .insert([{
+              tenant_id: tenantId,
+              name: leadData.name,
+              phone: leadData.phone,
+              email: leadData.email || null,
+              notes: leadData.preferred_time_description ? `Preferência: ${leadData.preferred_time_description}` : null
+            }])
+            .select('id, name')
+            .single();
+          
+          if (createError) throw createError;
+          
+          setClientId(newClient.id);
+          toast({
+            title: 'Cliente criado!',
+            description: `Novo cliente "${newClient.name}" adicionado ao sistema`,
+          });
+        }
+      } catch (error: any) {
+        toast({
+          title: 'Erro ao processar cliente',
+          description: error.message,
+          variant: 'destructive',
+        });
+      } finally {
+        setIsCreatingClient(false);
+      }
+    };
+    
+    findOrCreateClient();
+  }, [leadData, tenantId, clientId, toast]);
 
   // Create appointment mutation
   const createAppointment = useMutation({
@@ -79,8 +159,23 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      
+      // If created from a lead, update lead status to 'scheduled'
+      if (leadData?.id) {
+        try {
+          await supabase
+            .from('leads')
+            .update({ status: 'scheduled' })
+            .eq('id', leadData.id);
+          
+          queryClient.invalidateQueries({ queryKey: ['leads'] });
+        } catch (error) {
+          console.error('Error updating lead status:', error);
+        }
+      }
+      
       toast({
         title: 'Agendamento criado!',
         description: `Consulta agendada para ${format(selectedDate, "dd/MM/yyyy", { locale: ptBR })} às ${selectedTime}`,
@@ -206,12 +301,13 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               >
                 Novo Agendamento
               </h2>
-              {preselectedClientName && (
+              {(preselectedClientName || leadData) && (
                 <p style={{ 
                   fontSize: '14px', 
                   color: 'var(--text-muted)' 
                 }}>
-                  Cliente: <strong>{preselectedClientName}</strong>
+                  Cliente: <strong>{preselectedClientName || leadData?.name}</strong>
+                  {isCreatingClient && ' (processando...)'}
                 </p>
               )}
             </div>
@@ -317,7 +413,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
 
             {/* Form Fields */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {!preselectedClientId && (
+              {!preselectedClientId && !leadData && (
                 <div>
                   <label style={labelStyle}>Cliente *</label>
                   <select 
@@ -429,21 +525,21 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={createAppointment.isPending}
+              disabled={createAppointment.isPending || isCreatingClient || !clientId}
               style={{
                 padding: '12px 32px',
-                background: createAppointment.isPending ? '#737373' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                background: (createAppointment.isPending || isCreatingClient) ? '#737373' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                 border: 'none',
                 borderRadius: '12px',
                 fontSize: '14px',
                 fontWeight: 600,
                 color: 'white',
-                cursor: createAppointment.isPending ? 'not-allowed' : 'pointer',
+                cursor: (createAppointment.isPending || isCreatingClient || !clientId) ? 'not-allowed' : 'pointer',
                 transition: 'all 0.2s ease',
                 boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)'
               }}
               onMouseEnter={(e) => {
-                if (!createAppointment.isPending) {
+                if (!createAppointment.isPending && !isCreatingClient && clientId) {
                   e.currentTarget.style.transform = 'translateY(-2px)';
                   e.currentTarget.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.35)';
                 }
@@ -453,7 +549,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                 e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.25)';
               }}
             >
-              {createAppointment.isPending ? 'Criando...' : 'Criar Agendamento'}
+              {isCreatingClient ? 'Processando cliente...' : createAppointment.isPending ? 'Criando...' : 'Criar Agendamento'}
             </button>
           </div>
         </form>

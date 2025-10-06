@@ -5,6 +5,7 @@ import { useLeads } from '@/hooks/useLeads';
 import { KanbanColumn } from '@/components/leads/KanbanColumn';
 import { LeadCard } from '@/components/leads/LeadCard';
 import { CreateLeadModal } from '@/components/leads/CreateLeadModal';
+import { AgendamentoModal } from '@/components/agendamentos/AgendamentoModal';
 import { Skeleton } from '@/components/ui/skeleton';
 import './Leads.css';
 
@@ -12,6 +13,8 @@ export function Leads() {
   const { leads, isLoading, error, updateLeadStatus, createLead, deleteLead } = useLeads();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<any>(null);
 
   const leadsByStatus = useMemo(() => {
     if (!leads) return { pending: [], contacted: [], scheduled: [] };
@@ -102,7 +105,13 @@ export function Leads() {
     const lead = leads?.find(l => l.id === leadId);
     if (!lead) return;
     
-    window.location.href = `/agendamentos?action=new&leadId=${leadId}&name=${encodeURIComponent(lead.name)}&phone=${lead.phone}`;
+    setSelectedLead(lead);
+    setIsScheduleModalOpen(true);
+  };
+
+  const handleScheduleModalClose = () => {
+    setIsScheduleModalOpen(false);
+    setSelectedLead(null);
   };
 
   const handleDelete = async (leadId: string) => {
@@ -258,6 +267,13 @@ export function Leads() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreateLead}
+      />
+
+      {/* Modal Agendar Consulta */}
+      <AgendamentoModal
+        isOpen={isScheduleModalOpen}
+        onClose={handleScheduleModalClose}
+        leadData={selectedLead}
       />
     </div>
   );
