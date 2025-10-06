@@ -1190,11 +1190,28 @@ export default function PublicQuestionnaireResponse() {
                 return (
                   <div 
                     key={q.id}
+                    onClick={() => {
+                      setCurrentQuestionIndex(idx);
+                      setCurrentStep('questions');
+                    }}
                     style={{
                       background: '#f9fafb',
                       borderRadius: '12px',
                       padding: '16px',
-                      border: '1px solid #e5e7eb'
+                      border: '1px solid #e5e7eb',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      position: 'relative'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#f0fdf4';
+                      e.currentTarget.style.borderColor = '#10b981';
+                      e.currentTarget.style.transform = 'translateX(4px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#f9fafb';
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.transform = 'translateX(0)';
                     }}
                   >
                     <div 
@@ -1228,11 +1245,33 @@ export default function PublicQuestionnaireResponse() {
                           fontWeight: '600',
                           color: '#1f2937',
                           lineHeight: '1.4',
-                          flex: 1
+                          flex: 1,
+                          paddingRight: '24px'
                         }}
                       >
                         {q.question}
                       </p>
+                      {/* Ícone de editar */}
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        width="16" 
+                        height="16" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="#10b981" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                        style={{
+                          position: 'absolute',
+                          right: '16px',
+                          top: '16px',
+                          opacity: 0.5
+                        }}
+                      >
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                      </svg>
                     </div>
                     <div style={{ paddingLeft: '34px' }}>
                       <p 
