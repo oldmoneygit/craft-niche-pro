@@ -18,11 +18,8 @@ import { useQueryClient } from '@tanstack/react-query';
 
 const MEAL_TYPE_EMOJIS: Record<string, string> = {
   breakfast: '☀️',
-  morning_snack: '🍎',
   lunch: '🍽️',
-  afternoon_snack: '🥤',
   dinner: '🍲',
-  supper: '🥛',
 };
 
 interface CreateMealPlanModalProps {
@@ -32,11 +29,8 @@ interface CreateMealPlanModalProps {
 
 const DEFAULT_MEALS = [
   { key: 'breakfast', name: 'Café da Manhã', time: '07:00', icon: '☕' },
-  { key: 'morning_snack', name: 'Lanche da Manhã', time: '10:00', icon: '🍎' },
   { key: 'lunch', name: 'Almoço', time: '12:30', icon: '🍽️' },
-  { key: 'afternoon_snack', name: 'Lanche da Tarde', time: '15:30', icon: '🥤' },
-  { key: 'dinner', name: 'Jantar', time: '19:00', icon: '🍲' },
-  { key: 'supper', name: 'Ceia', time: '21:00', icon: '🥛' }
+  { key: 'dinner', name: 'Jantar', time: '19:00', icon: '🍲' }
 ];
 
 export function CreateMealPlanModal({ open, onOpenChange }: CreateMealPlanModalProps) {

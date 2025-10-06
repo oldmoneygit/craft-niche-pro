@@ -1,20 +1,34 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-export function useFoodSearch(searchTerm: string) {
+export function usePopularFoods() {
   return useQuery({
-    queryKey: ['foods-search', searchTerm],
+    queryKey: ['popular-foods'],
     queryFn: async () => {
-      if (!searchTerm || searchTerm.length < 2) {
-        return [];
-      }
-      
+      // Buscar alimentos mais comuns da TACO primeiro
       const { data, error } = await supabase
         .from('foods')
         .select('id, name, energy_kcal, protein_g, carbohydrate_g, lipid_g, category, source')
-        .ilike('name', `%${searchTerm}%`)
         .eq('active', true)
-        .order('source', { ascending: true }) // TACO primeiro
+        .in('name', [
+          // Alimentos mais comuns do brasileiro
+          'Arroz, integral, cozido',
+          'Arroz, branco, cozido',
+          'Feijão, preto, cozido',
+          'Feijão, carioca, cozido',
+          'Frango, peito, sem pele, cru',
+          'Banana, prata',
+          'Banana, nanica',
+          'Ovo, de galinha, inteiro, cozido',
+          'Batata, inglesa, cozida',
+          'Batata, doce, cozida',
+          'Macarrão, cozido',
+          'Pão, francês',
+          'Leite, vaca, integral',
+          'Carne, bovina, alcatra, sem gordura, crua',
+          'Tomate, cru',
+          'Alface, crespa, crua',
+        ])
         .order('name')
         .limit(20);
       
@@ -39,7 +53,6 @@ export function useFoodSearch(searchTerm: string) {
         return 0;
       });
     },
-    enabled: searchTerm.length >= 2,
-    staleTime: 5 * 60 * 1000, // 5 minutos
+    staleTime: 30 * 60 * 1000, // 30 minutos
   });
 }
