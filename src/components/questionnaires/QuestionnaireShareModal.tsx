@@ -26,12 +26,21 @@ export function QuestionnaireShareModal({
   const { tenantId } = useTenantId();
 
   useEffect(() => {
-    if (open && questionnaireId) {
+    if (open && questionnaireId && tenantId) {
       generatePublicLink();
     }
-  }, [open, questionnaireId]);
+  }, [open, questionnaireId, tenantId]);
 
   const generatePublicLink = async () => {
+    if (!tenantId) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível identificar seu tenant. Por favor, faça login novamente.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       // Criar uma resposta pendente com token público
@@ -39,24 +48,28 @@ export function QuestionnaireShareModal({
       
       const { data, error } = await supabase
         .from('questionnaire_responses')
-        .insert([{
+        .insert({
           questionnaire_id: questionnaireId,
           tenant_id: tenantId,
           status: 'pending',
           public_token: publicToken,
           answers: {}
-        }])
+        })
         .select('public_token')
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating response:', error);
+        throw error;
+      }
 
       const link = `${window.location.origin}/questionario/${data.public_token}`;
       setPublicLink(link);
     } catch (error: any) {
+      console.error('Error generating link:', error);
       toast({
         title: "Erro ao gerar link",
-        description: error.message,
+        description: error.message || "Ocorreu um erro ao gerar o link público",
         variant: "destructive"
       });
     } finally {
