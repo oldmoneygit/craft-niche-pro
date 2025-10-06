@@ -18,25 +18,23 @@ export function DashboardStatCard({
   trend = 'neutral'
 }: DashboardStatCardProps) {
   const variantColors = {
-    today: '#3b82f6',      // azul (--info)
-    month: '#10b981',      // verde (--primary)
-    pending: '#f59e0b',    // laranja (--warning)
-    inactive: '#ef4444'    // vermelho (--error)
+    today: '#3b82f6',
+    month: '#10b981',
+    pending: '#f59e0b',
+    inactive: '#ef4444'
   };
 
   const accentColor = variantColors[variant];
 
   return (
     <div
-      className="stat-card relative overflow-hidden transition-all duration-300 hover:-translate-y-1"
+      className="relative overflow-hidden rounded-[20px] p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
       style={{
         background: 'var(--bg-card)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         border: '1px solid var(--border)',
-        boxShadow: '0 4px 24px var(--shadow)',
-        borderRadius: '20px',
-        padding: '28px'
+        boxShadow: '0 4px 24px var(--shadow)'
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = accentColor;
@@ -49,75 +47,56 @@ export function DashboardStatCard({
     >
       {/* Barra superior colorida */}
       <div
-        className="absolute top-0 left-0 right-0"
+        className="absolute top-0 left-0 right-0 h-1"
         style={{
-          height: '4px',
           background: `linear-gradient(90deg, ${accentColor} 0%, transparent 100%)`
         }}
       />
 
-      {/* Header: Label à esquerda + Ícone à direita */}
-      <div className="flex justify-between items-start" style={{ marginBottom: '16px' }}>
+      {/* HEADER: Label (esquerda) + Ícone (direita) */}
+      <div className="flex justify-between items-start mb-4">
+        {/* Label */}
         <div
-          style={{ 
-            fontSize: '13px',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-            color: 'var(--text-muted)'
-          }}
+          className="text-[13px] font-semibold uppercase tracking-wider leading-tight"
+          style={{ color: 'var(--text-muted)' }}
         >
           {label}
         </div>
 
+        {/* Ícone */}
         <div
+          className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
           style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
             background: `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}dd 100%)`
           }}
         >
-          <Icon style={{ width: '24px', height: '24px', color: 'white', strokeWidth: 2 }} />
+          <Icon className="w-6 h-6 text-white" strokeWidth={2} />
         </div>
       </div>
 
-      {/* Valor grande */}
+      {/* VALOR - Grande e destacado */}
       <div
-        style={{ 
-          fontSize: '36px',
-          fontWeight: 700,
-          lineHeight: 1,
-          marginBottom: '8px',
-          color: 'var(--text-primary)'
-        }}
+        className="text-[36px] font-bold leading-none mb-2"
+        style={{ color: 'var(--text-primary)' }}
       >
         {value}
       </div>
 
-      {/* Descrição/Mudança */}
+      {/* DESCRIÇÃO - Abaixo do valor */}
       {description && (
         <div
-          style={{
-            fontSize: '13px',
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            color: trend === 'positive' ? '#10b981' :
-                   trend === 'negative' ? '#ef4444' :
-                   'var(--text-secondary)'
-          }}
+          className={`text-[13px] font-semibold flex items-center gap-1 ${
+            trend === 'positive' ? 'text-emerald-600 dark:text-emerald-400' :
+            trend === 'negative' ? 'text-red-600 dark:text-red-400' :
+            'text-neutral-600 dark:text-neutral-400'
+          }`}
         >
           {trend === 'positive' && (
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="flex-shrink-0">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
           )}
-          {description}
+          <span className="leading-tight">{description}</span>
         </div>
       )}
     </div>
