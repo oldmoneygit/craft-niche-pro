@@ -28,7 +28,11 @@ export const useClientsData = (searchQuery: string = '') => {
   const { data: clients, isLoading, error } = useQuery({
     queryKey: ['clients', tenantId, searchQuery],
     queryFn: async () => {
-      if (!tenantId) throw new Error('Tenant ID not found');
+      console.log('🔍 [useClientsData] tenant_id:', tenantId);
+      if (!tenantId) {
+        console.error('❌ [useClientsData] Tenant ID não encontrado!');
+        throw new Error('Tenant ID not found');
+      }
 
       let query = supabase
         .from('clients')
