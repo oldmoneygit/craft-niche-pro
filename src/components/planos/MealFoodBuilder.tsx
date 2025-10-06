@@ -44,6 +44,9 @@ export function MealFoodBuilder({
   const [isFocused, setIsFocused] = useState(false);
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [nutritionalSort, setNutritionalSort] = useState<string | null>(null);
+  const [selectedMealTypes, setSelectedMealTypes] = useState<string[]>([]);
+  const [selectedCharacteristics, setSelectedCharacteristics] = useState<string[]>([]);
 
   const { data: searchResults, isLoading } = useFoodSearch(searchTerm);
   const { data: popularFoods, isLoading: isLoadingPopular } = usePopularFoods();
@@ -55,12 +58,76 @@ export function MealFoodBuilder({
   );
   const { data: categories } = useFoodCategories(selectedSource);
 
-  // Lógica para determinar quais alimentos mostrar
-  const displayFoods = selectedSource 
+  // Lógica para determinar quais alimentos mostrar e aplicar filtros
+  let displayFoods = selectedSource 
     ? foodsBySource 
     : searchTerm.length >= 2 
       ? searchResults 
       : (isFocused ? popularFoods : []);
+
+  // Aplicar ordenação nutricional
+  if (displayFoods && nutritionalSort) {
+    displayFoods = [...displayFoods].sort((a, b) => {
+      switch (nutritionalSort) {
+        case 'calories':
+          return (b.calories || 0) - (a.calories || 0);
+        case 'protein':
+          return (b.protein || 0) - (a.protein || 0);
+        case 'carbs':
+          return (b.carbs || 0) - (a.carbs || 0);
+        case 'fats':
+          return (b.fats || 0) - (a.fats || 0);
+        default:
+          return 0;
+      }
+    });
+  }
+
+  // Aplicar filtros de características
+  if (displayFoods && selectedCharacteristics.length > 0) {
+    displayFoods = displayFoods.filter(food => {
+      return selectedCharacteristics.every(characteristic => {
+        const foodName = food.name.toLowerCase();
+        const foodCategory = (food.category || '').toLowerCase();
+        
+        switch (characteristic) {
+          case 'baixo_gordura':
+            return (food.fats || 0) < 3;
+          case 'baixo_potassio':
+            return foodCategory.includes('vegetal') || foodCategory.includes('fruta');
+          case 'baixo_sodio':
+            return ((food as any).sodium_mg || 0) < 140;
+          case 'com_frutas':
+            return foodCategory.includes('fruta') || foodName.includes('fruta');
+          case 'com_vegetais':
+            return foodCategory.includes('vegetal') || foodCategory.includes('verdura') || foodCategory.includes('legume');
+          case 'hiperproteica':
+            return (food.protein || 0) > 20;
+          case 'liquida':
+            return foodName.includes('suco') || foodName.includes('leite') || foodName.includes('vitamina') || foodName.includes('bebida');
+          case 'low_carb':
+            return (food.carbs || 0) < 10;
+          case 'pastosa':
+            return foodName.includes('purê') || foodName.includes('papa') || foodName.includes('mingau');
+          case 'rica_ferro':
+            return foodName.includes('carne') || foodName.includes('feijão') || foodName.includes('espinafre');
+          case 'rica_fibras':
+            return ((food as any).fiber_g || 0) > 3;
+          case 'sem_gluten':
+            return !foodName.includes('trigo') && !foodName.includes('pão') && !foodName.includes('massa');
+          case 'sem_leite':
+            return !foodName.includes('leite') && !foodName.includes('queijo') && !foodName.includes('iogurte');
+          case 'vegana':
+            return !foodName.includes('carne') && !foodName.includes('frango') && !foodName.includes('peixe') && 
+                   !foodName.includes('leite') && !foodName.includes('ovo') && !foodName.includes('mel');
+          case 'vegetariana':
+            return !foodName.includes('carne') && !foodName.includes('frango') && !foodName.includes('peixe');
+          default:
+            return true;
+        }
+      });
+    });
+  }
 
   const handleAddFood = () => {
     if (!selectedFood || !quantity) return;
@@ -228,6 +295,137 @@ export function MealFoodBuilder({
               </div>
             </div>
           )}
+
+          {/* Filtros Nutricionais */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">
+                Ordenar por Nutrientes
+              </span>
+              {nutritionalSort && (
+                <button
+                  onClick={() => setNutritionalSort(null)}
+                  className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
+                >
+                  Limpar
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { key: 'calories', label: 'Mais Calorias' },
+                { key: 'protein', label: 'Mais Proteínas' },
+                { key: 'carbs', label: 'Mais Carboidratos' },
+                { key: 'fats', label: 'Mais Gorduras' }
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setNutritionalSort(nutritionalSort === key ? null : key)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    nutritionalSort === key
+                      ? 'bg-amber-500 text-white shadow-md'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:border-amber-500'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Filtros de Tipo de Refeição */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">
+                Tipo de Refeição
+              </span>
+              {selectedMealTypes.length > 0 && (
+                <button
+                  onClick={() => setSelectedMealTypes([])}
+                  className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
+                >
+                  Limpar
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { key: 'cafe_manha', label: 'Café da manhã' },
+                { key: 'lanche', label: 'Lanche' },
+                { key: 'almoco', label: 'Almoço' },
+                { key: 'jantar', label: 'Jantar' },
+                { key: 'ceia', label: 'Ceia' }
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => {
+                    setSelectedMealTypes(prev => 
+                      prev.includes(key) ? prev.filter(t => t !== key) : [...prev, key]
+                    );
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    selectedMealTypes.includes(key)
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:border-blue-500'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Filtros de Características */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">
+                Características
+              </span>
+              {selectedCharacteristics.length > 0 && (
+                <button
+                  onClick={() => setSelectedCharacteristics([])}
+                  className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
+                >
+                  Limpar ({selectedCharacteristics.length})
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+              {[
+                { key: 'baixo_gordura', label: 'Baixo teor de gordura' },
+                { key: 'baixo_potassio', label: 'Baixo teor de potássio' },
+                { key: 'baixo_sodio', label: 'Baixo teor de sódio' },
+                { key: 'com_frutas', label: 'Com frutas' },
+                { key: 'com_vegetais', label: 'Com vegetais' },
+                { key: 'hiperproteica', label: 'Hiperproteica' },
+                { key: 'liquida', label: 'Líquida' },
+                { key: 'low_carb', label: 'Low carb' },
+                { key: 'pastosa', label: 'Pastosa' },
+                { key: 'rica_ferro', label: 'Rica em ferro' },
+                { key: 'rica_fibras', label: 'Rica em fibras' },
+                { key: 'sem_gluten', label: 'Sem glúten' },
+                { key: 'sem_leite', label: 'Sem leite' },
+                { key: 'vegana', label: 'Vegana' },
+                { key: 'vegetariana', label: 'Vegetariana' }
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => {
+                    setSelectedCharacteristics(prev => 
+                      prev.includes(key) ? prev.filter(c => c !== key) : [...prev, key]
+                    );
+                  }}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                    selectedCharacteristics.includes(key)
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:border-purple-500'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Input de busca (sempre habilitado e respeita filtros) */}
           <div className="relative">
