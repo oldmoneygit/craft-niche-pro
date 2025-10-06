@@ -458,203 +458,448 @@ export default function PublicQuestionnaireResponse() {
     const progress = ((currentQuestionIndex + 1) / questionnaire.questions.length) * 100;
 
     return (
-      <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600">
-        {/* Animated background */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-10 right-20 w-64 h-64 bg-yellow-400/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-10 left-20 w-80 h-80 bg-pink-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+        {/* Frame do Celular */}
+        <div 
+          className="w-full max-w-[420px] shadow-2xl"
+          style={{
+            background: '#1f2937',
+            borderRadius: '36px',
+            padding: '12px'
+          }}
+        >
+          <div 
+            className="flex flex-col"
+            style={{
+              background: 'white',
+              borderRadius: '28px',
+              overflow: 'hidden',
+              minHeight: '760px',
+              maxHeight: '90vh'
+            }}
+          >
+            {/* Header Verde */}
+            <div 
+              style={{
+                background: '#10b981',
+                color: 'white',
+                padding: '20px',
+                textAlign: 'center'
+              }}
+            >
+              <h3 
+                style={{
+                  fontSize: '18px',
+                  fontWeight: '700',
+                  marginBottom: '8px',
+                  lineHeight: '1.3'
+                }}
+              >
+                {questionnaire.title}
+              </h3>
+              {questionnaire.description && (
+                <p 
+                  style={{
+                    fontSize: '13px',
+                    opacity: '0.9',
+                    lineHeight: '1.4'
+                  }}
+                >
+                  {questionnaire.description}
+                </p>
+              )}
 
-        <div className="w-full max-w-2xl relative z-10 animate-fade-in">
-          <div className="shadow-2xl rounded-2xl border-0 bg-white/95 backdrop-blur-xl">
-            <div className="p-6 md:p-8 space-y-6">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-600 flex items-center gap-2">
-                    <ListChecks className="w-4 h-4 text-cyan-500" />
-                    Pergunta {currentQuestionIndex + 1} de {questionnaire.questions.length}
+              {/* Progress Bar */}
+              <div 
+                style={{
+                  marginTop: '16px',
+                  height: '4px',
+                  background: 'rgba(255, 255, 255, 0.3)',
+                  borderRadius: '2px',
+                  overflow: 'hidden'
+                }}
+              >
+                <div 
+                  style={{
+                    height: '100%',
+                    background: 'white',
+                    width: `${progress}%`,
+                    transition: 'width 0.3s ease'
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Content */}
+            <div 
+              className="flex-1 overflow-y-auto"
+              style={{
+                padding: '24px',
+                background: 'white'
+              }}
+            >
+              <div style={{ animation: 'slideIn 0.3s ease' }}>
+                <style>{`
+                  @keyframes slideIn {
+                    from {
+                      opacity: 0;
+                      transform: translateY(10px);
+                    }
+                    to {
+                      opacity: 1;
+                      transform: translateY(0);
+                    }
+                  }
+                `}</style>
+                
+                {/* Pergunta com Número */}
+                <div 
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: '700',
+                    color: '#1f2937',
+                    marginBottom: '20px',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    lineHeight: '1.4'
+                  }}
+                >
+                  <span 
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      background: '#10b981',
+                      color: 'white',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '14px',
+                      fontWeight: '700',
+                      marginRight: '12px',
+                      flexShrink: 0
+                    }}
+                  >
+                    {currentQuestionIndex + 1}
+                  </span>
+                  <span>
+                    {currentQuestion.question}
+                    {currentQuestion.required && <span style={{ color: '#ef4444', marginLeft: '4px' }}>*</span>}
                   </span>
                 </div>
-                <div className="relative w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
-                  <div
-                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full transition-all duration-500 ease-out shadow-lg"
-                    style={{ width: `${progress}%` }}
-                  >
-                    <div className="absolute inset-0 bg-white/30 animate-pulse"></div>
-                  </div>
+
+                <div style={{ marginTop: '20px' }}>
+                  {/* TEXT */}
+                  {currentQuestion.type === 'text' && (
+                    <input
+                      type="text"
+                      value={answers[currentQuestion.id] || ''}
+                      onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                      placeholder="Digite sua resposta..."
+                      style={{
+                        width: '100%',
+                        padding: '16px',
+                        borderRadius: '12px',
+                        border: '2px solid #e5e7eb',
+                        fontSize: '15px',
+                        color: '#374151',
+                        transition: 'all 0.2s ease',
+                        outline: 'none'
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = '#10b981';
+                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = '#e5e7eb';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    />
+                  )}
+
+                  {/* TEXTAREA */}
+                  {currentQuestion.type === 'textarea' && (
+                    <textarea
+                      value={answers[currentQuestion.id] || ''}
+                      onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                      placeholder="Digite sua resposta..."
+                      rows={5}
+                      style={{
+                        width: '100%',
+                        padding: '16px',
+                        borderRadius: '12px',
+                        border: '2px solid #e5e7eb',
+                        fontSize: '15px',
+                        color: '#374151',
+                        transition: 'all 0.2s ease',
+                        outline: 'none',
+                        resize: 'none',
+                        lineHeight: '1.5'
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = '#10b981';
+                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = '#e5e7eb';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    />
+                  )}
+
+                  {/* NUMBER */}
+                  {currentQuestion.type === 'number' && (
+                    <input
+                      type="number"
+                      value={answers[currentQuestion.id] || ''}
+                      onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                      placeholder="0"
+                      style={{
+                        width: '100%',
+                        padding: '16px',
+                        borderRadius: '12px',
+                        border: '2px solid #e5e7eb',
+                        fontSize: '15px',
+                        color: '#374151',
+                        transition: 'all 0.2s ease',
+                        outline: 'none'
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = '#10b981';
+                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = '#e5e7eb';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    />
+                  )}
+
+                  {/* SCALE */}
+                  {currentQuestion.type === 'scale' && (
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => {
+                          const isSelected = answers[currentQuestion.id] === num.toString();
+                          return (
+                            <button
+                              key={num}
+                              type="button"
+                              onClick={() => handleAnswerChange(currentQuestion.id, num.toString())}
+                              style={{
+                                flex: '0 0 calc(20% - 6.4px)',
+                                aspectRatio: '1',
+                                padding: '12px 0',
+                                borderRadius: '12px',
+                                border: isSelected ? '2px solid #10b981' : '2px solid #e5e7eb',
+                                background: isSelected ? 'rgba(16, 185, 129, 0.1)' : 'white',
+                                color: isSelected ? '#10b981' : '#374151',
+                                fontSize: '18px',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (!isSelected) {
+                                  e.currentTarget.style.borderColor = '#10b981';
+                                  e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (!isSelected) {
+                                  e.currentTarget.style.borderColor = '#e5e7eb';
+                                  e.currentTarget.style.background = 'white';
+                                }
+                              }}
+                            >
+                              {num}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: '#9ca3af' }}>
+                        <span>😞 Muito ruim</span>
+                        <span>😊 Excelente</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SINGLE CHOICE */}
+                  {currentQuestion.type === 'single_choice' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {currentQuestion.options?.map((option: any, index: number) => {
+                        const optionText = typeof option === 'string' ? option : option.text;
+                        const isSelected = answers[currentQuestion.id] === optionText;
+                        
+                        return (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => handleAnswerChange(currentQuestion.id, optionText)}
+                            style={{
+                              width: '100%',
+                              textAlign: 'left',
+                              padding: '16px',
+                              borderRadius: '12px',
+                              border: isSelected ? '2px solid #10b981' : '2px solid #e5e7eb',
+                              background: isSelected ? 'rgba(16, 185, 129, 0.1)' : 'white',
+                              color: isSelected ? '#10b981' : '#374151',
+                              fontWeight: isSelected ? '600' : '500',
+                              fontSize: '15px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                              lineHeight: '1.4'
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isSelected) {
+                                e.currentTarget.style.borderColor = '#10b981';
+                                e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isSelected) {
+                                e.currentTarget.style.borderColor = '#e5e7eb';
+                                e.currentTarget.style.background = 'white';
+                              }
+                            }}
+                          >
+                            {optionText}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* MULTIPLE CHOICE */}
+                  {currentQuestion.type === 'multiple_choice' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {currentQuestion.options?.map((option: any, index: number) => {
+                        const optionText = typeof option === 'string' ? option : option.text;
+                        const isSelected = Array.isArray(answers[currentQuestion.id]) && 
+                          answers[currentQuestion.id].includes(optionText);
+                        
+                        return (
+                          <label
+                            key={index}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              padding: '16px',
+                              borderRadius: '12px',
+                              border: '2px solid #e5e7eb',
+                              background: 'white',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.borderColor = '#10b981';
+                              e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = '#e5e7eb';
+                              e.currentTarget.style.background = 'white';
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => {
+                                const currentAnswers = Array.isArray(answers[currentQuestion.id]) 
+                                  ? answers[currentQuestion.id] 
+                                  : [];
+                                const newAnswers = isSelected
+                                  ? currentAnswers.filter((a: string) => a !== optionText)
+                                  : [...currentAnswers, optionText];
+                                handleAnswerChange(currentQuestion.id, newAnswers);
+                              }}
+                              style={{
+                                width: '20px',
+                                height: '20px',
+                                marginRight: '12px',
+                                accentColor: '#10b981',
+                                cursor: 'pointer'
+                              }}
+                            />
+                            <span style={{ fontSize: '15px', color: '#374151', fontWeight: '500', lineHeight: '1.4' }}>
+                              {optionText}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
+            </div>
 
-              <div className="space-y-3 pt-2">
-                <span className="inline-flex items-center gap-1.5 text-xs bg-gradient-to-r from-cyan-50 to-blue-50 px-3 py-1.5 rounded-full text-cyan-700 font-medium border border-cyan-200">
-                  <MessageSquare className="w-3.5 h-3.5" />
-                  {currentQuestion.type === 'text' ? 'Resposta curta' :
-                   currentQuestion.type === 'textarea' ? 'Resposta longa' :
-                   currentQuestion.type === 'single_choice' ? 'Escolha uma' :
-                   currentQuestion.type === 'multiple_choice' ? 'Múltipla escolha' :
-                   currentQuestion.type === 'number' ? 'Número' :
-                   currentQuestion.type === 'scale' ? 'Escala 1-10' :
-                   currentQuestion.type}
-                </span>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">
-                  {currentQuestion.question}
-                  {currentQuestion.required && <span className="text-red-500 ml-1">*</span>}
-                </h2>
-              </div>
-
-              <div className="space-y-4 py-4">
-                {/* TEXT */}
-                {currentQuestion.type === 'text' && (
-                  <input
-                    type="text"
-                    value={answers[currentQuestion.id] || ''}
-                    onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
-                    placeholder="Digite sua resposta"
-                    className="w-full text-base border-2 border-gray-200 rounded-xl p-4 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/20 transition-all duration-300"
-                  />
-                )}
-
-                {/* TEXTAREA */}
-                {currentQuestion.type === 'textarea' && (
-                  <textarea
-                    value={answers[currentQuestion.id] || ''}
-                    onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
-                    placeholder="Digite sua resposta"
-                    className="w-full text-base min-h-[140px] border-2 border-gray-200 rounded-xl p-4 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/20 transition-all duration-300 resize-none"
-                  />
-                )}
-
-                {/* NUMBER */}
-                {currentQuestion.type === 'number' && (
-                  <input
-                    type="number"
-                    value={answers[currentQuestion.id] || ''}
-                    onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
-                    placeholder="Digite um número"
-                    className="w-full text-base border-2 border-gray-200 rounded-xl p-4 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/20 transition-all duration-300"
-                  />
-                )}
-
-                {/* SCALE */}
-                {currentQuestion.type === 'scale' && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                        <button
-                          key={num}
-                          type="button"
-                          onClick={() => handleAnswerChange(currentQuestion.id, num.toString())}
-                          className={`aspect-square rounded-xl border-2 font-bold text-lg transition-all duration-300 transform cursor-pointer ${
-                            answers[currentQuestion.id] === num.toString()
-                              ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg scale-110'
-                              : 'bg-white border-emerald-500 text-gray-900 hover:bg-emerald-500 hover:text-white hover:scale-110 hover:shadow-lg active:scale-95'
-                          }`}
-                        >
-                          {num}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500 px-1 font-medium">
-                      <span>😞 Muito ruim</span>
-                      <span>😊 Excelente</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* SINGLE CHOICE */}
-                {currentQuestion.type === 'single_choice' && (
-                  <div className="space-y-3">
-                    {currentQuestion.options?.map((option: any, index: number) => (
-                      <div
-                        key={option.id}
-                        className="animate-fade-in"
-                        style={{ animationDelay: `${index * 0.05}s` }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => handleAnswerChange(currentQuestion.id, option.text)}
-                          className={`group w-full text-left p-4 rounded-xl border-2 transition-all duration-300 transform cursor-pointer ${
-                            answers[currentQuestion.id] === option.text
-                              ? 'border-emerald-500 bg-emerald-500 shadow-lg scale-[1.02]'
-                              : 'border-emerald-500 bg-white hover:bg-emerald-500 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]'
-                          }`}
-                        >
-                          <span className={`text-base font-medium ${
-                            answers[currentQuestion.id] === option.text 
-                              ? 'text-white' 
-                              : 'text-gray-900 group-hover:text-white'
-                          }`}>
-                            {option.text}
-                          </span>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* MULTIPLE CHOICE */}
-                {currentQuestion.type === 'multiple_choice' && (
-                  <div className="space-y-3">
-                    {currentQuestion.options?.map((option: any, index: number) => (
-                      <div
-                        key={option.id}
-                        className="animate-fade-in"
-                        style={{ animationDelay: `${index * 0.05}s` }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => handleAnswerChange(currentQuestion.id, option.text, 'checkbox')}
-                          className={`group w-full text-left p-4 rounded-xl border-2 transition-all duration-300 flex items-center gap-3 transform cursor-pointer ${
-                            (answers[currentQuestion.id] as string[] || []).includes(option.text)
-                              ? 'border-emerald-500 bg-emerald-500 shadow-lg scale-[1.02]'
-                              : 'border-emerald-500 bg-white hover:bg-emerald-500 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]'
-                          }`}
-                        >
-                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
-                            (answers[currentQuestion.id] as string[] || []).includes(option.text)
-                              ? 'bg-white border-white'
-                              : 'border-emerald-500 bg-transparent group-hover:border-white group-hover:bg-white/20'
-                          }`}>
-                            {(answers[currentQuestion.id] as string[] || []).includes(option.text) && (
-                              <svg className="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
-                            )}
-                          </div>
-                          <span className={`text-base font-medium flex-1 ${
-                            (answers[currentQuestion.id] as string[] || []).includes(option.text) 
-                              ? 'text-white' 
-                              : 'text-gray-900 group-hover:text-white'
-                          }`}>
-                            {option.text}
-                          </span>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Navigation buttons */}
-              <div className="flex gap-3 pt-6 border-t border-gray-100">
-                {currentQuestionIndex > 0 && (
-                  <button
-                    onClick={goToPrevQuestion}
-                    className="flex-1 px-6 py-3 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-cyan-500 hover:text-cyan-600 transition-all duration-300 group flex items-center justify-center gap-2"
-                  >
-                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-300" />
-                    Anterior
-                  </button>
-                )}
-                <button
-                  onClick={goToNextQuestion}
-                  disabled={!canGoNext()}
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group flex items-center justify-center gap-2"
-                >
-                  <span>{currentQuestionIndex === questionnaire.questions.length - 1 ? 'Revisar' : 'Próxima'}</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                </button>
-              </div>
+            {/* Footer */}
+            <div 
+              style={{
+                padding: '20px',
+                borderTop: '1px solid #e5e7eb',
+                display: 'flex',
+                gap: '12px',
+                background: 'white'
+              }}
+            >
+              <button
+                onClick={goToPrevQuestion}
+                disabled={currentQuestionIndex === 0}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: currentQuestionIndex === 0 ? '#f3f4f6' : '#f3f4f6',
+                  color: '#6b7280',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: currentQuestionIndex === 0 ? 'not-allowed' : 'pointer',
+                  opacity: currentQuestionIndex === 0 ? 0.5 : 1,
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (currentQuestionIndex !== 0) {
+                    e.currentTarget.style.background = '#e5e7eb';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (currentQuestionIndex !== 0) {
+                    e.currentTarget.style.background = '#f3f4f6';
+                  }
+                }}
+              >
+                Voltar
+              </button>
+              <button
+                onClick={goToNextQuestion}
+                disabled={!canGoNext()}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: !canGoNext() ? '#10b981' : '#10b981',
+                  color: 'white',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: !canGoNext() ? 'not-allowed' : 'pointer',
+                  opacity: !canGoNext() ? 0.5 : 1,
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (canGoNext()) {
+                    e.currentTarget.style.background = '#059669';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (canGoNext()) {
+                    e.currentTarget.style.background = '#10b981';
+                  }
+                }}
+              >
+                {currentQuestionIndex === questionnaire.questions.length - 1 ? 'Revisar' : 'Próxima'}
+              </button>
             </div>
           </div>
         </div>
