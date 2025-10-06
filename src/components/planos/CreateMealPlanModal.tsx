@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useCreateMealPlan } from '@/hooks/useMealPlansData';
+import { useCreateMealPlan, useMealPlanDetail } from '@/hooks/useMealPlansData';
 import { useClientsData } from '@/hooks/useClientsData';
 import { Plus, ChevronRight, ChevronLeft, Check, Info, Calculator } from 'lucide-react';
 import { MEAL_TYPE_LABELS, MEAL_TYPE_ICONS } from '@/types/meal-plans';
@@ -25,6 +25,7 @@ const MEAL_TYPE_EMOJIS: Record<string, string> = {
 interface CreateMealPlanModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  editPlanId?: string | null;
 }
 
 const DEFAULT_MEALS = [
@@ -33,7 +34,7 @@ const DEFAULT_MEALS = [
   { key: 'dinner', name: 'Jantar', time: '19:00', icon: '🍲' }
 ];
 
-export function CreateMealPlanModal({ open, onOpenChange }: CreateMealPlanModalProps) {
+export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMealPlanModalProps) {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     clientId: '',
@@ -62,6 +63,89 @@ export function CreateMealPlanModal({ open, onOpenChange }: CreateMealPlanModalP
   const { toast } = useToast();
   const { tenantId } = useTenantId();
   const queryClient = useQueryClient();
+  const { data: editingPlan, isLoading: isLoadingPlan } = useMealPlanDetail(editPlanId || null);
+
+  // Carregar dados do plano ao editar
+  useEffect(() => {
+    if (editPlanId && editingPlan && open) {
+      setFormData({
+        clientId: editingPlan.client_id,
+        name: editingPlan.name,
+        startDate: editingPlan.start_date,
+        endDate: editingPlan.end_date || '',
+        goal: editingPlan.goal || '',
+        targetKcal: editingPlan.target_kcal?.toString() || '',
+        targetProtein: editingPlan.target_protein?.toString() || '',
+        targetCarbs: editingPlan.target_carbs?.toString() || '',
+        targetFats: editingPlan.target_fats?.toString() || '',
+        notes: editingPlan.notes || ''
+      });
+
+      // Configurar refeições selecionadas
+      if (editingPlan.meals) {
+        const mealKeys = editingPlan.meals.map((meal: any) => {
+          const defaultMeal = DEFAULT_MEALS.find(m => m.name === meal.name);
+          return defaultMeal?.key || '';
+        }).filter(Boolean);
+        setSelectedMeals(mealKeys);
+
+        // Configurar alimentos por refeição
+        const foodsByMeal: Record<string, any[]> = {
+          breakfast: [],
+          morning_snack: [],
+          lunch: [],
+          afternoon_snack: [],
+          dinner: [],
+          supper: [],
+        };
+
+        editingPlan.meals.forEach((meal: any) => {
+          const defaultMeal = DEFAULT_MEALS.find(m => m.name === meal.name);
+          const mealKey = defaultMeal?.key;
+          
+          if (mealKey && meal.items) {
+            foodsByMeal[mealKey] = meal.items.map((item: any) => ({
+              food: item.food,
+              measure: item.measure,
+              quantity: item.quantity,
+              calculatedNutrients: {
+                calories: item.kcal_total,
+                protein: item.protein_total,
+                carbs: item.carb_total,
+                fats: item.fat_total,
+              }
+            }));
+          }
+        });
+
+        setMealFoods(foodsByMeal);
+      }
+    } else if (!open && !editPlanId) {
+      // Reset ao fechar sem estar editando
+      setStep(1);
+      setFormData({
+        clientId: '',
+        name: '',
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: '',
+        goal: '',
+        targetKcal: '',
+        targetProtein: '',
+        targetCarbs: '',
+        targetFats: '',
+        notes: ''
+      });
+      setSelectedMeals(['breakfast', 'lunch', 'dinner']);
+      setMealFoods({
+        breakfast: [],
+        morning_snack: [],
+        lunch: [],
+        afternoon_snack: [],
+        dinner: [],
+        supper: [],
+      });
+    }
+  }, [editPlanId, editingPlan, open]);
 
   // Calcular totais automaticamente
   const totalNutrients = useMemo(() => {
@@ -127,28 +211,63 @@ export function CreateMealPlanModal({ open, onOpenChange }: CreateMealPlanModalP
 
   const handleSubmit = async () => {
     try {
-      // 1. Criar o plano com metas definidas pelo usuário
-      const { data: plan, error: planError } = await supabase
-        .from('meal_plans')
-        .insert([{
-          tenant_id: tenantId,
-          client_id: formData.clientId,
-          name: formData.name,
-          notes: formData.notes || null,
-          start_date: formData.startDate,
-          end_date: formData.endDate || null,
-          status: 'ativo',
-          goal: formData.goal || null,
-          target_kcal: formData.targetKcal ? parseFloat(formData.targetKcal) : null,
-          target_protein: formData.targetProtein ? parseFloat(formData.targetProtein) : null,
-          target_carbs: formData.targetCarbs ? parseFloat(formData.targetCarbs) : null,
-          target_fats: formData.targetFats ? parseFloat(formData.targetFats) : null,
-        }])
-        .select()
-        .maybeSingle();
-      
-      if (planError) throw planError;
-      if (!plan) throw new Error('Erro ao criar plano');
+      let plan;
+
+      if (editPlanId) {
+        // Atualizar plano existente
+        const { data: updatedPlan, error: planError } = await supabase
+          .from('meal_plans')
+          .update({
+            client_id: formData.clientId,
+            name: formData.name,
+            notes: formData.notes || null,
+            start_date: formData.startDate,
+            end_date: formData.endDate || null,
+            goal: formData.goal || null,
+            target_kcal: formData.targetKcal ? parseFloat(formData.targetKcal) : null,
+            target_protein: formData.targetProtein ? parseFloat(formData.targetProtein) : null,
+            target_carbs: formData.targetCarbs ? parseFloat(formData.targetCarbs) : null,
+            target_fats: formData.targetFats ? parseFloat(formData.targetFats) : null,
+          })
+          .eq('id', editPlanId)
+          .select()
+          .maybeSingle();
+        
+        if (planError) throw planError;
+        if (!updatedPlan) throw new Error('Erro ao atualizar plano');
+        plan = updatedPlan;
+
+        // Deletar refeições antigas
+        await supabase
+          .from('meal_plan_meals')
+          .delete()
+          .eq('meal_plan_id', editPlanId);
+
+      } else {
+        // Criar novo plano
+        const { data: newPlan, error: planError } = await supabase
+          .from('meal_plans')
+          .insert([{
+            tenant_id: tenantId,
+            client_id: formData.clientId,
+            name: formData.name,
+            notes: formData.notes || null,
+            start_date: formData.startDate,
+            end_date: formData.endDate || null,
+            status: 'ativo',
+            goal: formData.goal || null,
+            target_kcal: formData.targetKcal ? parseFloat(formData.targetKcal) : null,
+            target_protein: formData.targetProtein ? parseFloat(formData.targetProtein) : null,
+            target_carbs: formData.targetCarbs ? parseFloat(formData.targetCarbs) : null,
+            target_fats: formData.targetFats ? parseFloat(formData.targetFats) : null,
+          }])
+          .select()
+          .maybeSingle();
+        
+        if (planError) throw planError;
+        if (!newPlan) throw new Error('Erro ao criar plano');
+        plan = newPlan;
+      }
       
       // 2. Criar refeições
       const mealsToCreate = DEFAULT_MEALS
@@ -199,7 +318,10 @@ export function CreateMealPlanModal({ open, onOpenChange }: CreateMealPlanModalP
         }
       }
       
-      toast({ title: "Sucesso!", description: "Plano alimentar criado com sucesso" });
+      toast({ 
+        title: "Sucesso!", 
+        description: editPlanId ? "Plano alimentar atualizado com sucesso" : "Plano alimentar criado com sucesso" 
+      });
 
       // Reset and close
       setStep(1);
@@ -227,8 +349,12 @@ export function CreateMealPlanModal({ open, onOpenChange }: CreateMealPlanModalP
       queryClient.invalidateQueries({ queryKey: ['meal-plans'] });
       onOpenChange(false);
     } catch (error) {
-      console.error('Erro ao criar plano:', error);
-      toast({ variant: "destructive", title: "Erro", description: "Erro ao criar plano alimentar" });
+      console.error('Erro ao salvar plano:', error);
+      toast({ 
+        variant: "destructive", 
+        title: "Erro", 
+        description: editPlanId ? "Erro ao atualizar plano alimentar" : "Erro ao criar plano alimentar" 
+      });
     }
   };
 
@@ -247,7 +373,7 @@ export function CreateMealPlanModal({ open, onOpenChange }: CreateMealPlanModalP
           <div className="flex items-center justify-between mb-4">
             <DialogTitle className="text-2xl font-bold flex items-center gap-2">
               <span className="text-3xl">🍽️</span>
-              Criar Novo Plano Alimentar
+              {editPlanId ? 'Editar Plano Alimentar' : 'Criar Novo Plano Alimentar'}
             </DialogTitle>
             <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full">
               Etapa {step}/4

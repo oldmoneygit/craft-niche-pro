@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, List, Plus, FileText, CheckCircle, Copy, Trash2, Eye, Calendar } from 'lucide-react';
+import { Search, List, Plus, FileText, CheckCircle, Copy, Trash2, Eye, Calendar, Edit } from 'lucide-react';
 import { StatCard } from '@/components/shared/StatCard';
 import { PlanoCard } from '@/components/planos/PlanoCard';
 import { CreateMealPlanModal } from '@/components/planos/CreateMealPlanModal';
@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function PlanosAlimentares() {
   const [isDark, setIsDark] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editPlanId, setEditPlanId] = useState<string | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -60,6 +61,11 @@ export default function PlanosAlimentares() {
   const handleView = (planId: string) => {
     setSelectedPlanId(planId);
     setDetailModalOpen(true);
+  };
+
+  const handleEdit = (planId: string) => {
+    setEditPlanId(planId);
+    setCreateModalOpen(true);
   };
 
   const handleDuplicate = async (planId: string) => {
@@ -130,7 +136,14 @@ export default function PlanosAlimentares() {
 
   return (
     <>
-      <CreateMealPlanModal open={createModalOpen} onOpenChange={setCreateModalOpen} />
+      <CreateMealPlanModal 
+        open={createModalOpen} 
+        onOpenChange={(open) => {
+          setCreateModalOpen(open);
+          if (!open) setEditPlanId(null);
+        }}
+        editPlanId={editPlanId}
+      />
       <MealPlanDetailModal planId={selectedPlanId} open={detailModalOpen} onOpenChange={setDetailModalOpen} />
     <div style={{ padding: '24px', minHeight: '100vh' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
@@ -560,7 +573,7 @@ export default function PlanosAlimentares() {
                   })()}
 
                   {/* Botões de ação com cores específicas no hover */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', paddingTop: '20px', borderTop: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', paddingTop: '20px', borderTop: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)' }}>
                     {/* Botão Ver - verde no hover */}
                     <button
                       onClick={() => handleView(plan.id)}
@@ -593,6 +606,39 @@ export default function PlanosAlimentares() {
                       }}
                     >
                       <Eye style={{ width: '16px', height: '16px' }} />
+                    </button>
+                    {/* Botão Editar - roxo no hover */}
+                    <button
+                      onClick={() => handleEdit(plan.id)}
+                      style={{
+                        padding: '10px',
+                        borderRadius: '10px',
+                        border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+                        background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)',
+                        color: isDark ? '#a3a3a3' : '#6b7280',
+                        fontWeight: 600,
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(168, 85, 247, 0.1)';
+                        e.currentTarget.style.borderColor = '#a855f7';
+                        e.currentTarget.style.color = '#a855f7';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(168, 85, 247, 0.2)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)';
+                        e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
+                        e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      <Edit style={{ width: '16px', height: '16px' }} />
                     </button>
                     {/* Botão Duplicar - azul no hover */}
                     <button
