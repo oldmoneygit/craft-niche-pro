@@ -1,8 +1,9 @@
 import { 
   Calendar, Users, CheckCircle, Clock, 
-  DollarSign, AlertTriangle, Bell 
+  DollarSign, AlertTriangle, Bell, LucideIcon
 } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
 import './Dashboard.css';
 
 interface StatCard {
@@ -10,7 +11,7 @@ interface StatCard {
   value: string | number;
   change?: string;
   changeType?: 'positive' | 'negative' | 'neutral';
-  icon: React.ElementType;
+  icon: LucideIcon;
   variant: 'today' | 'month' | 'pending' | 'inactive';
 }
 
@@ -155,28 +156,17 @@ export function Dashboard() {
 
       {/* Stats Grid */}
       <div className="stats-grid">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <div key={index} className={`stat-card ${stat.variant}`}>
-              <div className="stat-header">
-                <div className="stat-label">{stat.label}</div>
-                <div className="stat-icon">
-                  <Icon size={24} />
-                </div>
-              </div>
-              <div className="stat-value">{stat.value}</div>
-              <div className={`stat-change ${stat.changeType || ''}`}>
-                {stat.changeType === 'positive' && (
-                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                  </svg>
-                )}
-                {stat.change}
-              </div>
-            </div>
-          );
-        })}
+        {stats.map((stat, index) => (
+          <DashboardStatCard
+            key={index}
+            label={stat.label}
+            value={stat.value}
+            change={stat.change}
+            changeType={stat.changeType}
+            icon={stat.icon}
+            variant={stat.variant}
+          />
+        ))}
       </div>
 
       {/* Alerts Section */}
