@@ -82,7 +82,9 @@ export default function PublicQuestionnaireResponse() {
       const mappedQuestions = (questionsData || []).map((q: any) => ({
         id: q.id,
         question: q.question_text,
-        type: q.question_type,
+        type: q.question_type === 'single_choice' ? 'single_select' :
+              q.question_type === 'multiple_choice' ? 'multi_select' :
+              q.question_type as any,
         options: q.options || [],
         required: q.is_required
       }));
@@ -406,17 +408,43 @@ export default function PublicQuestionnaireResponse() {
 
   // TELA 2: Perguntas (uma por vez)
   if (currentStep === 'questions') {
+    // DEBUG: Verificar estado do questionário
+    console.log('=== DEBUG QUESTIONNAIRE ===');
+    console.log('questionnaire:', questionnaire);
+    console.log('questionnaire?.questions:', questionnaire?.questions);
+    console.log('questionnaire?.questions length:', questionnaire?.questions?.length);
+    console.log('currentQuestionIndex:', currentQuestionIndex);
+    
+    if (!questionnaire || !questionnaire.questions || questionnaire.questions.length === 0) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
+            <p className="text-red-600 font-semibold mb-2">Erro ao carregar perguntas</p>
+            <p className="text-gray-600 text-sm mb-4">
+              O questionário não possui perguntas cadastradas ou houve um erro ao carregá-las.
+            </p>
+            <button
+              onClick={() => setCurrentStep('info')}
+              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg"
+            >
+              Voltar
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     const currentQuestion = questionnaire.questions[currentQuestionIndex];
     const progress = ((currentQuestionIndex + 1) / questionnaire.questions.length) * 100;
 
     // DEBUG LOG
     console.log('Pergunta atual:', {
-      id: currentQuestion.id,
-      type: currentQuestion.type,
-      question: currentQuestion.question,
-      hasOptions: !!currentQuestion.options,
-      optionsCount: currentQuestion.options?.length || 0,
-      options: currentQuestion.options
+      id: currentQuestion?.id,
+      type: currentQuestion?.type,
+      question: currentQuestion?.question,
+      hasOptions: !!currentQuestion?.options,
+      optionsCount: currentQuestion?.options?.length || 0,
+      options: currentQuestion?.options
     });
 
     return (
@@ -441,10 +469,11 @@ export default function PublicQuestionnaireResponse() {
                 <span className="text-xs bg-gray-100 px-3 py-1 rounded-full text-gray-600">
                   {currentQuestion.type === 'text' ? 'Resposta curta' :
                    currentQuestion.type === 'textarea' ? 'Resposta longa' :
-                   (currentQuestion.type === 'single_select' || currentQuestion.type === 'radio') ? 'Escolha uma' :
-                   (currentQuestion.type === 'multi_select' || currentQuestion.type === 'checkbox') ? 'Múltipla escolha' :
+                   currentQuestion.type === 'single_choice' ? 'Escolha uma' :
+                   currentQuestion.type === 'multiple_choice' ? 'Múltipla escolha' :
                    currentQuestion.type === 'number' ? 'Número' :
-                   'Escala 1-10'}
+                   currentQuestion.type === 'scale' ? 'Escala 1-10' :
+                   currentQuestion.type}
                 </span>
               </div>
               <h2 className="text-2xl font-bold text-gray-900">
@@ -622,7 +651,7 @@ export default function PublicQuestionnaireResponse() {
                     {index + 1}. {q.question}
                   </p>
                   <p className="text-gray-700 mb-2">
-                    {(q.type === 'multi_select' || q.type === 'checkbox') && Array.isArray(answers[q.id])
+                    {(q.type === 'multi_select' || q.type === 'checkbox' || q.type === 'multiple_choice') && Array.isArray(answers[q.id])
                       ? answers[q.id].join(', ') || 'Não respondido'
                       : answers[q.id] || 'Não respondido'}
                   </p>
