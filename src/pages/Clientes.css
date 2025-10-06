@@ -12,31 +12,18 @@
 
 .stat-card {
   padding: 24px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top: 3px solid var(--stat-color);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 16px var(--shadow);
   transition: all 0.3s ease;
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;
   overflow: hidden;
-}
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at top right, var(--stat-color), transparent 60%);
-  opacity: 0.03;
-  pointer-events: none;
 }
 
 .stat-card:hover {
@@ -49,6 +36,10 @@
 .stat-card.new { --stat-color: #10b981; }
 .stat-card.active { --stat-color: #f59e0b; }
 .stat-card.inactive { --stat-color: #ef4444; }
+
+.stat-content {
+  flex: 1;
+}
 
 .stat-content h3 {
   font-size: 13px;
@@ -74,6 +65,13 @@
   align-items: center;
   justify-content: center;
   color: white;
+  flex-shrink: 0;
+}
+
+.stat-icon svg {
+  width: 24px;
+  height: 24px;
+  color: white;
 }
 
 /* ==================== SEARCH ==================== */
@@ -88,7 +86,7 @@
 .search-bar input {
   width: 100%;
   padding: 16px 20px 16px 52px;
-  background: var(--bg-content);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -120,7 +118,7 @@
 /* ==================== FILTERS ==================== */
 .filters-section {
   padding: 24px;
-  background: var(--bg-content);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
   border-radius: 16px;
   border: 1px solid var(--border);
@@ -182,7 +180,7 @@
 
 .client-card {
   padding: 20px;
-  background: var(--bg-content);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
   border-radius: 16px;
   border: 1px solid var(--border);
@@ -191,6 +189,7 @@
   justify-content: space-between;
   align-items: center;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .client-card:hover {
@@ -276,9 +275,20 @@
   color: var(--text-secondary);
 }
 
+.action-btn svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
 .action-btn:hover:not(:disabled) {
   background: var(--primary);
   border-color: var(--primary);
+  color: white;
+}
+
+.action-btn:hover:not(:disabled) svg {
   color: white;
 }
 
@@ -290,6 +300,10 @@
 .action-btn.view {
   background: var(--primary);
   border-color: var(--primary);
+  color: white;
+}
+
+.action-btn.view svg {
   color: white;
 }
 

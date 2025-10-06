@@ -13,6 +13,8 @@
   --bg-body: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
   --bg-sidebar: rgba(255, 255, 255, 0.95);
   --bg-content: rgba(255, 255, 255, 0.9);
+  --bg-card: rgba(255, 255, 255, 0.7);
+  --bg-primary: #ffffff;
   --bg-hover: rgba(16, 185, 129, 0.08);
   --bg-active: rgba(16, 185, 129, 0.12);
   --text-primary: #1f2937;
@@ -28,6 +30,8 @@
   --bg-body: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
   --bg-sidebar: rgba(38, 38, 38, 0.95);
   --bg-content: rgba(30, 30, 30, 0.9);
+  --bg-card: rgba(38, 38, 38, 0.6);
+  --bg-primary: #171717;
   --bg-hover: rgba(16, 185, 129, 0.15);
   --bg-active: rgba(16, 185, 129, 0.25);
   --text-primary: #f9fafb;
