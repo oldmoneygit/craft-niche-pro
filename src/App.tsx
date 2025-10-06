@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
+import { TwentyFirstToolbar } from '@21st-extension/toolbar-react';
+import { ReactPlugin } from '@21st-extension/react';
 import { Layout } from './components/layout/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { Clientes } from './pages/Clientes';
@@ -33,8 +35,14 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+    <>
+      <TwentyFirstToolbar 
+        config={{
+          plugins: [ReactPlugin]
+        }}
+      />
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
         <Routes>
           {/* Rota pública para resposta de questionário */}
           <Route path="/questionario/:token" element={<PublicQuestionnaireResponse />} />
@@ -62,9 +70,10 @@ function App() {
             <Route path="/platform/:slug" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
-      </BrowserRouter>
-      <Toaster />
-    </QueryClientProvider>
+        </BrowserRouter>
+        <Toaster />
+      </QueryClientProvider>
+    </>
   );
 }
 
