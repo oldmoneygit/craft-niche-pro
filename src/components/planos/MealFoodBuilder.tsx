@@ -48,7 +48,11 @@ export function MealFoodBuilder({
   const { data: searchResults, isLoading } = useFoodSearch(searchTerm);
   const { data: popularFoods, isLoading: isLoadingPopular } = usePopularFoods();
   const { data: measures } = useFoodMeasures(selectedFood?.id || '');
-  const { data: foodsBySource, isLoading: isLoadingBySource } = useFoodsBySource(selectedSource, selectedCategory);
+  const { data: foodsBySource, isLoading: isLoadingBySource } = useFoodsBySource(
+    selectedSource, 
+    selectedCategory,
+    searchTerm
+  );
   const { data: categories } = useFoodCategories(selectedSource);
 
   // Lógica para determinar quais alimentos mostrar
@@ -225,18 +229,17 @@ export function MealFoodBuilder({
             </div>
           )}
 
-          {/* Input de busca (desabilitado quando há filtro de fonte ativo) */}
+          {/* Input de busca (sempre habilitado e respeita filtros) */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder={selectedSource ? "Pesquisa desabilitada - use os filtros acima" : "Buscar alimento... (ex: arroz, frango, banana)"}
+              placeholder={selectedSource ? `Buscar em ${selectedSource}... (ex: arroz, frango, banana)` : "Buscar alimento... (ex: arroz, frango, banana)"}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-              disabled={!!selectedSource}
-              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
 
@@ -246,7 +249,12 @@ export function MealFoodBuilder({
               {selectedSource && (
                 <div className="flex items-center justify-between px-2">
                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                    {selectedCategory ? `${selectedSource} - ${selectedCategory}` : `Todos os alimentos ${selectedSource}`}
+                    {searchTerm.length >= 2 
+                      ? `Buscando "${searchTerm}" em ${selectedSource}${selectedCategory ? ` - ${selectedCategory}` : ''}`
+                      : selectedCategory 
+                        ? `${selectedSource} - ${selectedCategory}` 
+                        : `Todos os alimentos ${selectedSource}`
+                    }
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
                     {displayFoods?.length || 0} alimentos

@@ -1,9 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-export function useFoodsBySource(source: string | null, category: string | null) {
+export function useFoodsBySource(
+  source: string | null, 
+  category: string | null, 
+  searchTerm: string = ''
+) {
   return useQuery({
-    queryKey: ['foods-by-source', source, category],
+    queryKey: ['foods-by-source', source, category, searchTerm],
     queryFn: async () => {
       if (!source) return [];
       
@@ -16,10 +20,14 @@ export function useFoodsBySource(source: string | null, category: string | null)
       if (category) {
         query = query.eq('category', category);
       }
+
+      if (searchTerm.length >= 2) {
+        query = query.ilike('name', `%${searchTerm}%`);
+      }
       
       const { data, error } = await query
         .order('name')
-        .limit(100);
+        .limit(1000); // Aumentado para 1000 alimentos
       
       if (error) throw error;
       
