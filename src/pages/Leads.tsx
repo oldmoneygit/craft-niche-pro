@@ -106,19 +106,33 @@ export function Leads() {
   };
 
   const handleDelete = async (leadId: string) => {
+    console.log('🔍 handleDelete chamado para:', leadId);
+    
     const lead = leads?.find(l => l.id === leadId);
-    if (!lead) return;
+    
+    if (!lead) {
+      console.error('❌ Lead não encontrado:', leadId);
+      return;
+    }
+    
+    console.log('📋 Lead encontrado:', { id: lead.id, name: lead.name });
     
     const confirmed = window.confirm(
       `Tem certeza que deseja excluir o lead "${lead.name}"?\n\nEsta ação não pode ser desfeita.`
     );
     
+    console.log('🔍 Usuário confirmou exclusão:', confirmed);
+    
     if (confirmed) {
       try {
+        console.log('🗑️ Iniciando exclusão...');
         await deleteLead.mutateAsync(leadId);
+        console.log('✅ Exclusão concluída com sucesso');
       } catch (error) {
         console.error('❌ Erro ao excluir lead:', error);
       }
+    } else {
+      console.log('ℹ️ Exclusão cancelada pelo usuário');
     }
   };
 

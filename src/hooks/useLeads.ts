@@ -115,30 +115,33 @@ export const useLeads = () => {
 
   const deleteLead = useMutation({
     mutationFn: async (leadId: string) => {
-      console.log('🗑️ Deletando lead:', leadId);
+      console.log('🗑️ Tentando deletar lead:', leadId);
       
       const { error } = await supabase
         .from('leads')
         .delete()
         .eq('id', leadId);
-      // NÃO adicionar .select() aqui - causa erro 400
       
       if (error) {
-        console.error('❌ Erro ao deletar:', error);
+        console.error('❌ Erro do Supabase ao deletar:', error);
         throw error;
       }
       
-      console.log('✅ Lead deletado com sucesso');
+      console.log('✅ Lead deletado com sucesso no banco');
     },
     onSuccess: () => {
+      console.log('✅ Mutation de delete bem-sucedida');
       queryClient.invalidateQueries({ queryKey: ['leads'] });
-      toast({ title: '✅ Lead excluído com sucesso!' });
+      toast({ 
+        title: '✅ Lead excluído com sucesso!',
+        description: 'O lead foi removido permanentemente.'
+      });
     },
     onError: (error: any) => {
       console.error('❌ Erro na mutation de delete:', error);
       toast({
         title: 'Erro ao excluir lead',
-        description: error.message || 'Verifique as permissões',
+        description: error.message || 'Verifique as permissões no console',
         variant: 'destructive'
       });
     }

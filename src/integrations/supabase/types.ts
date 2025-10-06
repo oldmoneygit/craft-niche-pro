@@ -14,76 +14,137 @@ export type Database = {
   }
   public: {
     Tables: {
-      ai_suggestions: {
+      anamneses: {
         Row: {
+          alcohol_consumption: string | null
+          allergies: string | null
+          anamnesis_date: string
+          client_id: string
+          clinical_observations: string | null
           created_at: string
-          data: Json
+          created_by: string | null
+          current_medications: string | null
+          current_weight: number | null
+          dietary_restrictions: string | null
+          eating_out_frequency: string | null
+          family_history: string | null
+          food_dislikes: string | null
+          food_intolerances: string | null
+          food_preferences: string | null
+          height: number | null
+          hip_circumference: number | null
+          household_size: number | null
           id: string
-          priority: number
-          resolved: boolean
+          main_goal: string
+          marital_status: string | null
+          meals_per_day: number | null
+          medical_conditions: string | null
+          motivation: string | null
+          occupation: string | null
+          physical_activity: string | null
+          previous_diets: string | null
+          professional_notes: string | null
+          recent_exams: Json | null
+          sleep_hours: number | null
+          smoking: string | null
+          stress_level: string | null
+          target_weight: number | null
           tenant_id: string
-          type: string
           updated_at: string
+          waist_circumference: number | null
+          water_intake_liters: number | null
         }
         Insert: {
+          alcohol_consumption?: string | null
+          allergies?: string | null
+          anamnesis_date?: string
+          client_id: string
+          clinical_observations?: string | null
           created_at?: string
-          data?: Json
+          created_by?: string | null
+          current_medications?: string | null
+          current_weight?: number | null
+          dietary_restrictions?: string | null
+          eating_out_frequency?: string | null
+          family_history?: string | null
+          food_dislikes?: string | null
+          food_intolerances?: string | null
+          food_preferences?: string | null
+          height?: number | null
+          hip_circumference?: number | null
+          household_size?: number | null
           id?: string
-          priority?: number
-          resolved?: boolean
+          main_goal: string
+          marital_status?: string | null
+          meals_per_day?: number | null
+          medical_conditions?: string | null
+          motivation?: string | null
+          occupation?: string | null
+          physical_activity?: string | null
+          previous_diets?: string | null
+          professional_notes?: string | null
+          recent_exams?: Json | null
+          sleep_hours?: number | null
+          smoking?: string | null
+          stress_level?: string | null
+          target_weight?: number | null
           tenant_id: string
-          type: string
           updated_at?: string
+          waist_circumference?: number | null
+          water_intake_liters?: number | null
         }
         Update: {
+          alcohol_consumption?: string | null
+          allergies?: string | null
+          anamnesis_date?: string
+          client_id?: string
+          clinical_observations?: string | null
           created_at?: string
-          data?: Json
+          created_by?: string | null
+          current_medications?: string | null
+          current_weight?: number | null
+          dietary_restrictions?: string | null
+          eating_out_frequency?: string | null
+          family_history?: string | null
+          food_dislikes?: string | null
+          food_intolerances?: string | null
+          food_preferences?: string | null
+          height?: number | null
+          hip_circumference?: number | null
+          household_size?: number | null
           id?: string
-          priority?: number
-          resolved?: boolean
+          main_goal?: string
+          marital_status?: string | null
+          meals_per_day?: number | null
+          medical_conditions?: string | null
+          motivation?: string | null
+          occupation?: string | null
+          physical_activity?: string | null
+          previous_diets?: string | null
+          professional_notes?: string | null
+          recent_exams?: Json | null
+          sleep_hours?: number | null
+          smoking?: string | null
+          stress_level?: string | null
+          target_weight?: number | null
           tenant_id?: string
-          type?: string
           updated_at?: string
-        }
-        Relationships: []
-      }
-      appointment_reminders: {
-        Row: {
-          appointment_id: string
-          client_response: string | null
-          created_at: string | null
-          id: string
-          reminder_type: string
-          sent_at: string
-          status: string | null
-          tenant_id: string
-        }
-        Insert: {
-          appointment_id: string
-          client_response?: string | null
-          created_at?: string | null
-          id?: string
-          reminder_type: string
-          sent_at?: string
-          status?: string | null
-          tenant_id: string
-        }
-        Update: {
-          appointment_id?: string
-          client_response?: string | null
-          created_at?: string | null
-          id?: string
-          reminder_type?: string
-          sent_at?: string
-          status?: string | null
-          tenant_id?: string
+          waist_circumference?: number | null
+          water_intake_liters?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "appointment_reminders_appointment_id_fkey"
-            columns: ["appointment_id"]
+            foreignKeyName: "anamneses_client_id_fkey"
+            columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "appointments"
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anamneses_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -326,39 +387,6 @@ export type Database = {
           template_used?: string | null
           tenant_id?: string
           type?: string
-        }
-        Relationships: []
-      }
-      faq_items: {
-        Row: {
-          active: boolean
-          answer: string
-          category: string
-          created_at: string
-          id: string
-          question: string
-          tenant_id: string
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean
-          answer: string
-          category: string
-          created_at?: string
-          id?: string
-          question: string
-          tenant_id: string
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean
-          answer?: string
-          category?: string
-          created_at?: string
-          id?: string
-          question?: string
-          tenant_id?: string
-          updated_at?: string
         }
         Relationships: []
       }
@@ -714,36 +742,6 @@ export type Database = {
         }
         Relationships: []
       }
-      meal_foods: {
-        Row: {
-          calories: number | null
-          created_at: string | null
-          id: string
-          meal_id: string
-          name: string
-          order_index: number | null
-          quantity: string
-        }
-        Insert: {
-          calories?: number | null
-          created_at?: string | null
-          id?: string
-          meal_id: string
-          name: string
-          order_index?: number | null
-          quantity: string
-        }
-        Update: {
-          calories?: number | null
-          created_at?: string | null
-          id?: string
-          meal_id?: string
-          name?: string
-          order_index?: number | null
-          quantity?: string
-        }
-        Relationships: []
-      }
       meal_items: {
         Row: {
           carb_total: number | null
@@ -991,7 +989,6 @@ export type Database = {
           is_active: boolean | null
           name: string
           notes: string | null
-          plan_data: Json
           public_token: string | null
           replaced_by: string | null
           start_date: string
@@ -1013,7 +1010,6 @@ export type Database = {
           is_active?: boolean | null
           name: string
           notes?: string | null
-          plan_data?: Json
           public_token?: string | null
           replaced_by?: string | null
           start_date: string
@@ -1035,7 +1031,6 @@ export type Database = {
           is_active?: boolean | null
           name?: string
           notes?: string | null
-          plan_data?: Json
           public_token?: string | null
           replaced_by?: string | null
           start_date?: string
