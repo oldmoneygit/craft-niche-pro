@@ -10,6 +10,7 @@ import type { ClientWithStats } from '@/hooks/useClientsData';
 import { StatCardClientes } from '@/components/clientes/StatCardClientes';
 import { ClientDetailsModal } from '@/components/clientes/ClientDetailsModal';
 import { CreateClientModal } from '@/components/clientes/CreateClientModal';
+import { AgendamentoModal } from '@/components/agendamentos/AgendamentoModal';
 import './Clientes.css';
 
 export function Clientes() {
@@ -19,6 +20,9 @@ export function Clientes() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [serviceFilter, setServiceFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [expiringFilter, setExpiringFilter] = useState<'all' | '7days' | '30days'>('all');
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [scheduleClientId, setScheduleClientId] = useState<string>('');
+  const [scheduleClientName, setScheduleClientName] = useState<string>('');
 
   const { 
     clients, 
@@ -72,7 +76,9 @@ export function Clientes() {
 
   const handleSchedule = (clientId: string, clientName: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/agendamentos?action=new&clientId=${clientId}&clientName=${encodeURIComponent(clientName)}`);
+    setScheduleClientId(clientId);
+    setScheduleClientName(clientName);
+    setIsScheduleModalOpen(true);
   };
 
   const calculateAge = (birthDate: string | null) => {
@@ -393,6 +399,19 @@ export function Clientes() {
       {isCreateModalOpen && (
         <CreateClientModal 
           onClose={() => setIsCreateModalOpen(false)} 
+        />
+      )}
+
+      {isScheduleModalOpen && (
+        <AgendamentoModal
+          isOpen={isScheduleModalOpen}
+          onClose={() => {
+            setIsScheduleModalOpen(false);
+            setScheduleClientId('');
+            setScheduleClientName('');
+          }}
+          clientId={scheduleClientId}
+          clientName={scheduleClientName}
         />
       )}
     </div>
