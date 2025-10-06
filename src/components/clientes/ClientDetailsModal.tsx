@@ -4,12 +4,23 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   X, User, Mail, Phone, Calendar, Activity, Target, Ruler, Weight,
-  Package, FileText, ClipboardList, FileQuestion, Loader2, Eye, Edit
+  Package, FileText, ClipboardList, FileQuestion, Loader2, Eye, Edit, Trash2
 } from 'lucide-react';
 import { ClientWithStats } from '@/hooks/useClientsData';
 import { format } from 'date-fns';
 import { AnamneseForm } from '@/components/platform/AnamneseForm';
 import { AnamneseViewer } from '@/components/platform/AnamneseViewer';
+import { useDeleteAnamnese } from '@/hooks/useAnamnese';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ClientDetailsModalProps {
   client: ClientWithStats;
@@ -21,6 +32,9 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
   const [activeTab, setActiveTab] = useState<'info' | 'services' | 'plans' | 'questionnaires' | 'appointments' | 'anamneses'>('info');
   const [viewingAnamnese, setViewingAnamnese] = useState<any | null>(null);
   const [editingAnamnese, setEditingAnamnese] = useState(false);
+  const [deletingAnamneseId, setDeletingAnamneseId] = useState<string | null>(null);
+  
+  const deleteAnamnese = useDeleteAnamnese();
 
   // Fetch services
   const { data: clientServices, isLoading: servicesLoading } = useQuery({
@@ -554,6 +568,13 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                               <Edit className="w-4 h-4 inline mr-2" />
                               Editar
                             </button>
+                            <button
+                              onClick={() => setDeletingAnamneseId(anamnese.id)}
+                              className="px-4 py-2 rounded-lg font-semibold border-2 border-red-500 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                              title="Excluir anamnese"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -638,6 +659,35 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
           onClose={() => setViewingAnamnese(null)}
         />
       )}
+
+      {/* Dialog de confirmação de exclusão */}
+      <AlertDialog open={!!deletingAnamneseId} onOpenChange={(open) => !open && setDeletingAnamneseId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta anamnese? Esta ação não pode ser desfeita e todos os dados da anamnese serão perdidos permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deletingAnamneseId) {
+                  deleteAnamnese.mutate({ 
+                    anamneseId: deletingAnamneseId, 
+                    clientId: client.id 
+                  });
+                  setDeletingAnamneseId(null);
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

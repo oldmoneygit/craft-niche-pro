@@ -103,6 +103,7 @@ export function useSaveAnamnese() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['anamnese', variables.clientId] });
+      queryClient.invalidateQueries({ queryKey: ['client-anamneses', variables.clientId] });
       toast({ 
         title: 'Sucesso!',
         description: 'Anamnese salva com sucesso!' 
@@ -112,6 +113,38 @@ export function useSaveAnamnese() {
       toast({ 
         title: 'Erro',
         description: error.message || 'Erro ao salvar anamnese',
+        variant: 'destructive'
+      });
+    }
+  });
+}
+
+export function useDeleteAnamnese() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
+  return useMutation({
+    mutationFn: async ({ anamneseId, clientId }: { anamneseId: string; clientId: string }) => {
+      const { error } = await supabase
+        .from('anamneses')
+        .delete()
+        .eq('id', anamneseId);
+      
+      if (error) throw error;
+      return { clientId };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['anamnese', data.clientId] });
+      queryClient.invalidateQueries({ queryKey: ['client-anamneses', data.clientId] });
+      toast({ 
+        title: 'Sucesso!',
+        description: 'Anamnese excluída com sucesso!' 
+      });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Erro',
+        description: error.message || 'Erro ao excluir anamnese',
         variant: 'destructive'
       });
     }
