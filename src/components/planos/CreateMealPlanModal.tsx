@@ -367,6 +367,9 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
         supper: [],
       });
       queryClient.invalidateQueries({ queryKey: ['meal-plans'] });
+      if (editPlanId) {
+        queryClient.invalidateQueries({ queryKey: ['meal-plan', editPlanId] });
+      }
       onOpenChange(false);
     } catch (error) {
       console.error('Erro ao salvar plano:', error);
