@@ -276,10 +276,15 @@
   color: var(--text-secondary);
 }
 
-.action-btn:hover {
+.action-btn:hover:not(:disabled) {
   background: var(--primary);
   border-color: var(--primary);
   color: white;
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .action-btn.view {
