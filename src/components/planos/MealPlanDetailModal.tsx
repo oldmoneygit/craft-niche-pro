@@ -63,7 +63,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
         </DialogHeader>
 
         {/* Header com informações do cliente - Design melhorado */}
-        <div className="bg-primary dark:bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-primary dark:border-white/10">
+        <div className="rounded-2xl p-6 border backdrop-blur-md bg-primary dark:bg-white/5 border-primary dark:border-white/10" style={{ backgroundColor: 'var(--card-info-bg)' }}>
           <div className="flex items-center gap-4 mb-4">
             <div className="w-14 h-14 rounded-full bg-primary-foreground/20 dark:bg-primary flex items-center justify-center text-primary dark:text-primary-foreground font-bold text-xl shadow-lg">
               {plan.client.name.substring(0, 2).toUpperCase()}

@@ -1,10 +1,12 @@
 /* Modal dark mode background */
 [data-theme="dark"] {
   --modal-bg: #1a1a1a;
+  --card-info-bg: transparent;
 }
 
 :root {
   --modal-bg: #fafafa;
+  --card-info-bg: #10b981;
 }
 
 .agendamentos-page {
