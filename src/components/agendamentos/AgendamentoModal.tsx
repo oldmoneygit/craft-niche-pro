@@ -285,7 +285,8 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                       background: isDark ? '#171717' : '#ffffff',
                       border: isDark ? '1px solid #404040' : '1px solid #e5e5e5',
                       borderRadius: '12px',
-                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)'
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+                      zIndex: 9999
                     }}
                   >
                     <Calendar
@@ -294,7 +295,8 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                       onSelect={(date) => date && setSelectedDate(date)}
                       disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                       initialFocus
-                      className={cn("p-3 pointer-events-auto")}
+                      locale={ptBR}
+                      className="pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
