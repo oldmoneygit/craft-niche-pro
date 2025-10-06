@@ -370,6 +370,24 @@ export default function PlanosAlimentares() {
                         </span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                        <span style={{ color: isDark ? '#a3a3a3' : '#6b7280', marginLeft: '26px' }}>Proteínas:</span>
+                        <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
+                          {plan.target_protein ? `${plan.target_protein}g` : 'Não definida'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                        <span style={{ color: isDark ? '#a3a3a3' : '#6b7280', marginLeft: '26px' }}>Carboidratos:</span>
+                        <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
+                          {plan.target_carbs ? `${plan.target_carbs}g` : 'Não definida'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                        <span style={{ color: isDark ? '#a3a3a3' : '#6b7280', marginLeft: '26px' }}>Gorduras:</span>
+                        <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
+                          {plan.target_fats ? `${plan.target_fats}g` : 'Não definida'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
                         <List style={{ width: '18px', height: '18px', color: colors.iconColor }} />
                         <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>Refeições:</span>
                         <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
