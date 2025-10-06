@@ -1,196 +1,203 @@
-import { useState } from 'react';
-import { 
-  UserPlus, Phone, Clock, MessageCircle, 
-  Calendar, X
-} from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { DndContext, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
+import { UserPlus, Plus, AlertCircle } from 'lucide-react';
+import { useLeads } from '@/hooks/useLeads';
+import { KanbanColumn } from '@/components/leads/KanbanColumn';
+import { LeadCard } from '@/components/leads/LeadCard';
+import { CreateLeadModal } from '@/components/leads/CreateLeadModal';
+import { Skeleton } from '@/components/ui/skeleton';
 import './Leads.css';
 
-interface Lead {
-  id: string;
-  name: string;
-  phone: string;
-  preferredTime: string;
-  capturedAt: string;
-  status: 'pending' | 'contacted' | 'scheduled';
-  aiCaptured: boolean;
-}
-
 export function Leads() {
-  const [leads] = useState<Lead[]>([
-    {
-      id: '1',
-      name: 'Pamela Ferreira',
-      phone: '19 982403342',
-      preferredTime: 'quinta às 09h',
-      capturedAt: '01/10/2025, 20:12:23',
-      status: 'pending',
-      aiCaptured: true
-    }
-  ]);
+  const { leads, isLoading, error, updateLeadStatus, createLead, deleteLead } = useLeads();
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const getLeadsByStatus = (status: Lead['status']) => {
-    return leads.filter(lead => lead.status === status);
+  const leadsByStatus = useMemo(() => {
+    if (!leads) return { pending: [], contacted: [], scheduled: [] };
+    
+    return {
+      pending: leads.filter(l => l.status === 'pending'),
+      contacted: leads.filter(l => l.status === 'contacted'),
+      scheduled: leads.filter(l => l.status === 'scheduled')
+    };
+  }, [leads]);
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
   };
 
-  const handleContact = (leadId: string) => {
-    console.log('Contact lead:', leadId);
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (!over) {
+      setActiveId(null);
+      return;
+    }
+    
+    const leadId = active.id as string;
+    const newStatus = over.id as 'pending' | 'contacted' | 'scheduled';
+    
+    const lead = leads?.find(l => l.id === leadId);
+    
+    if (lead && lead.status !== newStatus) {
+      await updateLeadStatus.mutateAsync({ leadId, newStatus });
+    }
+    
+    setActiveId(null);
+  };
+
+  const handleContact = async (leadId: string) => {
+    const lead = leads?.find(l => l.id === leadId);
+    if (!lead) return;
+    
+    const message = encodeURIComponent(
+      `Olá ${lead.name}! Vi que você se interessou pelos nossos serviços de nutrição. Como posso te ajudar?`
+    );
+    window.open(`https://wa.me/${lead.phone.replace(/\D/g, '')}?text=${message}`, '_blank');
+    
+    await updateLeadStatus.mutateAsync({ leadId, newStatus: 'contacted' });
   };
 
   const handleSchedule = (leadId: string) => {
-    console.log('Schedule lead:', leadId);
+    const lead = leads?.find(l => l.id === leadId);
+    if (!lead) return;
+    
+    window.location.href = `/agendamentos?action=new&leadId=${leadId}&name=${encodeURIComponent(lead.name)}&phone=${lead.phone}`;
   };
 
-  const handleReject = (leadId: string) => {
-    console.log('Reject lead:', leadId);
+  const handleDelete = (leadId: string) => {
+    if (confirm('Tem certeza que deseja excluir este lead?')) {
+      deleteLead.mutate(leadId);
+    }
   };
 
-  const pendingLeads = getLeadsByStatus('pending');
-  const contactedLeads = getLeadsByStatus('contacted');
-  const scheduledLeads = getLeadsByStatus('scheduled');
+  const handleCreateLead = (data: any) => {
+    createLead.mutate(data);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="container max-w-[1600px] mx-auto p-6">
+        <div className="mb-8">
+          <Skeleton className="h-10 w-64 mb-2" />
+          <Skeleton className="h-5 w-96" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {[1,2,3].map(i => (
+            <Skeleton 
+              key={i}
+              className="h-[600px] rounded-2xl"
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container max-w-[1600px] mx-auto p-6">
+        <div 
+          className="p-6 rounded-2xl border flex items-center gap-3"
+          style={{
+            background: 'rgba(239, 68, 68, 0.1)',
+            borderColor: '#ef4444'
+          }}
+        >
+          <AlertCircle className="w-5 h-5 text-red-500" />
+          <div>
+            <p className="font-semibold text-red-700">Erro ao carregar leads</p>
+            <p className="text-sm text-red-600">{error.message}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const activeLead = activeId ? leads?.find(l => l.id === activeId) : null;
 
   return (
-    <div className="leads-page">
+    <div className="container max-w-[1600px] mx-auto p-6">
       {/* Header */}
-      <div className="leads-header">
-        <div className="header-content">
-          <h1>
-            <UserPlus size={32} />
-            Gestão de Leads
-          </h1>
-          <p>Acompanhe e gerencie seus leads capturados</p>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground mb-2 flex items-center gap-3">
+          <UserPlus size={32} className="text-primary" />
+          Gestão de Leads
+        </h1>
+        <p className="text-muted-foreground">
+          Acompanhe e gerencie seus leads capturados
+        </p>
       </div>
 
       {/* Kanban Board */}
-      <div className="kanban-board">
-        {/* PENDENTES */}
-        <div className="kanban-column column-pendentes">
-          <div className="kanban-header">
-            <div className="kanban-title">Pendentes</div>
-            <div className="kanban-count">{pendingLeads.length}</div>
-          </div>
-
-          {pendingLeads.length > 0 ? (
-            pendingLeads.map((lead) => (
-              <div key={lead.id} className="lead-card ai-captured">
-                <div className="lead-header">
-                  <div className="lead-name">{lead.name}</div>
-                  {lead.aiCaptured && (
-                    <div className="lead-badge">Capturado pela IA</div>
-                  )}
-                </div>
-
-                <div className="lead-info">
-                  <div className="info-item">
-                    <Phone size={18} />
-                    <span>{lead.phone}</span>
-                  </div>
-                  <div className="info-item">
-                    <Clock size={18} />
-                    <span>Prefere: {lead.preferredTime}</span>
-                  </div>
-                </div>
-
-                <div className="lead-meta">
-                  Capturado em {lead.capturedAt}
-                </div>
-
-                <div className="lead-actions">
-                  <button 
-                    className="btn btn-contact"
-                    onClick={() => handleContact(lead.id)}
-                  >
-                    <MessageCircle size={16} />
-                    Contatar
-                  </button>
-                  <button 
-                    className="btn btn-schedule"
-                    onClick={() => handleSchedule(lead.id)}
-                  >
-                    <Calendar size={16} />
-                    Agendar
-                  </button>
-                  <button 
-                    className="btn btn-reject"
-                    onClick={() => handleReject(lead.id)}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="empty-state">
-              <MessageCircle size={56} />
-              <p>Nenhum lead pendente</p>
-            </div>
-          )}
+      <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <KanbanColumn
+            id="pending"
+            title="PENDENTES"
+            count={leadsByStatus.pending.length}
+            color="#f59e0b"
+            leads={leadsByStatus.pending}
+            onContact={handleContact}
+            onSchedule={handleSchedule}
+            onDelete={handleDelete}
+          />
+          
+          <KanbanColumn
+            id="contacted"
+            title="CONTACTADOS"
+            count={leadsByStatus.contacted.length}
+            color="#3b82f6"
+            leads={leadsByStatus.contacted}
+            onContact={handleContact}
+            onSchedule={handleSchedule}
+            onDelete={handleDelete}
+          />
+          
+          <KanbanColumn
+            id="scheduled"
+            title="AGENDADOS"
+            count={leadsByStatus.scheduled.length}
+            color="#10b981"
+            leads={leadsByStatus.scheduled}
+            onContact={handleContact}
+            onSchedule={handleSchedule}
+            onDelete={handleDelete}
+          />
         </div>
 
-        {/* CONTACTADOS */}
-        <div className="kanban-column column-contactados">
-          <div className="kanban-header">
-            <div className="kanban-title">Contactados</div>
-            <div className="kanban-count">{contactedLeads.length}</div>
-          </div>
-
-          {contactedLeads.length > 0 ? (
-            contactedLeads.map((lead) => (
-              <div key={lead.id} className="lead-card">
-                <div className="lead-header">
-                  <div className="lead-name">{lead.name}</div>
-                </div>
-                <div className="lead-info">
-                  <div className="info-item">
-                    <Phone size={18} />
-                    <span>{lead.phone}</span>
-                  </div>
-                </div>
-                <div className="lead-meta">
-                  Contactado em {lead.capturedAt}
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="empty-state">
-              <MessageCircle size={56} />
-              <p>Nenhum lead contactado</p>
+        <DragOverlay>
+          {activeLead && (
+            <div style={{ width: '350px' }}>
+              <LeadCard 
+                lead={activeLead}
+                onContact={handleContact}
+                onSchedule={handleSchedule}
+                onDelete={handleDelete}
+              />
             </div>
           )}
-        </div>
+        </DragOverlay>
+      </DndContext>
 
-        {/* AGENDADOS */}
-        <div className="kanban-column column-agendados">
-          <div className="kanban-header">
-            <div className="kanban-title">Agendados</div>
-            <div className="kanban-count">{scheduledLeads.length}</div>
-          </div>
+      {/* FAB - Adicionar Lead */}
+      <button
+        onClick={() => setIsCreateModalOpen(true)}
+        className="fixed bottom-8 right-8 w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg hover:shadow-xl hover:scale-110 transition-all flex items-center justify-center z-50"
+        style={{
+          boxShadow: '0 8px 24px rgba(16, 185, 129, 0.4)'
+        }}
+      >
+        <Plus className="w-7 h-7 text-white" strokeWidth={2.5} />
+      </button>
 
-          {scheduledLeads.length > 0 ? (
-            scheduledLeads.map((lead) => (
-              <div key={lead.id} className="lead-card">
-                <div className="lead-header">
-                  <div className="lead-name">{lead.name}</div>
-                </div>
-                <div className="lead-info">
-                  <div className="info-item">
-                    <Phone size={18} />
-                    <span>{lead.phone}</span>
-                  </div>
-                </div>
-                <div className="lead-meta">
-                  Agendado para {lead.preferredTime}
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="empty-state">
-              <Calendar size={56} />
-              <p>Nenhum agendamento realizado</p>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Modal Criar Lead */}
+      <CreateLeadModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleCreateLead}
+      />
     </div>
   );
 }
