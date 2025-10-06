@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Plus, X, Filter } from 'lucide-react';
 import { useFoodSearch } from '@/hooks/useFoodSearch';
 import { useFoodMeasures } from '@/hooks/useFoodMeasures';
@@ -57,6 +57,18 @@ export function MealFoodBuilder({
     searchTerm
   );
   const { data: categories } = useFoodCategories(selectedSource);
+
+  // Definir medida padrão quando um alimento é selecionado e medidas são carregadas
+  useEffect(() => {
+    if (selectedFood && measures && measures.length > 0) {
+      // Procurar por "100 gramas" primeiro
+      const defaultMeasure = measures.find(m => 
+        m.measure_name.toLowerCase().includes('100 gramas')
+      ) || measures[0]; // Se não encontrar, usa a primeira medida
+      
+      setSelectedMeasure(defaultMeasure);
+    }
+  }, [selectedFood?.id, measures]);
 
   // Lógica para determinar quais alimentos mostrar e aplicar filtros
   let displayFoods = selectedSource 
@@ -529,7 +541,7 @@ export function MealFoodBuilder({
                   }}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-colors"
                 >
-                  <option value="">Gramas</option>
+                  <option value="">gramas (1g)</option>
                   {measures?.map((measure) => (
                     <option key={measure.id} value={measure.id}>
                       {measure.measure_name} ({measure.grams}g)
