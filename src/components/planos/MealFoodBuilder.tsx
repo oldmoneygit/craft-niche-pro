@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Search, Plus, X } from 'lucide-react';
+import { Search, Plus, X, Filter } from 'lucide-react';
 import { useFoodSearch } from '@/hooks/useFoodSearch';
 import { useFoodMeasures } from '@/hooks/useFoodMeasures';
 import { usePopularFoods } from '@/hooks/usePopularFoods';
+import { useFoodsBySource } from '@/hooks/useFoodsBySource';
+import { useFoodCategories } from '@/hooks/useFoodCategories';
 import { Badge } from '@/components/ui/badge';
 
 interface FoodItem {
@@ -40,13 +42,21 @@ export function MealFoodBuilder({
   const [quantity, setQuantity] = useState('1');
   const [showSearch, setShowSearch] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [selectedSource, setSelectedSource] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const { data: searchResults, isLoading } = useFoodSearch(searchTerm);
   const { data: popularFoods, isLoading: isLoadingPopular } = usePopularFoods();
   const { data: measures } = useFoodMeasures(selectedFood?.id || '');
+  const { data: foodsBySource, isLoading: isLoadingBySource } = useFoodsBySource(selectedSource, selectedCategory);
+  const { data: categories } = useFoodCategories(selectedSource);
 
-  // Mostrar alimentos populares quando focado e sem busca, ou resultados da busca
-  const displayFoods = searchTerm.length >= 2 ? searchResults : (isFocused ? popularFoods : []);
+  // Lógica para determinar quais alimentos mostrar
+  const displayFoods = selectedSource 
+    ? foodsBySource 
+    : searchTerm.length >= 2 
+      ? searchResults 
+      : (isFocused ? popularFoods : []);
 
   const handleAddFood = () => {
     if (!selectedFood || !quantity) return;
@@ -127,30 +137,129 @@ export function MealFoodBuilder({
       {/* Busca de alimentos */}
       {showSearch && (
         <div className="space-y-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700">
-          {/* Input de busca */}
+          {/* Filtros por Fonte de Dados */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Filter className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">
+                Fonte de Dados
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => {
+                  setSelectedSource(selectedSource === 'TACO' ? null : 'TACO');
+                  setSelectedCategory(null);
+                  setSearchTerm('');
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  selectedSource === 'TACO'
+                    ? 'bg-emerald-500 text-white shadow-md'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:border-emerald-500'
+                }`}
+              >
+                TACO (Brasil)
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedSource(selectedSource === 'OpenFoodFacts' ? null : 'OpenFoodFacts');
+                  setSelectedCategory(null);
+                  setSearchTerm('');
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  selectedSource === 'OpenFoodFacts'
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:border-blue-500'
+                }`}
+              >
+                OpenFoodFacts
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedSource(selectedSource === 'USDA' ? null : 'USDA');
+                  setSelectedCategory(null);
+                  setSearchTerm('');
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  selectedSource === 'USDA'
+                    ? 'bg-purple-500 text-white shadow-md'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:border-purple-500'
+                }`}
+              >
+                USDA (EUA)
+              </button>
+            </div>
+          </div>
+
+          {/* Filtros por Categoria (só aparece quando uma fonte está selecionada) */}
+          {selectedSource && categories && categories.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase">
+                  Categoria
+                </span>
+                {selectedCategory && (
+                  <button
+                    onClick={() => setSelectedCategory(null)}
+                    className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
+                  >
+                    Limpar filtro
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
+                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                      selectedCategory === category
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:border-emerald-500'
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Input de busca (desabilitado quando há filtro de fonte ativo) */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Buscar alimento... (ex: arroz, frango, banana)"
+              placeholder={selectedSource ? "Pesquisa desabilitada - use os filtros acima" : "Buscar alimento... (ex: arroz, frango, banana)"}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              disabled={!!selectedSource}
+              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
           {/* Resultados da busca ou alimentos populares */}
-          {(searchTerm.length >= 2 || isFocused) && (
+          {(searchTerm.length >= 2 || isFocused || selectedSource) && (
             <div className="space-y-2">
-              {searchTerm.length === 0 && isFocused && (
+              {selectedSource && (
+                <div className="flex items-center justify-between px-2">
+                  <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    {selectedCategory ? `${selectedSource} - ${selectedCategory}` : `Todos os alimentos ${selectedSource}`}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {displayFoods?.length || 0} alimentos
+                  </div>
+                </div>
+              )}
+              {searchTerm.length === 0 && isFocused && !selectedSource && (
                 <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide px-2">
                   Alimentos mais comuns
                 </div>
               )}
               <div className="max-h-64 overflow-y-auto space-y-1">
-                {(isLoading || isLoadingPopular) ? (
+                {(isLoading || isLoadingPopular || isLoadingBySource) ? (
                   <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
                     Buscando...
                   </div>
