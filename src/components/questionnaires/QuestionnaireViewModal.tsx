@@ -29,6 +29,9 @@ export function QuestionnaireViewModal({
   const color = categoryColors[questionnaire.category as keyof typeof categoryColors] || categoryColors.outro;
   const questions = questionnaire.questions as any[] || [];
   
+  // Debug: verificar estrutura das perguntas
+  console.log('Questions data:', questions);
+  
   // Verificar se tem perguntas pontuáveis
   const scorableQuestions = questions.filter(q => q.scorable);
   const hasScoringSystem = scorableQuestions.length > 0;
@@ -38,8 +41,10 @@ export function QuestionnaireViewModal({
       text: 'Resposta Curta',
       textarea: 'Resposta Longa',
       single_select: 'Escolha Única',
+      single_choice: 'Escolha Única',
       radio: 'Escolha Única',
       multi_select: 'Múltipla Escolha',
+      multiple_choice: 'Múltipla Escolha',
       checkbox: 'Múltipla Escolha',
       number: 'Número',
       scale: 'Escala (1-10)',
@@ -126,14 +131,18 @@ export function QuestionnaireViewModal({
 
                   {/* Mostrar opções se houver */}
                   {(question.type === 'single_select' || 
+                    question.type === 'single_choice' ||
                     question.type === 'radio' || 
                     question.type === 'multi_select' || 
+                    question.type === 'multiple_choice' ||
                     question.type === 'checkbox') && 
                    question.options && question.options.length > 0 && (
                     <div className="ml-11 mt-3 space-y-2">
                       {question.options.map((option: any, optIndex: number) => {
                         const optionText = typeof option === 'string' ? option : option.text || option.label || option;
                         const optionScore = question.scorable && question.optionScores ? question.optionScores[optionText] : null;
+                        
+                        console.log('Option:', optionText, 'Score:', optionScore, 'All scores:', question.optionScores);
                         
                         return (
                           <div 
@@ -142,7 +151,7 @@ export function QuestionnaireViewModal({
                           >
                             <div className="flex items-center gap-2 flex-1">
                               <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${
-                                question.type === 'multi_select' || question.type === 'checkbox' 
+                                question.type === 'multi_select' || question.type === 'multiple_choice' || question.type === 'checkbox' 
                                   ? 'rounded border-emerald-400' 
                                   : 'border-emerald-400'
                               }`} />
