@@ -80,7 +80,8 @@ export function Dashboard() {
       value: dashboardData?.todayAppointments || 0,
       change: 'Consultas agendadas',
       icon: Calendar,
-      variant: 'today'
+      variant: 'today',
+      changeType: 'neutral'
     },
     {
       label: 'ESTE MÊS',
@@ -95,7 +96,8 @@ export function Dashboard() {
       value: dashboardData?.pendingConfirmations || 0,
       change: 'Pendentes (48h)',
       icon: CheckCircle,
-      variant: 'pending'
+      variant: 'pending',
+      changeType: 'neutral'
     },
     {
       label: 'INATIVOS',
@@ -161,8 +163,8 @@ export function Dashboard() {
             key={index}
             label={stat.label}
             value={stat.value}
-            change={stat.change}
-            changeType={stat.changeType}
+            description={stat.change}
+            trend={stat.changeType}
             icon={stat.icon}
             variant={stat.variant}
           />

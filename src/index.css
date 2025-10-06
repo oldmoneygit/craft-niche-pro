@@ -17,12 +17,12 @@
   --bg-primary: #ffffff;
   --bg-hover: rgba(16, 185, 129, 0.08);
   --bg-active: rgba(16, 185, 129, 0.12);
-  --text-primary: #1f2937;
+  --text-primary: #171717;
   --text-secondary: #6b7280;
   --text-tertiary: #9ca3af;
   --text-muted: #737373;
-  --border: #e5e7eb;
-  --shadow: rgba(0, 0, 0, 0.1);
+  --border: #e5e5e5;
+  --shadow: rgba(0, 0, 0, 0.08);
   --shadow-hover: rgba(0, 0, 0, 0.15);
 }
 
@@ -34,13 +34,18 @@
   --bg-primary: #171717;
   --bg-hover: rgba(16, 185, 129, 0.15);
   --bg-active: rgba(16, 185, 129, 0.25);
-  --text-primary: #f9fafb;
+  --text-primary: #fafafa;
   --text-secondary: #d1d5db;
   --text-tertiary: #9ca3af;
   --text-muted: #a3a3a3;
-  --border: #374151;
+  --border: #404040;
   --shadow: rgba(0, 0, 0, 0.3);
   --shadow-hover: rgba(0, 0, 0, 0.5);
+}
+
+/* Garantir backdrop-filter funciona em todos navegadores */
+.stat-card {
+  -webkit-backdrop-filter: blur(20px);
 }
 
 * {
