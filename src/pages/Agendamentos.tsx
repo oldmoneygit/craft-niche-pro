@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Calendar as CalendarIcon, Clock, CheckCircle, Check, Plus, 
-  ChevronLeft, ChevronRight, X as XIcon
+  ChevronLeft, ChevronRight, X as XIcon, ArrowRight
 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, 
   isSameDay, isToday, addMonths, subMonths } from 'date-fns';
@@ -89,6 +89,16 @@ export function Agendamentos() {
       .filter(apt => isSameDay(new Date(apt.datetime), selectedDate))
       .sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime());
   }, [appointments, selectedDate]);
+
+  // Next upcoming appointments
+  const nextAppointments = useMemo(() => {
+    if (!appointments) return [];
+    const now = new Date();
+    return appointments
+      .filter(apt => new Date(apt.datetime) >= now && apt.status !== 'cancelado')
+      .sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime())
+      .slice(0, 5);
+  }, [appointments]);
 
   // Calendar days
   const monthDays = useMemo(() => {
@@ -263,6 +273,37 @@ export function Agendamentos() {
               })}
             </div>
           </div>
+
+          {/* Next Appointments */}
+          {nextAppointments.length > 0 && (
+            <div className="next-appointments-section">
+              <div className="next-appointments-title">
+                <ArrowRight size={14} />
+                Próximas Consultas
+              </div>
+              {nextAppointments.map((apt) => (
+                <div key={apt.id} className="next-appointment-item">
+                  <div className="next-appointment-date">
+                    <div className="next-appointment-day">
+                      {format(new Date(apt.datetime), 'd')}
+                    </div>
+                    <div className="next-appointment-month">
+                      {format(new Date(apt.datetime), 'MMM', { locale: ptBR })}
+                    </div>
+                  </div>
+                  <div className="next-appointment-details">
+                    <div className="next-appointment-client">{apt.clients.name}</div>
+                    <div className="next-appointment-time">
+                      {format(new Date(apt.datetime), "EEE, HH:mm", { locale: ptBR })}
+                    </div>
+                  </div>
+                  <span className={`status-badge ${apt.status}`} style={{ fontSize: '9px', padding: '3px 8px' }}>
+                    {apt.status === 'agendado' ? 'Agendado' : 'Confirmado'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Day Appointments List */}

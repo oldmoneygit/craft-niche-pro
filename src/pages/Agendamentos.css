@@ -214,6 +214,79 @@
   color: hsl(var(--muted-foreground));
 }
 
+/* Next Appointments Section */
+.next-appointments-section {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.next-appointments-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.next-appointment-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: hsl(var(--background));
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.next-appointment-item:hover {
+  background: hsl(var(--accent));
+}
+
+.next-appointment-item:last-child {
+  margin-bottom: 0;
+}
+
+.next-appointment-date {
+  text-align: center;
+  min-width: 50px;
+}
+
+.next-appointment-day {
+  font-size: 20px;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  line-height: 1;
+}
+
+.next-appointment-month {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  margin-top: 2px;
+}
+
+.next-appointment-details {
+  flex: 1;
+}
+
+.next-appointment-client {
+  font-size: 13px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 2px;
+}
+
+.next-appointment-time {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+}
+
 /* Day Appointments Section */
 .day-appointments-section {
   background: hsl(var(--background) / 0.6);
