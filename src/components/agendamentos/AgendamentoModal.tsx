@@ -244,7 +244,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               <X style={{ 
                 width: '20px', 
                 height: '20px', 
-                color: 'white' 
+                color: '#ef4444'
               }} />
             </button>
           </div>
