@@ -31,7 +31,7 @@ export function LeadCard({ lead, onContact, onSchedule, onDelete }: LeadCardProp
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className={`lead-card ${lead.source === 'ai_chat' ? 'ai-captured' : ''}`}
+      className={`lead-card status-${lead.status} ${lead.source === 'ai_chat' ? 'ai-captured' : ''}`}
     >
       {/* Área de drag - apenas o conteúdo, não os botões */}
       <div {...listeners} className="cursor-move">

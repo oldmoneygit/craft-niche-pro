@@ -80,7 +80,6 @@
   top: 0;
   bottom: 0;
   width: 3px;
-  background: #10b981;
   transform: scaleY(0);
   transition: transform 0.3s ease;
 }
@@ -88,6 +87,30 @@
 .lead-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px hsl(var(--foreground) / 0.12);
+}
+
+/* Cores por status */
+.lead-card.status-pending::before {
+  background: #f59e0b;
+}
+
+.lead-card.status-pending:hover {
+  border-color: #f59e0b;
+}
+
+.lead-card.status-contacted::before {
+  background: #3b82f6;
+}
+
+.lead-card.status-contacted:hover {
+  border-color: #3b82f6;
+}
+
+.lead-card.status-scheduled::before {
+  background: #10b981;
+}
+
+.lead-card.status-scheduled:hover {
   border-color: #10b981;
 }
 
