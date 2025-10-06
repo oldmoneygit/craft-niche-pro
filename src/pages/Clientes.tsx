@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useClientsData } from '@/hooks/useClientsData';
 import type { ClientWithStats } from '@/hooks/useClientsData';
-import { ClientStatCard } from '@/components/clientes/ClientStatCard';
+import { StatCardClientes } from '@/components/clientes/StatCardClientes';
 import './Clientes.css';
 
 export function Clientes() {
@@ -78,26 +78,26 @@ export function Clientes() {
       </div>
 
       {/* Stats Grid */}
-      <div className="stats-grid">
-        <ClientStatCard
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <StatCardClientes
           title="TOTAL DE CLIENTES"
           value={clientStats?.total || 0}
           icon={Users}
           variant="total"
         />
-        <ClientStatCard
+        <StatCardClientes
           title="NOVOS ESTE MÊS"
           value={clientStats?.newThisMonth || 0}
           icon={UserPlus}
           variant="new"
         />
-        <ClientStatCard
+        <StatCardClientes
           title="ATIVOS"
           value={clientStats?.active || 0}
           icon={UserCheck}
           variant="active"
         />
-        <ClientStatCard
+        <StatCardClientes
           title="INATIVOS"
           value={clientStats?.inactive || 0}
           icon={Clock}
