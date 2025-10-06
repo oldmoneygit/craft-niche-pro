@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, User, Phone, Mail, Calendar, UtensilsCrossed, ClipboardList, Eye, Send, Edit, Package, Plus, RefreshCw, Trash2, CheckCircle, MessageCircle, FileText } from 'lucide-react';
 import { AnamnesisHistory } from '@/components/platform/AnamnesisHistory';
+import { AnamneseForm } from '@/components/platform/AnamneseForm';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -734,9 +735,7 @@ export const ClientDetailsModal = ({ client, onClose, onUpdate }: ClientDetailsM
 
                 {/* Tab: Anamneses */}
                 {activeTab === 'anamneses' && (
-                  <div>
-                    <AnamnesisHistory clientId={client.id} tenantId={client.tenant_id} />
-                  </div>
+                  <AnamneseForm clientId={client.id} />
                 )}
               </>
             )}
