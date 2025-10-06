@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Clock, HelpCircle, FileText } from "lucide-react";
+import { Clock, HelpCircle, FileText, Target, Award } from "lucide-react";
 import type { Questionnaire } from '@/hooks/useQuestionnaires';
 
 interface QuestionnaireViewModalProps {
@@ -28,6 +28,10 @@ export function QuestionnaireViewModal({
 
   const color = categoryColors[questionnaire.category as keyof typeof categoryColors] || categoryColors.outro;
   const questions = questionnaire.questions as any[] || [];
+  
+  // Verificar se tem perguntas pontuáveis
+  const scorableQuestions = questions.filter(q => q.scorable);
+  const hasScoringSystem = scorableQuestions.length > 0;
 
   const getQuestionTypeLabel = (type: string) => {
     const types: Record<string, string> = {
@@ -69,6 +73,12 @@ export function QuestionnaireViewModal({
                   <FileText className="w-4 h-4" />
                   <span className="font-medium">{questionnaire.response_count}</span> respostas
                 </div>
+                {hasScoringSystem && (
+                  <Badge variant="outline" className="border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20">
+                    <Target className="w-3 h-3 mr-1" />
+                    {scorableQuestions.length} {scorableQuestions.length === 1 ? 'pergunta pontuável' : 'perguntas pontuáveis'}
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
@@ -92,13 +102,25 @@ export function QuestionnaireViewModal({
                       {index + 1}
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
-                        {question.question}
-                        {question.required && <span className="text-red-500 ml-1">*</span>}
-                      </h4>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {getQuestionTypeLabel(question.type)}
-                      </p>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                            {question.question}
+                            {question.required && <span className="text-red-500 ml-1">*</span>}
+                          </h4>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {getQuestionTypeLabel(question.type)}
+                          </p>
+                        </div>
+                        {question.scorable && (
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20">
+                              <Award className="w-3 h-3 mr-1" />
+                              Peso {question.weight || 1}
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -109,21 +131,33 @@ export function QuestionnaireViewModal({
                     question.type === 'checkbox') && 
                    question.options && question.options.length > 0 && (
                     <div className="ml-11 mt-3 space-y-2">
-                      {question.options.map((option: any, optIndex: number) => (
-                        <div 
-                          key={option.id || optIndex}
-                          className="flex items-center gap-2 p-2.5 bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors"
-                        >
-                          <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${
-                            question.type === 'multi_select' || question.type === 'checkbox' 
-                              ? 'rounded border-emerald-400' 
-                              : 'border-emerald-400'
-                          }`} />
-                          <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                            {typeof option === 'string' ? option : option.text || option.label || option}
-                          </span>
-                        </div>
-                      ))}
+                      {question.options.map((option: any, optIndex: number) => {
+                        const optionText = typeof option === 'string' ? option : option.text || option.label || option;
+                        const optionScore = question.scorable && question.optionScores ? question.optionScores[optionText] : null;
+                        
+                        return (
+                          <div 
+                            key={option.id || optIndex}
+                            className="flex items-center justify-between gap-2 p-2.5 bg-white dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors"
+                          >
+                            <div className="flex items-center gap-2 flex-1">
+                              <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${
+                                question.type === 'multi_select' || question.type === 'checkbox' 
+                                  ? 'rounded border-emerald-400' 
+                                  : 'border-emerald-400'
+                              }`} />
+                              <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                                {optionText}
+                              </span>
+                            </div>
+                            {optionScore !== null && optionScore !== undefined && (
+                              <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                {optionScore} pts
+                              </Badge>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 

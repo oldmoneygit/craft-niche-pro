@@ -80,7 +80,10 @@ export function useQuestionnaires() {
             options: q.options || [],
             required: q.is_required,
             section: q.section,
-            order_index: q.order_index
+            order_index: q.order_index,
+            scorable: q.scorable || false,
+            weight: q.weight || 1,
+            optionScores: q.option_scores || {}
           }));
 
           return {
