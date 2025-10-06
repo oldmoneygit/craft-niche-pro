@@ -7,7 +7,9 @@ interface QuizCardProps {
 }
 
 export function QuizCard({ question, index }: QuizCardProps) {
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [selectedOption, setSelectedOption] = useState<string>('');
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [scaleValue, setScaleValue] = useState<number>(0);
 
   if (!question) return null;
 
@@ -61,83 +63,97 @@ export function QuizCard({ question, index }: QuizCardProps) {
       {/* Single Choice */}
       {question.type === 'single_choice' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {(question.options || []).map((option, i) => (
-            <button
-              key={i}
-              onClick={() => setSelectedOption(option)}
-              style={{
-                width: '100%',
-                textAlign: 'left',
-                padding: '16px',
-                borderRadius: '12px',
-                border: selectedOption === option ? '2px solid #10b981' : '2px solid #e5e7eb',
-                background: selectedOption === option ? 'rgba(16, 185, 129, 0.1)' : 'white',
-                color: selectedOption === option ? '#10b981' : '#374151',
-                fontWeight: selectedOption === option ? '600' : '500',
-                fontSize: '15px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                lineHeight: '1.4'
-              }}
-              onMouseEnter={(e) => {
-                if (selectedOption !== option) {
-                  e.currentTarget.style.borderColor = '#10b981';
-                  e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (selectedOption !== option) {
-                  e.currentTarget.style.borderColor = '#e5e7eb';
-                  e.currentTarget.style.background = 'white';
-                }
-              }}
-            >
-              {option || `Opção ${i + 1}`}
-            </button>
-          ))}
+          {(question.options || []).map((option, i) => {
+            const isSelected = selectedOption === option;
+            return (
+              <button
+                key={i}
+                onClick={() => setSelectedOption(option)}
+                style={{
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '16px',
+                  borderRadius: '12px',
+                  border: isSelected ? '2px solid #10b981' : '2px solid #e5e7eb',
+                  background: isSelected ? 'rgba(16, 185, 129, 0.1)' : 'white',
+                  color: isSelected ? '#10b981' : '#374151',
+                  fontWeight: isSelected ? '600' : '500',
+                  fontSize: '15px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  lineHeight: '1.4'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.borderColor = '#10b981';
+                    e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.borderColor = '#e5e7eb';
+                    e.currentTarget.style.background = 'white';
+                  }
+                }}
+              >
+                {option || `Opção ${i + 1}`}
+              </button>
+            );
+          })}
         </div>
       )}
 
       {/* Multiple Choice */}
       {question.type === 'multiple_choice' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {(question.options || []).map((option, i) => (
-            <label
-              key={i}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '16px',
-                borderRadius: '12px',
-                border: '2px solid #e5e7eb',
-                background: 'white',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#10b981';
-                e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#e5e7eb';
-                e.currentTarget.style.background = 'white';
-              }}
-            >
-              <input
-                type="checkbox"
+          {(question.options || []).map((option, i) => {
+            const isChecked = selectedOptions.includes(option);
+            return (
+              <label
+                key={i}
                 style={{
-                  width: '20px',
-                  height: '20px',
-                  marginRight: '12px',
-                  accentColor: '#10b981',
-                  cursor: 'pointer'
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '16px',
+                  borderRadius: '12px',
+                  border: '2px solid #e5e7eb',
+                  background: 'white',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
                 }}
-              />
-              <span style={{ fontSize: '15px', color: '#374151', fontWeight: '500', lineHeight: '1.4' }}>
-                {option || `Opção ${i + 1}`}
-              </span>
-            </label>
-          ))}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#10b981';
+                  e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#e5e7eb';
+                  e.currentTarget.style.background = 'white';
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={isChecked}
+                  onChange={() => {
+                    if (isChecked) {
+                      setSelectedOptions(selectedOptions.filter(o => o !== option));
+                    } else {
+                      setSelectedOptions([...selectedOptions, option]);
+                    }
+                  }}
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    marginRight: '12px',
+                    accentColor: '#10b981',
+                    cursor: 'pointer'
+                  }}
+                />
+                <span style={{ fontSize: '15px', color: '#374151', fontWeight: '500', lineHeight: '1.4' }}>
+                  {option || `Opção ${i + 1}`}
+                </span>
+              </label>
+            );
+          })}
         </div>
       )}
 
@@ -225,33 +241,41 @@ export function QuizCard({ question, index }: QuizCardProps) {
       {question.type === 'scale' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
-            {[1, 2, 3, 4, 5].map(num => (
-              <button
-                key={num}
-                style={{
-                  flex: 1,
-                  padding: '20px 0',
-                  borderRadius: '12px',
-                  border: '2px solid #e5e7eb',
-                  background: 'white',
-                  color: '#374151',
-                  fontSize: '18px',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#10b981';
-                  e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#e5e7eb';
-                  e.currentTarget.style.background = 'white';
-                }}
-              >
-                {num}
-              </button>
-            ))}
+            {[1, 2, 3, 4, 5].map(num => {
+              const isSelected = scaleValue === num;
+              return (
+                <button
+                  key={num}
+                  onClick={() => setScaleValue(num)}
+                  style={{
+                    flex: 1,
+                    padding: '20px 0',
+                    borderRadius: '12px',
+                    border: isSelected ? '2px solid #10b981' : '2px solid #e5e7eb',
+                    background: isSelected ? 'rgba(16, 185, 129, 0.1)' : 'white',
+                    color: isSelected ? '#10b981' : '#374151',
+                    fontSize: '18px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.borderColor = '#10b981';
+                      e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.borderColor = '#e5e7eb';
+                      e.currentTarget.style.background = 'white';
+                    }
+                  }}
+                >
+                  {num}
+                </button>
+              );
+            })}
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: '#9ca3af' }}>
             <span>Discordo totalmente</span>
