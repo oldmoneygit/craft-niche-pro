@@ -359,7 +359,7 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
                     onCheckedChange={(checked) => setConsumesAlcohol(checked as boolean)}
                   />
                   <Label htmlFor="alcohol" className="text-sm font-semibold cursor-pointer text-gray-700 dark:text-gray-300">
-                    Ingere bebida alcoólica
+                    Ingere bebida alcoólica?
                   </Label>
                 </div>
                 {consumesAlcohol && (
@@ -382,7 +382,7 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
                     onCheckedChange={(checked) => setSmokes(checked as boolean)}
                   />
                   <Label htmlFor="smoking" className="text-sm font-semibold cursor-pointer text-gray-700 dark:text-gray-300">
-                    Fumante
+                    Fumante?
                   </Label>
                 </div>
                 {smokes && (
