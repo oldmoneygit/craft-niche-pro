@@ -397,44 +397,84 @@ export default function PlanosAlimentares() {
                     </div>
                   </div>
 
-                  {/* Área de macros com background verde suave */}
-                  {(plan.target_protein || plan.target_carbs || plan.target_fats) && (
-                    <div style={{ 
-                      display: 'grid', 
-                      gridTemplateColumns: 'repeat(3, 1fr)', 
-                      gap: '12px', 
-                      marginBottom: '20px', 
-                      padding: '16px', 
-                      background: 'rgba(16, 185, 129, 0.05)',
-                      border: '1px solid rgba(16, 185, 129, 0.1)',
-                      borderRadius: '12px' 
-                    }}>
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
-                          {plan.target_protein || 0}g
+                  {/* Área de macros com background verde suave - valores reais dos alimentos */}
+                  {(() => {
+                    // Calcular totais reais dos alimentos adicionados ao plano
+                    const realTotals = {
+                      calories: 0,
+                      protein: 0,
+                      carbs: 0,
+                      fats: 0
+                    };
+                    
+                    if (plan.meals && Array.isArray(plan.meals)) {
+                      plan.meals.forEach((meal: any) => {
+                        if (meal.items && Array.isArray(meal.items)) {
+                          meal.items.forEach((item: any) => {
+                            realTotals.calories += item.kcal_total || 0;
+                            realTotals.protein += item.protein_total || 0;
+                            realTotals.carbs += item.carb_total || 0;
+                            realTotals.fats += item.fat_total || 0;
+                          });
+                        }
+                      });
+                    }
+                    
+                    const hasNutrients = realTotals.protein > 0 || realTotals.carbs > 0 || realTotals.fats > 0;
+                    
+                    return hasNutrients ? (
+                      <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(3, 1fr)', 
+                        gap: '12px', 
+                        marginBottom: '20px', 
+                        padding: '16px', 
+                        background: 'rgba(16, 185, 129, 0.05)',
+                        border: '1px solid rgba(16, 185, 129, 0.1)',
+                        borderRadius: '12px' 
+                      }}>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+                            {Math.round(realTotals.protein)}g
+                          </div>
+                          <div style={{ fontSize: '11px', color: isDark ? '#a3a3a3' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                            Proteínas
+                          </div>
+                          {plan.target_protein && (
+                            <div style={{ fontSize: '10px', color: isDark ? '#666' : '#999', marginTop: '2px' }}>
+                              Meta: {plan.target_protein}g
+                            </div>
+                          )}
                         </div>
-                        <div style={{ fontSize: '11px', color: isDark ? '#a3a3a3' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                          Proteínas
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+                            {Math.round(realTotals.fats)}g
+                          </div>
+                          <div style={{ fontSize: '11px', color: isDark ? '#a3a3a3' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                            Gorduras
+                          </div>
+                          {plan.target_fats && (
+                            <div style={{ fontSize: '10px', color: isDark ? '#666' : '#999', marginTop: '2px' }}>
+                              Meta: {plan.target_fats}g
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+                            {Math.round(realTotals.carbs)}g
+                          </div>
+                          <div style={{ fontSize: '11px', color: isDark ? '#a3a3a3' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                            Carboidratos
+                          </div>
+                          {plan.target_carbs && (
+                            <div style={{ fontSize: '10px', color: isDark ? '#666' : '#999', marginTop: '2px' }}>
+                              Meta: {plan.target_carbs}g
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
-                          {plan.target_fats || 0}g
-                        </div>
-                        <div style={{ fontSize: '11px', color: isDark ? '#a3a3a3' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                          Gorduras
-                        </div>
-                      </div>
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
-                          {plan.target_carbs || 0}g
-                        </div>
-                        <div style={{ fontSize: '11px', color: isDark ? '#a3a3a3' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                          Carboidratos
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                    ) : null;
+                  })()}
 
                   {/* Botões de ação com cores específicas no hover */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', paddingTop: '20px', borderTop: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)' }}>

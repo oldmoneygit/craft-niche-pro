@@ -22,7 +22,15 @@ export function useMealPlansData(filters?: {
         .select(`
           *,
           client:clients!meal_plans_client_id_fkey(id, name, email, phone),
-          meals:meal_plan_meals(id)
+          meals:meal_plan_meals(
+            id,
+            items:meal_items(
+              kcal_total,
+              protein_total,
+              carb_total,
+              fat_total
+            )
+          )
         `)
         .eq('tenant_id', tenantId);
       
