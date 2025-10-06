@@ -232,11 +232,18 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-inter;
+    @apply text-foreground font-inter;
     background: 
       radial-gradient(circle at 25% 25%, hsl(142 69% 58% / 0.05) 0%, transparent 50%),
       radial-gradient(circle at 75% 75%, hsl(217 91% 60% / 0.05) 0%, transparent 50%),
       linear-gradient(180deg, hsl(0 0% 99%) 0%, hsl(0 0% 97%) 100%);
+  }
+
+  .dark body {
+    background: 
+      radial-gradient(circle at 25% 25%, hsl(142 69% 58% / 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, hsl(217 91% 60% / 0.08) 0%, transparent 50%),
+      linear-gradient(135deg, hsl(0 0% 10%) 0%, hsl(0 0% 4%) 100%);
   }
 }
 
