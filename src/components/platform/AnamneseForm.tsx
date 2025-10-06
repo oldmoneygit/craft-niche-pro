@@ -149,12 +149,12 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
       </div>
 
       {/* Caso Clínico - Sempre visível */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-        <Label className="block text-sm font-bold mb-2">
+      <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-2 border-green-200 dark:border-green-800 rounded-2xl p-5 shadow-sm">
+        <Label className="block text-sm font-bold mb-3 text-green-900 dark:text-green-100">
           Objetivos / Motivo da Consulta *
         </Label>
         <textarea
-          className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent text-foreground"
+          className="w-full px-4 py-3 bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-foreground placeholder:text-gray-400"
           rows={3}
           placeholder="Objetivos do cliente, motivo da consulta..."
           value={mainGoal}
@@ -163,20 +163,20 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
       </div>
 
       {/* Seções Colapsáveis */}
-      <Accordion type="multiple" defaultValue={['lifestyle']} className="space-y-2">
+      <Accordion type="multiple" defaultValue={['lifestyle']} className="space-y-3">
         {/* Seção 1: Hábitos de Vida */}
-        <AccordionItem value="lifestyle" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-lg font-bold hover:no-underline">
+        <AccordionItem value="lifestyle" className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+          <AccordionTrigger className="px-6 py-4 text-lg font-bold hover:no-underline hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-gray-100">
             Hábitos de Vida
           </AccordionTrigger>
-          <AccordionContent className="space-y-4 pt-4">
+          <AccordionContent className="px-6 pb-6 space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
             {/* Restrições Alimentares */}
             <div>
-              <Label className="block text-sm font-semibold mb-2">Restrições Alimentares</Label>
+              <Label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Restrições Alimentares</Label>
               <textarea
                 rows={2}
                 placeholder="Vegetariano, vegano, sem glúten, etc..."
-                className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
+                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-foreground focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all placeholder:text-gray-400"
                 value={dietaryRestrictions}
                 onChange={(e) => setDietaryRestrictions(e.target.value)}
               />
@@ -184,11 +184,11 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
 
             {/* Bebida Alcoólica */}
             <div>
-              <Label className="block text-sm font-semibold mb-2">Consumo de Álcool</Label>
+              <Label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Consumo de Álcool</Label>
               <textarea
                 rows={2}
                 placeholder="Frequência e tipo de bebida..."
-                className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
+                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-foreground focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all placeholder:text-gray-400"
                 value={alcoholConsumption}
                 onChange={(e) => setAlcoholConsumption(e.target.value)}
               />
@@ -196,11 +196,11 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
 
             {/* Fumante */}
             <div>
-              <Label className="block text-sm font-semibold mb-2">Tabagismo</Label>
+              <Label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Tabagismo</Label>
               <textarea
                 rows={2}
                 placeholder="Fumante, ex-fumante, quantidade..."
-                className="w-full px-3 py-2 border rounded-lg bg-background text-foreground"
+                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-foreground focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all placeholder:text-gray-400"
                 value={smoking}
                 onChange={(e) => setSmoking(e.target.value)}
               />
@@ -282,11 +282,11 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
         </AccordionItem>
 
         {/* Seção 2: Patologias e Medicamentos */}
-        <AccordionItem value="pathologies" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-lg font-bold hover:no-underline">
+        <AccordionItem value="pathologies" className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+          <AccordionTrigger className="px-6 py-4 text-lg font-bold hover:no-underline hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-gray-100">
             Condições de Saúde
           </AccordionTrigger>
-          <AccordionContent className="space-y-4 pt-4">
+          <AccordionContent className="px-6 pb-6 space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
             {/* Condições Médicas */}
             <div>
               <Label className="text-sm font-semibold mb-2 block">Condições Médicas / Patologias</Label>
@@ -326,11 +326,11 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
         </AccordionItem>
 
         {/* Seção 3: Dados Antropométricos */}
-        <AccordionItem value="anthropometric" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-lg font-bold hover:no-underline">
+        <AccordionItem value="anthropometric" className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+          <AccordionTrigger className="px-6 py-4 text-lg font-bold hover:no-underline hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-gray-100">
             Dados Antropométricos
           </AccordionTrigger>
-          <AccordionContent className="space-y-4 pt-4">
+          <AccordionContent className="px-6 pb-6 space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Peso Atual */}
               <div>
@@ -414,11 +414,11 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
         </AccordionItem>
 
         {/* Seção 4: Hábitos Alimentares */}
-        <AccordionItem value="dietary" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-lg font-bold hover:no-underline">
+        <AccordionItem value="dietary" className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+          <AccordionTrigger className="px-6 py-4 text-lg font-bold hover:no-underline hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-gray-100">
             Hábitos Alimentares
           </AccordionTrigger>
-          <AccordionContent className="space-y-3 pt-4">
+          <AccordionContent className="px-6 pb-6 space-y-3 pt-4 border-t border-gray-100 dark:border-gray-800">
             {/* Alergias */}
             <div>
               <Label className="text-sm font-semibold mb-2 block">Alergias Alimentares</Label>
@@ -470,11 +470,11 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
         </AccordionItem>
 
         {/* Seção 5: Observações do Profissional */}
-        <AccordionItem value="observations" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-lg font-bold hover:no-underline">
+        <AccordionItem value="observations" className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+          <AccordionTrigger className="px-6 py-4 text-lg font-bold hover:no-underline hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-gray-100">
             Observações Profissionais
           </AccordionTrigger>
-          <AccordionContent className="space-y-3 pt-4">
+          <AccordionContent className="px-6 pb-6 space-y-3 pt-4 border-t border-gray-100 dark:border-gray-800">
             {/* Observações Clínicas */}
             <div>
               <Label className="text-sm font-semibold mb-2 block">Observações Clínicas</Label>
