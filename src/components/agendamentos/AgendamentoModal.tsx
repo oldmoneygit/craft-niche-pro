@@ -222,10 +222,8 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                 width: '40px',
                 height: '40px',
                 borderRadius: '12px',
-                background: isDark ? '#171717' : '#ffffff',
-                border: isDark 
-                  ? '1px solid #404040' 
-                  : '1px solid #e5e5e5',
+                background: '#ef4444',
+                border: '1px solid #ef4444',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -233,18 +231,18 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                 transition: 'all 0.2s ease'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#ef4444';
-                e.currentTarget.style.borderColor = '#ef4444';
+                e.currentTarget.style.background = '#dc2626';
+                e.currentTarget.style.borderColor = '#dc2626';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = isDark ? '#171717' : '#ffffff';
-                e.currentTarget.style.borderColor = isDark ? '#404040' : '#e5e5e5';
+                e.currentTarget.style.background = '#ef4444';
+                e.currentTarget.style.borderColor = '#ef4444';
               }}
             >
               <X style={{ 
                 width: '20px', 
                 height: '20px', 
-                color: '#ef4444'
+                color: 'white'
               }} />
             </button>
           </div>
