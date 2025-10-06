@@ -6,6 +6,16 @@ import { QuestionnaireCard } from '@/components/questionnaires/QuestionnaireCard
 import { QuestionnaireModal } from '@/components/questionnaires/QuestionnaireModal';
 import { SendQuestionnaireModal } from '@/components/questionnaires/SendQuestionnaireModal';
 import { useQuestionnaires, type Questionnaire } from '@/hooks/useQuestionnaires';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function Questionarios() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -13,8 +23,10 @@ export default function Questionarios() {
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState<Questionnaire | null>(null);
   const [selectedForSend, setSelectedForSend] = useState<{ id: string; title: string } | null>(null);
   const [activeCategory, setActiveCategory] = useState('Todos');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [questionnaireToDelete, setQuestionnaireToDelete] = useState<{ id: string; title: string } | null>(null);
 
-  const { questionnaires, isLoading, toggleActive } = useQuestionnaires();
+  const { questionnaires, isLoading, toggleActive, deleteQuestionnaire } = useQuestionnaires();
 
   const categories = [
     { key: 'Todos', label: 'Todos' },
@@ -62,6 +74,19 @@ export default function Questionarios() {
   const handleCloseCreateModal = () => {
     setIsCreateModalOpen(false);
     setSelectedQuestionnaire(null);
+  };
+
+  const handleDelete = (questionnaire: any) => {
+    setQuestionnaireToDelete({ id: questionnaire.id, title: questionnaire.title });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (questionnaireToDelete) {
+      await deleteQuestionnaire.mutateAsync(questionnaireToDelete.id);
+      setDeleteDialogOpen(false);
+      setQuestionnaireToDelete(null);
+    }
   };
 
   return (
@@ -166,6 +191,7 @@ export default function Questionarios() {
                 onEdit={() => handleEdit(questionnaire)}
                 onSend={() => handleSend(questionnaire)}
                 onToggleActive={() => handleToggleActive(questionnaire)}
+                onDelete={() => handleDelete(questionnaire)}
               />
             ))}
           </div>
@@ -185,6 +211,29 @@ export default function Questionarios() {
         questionnaireId={selectedForSend?.id || null}
         questionnaireTitle={selectedForSend?.title}
       />
+
+      {/* Alert Dialog de Confirmação */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Questionário</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o questionário <strong>"{questionnaireToDelete?.title}"</strong>?
+              <br /><br />
+              Esta ação não pode ser desfeita e todas as perguntas relacionadas também serão excluídas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Eye, Edit, Send, Clock, HelpCircle, FileText, Power } from 'lucide-react';
+import { Eye, Edit, Send, Clock, HelpCircle, FileText, Power, Trash2 } from 'lucide-react';
 import type { Questionnaire } from '@/hooks/useQuestionnaires';
 
 interface QuestionnaireCardProps {
@@ -10,14 +10,16 @@ interface QuestionnaireCardProps {
   onEdit: () => void;
   onSend: () => void;
   onToggleActive: () => void;
+  onDelete: () => void;
 }
 
 export function QuestionnaireCard({ 
   questionnaire, 
   onView, 
   onEdit, 
-  onSend,
-  onToggleActive 
+  onSend, 
+  onToggleActive,
+  onDelete
 }: QuestionnaireCardProps) {
   const categoryColors = {
     anamnese: { badge: 'bg-blue-500', border: 'border-blue-500', icon: 'text-blue-500', bg: 'bg-blue-500' },
@@ -116,7 +118,7 @@ export function QuestionnaireCard({
       </div>
 
       {/* Botões de ação */}
-      <div className="grid grid-cols-3 gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="grid grid-cols-2 gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
         <button
           onClick={onView}
           className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-emerald-500/10 hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
@@ -139,6 +141,14 @@ export function QuestionnaireCard({
         >
           <Send className="w-4 h-4" />
           Enviar
+        </button>
+
+        <button
+          onClick={onDelete}
+          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-red-500/10 hover:border-red-500 hover:text-red-600 dark:hover:text-red-400 transition-all"
+        >
+          <Trash2 className="w-4 h-4" />
+          Excluir
         </button>
       </div>
     </div>
