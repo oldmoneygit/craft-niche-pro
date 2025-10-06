@@ -546,8 +546,8 @@ export default function PublicQuestionnaireResponse() {
                           onClick={() => handleAnswerChange(currentQuestion.id, num.toString())}
                           className={`aspect-square rounded-xl border-2 font-bold text-lg transition-all duration-300 transform cursor-pointer ${
                             answers[currentQuestion.id] === num.toString()
-                              ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white border-transparent shadow-lg scale-110'
-                              : 'bg-white border-gray-200 text-gray-700 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:scale-110 hover:shadow-lg active:scale-95'
+                              ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg scale-110'
+                              : 'bg-white border-emerald-500 text-gray-900 hover:bg-emerald-500 hover:text-white hover:scale-110 hover:shadow-lg active:scale-95'
                           }`}
                         >
                           {num}
@@ -575,13 +575,11 @@ export default function PublicQuestionnaireResponse() {
                           onClick={() => handleAnswerChange(currentQuestion.id, option.text)}
                           className={`group w-full text-left p-4 rounded-xl border-2 transition-all duration-300 transform cursor-pointer ${
                             answers[currentQuestion.id] === option.text
-                              ? 'border-emerald-500 bg-gradient-to-r from-emerald-50 to-teal-50 shadow-lg scale-[1.02]'
-                              : 'border-gray-200 bg-white hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]'
+                              ? 'border-emerald-500 bg-emerald-500 text-white shadow-lg scale-[1.02]'
+                              : 'border-emerald-500 bg-white text-gray-900 hover:bg-emerald-500 hover:text-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]'
                           }`}
                         >
-                          <span className={`text-base font-medium transition-colors duration-300 ${
-                            answers[currentQuestion.id] === option.text ? 'text-emerald-700' : 'text-gray-700 group-hover:text-white'
-                          }`}>{option.text}</span>
+                          <span className="text-base font-medium">{option.text}</span>
                         </button>
                       </div>
                     ))}
@@ -602,24 +600,22 @@ export default function PublicQuestionnaireResponse() {
                           onClick={() => handleAnswerChange(currentQuestion.id, option.text, 'checkbox')}
                           className={`group w-full text-left p-4 rounded-xl border-2 transition-all duration-300 flex items-center gap-3 transform cursor-pointer ${
                             (answers[currentQuestion.id] as string[] || []).includes(option.text)
-                              ? 'border-emerald-500 bg-gradient-to-r from-emerald-50 to-teal-50 shadow-lg scale-[1.02]'
-                              : 'border-gray-200 bg-white hover:bg-emerald-500 hover:border-emerald-500 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]'
+                              ? 'border-emerald-500 bg-emerald-500 text-white shadow-lg scale-[1.02]'
+                              : 'border-emerald-500 bg-white text-gray-900 hover:bg-emerald-500 hover:text-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]'
                           }`}
                         >
                           <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-300 ${
                             (answers[currentQuestion.id] as string[] || []).includes(option.text)
-                              ? 'bg-emerald-500 border-emerald-500'
-                              : 'border-gray-300 group-hover:border-white group-hover:bg-white/20'
+                              ? 'bg-white border-white'
+                              : 'border-emerald-500 bg-transparent group-hover:border-white group-hover:bg-white/20'
                           }`}>
                             {(answers[currentQuestion.id] as string[] || []).includes(option.text) && (
-                              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <svg className="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                               </svg>
                             )}
                           </div>
-                          <span className={`text-base font-medium flex-1 transition-colors duration-300 ${
-                            (answers[currentQuestion.id] as string[] || []).includes(option.text) ? 'text-emerald-700' : 'text-gray-700 group-hover:text-white'
-                          }`}>{option.text}</span>
+                          <span className="text-base font-medium flex-1">{option.text}</span>
                         </button>
                       </div>
                     ))}
