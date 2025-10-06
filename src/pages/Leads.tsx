@@ -91,9 +91,20 @@ export function Leads() {
     window.location.href = `/agendamentos?action=new&leadId=${leadId}&name=${encodeURIComponent(lead.name)}&phone=${lead.phone}`;
   };
 
-  const handleDelete = (leadId: string) => {
-    if (confirm('Tem certeza que deseja excluir este lead?')) {
-      deleteLead.mutate(leadId);
+  const handleDelete = async (leadId: string) => {
+    const lead = leads?.find(l => l.id === leadId);
+    if (!lead) return;
+    
+    const confirmed = window.confirm(
+      `Tem certeza que deseja excluir o lead "${lead.name}"?\n\nEsta ação não pode ser desfeita.`
+    );
+    
+    if (confirmed) {
+      try {
+        await deleteLead.mutateAsync(leadId);
+      } catch (error) {
+        console.error('❌ Erro ao excluir lead:', error);
+      }
     }
   };
 

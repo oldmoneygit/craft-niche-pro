@@ -122,6 +122,7 @@ export function LeadCard({ lead, onContact, onSchedule, onDelete }: LeadCardProp
             onDelete(lead.id);
           }}
           className="p-2 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+          title="Excluir lead"
         >
           <X className="w-4 h-4" />
         </button>
