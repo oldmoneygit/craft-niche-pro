@@ -1,3 +1,20 @@
+/* ==================== PAGE HEADER ==================== */
+.text-foreground {
+  color: #171717;
+}
+
+[data-theme="dark"] .text-foreground {
+  color: #fafafa;
+}
+
+.text-muted-foreground {
+  color: #737373;
+}
+
+[data-theme="dark"] .text-muted-foreground {
+  color: #a3a3a3;
+}
+
 /* ==================== KANBAN BOARD ==================== */
 .kanban-board {
   display: grid;
