@@ -1171,6 +1171,50 @@ export type Database = {
           },
         ]
       }
+      questionnaire_questions: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_required: boolean | null
+          options: Json | null
+          order_index: number
+          question_text: string
+          question_type: string
+          questionnaire_id: string
+          section: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_required?: boolean | null
+          options?: Json | null
+          order_index: number
+          question_text: string
+          question_type: string
+          questionnaire_id: string
+          section?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_required?: boolean | null
+          options?: Json | null
+          order_index?: number
+          question_text?: string
+          question_type?: string
+          questionnaire_id?: string
+          section?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questionnaire_questions_questionnaire_id_fkey"
+            columns: ["questionnaire_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaires"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       questionnaire_responses: {
         Row: {
           answers: Json
@@ -1184,6 +1228,7 @@ export type Database = {
           respondent_name: string | null
           respondent_phone: string | null
           score: number | null
+          started_at: string | null
           status: string | null
           tenant_id: string
         }
@@ -1199,6 +1244,7 @@ export type Database = {
           respondent_name?: string | null
           respondent_phone?: string | null
           score?: number | null
+          started_at?: string | null
           status?: string | null
           tenant_id: string
         }
@@ -1214,6 +1260,7 @@ export type Database = {
           respondent_name?: string | null
           respondent_phone?: string | null
           score?: number | null
+          started_at?: string | null
           status?: string | null
           tenant_id?: string
         }
@@ -1237,9 +1284,13 @@ export type Database = {
       questionnaires: {
         Row: {
           active: boolean | null
+          category: string | null
           created_at: string | null
           description: string | null
+          estimated_time: number | null
           id: string
+          is_active: boolean | null
+          question_count: number | null
           questions: Json
           tenant_id: string
           title: string
@@ -1247,9 +1298,13 @@ export type Database = {
         }
         Insert: {
           active?: boolean | null
+          category?: string | null
           created_at?: string | null
           description?: string | null
+          estimated_time?: number | null
           id?: string
+          is_active?: boolean | null
+          question_count?: number | null
           questions: Json
           tenant_id: string
           title: string
@@ -1257,9 +1312,13 @@ export type Database = {
         }
         Update: {
           active?: boolean | null
+          category?: string | null
           created_at?: string | null
           description?: string | null
+          estimated_time?: number | null
           id?: string
+          is_active?: boolean | null
+          question_count?: number | null
           questions?: Json
           tenant_id?: string
           title?: string
@@ -1398,6 +1457,45 @@ export type Database = {
           typical_grams?: number | null
         }
         Relationships: []
+      }
+      response_answers: {
+        Row: {
+          answer_value: Json
+          created_at: string | null
+          id: string
+          question_id: string
+          response_id: string
+        }
+        Insert: {
+          answer_value: Json
+          created_at?: string | null
+          id?: string
+          question_id: string
+          response_id: string
+        }
+        Update: {
+          answer_value?: Json
+          created_at?: string | null
+          id?: string
+          question_id?: string
+          response_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "response_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaire_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "response_answers_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaire_responses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       service_notifications: {
         Row: {
