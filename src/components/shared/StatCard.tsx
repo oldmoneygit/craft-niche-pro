@@ -31,7 +31,7 @@ const variantStyles = {
 };
 
 export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, variant }) => {
-  const config = variantStyles[variant];
+  const config = variantStyles[variant] || variantStyles.primary;
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
