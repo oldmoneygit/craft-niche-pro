@@ -90,6 +90,10 @@ export default function PublicQuestionnaireResponse() {
         optionScores: q.option_scores || {}
       }));
 
+      console.log('=== QUESTIONS FOR ANSWERING ===');
+      console.log('Questions being used for answering:', mappedQuestions);
+      console.log('Question IDs for answering:', mappedQuestions.map((q: any) => q.id));
+
       setQuestionnaire({
         ...questionnaireData,
         questions: mappedQuestions
