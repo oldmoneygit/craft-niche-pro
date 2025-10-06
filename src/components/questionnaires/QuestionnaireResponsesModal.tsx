@@ -50,6 +50,40 @@ export function QuestionnaireResponsesModal({
     filterResponses();
   }, [searchTerm, responses]);
 
+  const calculateScore = (answers: Record<string, any>, questions: any[]): number => {
+    let totalScore = 0;
+    let maxPossibleScore = 0;
+
+    questions.forEach(question => {
+      if (!question.scorable) return;
+
+      const answer = answers?.[question.id];
+      const weight = question.weight || 1;
+      let questionScore = 0;
+      let maxQuestionScore = 0;
+
+      // Encontrar score máximo possível para esta pergunta
+      if (question.optionScores && Object.keys(question.optionScores).length > 0) {
+        const scores = Object.values(question.optionScores) as number[];
+        maxQuestionScore = Math.max(...scores);
+      }
+
+      // Calcular score da resposta
+      if (['single_select', 'single_choice', 'radio'].includes(question.type) && answer) {
+        questionScore = question.optionScores?.[answer] || 0;
+      } 
+      else if (['multi_select', 'multiple_choice', 'checkbox'].includes(question.type) && Array.isArray(answer)) {
+        const scores = answer.map((opt: string) => question.optionScores?.[opt] || 0);
+        questionScore = scores.length > 0 ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length : 0;
+      }
+
+      totalScore += questionScore * weight;
+      maxPossibleScore += maxQuestionScore * weight;
+    });
+
+    return maxPossibleScore > 0 ? Math.round((totalScore / maxPossibleScore) * 100) : 0;
+  };
+
   const fetchResponses = async () => {
     setLoading(true);
     try {
@@ -62,8 +96,20 @@ export function QuestionnaireResponsesModal({
 
       if (error) throw error;
       
-      setResponses(data || []);
-      setFilteredResponses(data || []);
+      // Recalcular score para respostas que não têm ou têm score zerado
+      const responsesWithScore = (data || []).map(response => {
+        if (response.score === null || response.score === 0) {
+          const calculatedScore = calculateScore(response.answers as Record<string, any>, questions);
+          return {
+            ...response,
+            score: calculatedScore
+          };
+        }
+        return response;
+      });
+      
+      setResponses(responsesWithScore);
+      setFilteredResponses(responsesWithScore);
     } catch (error) {
       console.error('Erro ao buscar respostas:', error);
     } finally {

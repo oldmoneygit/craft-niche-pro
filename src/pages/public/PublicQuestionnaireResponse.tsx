@@ -147,7 +147,7 @@ export default function PublicQuestionnaireResponse() {
     console.log('Questions:', questions);
     
     let totalScore = 0;
-    let totalWeight = 0;
+    let maxPossibleScore = 0;
 
     questions.forEach(question => {
       console.log(`\n--- Question ID: ${question.id} ---`);
@@ -165,6 +165,14 @@ export default function PublicQuestionnaireResponse() {
       
       const weight = question.weight || 1;
       let questionScore = 0;
+      let maxQuestionScore = 0;
+
+      // Encontrar score máximo possível para esta pergunta
+      if (question.optionScores && Object.keys(question.optionScores).length > 0) {
+        const scores = Object.values(question.optionScores) as number[];
+        maxQuestionScore = Math.max(...scores);
+        console.log('Max possible score for this question:', maxQuestionScore);
+      }
 
       // Tipos de escolha única: single_select, single_choice, radio
       if (['single_select', 'single_choice', 'radio'].includes(question.type)) {
@@ -179,18 +187,19 @@ export default function PublicQuestionnaireResponse() {
       } 
       // Escala de 1-10
       else if (question.type === 'scale') {
-        questionScore = (answer / 10) * 100;
+        questionScore = answer; // Scale já é 1-10
+        maxQuestionScore = 10;
         console.log(`Scale score: ${questionScore}`);
       }
 
-      console.log(`Weight: ${weight}, Question score: ${questionScore}`);
+      console.log(`Weight: ${weight}, Question score: ${questionScore}, Max: ${maxQuestionScore}`);
       totalScore += questionScore * weight;
-      totalWeight += weight;
-      console.log(`Running total: ${totalScore}, total weight: ${totalWeight}`);
+      maxPossibleScore += maxQuestionScore * weight;
+      console.log(`Running total: ${totalScore}/${maxPossibleScore}`);
     });
 
-    const finalScore = totalWeight > 0 ? Math.round(totalScore / totalWeight) : 0;
-    console.log(`\n=== FINAL SCORE: ${finalScore} ===\n`);
+    const finalScore = maxPossibleScore > 0 ? Math.round((totalScore / maxPossibleScore) * 100) : 0;
+    console.log(`\n=== FINAL SCORE: ${finalScore}% (${totalScore}/${maxPossibleScore}) ===\n`);
     return finalScore;
   };
 
