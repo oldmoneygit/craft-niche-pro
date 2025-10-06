@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, FileText, CheckCircle, MessageSquare, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatCard } from '@/components/shared/StatCard';
@@ -18,6 +19,7 @@ import {
 } from '@/components/ui/alert-dialog';
 
 export default function Questionarios() {
+  const navigate = useNavigate();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [sendModalOpen, setSendModalOpen] = useState(false);
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState<Questionnaire | null>(null);
@@ -55,8 +57,7 @@ export default function Questionarios() {
   };
 
   const handleEdit = (questionnaire: any) => {
-    setSelectedQuestionnaire(questionnaire as unknown as Questionnaire);
-    setIsCreateModalOpen(true);
+    navigate(`/questionarios/${questionnaire.id}/editar`);
   };
 
   const handleSend = (questionnaire: any) => {
@@ -103,7 +104,7 @@ export default function Questionarios() {
             </p>
           </div>
           <Button
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => navigate('/questionarios/novo')}
             className="flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-semibold shadow-lg shadow-emerald-500/30 transition-all duration-300"
           >
             <Plus className="w-5 h-5" />
@@ -174,7 +175,7 @@ export default function Questionarios() {
               }
             </p>
             <Button
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={() => navigate('/questionarios/novo')}
               className="bg-emerald-500 hover:bg-emerald-600"
             >
               <Plus className="w-4 h-4 mr-2" />

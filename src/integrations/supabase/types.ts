@@ -1281,6 +1281,50 @@ export type Database = {
           },
         ]
       }
+      questionnaire_templates: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+          template_data: Json
+          tenant_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          template_data: Json
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          template_data?: Json
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questionnaire_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       questionnaires: {
         Row: {
           active: boolean | null
