@@ -346,7 +346,7 @@ export default function PlanosAlimentares() {
                     <div style={{ fontSize: '16px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '12px' }}>
                       {plan.name}
                     </div>
-                    {/* Meta rows com ícones coloridos */}
+                    {/* Informações básicas */}
                     <div style={{ display: 'grid', gap: '10px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
                         <Calendar style={{ width: '18px', height: '18px', color: colors.iconColor }} />
@@ -363,31 +363,6 @@ export default function PlanosAlimentares() {
                         </span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-                        <FileText style={{ width: '18px', height: '18px', color: colors.iconColor }} />
-                        <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>Meta Calórica:</span>
-                        <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
-                          {plan.target_kcal ? `${plan.target_kcal} kcal` : 'Não definida'}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-                        <span style={{ color: isDark ? '#a3a3a3' : '#6b7280', marginLeft: '26px' }}>Proteínas:</span>
-                        <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
-                          {plan.target_protein ? `${plan.target_protein}g` : 'Não definida'}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-                        <span style={{ color: isDark ? '#a3a3a3' : '#6b7280', marginLeft: '26px' }}>Carboidratos:</span>
-                        <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
-                          {plan.target_carbs ? `${plan.target_carbs}g` : 'Não definida'}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-                        <span style={{ color: isDark ? '#a3a3a3' : '#6b7280', marginLeft: '26px' }}>Gorduras:</span>
-                        <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
-                          {plan.target_fats ? `${plan.target_fats}g` : 'Não definida'}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
                         <List style={{ width: '18px', height: '18px', color: colors.iconColor }} />
                         <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>Refeições:</span>
                         <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
@@ -397,7 +372,7 @@ export default function PlanosAlimentares() {
                     </div>
                   </div>
 
-                  {/* Área de macros com background verde suave - valores reais dos alimentos */}
+                  {/* Card de macros nutricionais com design melhorado */}
                   {(() => {
                     // Calcular totais reais dos alimentos adicionados ao plano
                     const realTotals = {
@@ -426,61 +401,156 @@ export default function PlanosAlimentares() {
                       <div style={{ 
                         display: 'grid', 
                         gridTemplateColumns: 'repeat(4, 1fr)', 
-                        gap: '12px', 
+                        gap: '10px', 
                         marginBottom: '20px', 
-                        padding: '16px', 
-                        background: 'rgba(16, 185, 129, 0.05)',
-                        border: '1px solid rgba(16, 185, 129, 0.1)',
-                        borderRadius: '12px' 
+                        padding: '14px', 
+                        background: isDark ? 'rgba(16, 185, 129, 0.08)' : 'rgba(16, 185, 129, 0.06)',
+                        border: `1px solid ${isDark ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.15)'}`,
+                        borderRadius: '14px' 
                       }}>
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: '20px', fontWeight: 700, color: '#10b981', marginBottom: '4px' }}>
+                        {/* KCAL - Verde em destaque */}
+                        <div style={{ 
+                          textAlign: 'center',
+                          padding: '8px',
+                          borderRadius: '10px',
+                          background: isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.1)'
+                        }}>
+                          <div style={{ 
+                            fontSize: '22px', 
+                            fontWeight: 800, 
+                            color: '#10b981', 
+                            marginBottom: '2px',
+                            lineHeight: 1
+                          }}>
                             {Math.round(realTotals.calories)}
                           </div>
-                          <div style={{ fontSize: '11px', color: isDark ? '#a3a3a3' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                          <div style={{ 
+                            fontSize: '10px', 
+                            color: '#10b981', 
+                            textTransform: 'uppercase', 
+                            letterSpacing: '0.8px', 
+                            fontWeight: 700,
+                            marginBottom: '4px'
+                          }}>
                             KCAL
                           </div>
                           {plan.target_kcal && (
-                            <div style={{ fontSize: '10px', color: isDark ? '#666' : '#999', marginTop: '2px' }}>
+                            <div style={{ 
+                              fontSize: '9px', 
+                              color: isDark ? '#6b7280' : '#9ca3af',
+                              fontWeight: 500
+                            }}>
                               Meta: {plan.target_kcal}
                             </div>
                           )}
                         </div>
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+
+                        {/* Proteínas - Azul */}
+                        <div style={{ 
+                          textAlign: 'center',
+                          padding: '8px',
+                          borderRadius: '10px',
+                          background: isDark ? 'rgba(59, 130, 246, 0.12)' : 'rgba(59, 130, 246, 0.08)'
+                        }}>
+                          <div style={{ 
+                            fontSize: '22px', 
+                            fontWeight: 800, 
+                            color: '#3b82f6', 
+                            marginBottom: '2px',
+                            lineHeight: 1
+                          }}>
                             {Math.round(realTotals.protein)}g
                           </div>
-                          <div style={{ fontSize: '11px', color: isDark ? '#a3a3a3' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                            Proteínas
+                          <div style={{ 
+                            fontSize: '10px', 
+                            color: '#3b82f6', 
+                            textTransform: 'uppercase', 
+                            letterSpacing: '0.8px', 
+                            fontWeight: 700,
+                            marginBottom: '4px'
+                          }}>
+                            PROTEÍNAS
                           </div>
                           {plan.target_protein && (
-                            <div style={{ fontSize: '10px', color: isDark ? '#666' : '#999', marginTop: '2px' }}>
+                            <div style={{ 
+                              fontSize: '9px', 
+                              color: isDark ? '#6b7280' : '#9ca3af',
+                              fontWeight: 500
+                            }}>
                               Meta: {plan.target_protein}g
                             </div>
                           )}
                         </div>
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+
+                        {/* Gorduras - Laranja */}
+                        <div style={{ 
+                          textAlign: 'center',
+                          padding: '8px',
+                          borderRadius: '10px',
+                          background: isDark ? 'rgba(249, 115, 22, 0.12)' : 'rgba(249, 115, 22, 0.08)'
+                        }}>
+                          <div style={{ 
+                            fontSize: '22px', 
+                            fontWeight: 800, 
+                            color: '#f97316', 
+                            marginBottom: '2px',
+                            lineHeight: 1
+                          }}>
                             {Math.round(realTotals.fats)}g
                           </div>
-                          <div style={{ fontSize: '11px', color: isDark ? '#a3a3a3' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                            Gorduras
+                          <div style={{ 
+                            fontSize: '10px', 
+                            color: '#f97316', 
+                            textTransform: 'uppercase', 
+                            letterSpacing: '0.8px', 
+                            fontWeight: 700,
+                            marginBottom: '4px'
+                          }}>
+                            GORDURAS
                           </div>
                           {plan.target_fats && (
-                            <div style={{ fontSize: '10px', color: isDark ? '#666' : '#999', marginTop: '2px' }}>
+                            <div style={{ 
+                              fontSize: '9px', 
+                              color: isDark ? '#6b7280' : '#9ca3af',
+                              fontWeight: 500
+                            }}>
                               Meta: {plan.target_fats}g
                             </div>
                           )}
                         </div>
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+
+                        {/* Carboidratos - Roxo */}
+                        <div style={{ 
+                          textAlign: 'center',
+                          padding: '8px',
+                          borderRadius: '10px',
+                          background: isDark ? 'rgba(168, 85, 247, 0.12)' : 'rgba(168, 85, 247, 0.08)'
+                        }}>
+                          <div style={{ 
+                            fontSize: '22px', 
+                            fontWeight: 800, 
+                            color: '#a855f7', 
+                            marginBottom: '2px',
+                            lineHeight: 1
+                          }}>
                             {Math.round(realTotals.carbs)}g
                           </div>
-                          <div style={{ fontSize: '11px', color: isDark ? '#a3a3a3' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
-                            Carboidratos
+                          <div style={{ 
+                            fontSize: '10px', 
+                            color: '#a855f7', 
+                            textTransform: 'uppercase', 
+                            letterSpacing: '0.8px', 
+                            fontWeight: 700,
+                            marginBottom: '4px'
+                          }}>
+                            CARBOIDRATOS
                           </div>
                           {plan.target_carbs && (
-                            <div style={{ fontSize: '10px', color: isDark ? '#666' : '#999', marginTop: '2px' }}>
+                            <div style={{ 
+                              fontSize: '9px', 
+                              color: isDark ? '#6b7280' : '#9ca3af',
+                              fontWeight: 500
+                            }}>
                               Meta: {plan.target_carbs}g
                             </div>
                           )}
