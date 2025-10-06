@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Layout } from './components/layout/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { Clientes } from './pages/Clientes';
@@ -17,32 +18,44 @@ import Relatorios from './pages/Relatorios';
 import Financeiro from './pages/Financeiro';
 import { Configuracoes } from './pages/Configuracoes';
 
+// Create a client for React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1 minute
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/clientes" element={<Clientes />} />
-          <Route path="/leads" element={<Leads />} />
-          <Route path="/agendamentos" element={<Agendamentos />} />
-          <Route path="/planos" element={<PlanosAlimentares />} />
-          <Route path="/questionarios" element={<Questionarios />} />
-          <Route path="/recordatorio" element={<Recordatorio />} />
-          <Route path="/feedbacks" element={<FeedbacksSemanais />} />
-          <Route path="/servicos" element={<Servicos />} />
-          <Route path="/mensagens" element={<Mensagens />} />
-          <Route path="/lembretes" element={<Lembretes />} />
-          <Route path="/agente-ia" element={<AgenteIA />} />
-          <Route path="/base-conhecimento" element={<BaseConhecimento />} />
-          <Route path="/relatorios" element={<Relatorios />} />
-          <Route path="/financeiro" element={<Financeiro />} />
-          <Route path="/configuracoes" element={<Configuracoes />} />
-          {/* Redirect old /platform/* routes to main routes */}
-          <Route path="/platform/:slug" element={<Navigate to="/" replace />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/clientes" element={<Clientes />} />
+            <Route path="/leads" element={<Leads />} />
+            <Route path="/agendamentos" element={<Agendamentos />} />
+            <Route path="/planos" element={<PlanosAlimentares />} />
+            <Route path="/questionarios" element={<Questionarios />} />
+            <Route path="/recordatorio" element={<Recordatorio />} />
+            <Route path="/feedbacks" element={<FeedbacksSemanais />} />
+            <Route path="/servicos" element={<Servicos />} />
+            <Route path="/mensagens" element={<Mensagens />} />
+            <Route path="/lembretes" element={<Lembretes />} />
+            <Route path="/agente-ia" element={<AgenteIA />} />
+            <Route path="/base-conhecimento" element={<BaseConhecimento />} />
+            <Route path="/relatorios" element={<Relatorios />} />
+            <Route path="/financeiro" element={<Financeiro />} />
+            <Route path="/configuracoes" element={<Configuracoes />} />
+            {/* Redirect old /platform/* routes to main routes */}
+            <Route path="/platform/:slug" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 
