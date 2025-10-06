@@ -2,17 +2,19 @@ import { useState } from 'react';
 import { 
   Users, UserPlus, UserCheck, Clock, 
   Search, Filter, FileText, Calendar, Trash2, User,
-  Mail, X, AlertCircle, Loader2
+  Mail, Plus, AlertCircle, Loader2
 } from 'lucide-react';
 import { useClientsData } from '@/hooks/useClientsData';
 import type { ClientWithStats } from '@/hooks/useClientsData';
 import { StatCardClientes } from '@/components/clientes/StatCardClientes';
+import { ClientDetailsModal } from '@/components/clientes/ClientDetailsModal';
+import { CreateClientModal } from '@/components/clientes/CreateClientModal';
 import './Clientes.css';
 
 export function Clientes() {
-  const [selectedClient, setSelectedClient] = useState<ClientWithStats | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('info');
+  const [selectedClient, setSelectedClient] = useState<ClientWithStats | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const { 
     clients, 
@@ -21,15 +23,6 @@ export function Clientes() {
     error,
     deleteClient 
   } = useClientsData(searchQuery);
-
-  const handleOpenModal = (client: ClientWithStats) => {
-    setSelectedClient(client);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedClient(null);
-    setActiveTab('info');
-  };
 
   const handleDeleteClient = async (clientId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -50,13 +43,6 @@ export function Clientes() {
     // TODO: Implementar navegação para agendamentos
   };
 
-  // Format date helper
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'Não informado';
-    return new Date(dateString).toLocaleDateString('pt-BR');
-  };
-
-  // Calculate age
   const calculateAge = (birthDate: string | null) => {
     if (!birthDate) return null;
     const today = new Date();
@@ -67,6 +53,15 @@ export function Clientes() {
       age--;
     }
     return age;
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      ?.split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || '??';
   };
 
   return (
@@ -148,12 +143,33 @@ export function Clientes() {
       {isLoading && (
         <div className="clients-list">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="client-card animate-pulse">
+            <div 
+              key={i} 
+              className="client-card animate-pulse"
+              style={{
+                background: 'var(--bg-card)',
+                backdropFilter: 'blur(20px)'
+              }}
+            >
               <div className="client-main">
-                <div className="client-avatar" style={{ background: '#e5e7eb' }}></div>
+                <div 
+                  className="client-avatar" 
+                  style={{ background: '#e5e7eb' }}
+                ></div>
                 <div className="client-info" style={{ flex: 1 }}>
-                  <div style={{ height: '20px', background: '#e5e7eb', borderRadius: '4px', width: '60%', marginBottom: '8px' }}></div>
-                  <div style={{ height: '16px', background: '#e5e7eb', borderRadius: '4px', width: '40%' }}></div>
+                  <div style={{ 
+                    height: '20px', 
+                    background: '#e5e7eb', 
+                    borderRadius: '4px', 
+                    width: '60%', 
+                    marginBottom: '8px' 
+                  }}></div>
+                  <div style={{ 
+                    height: '16px', 
+                    background: '#e5e7eb', 
+                    borderRadius: '4px', 
+                    width: '40%' 
+                  }}></div>
                 </div>
               </div>
             </div>
@@ -163,55 +179,58 @@ export function Clientes() {
 
       {/* Error State */}
       {error && (
-        <div style={{ 
-          background: 'rgba(239, 68, 68, 0.1)', 
-          border: '1px solid rgba(239, 68, 68, 0.3)',
-          borderRadius: '12px',
-          padding: '24px',
-          margin: '24px 0'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#ef4444' }}>
-            <AlertCircle size={24} />
-            <div>
-              <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>
-                Erro ao carregar clientes
-              </h3>
-              <p style={{ fontSize: '14px' }}>{error.message}</p>
-            </div>
+        <div 
+          className="p-6 rounded-2xl border flex items-center gap-3 mb-6"
+          style={{ 
+            background: 'rgba(239, 68, 68, 0.1)', 
+            borderColor: '#ef4444'
+          }}
+        >
+          <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0" />
+          <div>
+            <h3 className="text-base font-semibold text-red-700 mb-1">
+              Erro ao carregar clientes
+            </h3>
+            <p className="text-sm text-red-600">{error.message}</p>
           </div>
         </div>
       )}
 
       {/* Empty State */}
       {!isLoading && !error && clients && clients.length === 0 && (
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(0, 0, 0, 0.08)',
-          borderRadius: '16px',
-          padding: '48px',
-          textAlign: 'center',
-          margin: '24px 0'
-        }}>
-          <Users size={64} style={{ color: '#d1d5db', margin: '0 auto 16px' }} />
-          <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#1f2937', marginBottom: '8px' }}>
+        <div 
+          className="p-12 rounded-2xl text-center"
+          style={{
+            background: 'var(--bg-card)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid var(--border)'
+          }}
+        >
+          <Users size={64} className="mx-auto mb-4" style={{ color: 'var(--text-muted)' }} />
+          <h3 
+            className="text-lg font-semibold mb-2"
+            style={{ color: 'var(--text-primary)' }}
+          >
             {searchQuery ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}
           </h3>
-          <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '24px' }}>
+          <p 
+            className="mb-6"
+            style={{ color: 'var(--text-muted)' }}
+          >
             {searchQuery 
               ? 'Tente ajustar sua pesquisa ou limpar os filtros'
               : 'Comece adicionando seu primeiro cliente'
             }
           </p>
           {!searchQuery && (
-            <button 
-              className="fab" 
-              style={{ position: 'relative', marginTop: '16px' }}
-              title="Adicionar novo cliente"
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:scale-105"
+              style={{
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+              }}
             >
-              <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"/>
-              </svg>
+              Adicionar Cliente
             </button>
           )}
         </div>
@@ -222,214 +241,106 @@ export function Clientes() {
         <div className="clients-list">
           {clients.map((client) => {
             const age = calculateAge(client.birth_date);
-            const avatar = client.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '??';
+            const avatar = getInitials(client.name);
             
             return (
-            <div key={client.id} className="client-card">
-              <div className="client-main" onClick={() => handleOpenModal(client)}>
-                <div className="client-avatar">{avatar}</div>
-                <div className="client-info">
-                  <h4>{client.name}</h4>
-                  <div className="client-meta">
-                    {age && (
-                      <span>
-                        <User size={14} />
-                        {age} anos
-                      </span>
-                    )}
-                    {client.email ? (
-                      <span>
-                        <Mail size={14} />
-                        {client.email}
-                      </span>
-                    ) : (
+              <div 
+                key={client.id} 
+                className="client-card"
+                onClick={() => setSelectedClient(client)}
+              >
+                <div className="client-main">
+                  <div className="client-avatar">{avatar}</div>
+                  <div className="client-info">
+                    <h4>{client.name}</h4>
+                    <div className="client-meta">
+                      {age && (
+                        <span>
+                          <User size={14} />
+                          {age} anos
+                        </span>
+                      )}
                       <span>
                         <Mail size={14} />
-                        Sem email
+                        {client.email || 'Sem email'}
                       </span>
+                    </div>
+                    {client.services && client.services.length > 0 && (
+                      <div className="client-badges">
+                        {client.services.map((service, idx) => (
+                          <span key={idx} className="badge">
+                            {service.name} • {service.daysRemaining}d
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </div>
-                  {client.services && client.services.length > 0 && (
-                    <div className="client-badges">
-                      {client.services.map((service, idx) => (
-                        <span key={idx} className="badge">
-                          {service.name} • {service.daysRemaining}d
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                </div>
+                <div className="client-actions">
+                  <button 
+                    className="action-btn"
+                    onClick={(e) => handleViewPlan(client.id, e)}
+                    title="Ver plano"
+                  >
+                    <FileText size={18} />
+                  </button>
+                  <button 
+                    className="action-btn"
+                    onClick={(e) => handleSchedule(client.id, e)}
+                    title="Agendar consulta"
+                  >
+                    <Calendar size={18} />
+                  </button>
+                  <button 
+                    className="action-btn"
+                    onClick={(e) => handleDeleteClient(client.id, e)}
+                    title="Excluir cliente"
+                    disabled={deleteClient.isPending}
+                  >
+                    {deleteClient.isPending ? (
+                      <Loader2 size={18} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={18} />
+                    )}
+                  </button>
+                  <button 
+                    className="action-btn view"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedClient(client);
+                    }}
+                    title="Ver perfil"
+                  >
+                    <User size={18} />
+                  </button>
                 </div>
               </div>
-              <div className="client-actions">
-                <button 
-                  className="action-btn"
-                  onClick={(e) => handleViewPlan(client.id, e)}
-                  title="Ver plano"
-                >
-                  <FileText size={18} />
-                </button>
-                <button 
-                  className="action-btn"
-                  onClick={(e) => handleSchedule(client.id, e)}
-                  title="Agendar consulta"
-                >
-                  <Calendar size={18} />
-                </button>
-                <button 
-                  className="action-btn"
-                  onClick={(e) => handleDeleteClient(client.id, e)}
-                  title="Excluir cliente"
-                  disabled={deleteClient.isPending}
-                >
-                  {deleteClient.isPending ? (
-                    <Loader2 size={18} className="animate-spin" />
-                  ) : (
-                    <Trash2 size={18} />
-                  )}
-                </button>
-                <button 
-                  className="action-btn view"
-                  onClick={() => handleOpenModal(client)}
-                  title="Ver perfil"
-                >
-                  <User size={18} />
-                </button>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
         </div>
       )}
 
       {/* FAB */}
-      <button className="fab" title="Adicionar novo cliente">
-        <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"/>
-        </svg>
+      <button 
+        onClick={() => setIsCreateModalOpen(true)}
+        className="fab" 
+        title="Adicionar novo cliente"
+      >
+        <Plus size={28} />
       </button>
 
-      {/* Modal */}
+      {/* Modals */}
       {selectedClient && (
-        <div className="modal active">
-          <div className="modal-content">
-            <div className="modal-header">
-              <div className="modal-header-content">
-                <div className="modal-avatar">
-                  {selectedClient.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '??'}
-                </div>
-                <div>
-                  <h2>{selectedClient.name}</h2>
-                  <p>Cliente desde {formatDate(selectedClient.created_at)}</p>
-                </div>
-              </div>
-              <button className="modal-close" onClick={handleCloseModal}>
-                <X size={20} />
-              </button>
-            </div>
+        <ClientDetailsModal 
+          client={selectedClient} 
+          onClose={() => setSelectedClient(null)} 
+        />
+      )}
 
-            <div className="modal-tabs">
-              <button 
-                className={`tab ${activeTab === 'info' ? 'active' : ''}`}
-                onClick={() => setActiveTab('info')}
-              >
-                Informações
-              </button>
-              <button 
-                className={`tab ${activeTab === 'services' ? 'active' : ''}`}
-                onClick={() => setActiveTab('services')}
-              >
-                Serviços
-              </button>
-              <button 
-                className={`tab ${activeTab === 'plan' ? 'active' : ''}`}
-                onClick={() => setActiveTab('plan')}
-              >
-                Plano Alimentar
-              </button>
-              <button 
-                className={`tab ${activeTab === 'questionnaires' ? 'active' : ''}`}
-                onClick={() => setActiveTab('questionnaires')}
-              >
-                Questionários
-              </button>
-              <button 
-                className={`tab ${activeTab === 'appointments' ? 'active' : ''}`}
-                onClick={() => setActiveTab('appointments')}
-              >
-                Consultas
-              </button>
-              <button 
-                className={`tab ${activeTab === 'anamnesis' ? 'active' : ''}`}
-                onClick={() => setActiveTab('anamnesis')}
-              >
-                Anamneses
-              </button>
-            </div>
-
-            <div className="modal-body">
-              {activeTab === 'info' && (
-                <div className="info-grid">
-                  <div className="info-item">
-                    <h4>Telefone</h4>
-                    <p>{selectedClient.phone || 'Não informado'}</p>
-                  </div>
-                  <div className="info-item">
-                    <h4>Email</h4>
-                    <p>{selectedClient.email || 'Não informado'}</p>
-                  </div>
-                  <div className="info-item">
-                    <h4>Idade</h4>
-                    <p>{calculateAge(selectedClient.birth_date) ? `${calculateAge(selectedClient.birth_date)} anos` : 'Não informado'}</p>
-                  </div>
-                  <div className="info-item">
-                    <h4>Data de Nascimento</h4>
-                    <p>{formatDate(selectedClient.birth_date)}</p>
-                  </div>
-                  <div className="info-item">
-                    <h4>Peso Atual</h4>
-                    <p>{selectedClient.weight_kg ? `${selectedClient.weight_kg} kg` : 'Não informado'}</p>
-                  </div>
-                  <div className="info-item">
-                    <h4>Altura</h4>
-                    <p>{selectedClient.height_cm ? `${selectedClient.height_cm} cm` : 'Não informado'}</p>
-                  </div>
-                  <div className="info-item">
-                    <h4>Objetivo</h4>
-                    <p>
-                      {selectedClient.goal === 'weight_loss' && 'Perder Peso'}
-                      {selectedClient.goal === 'muscle_gain' && 'Ganhar Massa'}
-                      {selectedClient.goal === 'maintenance' && 'Manutenção'}
-                      {selectedClient.goal === 'health' && 'Saúde'}
-                      {!selectedClient.goal && 'Não informado'}
-                    </p>
-                  </div>
-                  <div className="info-item">
-                    <h4>Nível de Atividade</h4>
-                    <p>
-                      {selectedClient.activity_level === 'sedentary' && 'Sedentário'}
-                      {selectedClient.activity_level === 'light' && 'Leve'}
-                      {selectedClient.activity_level === 'moderate' && 'Moderado'}
-                      {selectedClient.activity_level === 'intense' && 'Intenso'}
-                      {selectedClient.activity_level === 'very_intense' && 'Muito Intenso'}
-                      {!selectedClient.activity_level && 'Não informado'}
-                    </p>
-                  </div>
-                  {selectedClient.notes && (
-                    <div className="info-item" style={{ gridColumn: '1 / -1' }}>
-                      <h4>Observações</h4>
-                      <p>{selectedClient.notes}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-              {activeTab !== 'info' && (
-                <p style={{ color: 'var(--text-muted)', textAlign: 'center' }}>
-                  Conteúdo em desenvolvimento...
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
+      {isCreateModalOpen && (
+        <CreateClientModal 
+          onClose={() => setIsCreateModalOpen(false)} 
+        />
       )}
     </div>
   );
