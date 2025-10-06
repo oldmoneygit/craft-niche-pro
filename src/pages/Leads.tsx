@@ -36,12 +36,37 @@ export function Leads() {
     }
     
     const leadId = active.id as string;
-    const newStatus = over.id as 'pending' | 'contacted' | 'scheduled';
+    const newStatus = over.id as string;
+    
+    console.log('🔍 Drag End Debug:', {
+      leadId,
+      newStatus,
+      overId: over.id,
+      activeId: active.id,
+      overIdType: typeof over.id,
+      newStatusType: typeof newStatus
+    });
     
     const lead = leads?.find(l => l.id === leadId);
     
-    if (lead && lead.status !== newStatus) {
-      await updateLeadStatus.mutateAsync({ leadId, newStatus });
+    if (!lead) {
+      console.warn('⚠️ Lead não encontrado:', leadId);
+      setActiveId(null);
+      return;
+    }
+    
+    console.log('📋 Lead encontrado:', { 
+      currentStatus: lead.status, 
+      newStatus,
+      willUpdate: lead.status !== newStatus 
+    });
+    
+    if (lead.status !== newStatus) {
+      try {
+        await updateLeadStatus.mutateAsync({ leadId, newStatus });
+      } catch (error) {
+        console.error('❌ Erro ao atualizar status:', error);
+      }
     }
     
     setActiveId(null);

@@ -42,23 +42,49 @@ export const useLeads = () => {
 
   const updateLeadStatus = useMutation({
     mutationFn: async ({ leadId, newStatus }: { leadId: string; newStatus: string }) => {
+      console.log('🔍 Atualizando lead:', { leadId, newStatus });
+      
+      // Buscar lead atual
+      const { data: currentLead, error: fetchError } = await supabase
+        .from('leads')
+        .select('*')
+        .eq('id', leadId)
+        .single();
+      
+      if (fetchError) {
+        console.error('❌ Erro ao buscar lead:', fetchError);
+        throw fetchError;
+      }
+      
+      console.log('📋 Lead atual:', currentLead);
+      
       const updates: any = { status: newStatus };
       
-      const { error } = await supabase
+      console.log('💾 Updates que serão aplicados:', updates);
+      
+      const { data, error } = await supabase
         .from('leads')
         .update(updates)
-        .eq('id', leadId);
+        .eq('id', leadId)
+        .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erro ao atualizar lead:', error);
+        throw error;
+      }
+      
+      console.log('✅ Lead atualizado com sucesso:', data);
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leads'] });
-      toast({ title: 'Status atualizado com sucesso!' });
+      toast({ title: '✅ Status atualizado com sucesso!' });
     },
     onError: (error: any) => {
+      console.error('❌ Mutation error completo:', error);
       toast({
         title: 'Erro ao atualizar status',
-        description: error.message,
+        description: error.message || 'Verifique o console para mais detalhes',
         variant: 'destructive'
       });
     }
