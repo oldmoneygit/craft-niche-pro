@@ -212,6 +212,8 @@ All colors MUST be HSL.
     --foreground: 210 40% 98%;
     --card: 217 33% 17%;
     --card-foreground: 210 40% 98%;
+    --popover: 217 33% 17%;
+    --popover-foreground: 210 40% 98%;
     --border: 217 33% 25%;
     --input: 217 33% 25%;
     --ring: 160 84% 39%;
@@ -233,10 +235,21 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-inter;
+  }
+  
+  body:not(.dark) {
     background: 
       radial-gradient(circle at 25% 25%, hsl(142 69% 58% / 0.05) 0%, transparent 50%),
       radial-gradient(circle at 75% 75%, hsl(217 91% 60% / 0.05) 0%, transparent 50%),
       linear-gradient(180deg, hsl(0 0% 99%) 0%, hsl(0 0% 97%) 100%);
+  }
+  
+  body.dark,
+  [data-theme="dark"] body {
+    background: 
+      radial-gradient(circle at 25% 25%, hsl(142 69% 58% / 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, hsl(217 91% 60% / 0.03) 0%, transparent 50%),
+      linear-gradient(180deg, hsl(222 47% 11%) 0%, hsl(222 47% 8%) 100%);
   }
 }
 
