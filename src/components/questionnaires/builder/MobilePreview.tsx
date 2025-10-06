@@ -41,32 +41,92 @@ export function MobilePreview({
       </p>
 
       {/* Frame do Celular */}
-      <div className="w-full max-w-[420px] mx-auto bg-gray-900 rounded-[36px] p-3 shadow-2xl">
-        <div className="bg-white rounded-[28px] overflow-hidden h-[760px] flex flex-col">
-          {/* Header */}
-          <div className="bg-emerald-500 text-white p-5 text-center">
-            <h3 className="text-lg font-bold mb-2">
-              {title || 'Título do Questionário'}
+      <div 
+        className="w-full max-w-[420px] mx-auto shadow-2xl"
+        style={{
+          background: '#1f2937',
+          borderRadius: '36px',
+          padding: '12px'
+        }}
+      >
+        <div 
+          className="flex flex-col"
+          style={{
+            background: 'white',
+            borderRadius: '28px',
+            overflow: 'hidden',
+            height: '760px'
+          }}
+        >
+          {/* Header Verde */}
+          <div 
+            style={{
+              background: '#10b981',
+              color: 'white',
+              padding: '20px',
+              textAlign: 'center'
+            }}
+          >
+            <h3 
+              style={{
+                fontSize: '18px',
+                fontWeight: '700',
+                marginBottom: '8px',
+                lineHeight: '1.3'
+              }}
+            >
+              {title || 'Avaliação de Hábitos Alimentares'}
             </h3>
-            <p className="text-sm opacity-90">
-              {description || 'Responda as perguntas com atenção'}
+            <p 
+              style={{
+                fontSize: '13px',
+                opacity: '0.9',
+                lineHeight: '1.4'
+              }}
+            >
+              {description || 'Por favor, responda as perguntas sobre seus hábitos alimentares'}
             </p>
 
             {/* Progress Bar */}
-            <div className="mt-4 h-1 bg-white/30 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-white transition-all duration-300"
-                style={{ width: `${progress}%` }}
+            <div 
+              style={{
+                marginTop: '16px',
+                height: '4px',
+                background: 'rgba(255, 255, 255, 0.3)',
+                borderRadius: '2px',
+                overflow: 'hidden'
+              }}
+            >
+              <div 
+                style={{
+                  height: '100%',
+                  background: 'white',
+                  width: `${progress}%`,
+                  transition: 'width 0.3s ease'
+                }}
               />
             </div>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div 
+            className="flex-1 overflow-y-auto"
+            style={{
+              padding: '24px',
+              background: 'white'
+            }}
+          >
             {questions.length === 0 ? (
-              <div className="text-center py-16 text-gray-400">
-                <div className="text-5xl mb-4">📋</div>
-                <p className="text-sm font-medium">
+              <div 
+                style={{
+                  textAlign: 'center',
+                  paddingTop: '60px',
+                  paddingBottom: '60px',
+                  color: '#9ca3af'
+                }}
+              >
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
+                <p style={{ fontSize: '15px', fontWeight: '500', lineHeight: '1.4' }}>
                   Adicione perguntas para ver o preview
                 </p>
               </div>
@@ -76,22 +136,73 @@ export function MobilePreview({
           </div>
 
           {/* Footer */}
-          <div className="p-5 border-t border-gray-200 flex gap-3">
-            <Button
-              variant="outline"
-              className="flex-1"
+          <div 
+            style={{
+              padding: '20px',
+              borderTop: '1px solid #e5e7eb',
+              display: 'flex',
+              gap: '12px',
+              background: 'white'
+            }}
+          >
+            <button
               onClick={goPrev}
               disabled={currentQuestionIndex === 0}
+              style={{
+                flex: 1,
+                padding: '14px',
+                borderRadius: '12px',
+                border: 'none',
+                background: currentQuestionIndex === 0 ? '#f3f4f6' : '#f3f4f6',
+                color: '#6b7280',
+                fontSize: '15px',
+                fontWeight: '600',
+                cursor: currentQuestionIndex === 0 ? 'not-allowed' : 'pointer',
+                opacity: currentQuestionIndex === 0 ? 0.5 : 1,
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (currentQuestionIndex !== 0) {
+                  e.currentTarget.style.background = '#e5e7eb';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentQuestionIndex !== 0) {
+                  e.currentTarget.style.background = '#f3f4f6';
+                }
+              }}
             >
               Voltar
-            </Button>
-            <Button
-              className="flex-1 bg-emerald-500 hover:bg-emerald-600"
+            </button>
+            <button
               onClick={goNext}
               disabled={currentQuestionIndex === questions.length - 1}
+              style={{
+                flex: 1,
+                padding: '14px',
+                borderRadius: '12px',
+                border: 'none',
+                background: currentQuestionIndex === questions.length - 1 ? '#10b981' : '#10b981',
+                color: 'white',
+                fontSize: '15px',
+                fontWeight: '600',
+                cursor: currentQuestionIndex === questions.length - 1 ? 'not-allowed' : 'pointer',
+                opacity: currentQuestionIndex === questions.length - 1 ? 0.5 : 1,
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (currentQuestionIndex !== questions.length - 1) {
+                  e.currentTarget.style.background = '#059669';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentQuestionIndex !== questions.length - 1) {
+                  e.currentTarget.style.background = '#10b981';
+                }
+              }}
             >
               Próxima
-            </Button>
+            </button>
           </div>
         </div>
       </div>
