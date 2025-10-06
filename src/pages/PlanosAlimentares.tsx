@@ -325,6 +325,8 @@ export default function PlanosAlimentares() {
                       });
                     }
                   }}
+                  onDuplicate={() => handleDuplicate(plan.id)}
+                  onDelete={() => handleDelete(plan.id)}
                 />
               );
             })}

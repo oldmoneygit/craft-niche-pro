@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, Clock, Flame, Eye, Edit, Share2 } from 'lucide-react';
+import { Calendar, Clock, Flame, Eye, Edit, Share2, Trash2, Copy } from 'lucide-react';
 
 interface PlanoCardProps {
   clientName: string;
@@ -18,6 +18,8 @@ interface PlanoCardProps {
   onView?: () => void;
   onEdit?: () => void;
   onShare?: () => void;
+  onDelete?: () => void;
+  onDuplicate?: () => void;
 }
 
 const statusConfig = {
@@ -60,7 +62,9 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
   onStatusChange,
   onView,
   onEdit,
-  onShare
+  onShare,
+  onDelete,
+  onDuplicate
 }) => {
   const [isDark, setIsDark] = useState(false);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
@@ -241,30 +245,31 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
 
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(3, 1fr)', 
-        gap: '14px', 
+        gridTemplateColumns: 'repeat(4, 1fr)', 
+        gap: '12px', 
         marginBottom: '18px', 
-        padding: '18px', 
-        background: isDark ? 'rgba(255, 255, 255, 0.03)' : `${config.bgColor}08`, 
+        padding: '16px', 
+        background: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)', 
         borderRadius: '14px' 
       }}>
         {[
-          { value: protein, label: 'PROTEÍNAS' },
-          { value: fat, label: 'GORDURAS' },
-          { value: carbs, label: 'CARBOIDRATOS' }
-        ].map(({ value, label }) => (
+          { value: calories, label: 'CALORIAS', color: '#f59e0b' },
+          { value: protein, label: 'PROTEÍNAS', color: '#3b82f6' },
+          { value: fat, label: 'GORDURAS', color: '#ef4444' },
+          { value: carbs, label: 'CARBOIDRATOS', color: '#10b981' }
+        ].map(({ value, label, color }) => (
           <div key={label} style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px', lineHeight: 1 }}>
+            <div style={{ fontSize: '20px', fontWeight: 700, color: color, marginBottom: '4px', lineHeight: 1 }}>
               {value}
             </div>
-            <div style={{ fontSize: '10px', color: isDark ? '#9ca3af' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.6px', fontWeight: 600 }}>
+            <div style={{ fontSize: '9px', color: isDark ? '#9ca3af' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
               {label}
             </div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', paddingTop: '18px', borderTop: isDark ? '1px solid rgba(64, 64, 64, 0.2)' : '1px solid rgba(229, 231, 235, 0.5)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', paddingTop: '18px', borderTop: isDark ? '1px solid rgba(64, 64, 64, 0.2)' : '1px solid rgba(229, 231, 235, 0.5)' }}>
         {[
           { icon: Eye, label: 'Ver', action: onView },
           { icon: Edit, label: 'Editar', action: onEdit },
@@ -305,6 +310,76 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
             {label}
           </button>
         ))}
+        {onDuplicate && (
+          <button
+            onClick={onDuplicate}
+            style={{
+              padding: '11px 8px',
+              borderRadius: '10px',
+              border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.6)',
+              background: 'transparent',
+              color: isDark ? '#a3a3a3' : '#6b7280',
+              fontWeight: 600,
+              fontSize: '13px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = isDark ? '#3b82f615' : '#3b82f610';
+              e.currentTarget.style.color = '#3b82f6';
+              e.currentTarget.style.borderColor = '#3b82f6';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
+              e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.6)';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            <Copy style={{ width: '16px', height: '16px' }} />
+            Duplicar
+          </button>
+        )}
+        {onDelete && (
+          <button
+            onClick={onDelete}
+            style={{
+              padding: '11px 8px',
+              borderRadius: '10px',
+              border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.6)',
+              background: 'transparent',
+              color: isDark ? '#a3a3a3' : '#6b7280',
+              fontWeight: 600,
+              fontSize: '13px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = isDark ? '#ef444415' : '#ef444410';
+              e.currentTarget.style.color = '#ef4444';
+              e.currentTarget.style.borderColor = '#ef4444';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
+              e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.6)';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            <Trash2 style={{ width: '16px', height: '16px' }} />
+            Excluir
+          </button>
+        )}
       </div>
     </div>
   );
