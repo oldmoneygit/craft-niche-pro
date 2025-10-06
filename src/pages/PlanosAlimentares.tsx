@@ -420,12 +420,12 @@ export default function PlanosAlimentares() {
                       });
                     }
                     
-                    const hasNutrients = realTotals.protein > 0 || realTotals.carbs > 0 || realTotals.fats > 0;
+                    const hasNutrients = realTotals.calories > 0 || realTotals.protein > 0 || realTotals.carbs > 0 || realTotals.fats > 0;
                     
                     return hasNutrients ? (
                       <div style={{ 
                         display: 'grid', 
-                        gridTemplateColumns: 'repeat(3, 1fr)', 
+                        gridTemplateColumns: 'repeat(4, 1fr)', 
                         gap: '12px', 
                         marginBottom: '20px', 
                         padding: '16px', 
@@ -433,6 +433,19 @@ export default function PlanosAlimentares() {
                         border: '1px solid rgba(16, 185, 129, 0.1)',
                         borderRadius: '12px' 
                       }}>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: '20px', fontWeight: 700, color: '#10b981', marginBottom: '4px' }}>
+                            {Math.round(realTotals.calories)}
+                          </div>
+                          <div style={{ fontSize: '11px', color: isDark ? '#a3a3a3' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+                            KCAL
+                          </div>
+                          {plan.target_kcal && (
+                            <div style={{ fontSize: '10px', color: isDark ? '#666' : '#999', marginTop: '2px' }}>
+                              Meta: {plan.target_kcal}
+                            </div>
+                          )}
+                        </div>
                         <div style={{ textAlign: 'center' }}>
                           <div style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
                             {Math.round(realTotals.protein)}g
