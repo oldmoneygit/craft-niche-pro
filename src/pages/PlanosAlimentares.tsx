@@ -8,6 +8,8 @@ import { useMealPlansData, useDuplicateMealPlan, useDeleteMealPlan } from '@/hoo
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function PlanosAlimentares() {
   const [isDark, setIsDark] = useState(false);
@@ -22,6 +24,7 @@ export default function PlanosAlimentares() {
   const duplicatePlan = useDuplicateMealPlan();
   const deletePlan = useDeleteMealPlan();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const checkTheme = () => {
@@ -219,7 +222,7 @@ export default function PlanosAlimentares() {
           >
             <option value="all">Todos os status</option>
             <option value="ativo">Ativos</option>
-            <option value="pausado">Pausados</option>
+            <option value="pendente">Pendentes</option>
             <option value="concluido">Concluídos</option>
           </select>
         </div>
@@ -240,474 +243,89 @@ export default function PlanosAlimentares() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '24px' }}>
             {plans.map((plan: any) => {
-              const statusColors = {
-                'ativo': { 
-                  bg: '#10b981', 
-                  border: '#10b981',
-                  gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                  iconColor: '#10b981',
-                  shadow: 'rgba(16, 185, 129, 0.3)'
-                },
-                'pausado': { 
-                  bg: '#f59e0b', 
-                  border: '#f59e0b',
-                  gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                  iconColor: '#f59e0b',
-                  shadow: 'rgba(245, 158, 11, 0.3)'
-                },
-                'concluido': { 
-                  bg: '#6b7280', 
-                  border: '#6b7280',
-                  gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
-                  iconColor: '#6b7280',
-                  shadow: 'rgba(107, 114, 128, 0.3)'
+              // Calcular totais dos nutrientes
+              const realTotals = {
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fats: 0
+              };
+              
+              if (plan.meals && Array.isArray(plan.meals)) {
+                plan.meals.forEach((meal: any) => {
+                  if (meal.items && Array.isArray(meal.items)) {
+                    meal.items.forEach((item: any) => {
+                      realTotals.calories += item.kcal_total || 0;
+                      realTotals.protein += item.protein_total || 0;
+                      realTotals.carbs += item.carb_total || 0;
+                      realTotals.fats += item.fat_total || 0;
+                    });
+                  }
+                });
+              }
+
+              // Calcular duração em dias
+              const start = new Date(plan.start_date);
+              const end = plan.end_date ? new Date(plan.end_date) : new Date();
+              const duration = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+
+              // Função de mudança de status
+              const handleStatusChange = async (newStatus: 'ativo' | 'pendente' | 'concluido') => {
+                try {
+                  await supabase
+                    .from('meal_plans')
+                    .update({ status: newStatus })
+                    .eq('id', plan.id);
+                  
+                  queryClient.invalidateQueries({ queryKey: ['meal-plans'] });
+                  toast({
+                    title: "Status atualizado",
+                    description: `Plano marcado como ${newStatus}`
+                  });
+                } catch (error) {
+                  console.error('Erro ao atualizar status:', error);
+                  toast({
+                    variant: "destructive",
+                    title: "Erro",
+                    description: "Não foi possível atualizar o status"
+                  });
                 }
               };
-              const colors = statusColors[plan.status as keyof typeof statusColors] || statusColors['ativo'];
 
               return (
-                <div
+                <PlanoCard
                   key={plan.id}
-                  className="group relative"
-                  style={{
-                    background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)',
-                    backdropFilter: 'blur(20px)',
-                    WebkitBackdropFilter: 'blur(20px)',
-                    border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.5)',
-                    borderRadius: '16px',
-                    padding: '28px',
-                    transition: 'all 0.3s ease',
-                    position: 'relative',
-                    overflow: 'hidden'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-8px)';
-                    e.currentTarget.style.boxShadow = `0 20px 40px ${colors.shadow}`;
-                    e.currentTarget.style.borderColor = colors.border;
-                    const border = e.currentTarget.querySelector('.plan-border') as HTMLElement;
-                    if (border) border.style.width = '4px';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
-                    e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.5)';
-                    const border = e.currentTarget.querySelector('.plan-border') as HTMLElement;
-                    if (border) border.style.width = '0';
-                  }}
-                >
-                  {/* Borda lateral colorida */}
-                  <div
-                    className="plan-border"
-                    style={{
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      bottom: 0,
-                      width: '0',
-                      background: colors.border,
-                      transition: 'width 0.3s ease',
-                      borderTopLeftRadius: '16px',
-                      borderBottomLeftRadius: '16px'
-                    }}
-                  />
-
-                  {/* Header com cliente e badge */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ 
-                        width: '48px', 
-                        height: '48px', 
-                        borderRadius: '50%', 
-                        background: colors.gradient,
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        color: 'white', 
-                        fontWeight: 700, 
-                        fontSize: '18px',
-                        boxShadow: `0 4px 12px ${colors.shadow}`
-                      }}>
-                        {plan.client?.name?.substring(0, 2).toUpperCase() || 'NA'}
-                      </div>
-                      <div>
-                        <h3 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
-                          {plan.client?.name || 'Cliente'}
-                        </h3>
-                        <p style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
-                          {plan.goal ? `Objetivo: ${plan.goal}` : 'Sem objetivo definido'}
-                        </p>
-                      </div>
-                    </div>
-                    {/* Badge de status com cor sólida */}
-                    <div style={{ 
-                      padding: '6px 14px', 
-                      borderRadius: '20px', 
-                      fontSize: '12px', 
-                      fontWeight: 700, 
-                      background: colors.bg,
-                      color: 'white', 
-                      textTransform: 'uppercase', 
-                      letterSpacing: '0.5px',
-                      boxShadow: `0 4px 12px ${colors.shadow}`
-                    }}>
-                      {plan.status}
-                    </div>
-                  </div>
-
-                  {/* Título do plano */}
-                  <div style={{ marginBottom: '20px' }}>
-                    <div style={{ fontSize: '16px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '12px' }}>
-                      {plan.name}
-                    </div>
-                    {/* Informações básicas */}
-                    <div style={{ display: 'grid', gap: '10px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-                        <Calendar style={{ width: '18px', height: '18px', color: colors.iconColor }} />
-                        <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>Início:</span>
-                        <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
-                          {new Date(plan.start_date).toLocaleDateString('pt-BR')}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-                        <Calendar style={{ width: '18px', height: '18px', color: colors.iconColor }} />
-                        <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>Fim:</span>
-                        <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
-                          {new Date(plan.end_date).toLocaleDateString('pt-BR')}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-                        <List style={{ width: '18px', height: '18px', color: colors.iconColor }} />
-                        <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>Refeições:</span>
-                        <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>
-                          {plan.meals?.length || 0}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Card de macros nutricionais com design melhorado */}
-                  {(() => {
-                    // Calcular totais reais dos alimentos adicionados ao plano
-                    const realTotals = {
-                      calories: 0,
-                      protein: 0,
-                      carbs: 0,
-                      fats: 0
-                    };
-                    
-                    if (plan.meals && Array.isArray(plan.meals)) {
-                      plan.meals.forEach((meal: any) => {
-                        if (meal.items && Array.isArray(meal.items)) {
-                          meal.items.forEach((item: any) => {
-                            realTotals.calories += item.kcal_total || 0;
-                            realTotals.protein += item.protein_total || 0;
-                            realTotals.carbs += item.carb_total || 0;
-                            realTotals.fats += item.fat_total || 0;
-                          });
-                        }
+                  clientName={plan.client?.name || 'Cliente'}
+                  clientInitials={plan.client?.name?.substring(0, 2).toUpperCase() || 'NA'}
+                  objective={plan.goal || 'Sem objetivo definido'}
+                  status={plan.status || 'ativo'}
+                  planTitle={plan.name}
+                  startDate={new Date(plan.start_date).toLocaleDateString('pt-BR')}
+                  duration={duration > 0 ? duration : undefined}
+                  calories={`${Math.round(realTotals.calories || plan.target_kcal || 0)} kcal`}
+                  protein={`${Math.round(realTotals.protein || plan.target_protein || 0)}g`}
+                  fat={`${Math.round(realTotals.fats || plan.target_fats || 0)}g`}
+                  carbs={`${Math.round(realTotals.carbs || plan.target_carbs || 0)}g`}
+                  onStatusChange={handleStatusChange}
+                  onView={() => handleView(plan.id)}
+                  onEdit={() => handleEdit(plan.id)}
+                  onShare={() => {
+                    if (plan.public_token) {
+                      const url = `${window.location.origin}/public/meal-plan/${plan.public_token}`;
+                      navigator.clipboard.writeText(url);
+                      toast({
+                        title: "Link copiado!",
+                        description: "Link do plano copiado para área de transferência"
+                      });
+                    } else {
+                      toast({
+                        variant: "destructive",
+                        title: "Erro",
+                        description: "Este plano não possui link público"
                       });
                     }
-                    
-                    const hasNutrients = realTotals.calories > 0 || realTotals.protein > 0 || realTotals.carbs > 0 || realTotals.fats > 0;
-                    
-                    return hasNutrients ? (
-                      <div style={{ 
-                        display: 'grid', 
-                        gridTemplateColumns: 'repeat(4, 1fr)', 
-                        gap: '10px', 
-                        marginBottom: '20px', 
-                        padding: '14px', 
-                        background: isDark ? 'rgba(16, 185, 129, 0.08)' : 'rgba(16, 185, 129, 0.06)',
-                        border: `1px solid ${isDark ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.15)'}`,
-                        borderRadius: '14px' 
-                      }}>
-                        {/* KCAL - Verde em destaque */}
-                        <div style={{ 
-                          textAlign: 'center',
-                          padding: '8px',
-                          borderRadius: '10px',
-                          background: isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.1)'
-                        }}>
-                          <div style={{ 
-                            fontSize: '22px', 
-                            fontWeight: 800, 
-                            color: '#10b981', 
-                            marginBottom: '2px',
-                            lineHeight: 1
-                          }}>
-                            {Math.round(realTotals.calories)}
-                          </div>
-                          <div style={{ 
-                            fontSize: '10px', 
-                            color: '#10b981', 
-                            textTransform: 'uppercase', 
-                            letterSpacing: '0.8px', 
-                            fontWeight: 700,
-                            marginBottom: '4px'
-                          }}>
-                            KCAL
-                          </div>
-                          {plan.target_kcal && (
-                            <div style={{ 
-                              fontSize: '9px', 
-                              color: isDark ? '#6b7280' : '#9ca3af',
-                              fontWeight: 500
-                            }}>
-                              Meta: {plan.target_kcal}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Proteínas - Azul */}
-                        <div style={{ 
-                          textAlign: 'center',
-                          padding: '8px',
-                          borderRadius: '10px',
-                          background: isDark ? 'rgba(59, 130, 246, 0.12)' : 'rgba(59, 130, 246, 0.08)'
-                        }}>
-                          <div style={{ 
-                            fontSize: '22px', 
-                            fontWeight: 800, 
-                            color: '#3b82f6', 
-                            marginBottom: '2px',
-                            lineHeight: 1
-                          }}>
-                            {Math.round(realTotals.protein)}g
-                          </div>
-                          <div style={{ 
-                            fontSize: '10px', 
-                            color: '#3b82f6', 
-                            textTransform: 'uppercase', 
-                            letterSpacing: '0.8px', 
-                            fontWeight: 700,
-                            marginBottom: '4px'
-                          }}>
-                            PROTEÍNAS
-                          </div>
-                          {plan.target_protein && (
-                            <div style={{ 
-                              fontSize: '9px', 
-                              color: isDark ? '#6b7280' : '#9ca3af',
-                              fontWeight: 500
-                            }}>
-                              Meta: {plan.target_protein}g
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Gorduras - Laranja */}
-                        <div style={{ 
-                          textAlign: 'center',
-                          padding: '8px',
-                          borderRadius: '10px',
-                          background: isDark ? 'rgba(249, 115, 22, 0.12)' : 'rgba(249, 115, 22, 0.08)'
-                        }}>
-                          <div style={{ 
-                            fontSize: '22px', 
-                            fontWeight: 800, 
-                            color: '#f97316', 
-                            marginBottom: '2px',
-                            lineHeight: 1
-                          }}>
-                            {Math.round(realTotals.fats)}g
-                          </div>
-                          <div style={{ 
-                            fontSize: '10px', 
-                            color: '#f97316', 
-                            textTransform: 'uppercase', 
-                            letterSpacing: '0.8px', 
-                            fontWeight: 700,
-                            marginBottom: '4px'
-                          }}>
-                            GORDURAS
-                          </div>
-                          {plan.target_fats && (
-                            <div style={{ 
-                              fontSize: '9px', 
-                              color: isDark ? '#6b7280' : '#9ca3af',
-                              fontWeight: 500
-                            }}>
-                              Meta: {plan.target_fats}g
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Carboidratos - Roxo */}
-                        <div style={{ 
-                          textAlign: 'center',
-                          padding: '8px',
-                          borderRadius: '10px',
-                          background: isDark ? 'rgba(168, 85, 247, 0.12)' : 'rgba(168, 85, 247, 0.08)'
-                        }}>
-                          <div style={{ 
-                            fontSize: '22px', 
-                            fontWeight: 800, 
-                            color: '#a855f7', 
-                            marginBottom: '2px',
-                            lineHeight: 1
-                          }}>
-                            {Math.round(realTotals.carbs)}g
-                          </div>
-                          <div style={{ 
-                            fontSize: '10px', 
-                            color: '#a855f7', 
-                            textTransform: 'uppercase', 
-                            letterSpacing: '0.8px', 
-                            fontWeight: 700,
-                            marginBottom: '4px'
-                          }}>
-                            CARBOIDRATOS
-                          </div>
-                          {plan.target_carbs && (
-                            <div style={{ 
-                              fontSize: '9px', 
-                              color: isDark ? '#6b7280' : '#9ca3af',
-                              fontWeight: 500
-                            }}>
-                              Meta: {plan.target_carbs}g
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ) : null;
-                  })()}
-
-                  {/* Botões de ação com cores específicas no hover */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', paddingTop: '20px', borderTop: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)' }}>
-                    {/* Botão Ver - verde no hover */}
-                    <button
-                      onClick={() => handleView(plan.id)}
-                      style={{
-                        padding: '10px',
-                        borderRadius: '10px',
-                        border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
-                        background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)',
-                        color: isDark ? '#a3a3a3' : '#6b7280',
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(16, 185, 129, 0.1)';
-                        e.currentTarget.style.borderColor = '#10b981';
-                        e.currentTarget.style.color = '#10b981';
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.2)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)';
-                        e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
-                        e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                    >
-                      <Eye style={{ width: '16px', height: '16px' }} />
-                    </button>
-                    {/* Botão Editar - roxo no hover */}
-                    <button
-                      onClick={() => handleEdit(plan.id)}
-                      style={{
-                        padding: '10px',
-                        borderRadius: '10px',
-                        border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
-                        background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)',
-                        color: isDark ? '#a3a3a3' : '#6b7280',
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(168, 85, 247, 0.1)';
-                        e.currentTarget.style.borderColor = '#a855f7';
-                        e.currentTarget.style.color = '#a855f7';
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(168, 85, 247, 0.2)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)';
-                        e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
-                        e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                    >
-                      <Edit style={{ width: '16px', height: '16px' }} />
-                    </button>
-                    {/* Botão Duplicar - azul no hover */}
-                    <button
-                      onClick={() => handleDuplicate(plan.id)}
-                      style={{
-                        padding: '10px',
-                        borderRadius: '10px',
-                        border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
-                        background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)',
-                        color: isDark ? '#a3a3a3' : '#6b7280',
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
-                        e.currentTarget.style.borderColor = '#3b82f6';
-                        e.currentTarget.style.color = '#3b82f6';
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.2)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)';
-                        e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
-                        e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                    >
-                      <Copy style={{ width: '16px', height: '16px' }} />
-                    </button>
-                    {/* Botão Excluir - vermelho no hover */}
-                    <button
-                      onClick={() => handleDelete(plan.id)}
-                      style={{
-                        padding: '10px',
-                        borderRadius: '10px',
-                        border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
-                        background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)',
-                        color: isDark ? '#a3a3a3' : '#6b7280',
-                        fontWeight: 600,
-                        fontSize: '13px',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-                        e.currentTarget.style.borderColor = '#ef4444';
-                        e.currentTarget.style.color = '#ef4444';
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.2)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.7)';
-                        e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
-                        e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                    >
-                      <Trash2 style={{ width: '16px', height: '16px' }} />
-                    </button>
-                  </div>
-                </div>
+                  }}
+                />
               );
             })}
           </div>

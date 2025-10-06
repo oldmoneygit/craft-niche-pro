@@ -5,33 +5,42 @@ interface PlanoCardProps {
   clientName: string;
   clientInitials: string;
   objective: string;
-  status: 'active' | 'pending' | 'expired';
+  status: 'ativo' | 'pendente' | 'concluido';
   planTitle: string;
   startDate: string;
-  endDate: string;
+  duration?: number;
   calories: string;
   protein: string;
   fat: string;
   carbs: string;
-  meals?: number;
   avatarColor?: string;
+  onStatusChange?: (newStatus: 'ativo' | 'pendente' | 'concluido') => void;
+  onView?: () => void;
+  onEdit?: () => void;
+  onShare?: () => void;
 }
 
 const statusConfig = {
-  active: {
-    label: 'Ativo',
-    color: '#10b981',
-    colorDark: '#059669'
+  ativo: {
+    label: 'ATIVO',
+    bgColor: '#10b981',
+    bgColorDark: '#059669',
+    borderColor: '#10b981',
+    avatarBg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
   },
-  pending: {
-    label: 'Pendente',
-    color: '#f59e0b',
-    colorDark: '#d97706'
+  pendente: {
+    label: 'PENDENTE',
+    bgColor: '#f59e0b',
+    bgColorDark: '#d97706',
+    borderColor: '#f59e0b',
+    avatarBg: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
   },
-  expired: {
-    label: 'Expirado',
-    color: '#6b7280',
-    colorDark: '#4b5563'
+  concluido: {
+    label: 'CONCLUÍDO',
+    bgColor: '#6b7280',
+    bgColorDark: '#4b5563',
+    borderColor: '#6b7280',
+    avatarBg: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)'
   }
 };
 
@@ -42,15 +51,19 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
   status,
   planTitle,
   startDate,
-  endDate,
+  duration,
   calories,
   protein,
   fat,
   carbs,
-  meals,
-  avatarColor
+  avatarColor,
+  onStatusChange,
+  onView,
+  onEdit,
+  onShare
 }) => {
   const [isDark, setIsDark] = useState(false);
+  const [showStatusMenu, setShowStatusMenu] = useState(false);
   const config = statusConfig[status];
 
   useEffect(() => {
@@ -70,56 +83,51 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
     return () => observer.disconnect();
   }, []);
 
-  const defaultAvatarColor = avatarColor || `linear-gradient(135deg, ${config.color} 0%, ${config.colorDark} 100%)`;
+  const defaultAvatarColor = avatarColor || config.avatarBg;
 
   return (
     <div
       style={{
-        background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)',
+        background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
-        border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
-        borderRadius: '16px',
-        padding: '28px',
+        border: `2px solid ${config.borderColor}`,
+        borderRadius: '20px',
+        padding: '24px',
         transition: 'all 0.3s ease',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'visible',
+        boxShadow: isDark ? '0 4px 20px rgba(0, 0, 0, 0.3)' : '0 4px 20px rgba(0, 0, 0, 0.08)'
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-6px)';
-        e.currentTarget.style.boxShadow = isDark ? '0 12px 32px rgba(0, 0, 0, 0.4)' : '0 12px 32px rgba(0, 0, 0, 0.1)';
-        e.currentTarget.style.borderColor = config.color;
-        const border = e.currentTarget.querySelector('.plano-border') as HTMLElement;
-        if (border) border.style.width = '4px';
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = isDark ? '0 12px 32px rgba(0, 0, 0, 0.4)' : '0 12px 32px rgba(0, 0, 0, 0.12)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = 'none';
-        e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
-        const border = e.currentTarget.querySelector('.plano-border') as HTMLElement;
-        if (border) border.style.width = '0';
+        e.currentTarget.style.boxShadow = isDark ? '0 4px 20px rgba(0, 0, 0, 0.3)' : '0 4px 20px rgba(0, 0, 0, 0.08)';
       }}
     >
-      <div
-        className="plano-border"
-        style={{
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: '0',
-          background: config.color,
-          transition: 'width 0.3s ease'
-        }}
-      />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: defaultAvatarColor, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: '18px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ 
+            width: '52px', 
+            height: '52px', 
+            borderRadius: '50%', 
+            background: defaultAvatarColor, 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            color: 'white', 
+            fontWeight: 700, 
+            fontSize: '18px',
+            boxShadow: `0 4px 12px ${config.bgColor}40`
+          }}>
             {clientInitials}
           </div>
           <div>
-            <h3 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+            <h3 style={{ fontSize: '19px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '2px' }}>
               {clientName}
             </h3>
             <p style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
@@ -127,80 +135,170 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
             </p>
           </div>
         </div>
-        <div style={{ padding: '6px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 700, background: config.color, color: 'white', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-          {config.label}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => onStatusChange && setShowStatusMenu(!showStatusMenu)}
+            style={{ 
+              padding: '7px 16px', 
+              borderRadius: '20px', 
+              fontSize: '11px', 
+              fontWeight: 700, 
+              background: config.bgColor, 
+              color: 'white', 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.6px',
+              border: 'none',
+              cursor: onStatusChange ? 'pointer' : 'default',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              if (onStatusChange) {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.boxShadow = `0 4px 12px ${config.bgColor}60`;
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            {config.label}
+          </button>
+          {showStatusMenu && onStatusChange && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              right: 0,
+              marginTop: '8px',
+              background: isDark ? 'rgba(38, 38, 38, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+              borderRadius: '12px',
+              padding: '8px',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+              border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+              zIndex: 10,
+              minWidth: '140px'
+            }}>
+              {(['ativo', 'pendente', 'concluido'] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => {
+                    onStatusChange(s);
+                    setShowStatusMenu(false);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: status === s ? `${statusConfig[s].bgColor}20` : 'transparent',
+                    color: status === s ? statusConfig[s].bgColor : (isDark ? '#a3a3a3' : '#6b7280'),
+                    fontWeight: status === s ? 700 : 600,
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    textAlign: 'left',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    marginBottom: '4px'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (status !== s) {
+                      e.currentTarget.style.background = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (status !== s) {
+                      e.currentTarget.style.background = 'transparent';
+                    }
+                  }}
+                >
+                  {statusConfig[s].label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      <div style={{ marginBottom: '20px' }}>
-        <div style={{ fontSize: '16px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '12px' }}>
+      <div style={{ marginBottom: '18px' }}>
+        <div style={{ fontSize: '17px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '14px' }}>
           {planTitle}
         </div>
-        <div style={{ display: 'grid', gap: '10px' }}>
+        <div style={{ display: 'grid', gap: '8px' }}>
           {[
-            { icon: Calendar, label: 'Início:', value: startDate },
-            { icon: Calendar, label: 'Fim:', value: endDate },
-            { icon: Flame, label: 'Meta Calórica:', value: calories },
-            ...(meals !== undefined ? [{ icon: Clock, label: 'Refeições:', value: meals.toString() }] : [])
-          ].map(({ icon: Icon, label, value }) => (
-            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-              <Icon style={{ width: '18px', height: '18px', color: config.color }} />
-              <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>{label}</span>
-              <span style={{ fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>{value}</span>
+            { icon: Calendar, label: 'Criado em:', value: startDate, color: config.bgColor },
+            ...(duration ? [{ icon: Clock, label: 'Duração:', value: `${duration} dias`, color: config.bgColor }] : []),
+            { icon: Flame, label: 'Calorias/dia:', value: calories, color: config.bgColor }
+          ].map(({ icon: Icon, label, value, color }) => (
+            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
+              <Icon style={{ width: '18px', height: '18px', color: color, flexShrink: 0 }} />
+              <span style={{ color: isDark ? '#9ca3af' : '#6b7280', fontWeight: 500 }}>{label}</span>
+              <span style={{ fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>{value}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '20px', padding: '16px', background: 'rgba(16, 185, 129, 0.05)', borderRadius: '12px' }}>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(3, 1fr)', 
+        gap: '14px', 
+        marginBottom: '18px', 
+        padding: '18px', 
+        background: isDark ? 'rgba(255, 255, 255, 0.03)' : `${config.bgColor}08`, 
+        borderRadius: '14px' 
+      }}>
         {[
-          { value: protein, label: 'Proteínas' },
-          { value: fat, label: 'Gorduras' },
-          { value: carbs, label: 'Carboidratos' }
+          { value: protein, label: 'PROTEÍNAS' },
+          { value: fat, label: 'GORDURAS' },
+          { value: carbs, label: 'CARBOIDRATOS' }
         ].map(({ value, label }) => (
           <div key={label} style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+            <div style={{ fontSize: '24px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px', lineHeight: 1 }}>
               {value}
             </div>
-            <div style={{ fontSize: '11px', color: isDark ? '#a3a3a3' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            <div style={{ fontSize: '10px', color: isDark ? '#9ca3af' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.6px', fontWeight: 600 }}>
               {label}
             </div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', paddingTop: '20px', borderTop: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', paddingTop: '18px', borderTop: isDark ? '1px solid rgba(64, 64, 64, 0.2)' : '1px solid rgba(229, 231, 235, 0.5)' }}>
         {[
-          { icon: Eye, label: 'Ver' },
-          { icon: Edit, label: 'Editar' },
-          { icon: Share2, label: 'Enviar' }
-        ].map(({ icon: Icon, label }) => (
+          { icon: Eye, label: 'Ver', action: onView },
+          { icon: Edit, label: 'Editar', action: onEdit },
+          { icon: Share2, label: 'Enviar', action: onShare }
+        ].map(({ icon: Icon, label, action }) => (
           <button
             key={label}
+            onClick={action}
             style={{
-              padding: '10px',
+              padding: '11px 8px',
               borderRadius: '10px',
-              border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+              border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.6)',
               background: 'transparent',
               color: isDark ? '#a3a3a3' : '#6b7280',
               fontWeight: 600,
               fontSize: '13px',
               cursor: 'pointer',
-              transition: 'all 0.3s ease',
+              transition: 'all 0.2s ease',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '6px'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.95)';
-              e.currentTarget.style.color = config.color;
-              e.currentTarget.style.borderColor = config.color;
+              e.currentTarget.style.background = isDark ? `${config.bgColor}15` : `${config.bgColor}10`;
+              e.currentTarget.style.color = config.bgColor;
+              e.currentTarget.style.borderColor = config.bgColor;
+              e.currentTarget.style.transform = 'translateY(-2px)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
               e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
-              e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)';
+              e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.6)';
+              e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
             <Icon style={{ width: '16px', height: '16px' }} />
