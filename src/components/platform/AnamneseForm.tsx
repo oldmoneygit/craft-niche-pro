@@ -49,26 +49,27 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
   const [dietaryRestriction, setDietaryRestriction] = useState<string>('');
   const [otherRestriction, setOtherRestriction] = useState('');
   
-  // Álcool e Fumo
-  const [consumesAlcohol, setConsumesAlcohol] = useState(false);
-  const [alcoholDetails, setAlcoholDetails] = useState('');
-  const [smokes, setSmokes] = useState(false);
-  const [smokingDetails, setSmokingDetails] = useState('');
+  // Álcool: 'none', 'occasional', 'moderate', 'frequent'
+  const [alcoholLevel, setAlcoholLevel] = useState<string>('none');
+  
+  // Fumo: 'never', 'former', 'current'
+  const [smokingStatus, setSmokingStatus] = useState<string>('never');
   
   // Sono
   const [sleepQuality, setSleepQuality] = useState<string>('');
   const [sleepHours, setSleepHours] = useState<number | null>(null);
   
-  // Atividade Física
+  // Atividade Física: 'sedentary', 'light', 'moderate', 'intense', 'very_intense'
   const [activityLevel, setActivityLevel] = useState<string>('');
   const [activityDetails, setActivityDetails] = useState('');
   
-  // Refeições
+  // Refeições: 'never', 'rarely', 'sometimes', 'often', 'daily'
+  const [eatingOutFrequency, setEatingOutFrequency] = useState<string>('');
   const [eatingOutDetails, setEatingOutDetails] = useState('');
   const [householdSize, setHouseholdSize] = useState<number | null>(null);
   const [mealsPerDay, setMealsPerDay] = useState<number | null>(null);
   
-  // Estresse
+  // Estresse: 'low', 'moderate', 'high', 'very_high'
   const [stressLevel, setStressLevel] = useState<string>('');
   
   // Patologias (multi-select)
@@ -111,40 +112,27 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
         setOtherRestriction(restrictions);
       }
       
-      // Parse alcohol
-      const alcohol = anamnese.alcohol_consumption || '';
-      setConsumesAlcohol(alcohol.toLowerCase().includes('sim') || (alcohol && !alcohol.toLowerCase().includes('não')));
-      setAlcoholDetails(alcohol);
+      // Parse alcohol - usar valores do banco
+      setAlcoholLevel(anamnese.alcohol_consumption || 'none');
       
-      // Parse smoking
-      const smoke = anamnese.smoking || '';
-      setSmokes(smoke.toLowerCase().includes('sim') || smoke.toLowerCase().includes('fumante'));
-      setSmokingDetails(smoke);
+      // Parse smoking - usar valores do banco
+      setSmokingStatus(anamnese.smoking || 'never');
       
       // Sleep
       setSleepHours(anamnese.sleep_hours || null);
-      const physActivity = anamnese.physical_activity || '';
-      if (physActivity.includes('Sedentário')) setSleepQuality('Dorme bem');
-      else setSleepQuality('');
       
-      // Physical activity
-      const activity = anamnese.physical_activity || '';
-      if (activity.includes('Sedentário')) setActivityLevel('Sedentário');
-      else if (activity.includes('Leve')) setActivityLevel('Leve');
-      else if (activity.includes('Moderado')) setActivityLevel('Moderado');
-      else if (activity.includes('Intenso')) setActivityLevel('Intenso');
-      setActivityDetails(activity);
+      // Physical activity - usar valores do banco
+      setActivityLevel(anamnese.physical_activity || '');
+      setActivityDetails(anamnese.physical_activity || '');
       
-      // Meals
+      // Eating out - usar valores do banco
+      setEatingOutFrequency(anamnese.eating_out_frequency || '');
       setEatingOutDetails(anamnese.eating_out_frequency || '');
       setHouseholdSize(anamnese.household_size || null);
       setMealsPerDay(anamnese.meals_per_day || null);
       
-      // Stress
-      const stress = anamnese.stress_level || '';
-      if (stress.includes('Baixo')) setStressLevel('Baixo');
-      else if (stress.includes('Moderado')) setStressLevel('Moderado');
-      else if (stress.includes('Alto')) setStressLevel('Alto');
+      // Stress - usar valores do banco
+      setStressLevel(anamnese.stress_level || '');
       
       // Medical conditions - parse comma-separated
       const conditions = anamnese.medical_conditions || '';
@@ -184,18 +172,6 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
       restrictionsText = otherRestriction;
     }
     
-    // Build alcohol text
-    const alcoholText = consumesAlcohol ? (alcoholDetails || 'Sim') : 'Não';
-    
-    // Build smoking text
-    const smokingText = smokes ? (smokingDetails || 'Sim') : 'Não';
-    
-    // Build physical activity text
-    let activityText = activityLevel;
-    if (activityDetails) {
-      activityText = activityDetails;
-    }
-    
     // Build medical conditions text
     let conditionsText = selectedConditions.join(', ');
     if (otherConditions && !selectedConditions.every(c => otherConditions.includes(c))) {
@@ -209,11 +185,11 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
         main_goal: mainGoal,
         clinical_observations: clinicalObservations,
         dietary_restrictions: restrictionsText,
-        alcohol_consumption: alcoholText,
-        smoking: smokingText,
+        alcohol_consumption: alcoholLevel, // 'none', 'occasional', 'moderate', 'frequent'
+        smoking: smokingStatus, // 'never', 'former', 'current'
         sleep_hours: sleepHours,
-        physical_activity: activityText,
-        eating_out_frequency: eatingOutDetails,
+        physical_activity: activityLevel, // 'sedentary', 'light', 'moderate', 'intense', 'very_intense'
+        eating_out_frequency: eatingOutFrequency, // 'never', 'rarely', 'sometimes', 'often', 'daily'
         household_size: householdSize,
         medical_conditions: conditionsText,
         current_medications: currentMedications,
@@ -225,7 +201,7 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
         hip_circumference: hipCircumference,
         water_intake_liters: waterIntake,
         meals_per_day: mealsPerDay,
-        stress_level: stressLevel,
+        stress_level: stressLevel, // 'low', 'moderate', 'high', 'very_high'
         allergies,
         food_intolerances: foodIntolerances,
         food_preferences: foodPreferences,
@@ -352,48 +328,51 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
 
               {/* Bebida Alcoólica */}
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Checkbox
-                    id="alcohol"
-                    checked={consumesAlcohol}
-                    onCheckedChange={(checked) => setConsumesAlcohol(checked as boolean)}
+                <Label className="block text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">Consumo de Álcool</Label>
+                <div className="flex flex-wrap gap-2">
+                  <SelectionButton
+                    label="Nunca"
+                    selected={alcoholLevel === 'none'}
+                    onClick={() => setAlcoholLevel('none')}
                   />
-                  <Label htmlFor="alcohol" className="text-sm font-semibold cursor-pointer text-gray-700 dark:text-gray-300">
-                    Ingere bebida alcoólica?
-                  </Label>
+                  <SelectionButton
+                    label="Ocasional"
+                    selected={alcoholLevel === 'occasional'}
+                    onClick={() => setAlcoholLevel('occasional')}
+                  />
+                  <SelectionButton
+                    label="Moderado"
+                    selected={alcoholLevel === 'moderate'}
+                    onClick={() => setAlcoholLevel('moderate')}
+                  />
+                  <SelectionButton
+                    label="Frequente"
+                    selected={alcoholLevel === 'frequent'}
+                    onClick={() => setAlcoholLevel('frequent')}
+                  />
                 </div>
-                {consumesAlcohol && (
-                  <Textarea
-                    rows={2}
-                    placeholder="Frequência e tipo de bebida..."
-                    value={alcoholDetails}
-                    onChange={(e) => setAlcoholDetails(e.target.value)}
-                    className="mt-2"
-                  />
-                )}
               </div>
 
               {/* Fumante */}
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Checkbox
-                    id="smoking"
-                    checked={smokes}
-                    onCheckedChange={(checked) => setSmokes(checked as boolean)}
+                <Label className="block text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">Tabagismo</Label>
+                <div className="flex flex-wrap gap-2">
+                  <SelectionButton
+                    label="Nunca fumou"
+                    selected={smokingStatus === 'never'}
+                    onClick={() => setSmokingStatus('never')}
                   />
-                  <Label htmlFor="smoking" className="text-sm font-semibold cursor-pointer text-gray-700 dark:text-gray-300">
-                    Fumante?
-                  </Label>
+                  <SelectionButton
+                    label="Ex-fumante"
+                    selected={smokingStatus === 'former'}
+                    onClick={() => setSmokingStatus('former')}
+                  />
+                  <SelectionButton
+                    label="Fumante"
+                    selected={smokingStatus === 'current'}
+                    onClick={() => setSmokingStatus('current')}
+                  />
                 </div>
-                {smokes && (
-                  <Textarea
-                    rows={2}
-                    placeholder="Quantidade, frequência..."
-                    value={smokingDetails}
-                    onChange={(e) => setSmokingDetails(e.target.value)}
-                    className="mt-2"
-                  />
-                )}
               </div>
 
               {/* Sono */}
@@ -425,46 +404,65 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
               {/* Atividade Física */}
               <div>
                 <Label className="block text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">Atividade Física</Label>
-                <div className="flex flex-wrap gap-2 mb-3">
+                <div className="flex flex-wrap gap-2">
                   <SelectionButton
                     label="Sedentário"
-                    selected={activityLevel === 'Sedentário'}
-                    onClick={() => setActivityLevel('Sedentário')}
+                    selected={activityLevel === 'sedentary'}
+                    onClick={() => setActivityLevel('sedentary')}
                   />
                   <SelectionButton
                     label="Leve"
-                    selected={activityLevel === 'Leve'}
-                    onClick={() => setActivityLevel('Leve')}
+                    selected={activityLevel === 'light'}
+                    onClick={() => setActivityLevel('light')}
                   />
                   <SelectionButton
                     label="Moderado"
-                    selected={activityLevel === 'Moderado'}
-                    onClick={() => setActivityLevel('Moderado')}
+                    selected={activityLevel === 'moderate'}
+                    onClick={() => setActivityLevel('moderate')}
                   />
                   <SelectionButton
                     label="Intenso"
-                    selected={activityLevel === 'Intenso'}
-                    onClick={() => setActivityLevel('Intenso')}
+                    selected={activityLevel === 'intense'}
+                    onClick={() => setActivityLevel('intense')}
+                  />
+                  <SelectionButton
+                    label="Muito Intenso"
+                    selected={activityLevel === 'very_intense'}
+                    onClick={() => setActivityLevel('very_intense')}
                   />
                 </div>
-                <Textarea
-                  rows={2}
-                  placeholder="Tipo de exercício, frequência..."
-                  value={activityDetails}
-                  onChange={(e) => setActivityDetails(e.target.value)}
-                  className="mt-2"
-                />
               </div>
 
               {/* Frequência Come Fora */}
               <div>
-                <Label className="block text-sm font-semibold mb-2">Refeições Fora de Casa</Label>
-                <Textarea
-                  rows={2}
-                  placeholder="Ex: Almoço 3x/semana no trabalho..."
-                  value={eatingOutDetails}
-                  onChange={(e) => setEatingOutDetails(e.target.value)}
-                />
+                <Label className="block text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300">Refeições Fora de Casa</Label>
+                <div className="flex flex-wrap gap-2">
+                  <SelectionButton
+                    label="Nunca"
+                    selected={eatingOutFrequency === 'never'}
+                    onClick={() => setEatingOutFrequency('never')}
+                  />
+                  <SelectionButton
+                    label="Raramente"
+                    selected={eatingOutFrequency === 'rarely'}
+                    onClick={() => setEatingOutFrequency('rarely')}
+                  />
+                  <SelectionButton
+                    label="Às vezes"
+                    selected={eatingOutFrequency === 'sometimes'}
+                    onClick={() => setEatingOutFrequency('sometimes')}
+                  />
+                  <SelectionButton
+                    label="Frequentemente"
+                    selected={eatingOutFrequency === 'often'}
+                    onClick={() => setEatingOutFrequency('often')}
+                  />
+                  <SelectionButton
+                    label="Diariamente"
+                    selected={eatingOutFrequency === 'daily'}
+                    onClick={() => setEatingOutFrequency('daily')}
+                  />
+                </div>
               </div>
 
               {/* Mora com quantas pessoas */}
@@ -485,18 +483,23 @@ export const AnamneseForm = ({ clientId }: AnamneseFormProps) => {
                 <div className="flex flex-wrap gap-2">
                   <SelectionButton
                     label="Baixo"
-                    selected={stressLevel === 'Baixo'}
-                    onClick={() => setStressLevel('Baixo')}
+                    selected={stressLevel === 'low'}
+                    onClick={() => setStressLevel('low')}
                   />
                   <SelectionButton
                     label="Moderado"
-                    selected={stressLevel === 'Moderado'}
-                    onClick={() => setStressLevel('Moderado')}
+                    selected={stressLevel === 'moderate'}
+                    onClick={() => setStressLevel('moderate')}
                   />
                   <SelectionButton
                     label="Alto"
-                    selected={stressLevel === 'Alto'}
-                    onClick={() => setStressLevel('Alto')}
+                    selected={stressLevel === 'high'}
+                    onClick={() => setStressLevel('high')}
+                  />
+                  <SelectionButton
+                    label="Muito Alto"
+                    selected={stressLevel === 'very_high'}
+                    onClick={() => setStressLevel('very_high')}
                   />
                 </div>
               </div>
