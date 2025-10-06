@@ -1,9 +1,15 @@
+import { useState } from 'react';
 import { 
   Calendar, Users, CheckCircle, Clock, 
   DollarSign, AlertTriangle, Bell, LucideIcon
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useTenantId } from '@/hooks/useTenantId';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
+import { DashboardDetailsModal } from '@/components/dashboard/DashboardDetailsModal';
+import { startOfMonth, startOfToday, endOfToday, addDays } from 'date-fns';
 import './Dashboard.css';
 
 interface StatCard {
@@ -31,7 +37,117 @@ interface InactiveClient {
 }
 
 export function Dashboard() {
+  const { tenantId } = useTenantId();
   const { data: dashboardData, isLoading, error } = useDashboardStats();
+  const [modalState, setModalState] = useState<{ isOpen: boolean; type: 'today' | 'month' | 'pending' | 'inactive' | null; title: string }>({
+    isOpen: false,
+    type: null,
+    title: ''
+  });
+
+  // Query para consultas de hoje
+  const { data: todayAppointments = [] } = useQuery({
+    queryKey: ['today-appointments', tenantId],
+    queryFn: async () => {
+      if (!tenantId) return [];
+      const today = startOfToday();
+      const todayEnd = endOfToday();
+      
+      const { data, error } = await supabase
+        .from('appointments')
+        .select(`
+          id,
+          datetime,
+          status,
+          type,
+          clients (name)
+        `)
+        .eq('tenant_id', tenantId)
+        .gte('datetime', today.toISOString())
+        .lte('datetime', todayEnd.toISOString())
+        .order('datetime', { ascending: true });
+      
+      if (error) throw error;
+      return data.map(apt => ({
+        ...apt,
+        client_name: apt.clients?.name || 'Cliente não encontrado'
+      }));
+    },
+    enabled: !!tenantId && modalState.type === 'today'
+  });
+
+  // Query para novos clientes do mês
+  const { data: monthNewClients = [] } = useQuery({
+    queryKey: ['month-new-clients', tenantId],
+    queryFn: async () => {
+      if (!tenantId) return [];
+      const monthStart = startOfMonth(new Date());
+      
+      const { data, error } = await supabase
+        .from('clients')
+        .select('id, name, phone, created_at')
+        .eq('tenant_id', tenantId)
+        .gte('created_at', monthStart.toISOString())
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!tenantId && modalState.type === 'month'
+  });
+
+  // Query para confirmações pendentes
+  const { data: pendingConfirmations = [] } = useQuery({
+    queryKey: ['pending-confirmations', tenantId],
+    queryFn: async () => {
+      if (!tenantId) return [];
+      const next48Hours = addDays(new Date(), 2);
+      
+      const { data, error } = await supabase
+        .from('appointments')
+        .select(`
+          id,
+          datetime,
+          status,
+          clients (name)
+        `)
+        .eq('tenant_id', tenantId)
+        .eq('status', 'agendado')
+        .gte('datetime', new Date().toISOString())
+        .lte('datetime', next48Hours.toISOString())
+        .order('datetime', { ascending: true });
+      
+      if (error) throw error;
+      return data.map(apt => ({
+        ...apt,
+        client_name: apt.clients?.name || 'Cliente não encontrado'
+      }));
+    },
+    enabled: !!tenantId && modalState.type === 'pending'
+  });
+
+  const handleCardClick = (type: 'today' | 'month' | 'pending' | 'inactive', title: string) => {
+    setModalState({ isOpen: true, type, title });
+  };
+
+  const closeModal = () => {
+    setModalState({ isOpen: false, type: null, title: '' });
+  };
+
+  const getModalData = () => {
+    switch (modalState.type) {
+      case 'today':
+        return todayAppointments;
+      case 'month':
+        return monthNewClients;
+      case 'pending':
+        return pendingConfirmations;
+      case 'inactive':
+        return dashboardData?.inactiveClientsList || [];
+      default:
+        return [];
+    }
+  };
 
   // Loading state
   if (isLoading) {
@@ -167,9 +283,27 @@ export function Dashboard() {
             trend={stat.changeType}
             icon={stat.icon}
             variant={stat.variant}
+            onClick={() => handleCardClick(
+              stat.variant,
+              stat.variant === 'today' ? 'Consultas de Hoje' :
+              stat.variant === 'month' ? 'Novos Clientes Este Mês' :
+              stat.variant === 'pending' ? 'Confirmações Pendentes' :
+              'Pacientes Inativos'
+            )}
           />
         ))}
       </div>
+
+      {/* Details Modal */}
+      {modalState.isOpen && modalState.type && (
+        <DashboardDetailsModal
+          isOpen={modalState.isOpen}
+          onClose={closeModal}
+          title={modalState.title}
+          type={modalState.type}
+          data={getModalData()}
+        />
+      )}
 
       {/* Alerts Section */}
       <div className="section">

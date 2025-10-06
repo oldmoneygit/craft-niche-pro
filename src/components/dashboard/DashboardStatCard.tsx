@@ -7,6 +7,7 @@ interface DashboardStatCardProps {
   variant: 'today' | 'month' | 'pending' | 'inactive';
   description?: string;
   trend?: 'positive' | 'negative' | 'neutral';
+  onClick?: () => void;
 }
 
 export function DashboardStatCard({
@@ -15,7 +16,8 @@ export function DashboardStatCard({
   icon: Icon,
   variant,
   description,
-  trend = 'neutral'
+  trend = 'neutral',
+  onClick
 }: DashboardStatCardProps) {
   const variantColors = {
     today: '#3b82f6',
@@ -34,8 +36,10 @@ export function DashboardStatCard({
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         border: '1px solid var(--border)',
-        boxShadow: '0 4px 24px var(--shadow)'
+        boxShadow: '0 4px 24px var(--shadow)',
+        cursor: onClick ? 'pointer' : 'default'
       }}
+      onClick={onClick}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = accentColor;
         e.currentTarget.style.boxShadow = '0 8px 32px var(--shadow)';
