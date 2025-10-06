@@ -401,53 +401,116 @@ All colors MUST be HSL.
   animation: spin 1s linear infinite;
 }
 
-/* Calendar Dark Mode Styles */
-[data-theme="dark"] .rdp {
-  --rdp-cell-size: 36px;
-  --rdp-accent-color: #10b981;
-  --rdp-background-color: rgba(16, 185, 129, 0.1);
-  --rdp-accent-color-dark: #059669;
-}
+/* ============= CALENDAR DARK MODE - MÁXIMA PRIORIDADE ============= */
 
-[data-theme="dark"] .rdp-caption_label {
+/* Forçar cores claras em TODOS os elementos do calendário no dark mode */
+[data-theme="dark"] .rdp,
+[data-theme="dark"] .rdp *,
+[data-theme="dark"] .pointer-events-auto.rdp,
+[data-theme="dark"] .pointer-events-auto.rdp * {
   color: #fafafa !important;
 }
 
-[data-theme="dark"] .rdp-head_cell {
-  color: #a3a3a3 !important;
+/* Título do mês */
+[data-theme="dark"] .rdp-caption,
+[data-theme="dark"] .rdp-caption_label,
+[data-theme="dark"] .rdp-caption_label * {
+  color: #fafafa !important;
+  font-weight: 600 !important;
 }
 
-[data-theme="dark"] .rdp-day {
+/* Labels dos dias da semana (dom, seg, ter, etc) */
+[data-theme="dark"] .rdp-head_row,
+[data-theme="dark"] .rdp-head_row *,
+[data-theme="dark"] .rdp-head_cell,
+[data-theme="dark"] .rdp-head_cell * {
+  color: #d4d4d4 !important;
+  font-weight: 500 !important;
+}
+
+/* Números dos dias */
+[data-theme="dark"] .rdp-day,
+[data-theme="dark"] .rdp-day *,
+[data-theme="dark"] .rdp-cell,
+[data-theme="dark"] .rdp-cell *,
+[data-theme="dark"] .rdp-button,
+[data-theme="dark"] .rdp-button *,
+[data-theme="dark"] .rdp-day_button {
   color: #fafafa !important;
 }
 
-[data-theme="dark"] .rdp-day_outside {
+/* Dias de fora do mês */
+[data-theme="dark"] .rdp-day_outside,
+[data-theme="dark"] .rdp-day_outside * {
   color: #737373 !important;
-  opacity: 0.5;
+  opacity: 0.5 !important;
 }
 
-[data-theme="dark"] .rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
-  background-color: rgba(38, 38, 38, 0.6) !important;
+/* Dias desabilitados */
+[data-theme="dark"] .rdp-day_disabled,
+[data-theme="dark"] .rdp-day_disabled * {
+  color: #525252 !important;
+  opacity: 0.4 !important;
 }
 
-[data-theme="dark"] .rdp-day_selected {
+/* Hover nos dias */
+[data-theme="dark"] .rdp-button:hover:not([disabled]):not(.rdp-day_selected),
+[data-theme="dark"] .rdp-button:hover:not([disabled]):not(.rdp-day_selected) * {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #fafafa !important;
+}
+
+/* Dia selecionado */
+[data-theme="dark"] .rdp-day_selected,
+[data-theme="dark"] .rdp-day_selected *,
+[data-theme="dark"] .rdp-day_selected:hover,
+[data-theme="dark"] .rdp-day_selected:hover * {
   background-color: #10b981 !important;
   color: white !important;
 }
 
-[data-theme="dark"] .rdp-day_today:not(.rdp-day_selected) {
+/* Dia de hoje */
+[data-theme="dark"] .rdp-day_today:not(.rdp-day_selected),
+[data-theme="dark"] .rdp-day_today:not(.rdp-day_selected) * {
   background-color: rgba(16, 185, 129, 0.2) !important;
   color: #fafafa !important;
+  font-weight: 700 !important;
 }
 
+/* Botões de navegação (anterior/próximo) */
 [data-theme="dark"] button[name="previous-month"],
-[data-theme="dark"] button[name="next-month"] {
+[data-theme="dark"] button[name="previous-month"] *,
+[data-theme="dark"] button[name="next-month"],
+[data-theme="dark"] button[name="next-month"] * {
   color: #fafafa !important;
 }
 
 [data-theme="dark"] button[name="previous-month"]:hover,
 [data-theme="dark"] button[name="next-month"]:hover {
-  background-color: rgba(38, 38, 38, 0.6) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
 }
+
+/* Ícones dos botões de navegação */
+[data-theme="dark"] button[name="previous-month"] svg,
+[data-theme="dark"] button[name="next-month"] svg {
+  color: #fafafa !important;
+  stroke: #fafafa !important;
+}
+
+/* Forçar todos os spans e divs dentro do calendário */
+[data-theme="dark"] .rdp span,
+[data-theme="dark"] .rdp div:not(.rdp-button) {
+  color: #fafafa !important;
+}
+
+/* Remover qualquer cor herdada */
+[data-theme="dark"] .rdp table,
+[data-theme="dark"] .rdp tbody,
+[data-theme="dark"] .rdp tr,
+[data-theme="dark"] .rdp td {
+  color: #fafafa !important;
+}
+
+
 
 
