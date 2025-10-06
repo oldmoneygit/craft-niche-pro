@@ -90,6 +90,11 @@
 }
 
 /* Cores por status */
+.lead-card.status-pending {
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+}
+
 .lead-card.status-pending::before {
   background: #f59e0b;
 }
