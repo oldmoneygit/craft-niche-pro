@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { BasicInfoCard } from '@/components/questionnaires/builder/BasicInfoCard';
 import { QuestionsBuilderCard } from '@/components/questionnaires/builder/QuestionsBuilderCard';
@@ -22,6 +22,7 @@ export interface Question {
 
 export default function QuestionariosBuilder() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const { tenantId } = useTenantId();
   const { createQuestionnaire, updateQuestionnaire } = useQuestionnaires();
@@ -38,8 +39,11 @@ export default function QuestionariosBuilder() {
   useEffect(() => {
     if (id) {
       loadQuestionnaire(id);
+    } else if (location.state?.templateId) {
+      // Load template if coming from "Edit" in templates modal
+      handleLoadTemplate(location.state.templateId);
     }
-  }, [id]);
+  }, [id, location.state]);
 
   const loadQuestionnaire = async (questionnaireId: string) => {
     const { data: questionnaire } = await supabase

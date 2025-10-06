@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, FileText, CheckCircle, MessageSquare, TrendingUp } from 'lucide-react';
+import { Plus, FileText, CheckCircle, MessageSquare, TrendingUp, BookTemplate } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatCard } from '@/components/shared/StatCard';
 import { QuestionnaireCard } from '@/components/questionnaires/QuestionnaireCard';
 import { QuestionnaireModal } from '@/components/questionnaires/QuestionnaireModal';
 import { SendQuestionnaireModal } from '@/components/questionnaires/SendQuestionnaireModal';
+import { MyTemplatesModal } from '@/components/questionnaires/MyTemplatesModal';
 import { useQuestionnaires, type Questionnaire } from '@/hooks/useQuestionnaires';
 import {
   AlertDialog,
@@ -22,6 +23,7 @@ export default function Questionarios() {
   const navigate = useNavigate();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [sendModalOpen, setSendModalOpen] = useState(false);
+  const [templatesModalOpen, setTemplatesModalOpen] = useState(false);
   const [selectedQuestionnaire, setSelectedQuestionnaire] = useState<Questionnaire | null>(null);
   const [selectedForSend, setSelectedForSend] = useState<{ id: string; title: string } | null>(null);
   const [activeCategory, setActiveCategory] = useState('Todos');
@@ -103,13 +105,23 @@ export default function Questionarios() {
               Gerencie questionários e anamneses para seus pacientes
             </p>
           </div>
-          <Button
-            onClick={() => navigate('/questionarios/novo')}
-            className="flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-semibold shadow-lg shadow-emerald-500/30 transition-all duration-300"
-          >
-            <Plus className="w-5 h-5" />
-            Novo Questionário
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => setTemplatesModalOpen(true)}
+              variant="outline"
+              className="flex items-center gap-2 px-6 py-3 border-emerald-500 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl font-semibold shadow-lg transition-all duration-300"
+            >
+              <BookTemplate className="w-5 h-5" />
+              Meus Templates
+            </Button>
+            <Button
+              onClick={() => navigate('/questionarios/novo')}
+              className="flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-semibold shadow-lg shadow-emerald-500/30 transition-all duration-300"
+            >
+              <Plus className="w-5 h-5" />
+              Novo Questionário
+            </Button>
+          </div>
         </div>
 
         {/* StatCards */}
@@ -211,6 +223,11 @@ export default function Questionarios() {
         onOpenChange={setSendModalOpen}
         questionnaireId={selectedForSend?.id || null}
         questionnaireTitle={selectedForSend?.title}
+      />
+
+      <MyTemplatesModal
+        open={templatesModalOpen}
+        onOpenChange={setTemplatesModalOpen}
       />
 
       {/* Alert Dialog de Confirmação */}
