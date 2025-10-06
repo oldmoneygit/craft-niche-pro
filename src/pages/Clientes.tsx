@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useClientsData } from '@/hooks/useClientsData';
 import type { ClientWithStats } from '@/hooks/useClientsData';
+import { ClientStatCard } from '@/components/clientes/ClientStatCard';
 import './Clientes.css';
 
 export function Clientes() {
@@ -20,13 +21,6 @@ export function Clientes() {
     error,
     deleteClient 
   } = useClientsData(searchQuery);
-
-  const stats = [
-    { label: 'Total de Clientes', value: clientStats?.total || 0, icon: Users, variant: 'total' },
-    { label: 'Novos Este Mês', value: clientStats?.newThisMonth || 0, icon: UserPlus, variant: 'new' },
-    { label: 'Ativos', value: clientStats?.active || 0, icon: UserCheck, variant: 'active' },
-    { label: 'Inativos', value: clientStats?.inactive || 0, icon: Clock, variant: 'inactive' }
-  ];
 
   const handleOpenModal = (client: ClientWithStats) => {
     setSelectedClient(client);
@@ -85,20 +79,30 @@ export function Clientes() {
 
       {/* Stats Grid */}
       <div className="stats-grid">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <div key={index} className={`stat-card ${stat.variant}`}>
-              <div className="stat-content">
-                <h3>{stat.label}</h3>
-                <div className="value">{stat.value}</div>
-              </div>
-              <div className="stat-icon">
-                <Icon size={24} />
-              </div>
-            </div>
-          );
-        })}
+        <ClientStatCard
+          title="TOTAL DE CLIENTES"
+          value={clientStats?.total || 0}
+          icon={Users}
+          variant="total"
+        />
+        <ClientStatCard
+          title="NOVOS ESTE MÊS"
+          value={clientStats?.newThisMonth || 0}
+          icon={UserPlus}
+          variant="new"
+        />
+        <ClientStatCard
+          title="ATIVOS"
+          value={clientStats?.active || 0}
+          icon={UserCheck}
+          variant="active"
+        />
+        <ClientStatCard
+          title="INATIVOS"
+          value={clientStats?.inactive || 0}
+          icon={Clock}
+          variant="inactive"
+        />
       </div>
 
       {/* Search */}
