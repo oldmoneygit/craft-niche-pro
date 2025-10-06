@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Users, UserPlus, UserCheck, Clock, 
   Search, Filter, FileText, Calendar, Trash2, User,
@@ -12,9 +13,12 @@ import { CreateClientModal } from '@/components/clientes/CreateClientModal';
 import './Clientes.css';
 
 export function Clientes() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedClient, setSelectedClient] = useState<ClientWithStats | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [serviceFilter, setServiceFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [expiringFilter, setExpiringFilter] = useState<'all' | '7days' | '30days'>('all');
 
   const { 
     clients, 
@@ -24,23 +28,51 @@ export function Clientes() {
     deleteClient 
   } = useClientsData(searchQuery);
 
-  const handleDeleteClient = async (clientId: string, e: React.MouseEvent) => {
+  // Filter by service status
+  const filteredByService = useMemo(() => {
+    if (!clients || serviceFilter === 'all') return clients || [];
+    
+    const now = new Date();
+    return clients.filter(client => {
+      const hasActiveService = client.services && client.services.length > 0 && client.services.some(svc => {
+        return svc.daysRemaining > 0;
+      });
+      
+      return serviceFilter === 'active' ? hasActiveService : !hasActiveService;
+    });
+  }, [clients, serviceFilter]);
+
+  // Filter by expiring services
+  const finalFilteredClients = useMemo(() => {
+    if (expiringFilter === 'all') return filteredByService;
+    
+    const daysToAdd = expiringFilter === '7days' ? 7 : 30;
+    
+    return filteredByService.filter(client => {
+      return client.services && client.services.some(svc => {
+        return svc.daysRemaining > 0 && svc.daysRemaining <= daysToAdd;
+      });
+    });
+  }, [filteredByService, expiringFilter]);
+
+  const handleDeleteClient = async (clientId: string, clientName: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm('Tem certeza que deseja excluir este cliente?')) {
+    const confirmed = window.confirm(
+      `Tem certeza que deseja excluir ${clientName}?\n\nEsta ação não pode ser desfeita e todos os dados relacionados (planos, consultas, etc) serão perdidos.`
+    );
+    if (confirmed) {
       await deleteClient.mutateAsync(clientId);
     }
   };
 
-  const handleViewPlan = (clientId: string, e: React.MouseEvent) => {
+  const handleViewPlan = (clientId: string, clientName: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log('View plan:', clientId);
-    // TODO: Implementar navegação para planos
+    navigate(`/meal-plans?clientId=${clientId}&clientName=${encodeURIComponent(clientName)}`);
   };
 
-  const handleSchedule = (clientId: string, e: React.MouseEvent) => {
+  const handleSchedule = (clientId: string, clientName: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log('Schedule:', clientId);
-    // TODO: Implementar navegação para agendamentos
+    navigate(`/appointments?action=new&clientId=${clientId}&clientName=${encodeURIComponent(clientName)}`);
   };
 
   const calculateAge = (birthDate: string | null) => {
@@ -121,22 +153,43 @@ export function Clientes() {
         </div>
         <div className="filters-grid">
           <div className="filter-group">
-            <label>Filtrar por Plano</label>
-            <select>
-              <option>Todos os planos</option>
-              <option>Mensal</option>
-              <option>Trimestral</option>
+            <label>Status do Serviço</label>
+            <select
+              value={serviceFilter}
+              onChange={(e) => setServiceFilter(e.target.value as any)}
+              style={{
+                background: 'var(--bg-card)',
+                borderColor: 'var(--border)',
+                color: 'var(--text-primary)'
+              }}
+            >
+              <option value="all">Todos os status</option>
+              <option value="active">Apenas ativos</option>
+              <option value="inactive">Apenas inativos</option>
             </select>
           </div>
           <div className="filter-group">
-            <label>Planos Expirando</label>
-            <select>
-              <option>Todos</option>
-              <option>Próximos 7 dias</option>
-              <option>Próximos 30 dias</option>
+            <label>Serviços Expirando</label>
+            <select
+              value={expiringFilter}
+              onChange={(e) => setExpiringFilter(e.target.value as any)}
+              style={{
+                background: 'var(--bg-card)',
+                borderColor: 'var(--border)',
+                color: 'var(--text-primary)'
+              }}
+            >
+              <option value="all">Todas as datas</option>
+              <option value="7days">Próximos 7 dias</option>
+              <option value="30days">Próximos 30 dias</option>
             </select>
           </div>
         </div>
+        {clients && finalFilteredClients && (
+          <p className="text-sm mt-4" style={{ color: 'var(--text-muted)' }}>
+            Mostrando {finalFilteredClients.length} de {clients.length} clientes
+          </p>
+        )}
       </div>
 
       {/* Loading State */}
@@ -197,7 +250,7 @@ export function Clientes() {
       )}
 
       {/* Empty State */}
-      {!isLoading && !error && clients && clients.length === 0 && (
+      {!isLoading && !error && finalFilteredClients && finalFilteredClients.length === 0 && (
         <div 
           className="p-12 rounded-2xl text-center"
           style={{
@@ -237,9 +290,9 @@ export function Clientes() {
       )}
 
       {/* Clients List */}
-      {!isLoading && !error && clients && clients.length > 0 && (
+      {!isLoading && !error && finalFilteredClients && finalFilteredClients.length > 0 && (
         <div className="clients-list">
-          {clients.map((client) => {
+          {finalFilteredClients.map((client) => {
             const age = calculateAge(client.birth_date);
             const avatar = getInitials(client.name);
             
@@ -279,21 +332,21 @@ export function Clientes() {
                 <div className="client-actions">
                   <button 
                     className="action-btn"
-                    onClick={(e) => handleViewPlan(client.id, e)}
+                    onClick={(e) => handleViewPlan(client.id, client.name, e)}
                     title="Ver plano"
                   >
                     <FileText size={18} />
                   </button>
                   <button 
                     className="action-btn"
-                    onClick={(e) => handleSchedule(client.id, e)}
+                    onClick={(e) => handleSchedule(client.id, client.name, e)}
                     title="Agendar consulta"
                   >
                     <Calendar size={18} />
                   </button>
                   <button 
                     className="action-btn"
-                    onClick={(e) => handleDeleteClient(client.id, e)}
+                    onClick={(e) => handleDeleteClient(client.id, client.name, e)}
                     title="Excluir cliente"
                     disabled={deleteClient.isPending}
                   >
