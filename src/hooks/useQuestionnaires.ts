@@ -11,6 +11,9 @@ export interface Question {
   is_required: boolean;
   order_index: number;
   section?: string;
+  scorable?: boolean;
+  weight?: number;
+  option_scores?: Record<string, number>;
 }
 
 export interface Questionnaire {
@@ -132,6 +135,9 @@ export function useQuestionnaires() {
         is_required: q.is_required || false,
         order_index: index,
         section: q.section || null,
+        scorable: q.scorable || false,
+        weight: q.weight || 1,
+        option_scores: q.option_scores || {}
       }));
 
       const { error: questionsError } = await supabase
@@ -191,6 +197,9 @@ export function useQuestionnaires() {
         is_required: q.is_required || false,
         order_index: index,
         section: q.section || null,
+        scorable: q.scorable || false,
+        weight: q.weight || 1,
+        option_scores: q.option_scores || {}
       }));
 
       const { error: questionsError } = await supabase

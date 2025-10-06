@@ -18,6 +18,9 @@ export interface Question {
   options?: string[];
   required: boolean;
   order_index: number;
+  scorable?: boolean; // Se esta pergunta conta pontos
+  weight?: number; // Peso da pergunta (1-10)
+  optionScores?: Record<string, number>; // Pontuação de cada opção (0-100)
 }
 
 export default function QuestionariosBuilder() {
@@ -65,7 +68,10 @@ export default function QuestionariosBuilder() {
           type: q.question_type,
           options: q.options || [],
           required: q.is_required,
-          order_index: q.order_index
+          order_index: q.order_index,
+          scorable: q.scorable || false,
+          weight: q.weight || 1,
+          optionScores: q.option_scores || {}
         }));
       
       setQuestions(loadedQuestions);
@@ -93,7 +99,10 @@ export default function QuestionariosBuilder() {
         type: q.type || q.question_type || 'text',
         options: q.options || [],
         required: q.required || q.is_required || false,
-        order_index: index
+        order_index: index,
+        scorable: q.scorable || false,
+        weight: q.weight || 1,
+        optionScores: q.option_scores || q.optionScores || {}
       }));
       
       setQuestions(templateQuestions);
@@ -112,7 +121,10 @@ export default function QuestionariosBuilder() {
       type: q.type,
       options: q.options || [],
       required: q.required !== undefined ? q.required : true,
-      order_index: index
+      order_index: index,
+      scorable: q.scorable || false,
+      weight: q.weight || 1,
+      optionScores: q.optionScores || {}
     }));
     
     setQuestions(aiQuestions);
@@ -150,7 +162,10 @@ export default function QuestionariosBuilder() {
             question_type: q.type,
             options: q.options && q.options.length > 0 ? q.options : null,
             is_required: q.required,
-            order_index: q.order_index
+            order_index: q.order_index,
+            scorable: q.scorable || false,
+            weight: q.weight || 1,
+            option_scores: q.optionScores || {}
           }))
         });
       } else {
@@ -164,7 +179,10 @@ export default function QuestionariosBuilder() {
             question_type: q.type,
             options: q.options && q.options.length > 0 ? q.options : null,
             is_required: q.required,
-            order_index: q.order_index
+            order_index: q.order_index,
+            scorable: q.scorable || false,
+            weight: q.weight || 1,
+            option_scores: q.optionScores || {}
           }))
         });
       }

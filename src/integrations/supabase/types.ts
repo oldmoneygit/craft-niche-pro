@@ -1176,34 +1176,43 @@ export type Database = {
           created_at: string | null
           id: string
           is_required: boolean | null
+          option_scores: Json | null
           options: Json | null
           order_index: number
           question_text: string
           question_type: string
           questionnaire_id: string
+          scorable: boolean | null
           section: string | null
+          weight: number | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           is_required?: boolean | null
+          option_scores?: Json | null
           options?: Json | null
           order_index: number
           question_text: string
           question_type: string
           questionnaire_id: string
+          scorable?: boolean | null
           section?: string | null
+          weight?: number | null
         }
         Update: {
           created_at?: string | null
           id?: string
           is_required?: boolean | null
+          option_scores?: Json | null
           options?: Json | null
           order_index?: number
           question_text?: string
           question_type?: string
           questionnaire_id?: string
+          scorable?: boolean | null
           section?: string | null
+          weight?: number | null
         }
         Relationships: [
           {

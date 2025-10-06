@@ -37,7 +37,14 @@ export function QuestionEditor({
 
   const removeOption = (optionIndex: number) => {
     const newOptions = (question.options || []).filter((_, i) => i !== optionIndex);
-    onUpdate({ options: newOptions });
+    const newScores = { ...(question.optionScores || {}) };
+    delete newScores[question.options?.[optionIndex] || ''];
+    onUpdate({ options: newOptions, optionScores: newScores });
+  };
+
+  const updateOptionScore = (option: string, score: number) => {
+    const newScores = { ...(question.optionScores || {}), [option]: score };
+    onUpdate({ optionScores: newScores });
   };
 
   return (
@@ -122,20 +129,34 @@ export function QuestionEditor({
           <Label className="text-gray-700 dark:text-gray-300">Opções</Label>
           <div className="space-y-2 mt-1.5">
             {(question.options || []).map((option, i) => (
-              <div key={i} className="flex gap-2">
-                <Input
-                  value={option}
-                  onChange={(e) => updateOption(i, e.target.value)}
-                  placeholder={`Opção ${i + 1}`}
-                />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => removeOption(i)}
-                  className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
+              <div key={i} className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    value={option}
+                    onChange={(e) => updateOption(i, e.target.value)}
+                    placeholder={`Opção ${i + 1}`}
+                    className="flex-1"
+                  />
+                  {question.scorable && (
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={question.optionScores?.[option] || 0}
+                      onChange={(e) => updateOptionScore(option, Number(e.target.value))}
+                      placeholder="Pts"
+                      className="w-20"
+                    />
+                  )}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => removeOption(i)}
+                    className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
@@ -149,6 +170,46 @@ export function QuestionEditor({
           </Button>
         </div>
       )}
+
+      {/* Sistema de Pontuação */}
+      <div className="space-y-3 mb-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={question.scorable || false}
+            onChange={(e) => onUpdate({ 
+              scorable: e.target.checked,
+              weight: e.target.checked ? (question.weight || 1) : undefined,
+              optionScores: e.target.checked ? (question.optionScores || {}) : undefined
+            })}
+            className="w-4 h-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+          />
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            🎯 Pergunta pontuável
+          </span>
+        </label>
+
+        {question.scorable && (
+          <div>
+            <Label className="text-gray-700 dark:text-gray-300 text-xs">
+              Peso da pergunta (1-10)
+            </Label>
+            <Input
+              type="number"
+              min="1"
+              max="10"
+              value={question.weight || 1}
+              onChange={(e) => onUpdate({ weight: Number(e.target.value) })}
+              className="mt-1"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {question.weight && question.weight > 5 
+                ? 'Esta pergunta terá mais peso na pontuação final' 
+                : 'Peso padrão para esta pergunta'}
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Obrigatória */}
       <label className="flex items-center gap-2 cursor-pointer">

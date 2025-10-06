@@ -84,7 +84,10 @@ export default function PublicQuestionnaireResponse() {
         question: q.question_text,
         type: q.question_type,
         options: q.options || [],
-        required: q.is_required
+        required: q.is_required,
+        scorable: q.scorable || false,
+        weight: q.weight || 1,
+        optionScores: q.option_scores || {}
       }));
 
       setQuestionnaire({
