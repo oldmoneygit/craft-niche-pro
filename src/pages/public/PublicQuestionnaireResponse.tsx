@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { CheckCircle2, AlertCircle, Loader2, ArrowRight, ArrowLeft, User, Mail, Phone, Sparkles, MessageSquare, ListChecks } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader2, Sparkles, User, Mail, Phone } from 'lucide-react';
 import { Question } from '@/components/questionnaires/types/questionnaire';
 
 export default function PublicQuestionnaireResponse() {
@@ -415,10 +415,9 @@ export default function PublicQuestionnaireResponse() {
                   setError('');
                   setCurrentStep('questions');
                 }}
-                className="w-full mt-6 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group flex items-center justify-center gap-2"
+                className="w-full mt-6 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <span className="text-lg">Iniciar Questionário</span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
               </button>
 
               {error && (
@@ -458,24 +457,23 @@ export default function PublicQuestionnaireResponse() {
     const progress = ((currentQuestionIndex + 1) / questionnaire.questions.length) * 100;
 
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-        {/* Frame do Celular */}
+      <div className="min-h-screen flex items-center justify-center p-0 sm:p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+        {/* Container responsivo - com frame no desktop, sem frame no mobile */}
         <div 
-          className="w-full max-w-[420px] shadow-2xl"
+          className="w-full h-screen sm:h-auto sm:max-w-[420px] sm:shadow-2xl"
           style={{
-            background: '#1f2937',
-            borderRadius: '36px',
-            padding: '12px'
+            background: typeof window !== 'undefined' && window.innerWidth >= 640 ? '#1f2937' : 'transparent',
+            borderRadius: typeof window !== 'undefined' && window.innerWidth >= 640 ? '36px' : '0',
+            padding: typeof window !== 'undefined' && window.innerWidth >= 640 ? '12px' : '0'
           }}
         >
           <div 
-            className="flex flex-col"
+            className="flex flex-col h-full"
             style={{
               background: 'white',
-              borderRadius: '28px',
+              borderRadius: typeof window !== 'undefined' && window.innerWidth >= 640 ? '28px' : '0',
               overflow: 'hidden',
-              minHeight: '760px',
-              maxHeight: '90vh'
+              minHeight: typeof window !== 'undefined' && window.innerWidth >= 640 ? '760px' : '100vh'
             }}
           >
             {/* Header Verde */}
@@ -908,116 +906,48 @@ export default function PublicQuestionnaireResponse() {
   }
 
   // STEP 3: Review
-  if (currentStep === 'review') {
-    return (
-      <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600">
-        {/* Animated background */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-yellow-400/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-80 h-80 bg-pink-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        </div>
-
-        <div className="w-full max-w-3xl relative z-10 animate-fade-in">
-          <div className="shadow-2xl rounded-2xl border-0 bg-white/95 backdrop-blur-xl">
-            <div className="p-6 md:p-8 space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                  <ListChecks className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-bold">Revise suas respostas</h2>
-                  <p className="text-base text-gray-600">
-                    Confira tudo antes de enviar. Você pode voltar e editar qualquer resposta.
-                  </p>
-                </div>
-              </div>
-
-              {/* Info do respondente */}
-              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-5 rounded-xl border border-emerald-200 space-y-3 animate-fade-in">
-                <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                  <User className="w-5 h-5 text-emerald-600" />
-                  Seus dados
-                </h3>
-                <div className="text-sm text-gray-700 space-y-2 pl-7">
-                  <p className="flex items-center gap-2">
-                    <span className="font-semibold">Nome:</span> {respondentData.name}
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <span className="font-semibold">Telefone:</span> {respondentData.phone}
-                  </p>
-                  {respondentData.email && (
-                    <p className="flex items-center gap-2">
-                      <span className="font-semibold">E-mail:</span> {respondentData.email}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Respostas */}
-              <div className="space-y-4">
-                <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5 text-teal-600" />
-                  Suas respostas
-                </h3>
-                {questionnaire.questions.map((q: any, index: number) => (
-                  <div 
-                    key={q.id} 
-                    className="border-l-4 border-emerald-500 pl-5 py-3 bg-white rounded-r-xl hover:shadow-md transition-all duration-300 animate-fade-in"
-                    style={{ animationDelay: `${index * 0.05}s` }}
-                  >
-                    <p className="font-semibold text-gray-900 mb-2 text-base">
-                      {index + 1}. {q.question}
-                    </p>
-                    <p className="text-gray-700 mb-3 bg-gray-50 px-3 py-2 rounded-lg">
-                      {Array.isArray(answers[q.id])
-                        ? answers[q.id].join(', ') || 'Não respondido'
-                        : answers[q.id] || 'Não respondido'}
-                    </p>
-                    <button
-                      onClick={() => {
-                        setCurrentQuestionIndex(index);
-                        setCurrentStep('questions');
-                      }}
-                      className="text-sm text-emerald-600 hover:text-emerald-700 font-medium underline transition-colors duration-200"
-                    >
-                      ✏️ Editar resposta
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex gap-3 pt-6 border-t border-gray-100">
-                <button
-                  onClick={() => setCurrentStep('questions')}
-                  className="flex-1 px-6 py-3 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-emerald-500 hover:text-emerald-600 transition-all duration-300 group flex items-center justify-center gap-2"
-                >
-                  <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-300" />
-                  Voltar
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={submitting}
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 group flex items-center justify-center gap-2"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Enviando...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-5 h-5" />
-                      Enviar Respostas
-                    </>
-                  )}
-                </button>
-              </div>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 flex items-center justify-center p-4">
+      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
+        <h2 className="text-3xl font-bold text-gray-900 mb-6">Revise suas respostas</h2>
+        
+        <div className="space-y-4 mb-8 max-h-96 overflow-y-auto">
+          {questionnaire.questions.map((q: any, idx: number) => (
+            <div key={q.id} className="bg-gray-50 rounded-lg p-4">
+              <p className="font-semibold text-gray-900 mb-2">
+                {idx + 1}. {q.question}
+              </p>
+              <p className="text-gray-600">
+                {Array.isArray(answers[q.id]) 
+                  ? answers[q.id].join(', ') 
+                  : answers[q.id] || 'Não respondido'}
+              </p>
             </div>
-          </div>
+          ))}
         </div>
-      </div>
-    );
-  }
 
-  return null;
+        <div className="flex gap-4">
+          <button
+            onClick={() => setCurrentStep('questions')}
+            className="flex-1 px-6 py-3 border-2 border-emerald-500 text-emerald-600 font-semibold rounded-xl hover:bg-emerald-50 transition-all"
+          >
+            Editar Respostas
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="flex-1 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl shadow-lg transition-all disabled:opacity-50"
+          >
+            {submitting ? 'Enviando...' : 'Enviar Respostas'}
+          </button>
+        </div>
+
+        {error && (
+          <div className="mt-4 bg-red-50 border-2 border-red-200 rounded-xl p-4 text-sm text-red-800">
+            {error}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
