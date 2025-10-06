@@ -67,7 +67,7 @@ export function Clientes() {
 
   const handleViewPlan = (clientId: string, clientName: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/meal-plans?clientId=${clientId}&clientName=${encodeURIComponent(clientName)}`);
+    navigate(`/planos?clientId=${clientId}&clientName=${encodeURIComponent(clientName)}`);
   };
 
   const handleSchedule = (clientId: string, clientName: string, e: React.MouseEvent) => {

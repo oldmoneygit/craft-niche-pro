@@ -345,7 +345,7 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                       backdropFilter: 'blur(20px)',
                       borderColor: plan.is_active ? '#10b981' : 'var(--border)'
                     }}
-                    onClick={() => navigate(`/meal-plans/${plan.id}`)}
+                    onClick={() => navigate(`/planos/${plan.id}`)}
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div>
@@ -389,7 +389,7 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                   <FileText size={64} style={{ color: 'var(--text-muted)' }} className="mx-auto mb-3" />
                   <p style={{ color: 'var(--text-muted)' }} className="mb-4">Nenhum plano alimentar criado</p>
                   <button
-                    onClick={() => navigate(`/meal-plans?clientId=${client.id}`)}
+                    onClick={() => navigate(`/planos?clientId=${client.id}`)}
                     className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:scale-105"
                     style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
                   >
