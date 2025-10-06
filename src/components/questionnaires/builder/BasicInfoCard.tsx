@@ -69,8 +69,6 @@ export function BasicInfoCard({
             <SelectValue placeholder="Criar do zero" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Criar do zero</SelectItem>
-            
             {defaultTemplates.length > 0 && (
               <>
                 <div className="px-2 py-1.5 text-xs font-semibold text-gray-500">
