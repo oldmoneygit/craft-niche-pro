@@ -694,7 +694,7 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
                   <div>
                     <Label className="text-xs text-gray-700 dark:text-gray-300 mb-2 block">Ícone</Label>
                     <div className="flex gap-2 flex-wrap">
-                      {['🍴', '🥗', '🍎', '🥤', '🍞', '🥪', '🍕', '🍜', '🍰', '☕', '🥗', '🍳'].map(emoji => (
+                      {['🍴', '🥗', '🍎', '🥤', '🍞', '🥪', '🍕', '🍜', '🍰', '☕', '🥙', '🍳'].map(emoji => (
                         <button
                           key={emoji}
                           type="button"
@@ -754,13 +754,21 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
                 </div>
               </div>
 
-              {/* Lista de refeições selecionadas */}
+              {/* Lista de refeições selecionadas ordenadas por horário */}
               <div className="space-y-4">
-                {selectedMeals.map(mealKey => {
-                  const meal = allMeals.find(m => m.key === mealKey);
-                  if (!meal) return null;
-                  
-                  return (
+                {selectedMeals
+                  .map(mealKey => {
+                    const meal = allMeals.find(m => m.key === mealKey);
+                    return meal ? { mealKey, meal } : null;
+                  })
+                  .filter(Boolean)
+                  .sort((a, b) => {
+                    // Ordenar por horário (time)
+                    const timeA = a!.meal.time;
+                    const timeB = b!.meal.time;
+                    return timeA.localeCompare(timeB);
+                  })
+                  .map(({ mealKey, meal }) => (
                     <MealFoodBuilder
                       key={mealKey}
                       mealType={mealKey}
@@ -770,8 +778,7 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
                       onAddFood={(food) => handleAddFood(mealKey, food)}
                       onRemoveFood={(index) => handleRemoveFood(mealKey, index)}
                     />
-                  );
-                })}
+                  ))}
               </div>
 
               {/* Totais Calculados */}
