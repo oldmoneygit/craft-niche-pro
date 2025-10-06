@@ -63,44 +63,44 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
         </DialogHeader>
 
         {/* Header com informações do cliente - Design melhorado */}
-        <div className="rounded-2xl p-6 border backdrop-blur-md bg-primary dark:bg-white/5 border-primary dark:border-white/10" style={{ backgroundColor: 'var(--card-info-bg)' }}>
+        <div className="rounded-2xl p-6 border border-primary backdrop-blur-md" style={{ backgroundColor: 'var(--card-info-bg)' }}>
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-14 h-14 rounded-full bg-primary-foreground/20 dark:bg-primary flex items-center justify-center text-primary dark:text-primary-foreground font-bold text-xl shadow-lg">
+            <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-xl shadow-lg">
               {plan.client.name.substring(0, 2).toUpperCase()}
             </div>
             <div>
-              <div className="font-bold text-lg text-primary-foreground dark:text-foreground flex items-center gap-2">
-                <User className="w-5 h-5 text-primary-foreground dark:text-primary" />
+              <div className="font-bold text-lg text-white flex items-center gap-2">
+                <User className="w-5 h-5 text-white" />
                 {plan.client.name}
               </div>
               {plan.client.email && (
-                <div className="text-sm text-primary-foreground/80 dark:text-muted-foreground">{plan.client.email}</div>
+                <div className="text-sm text-white/80">{plan.client.email}</div>
               )}
             </div>
           </div>
 
-          <div className="h-px bg-gradient-to-r from-transparent via-primary-foreground/30 dark:via-primary/30 to-transparent mb-4" />
+          <div className="h-px bg-gradient-to-r from-transparent via-white/30 to-transparent mb-4" />
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="flex items-start gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary-foreground/20 dark:bg-primary/10 flex items-center justify-center">
-                <Calendar className="w-4 h-4 text-primary-foreground dark:text-primary" />
+              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                <Calendar className="w-4 h-4 text-white" />
               </div>
               <div>
-                <div className="text-xs text-primary-foreground/70 dark:text-muted-foreground font-medium">Início</div>
-                <div className="font-semibold text-primary-foreground dark:text-foreground text-sm">
+                <div className="text-xs text-white/70 font-medium">Início</div>
+                <div className="font-semibold text-white text-sm">
                   {new Date(plan.start_date).toLocaleDateString('pt-BR')}
                 </div>
               </div>
             </div>
             {plan.end_date && (
               <div className="flex items-start gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary-foreground/20 dark:bg-primary/10 flex items-center justify-center">
-                  <Calendar className="w-4 h-4 text-primary-foreground dark:text-primary" />
+                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                  <Calendar className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <div className="text-xs text-primary-foreground/70 dark:text-muted-foreground font-medium">Término</div>
-                  <div className="font-semibold text-primary-foreground dark:text-foreground text-sm">
+                  <div className="text-xs text-white/70 font-medium">Término</div>
+                  <div className="font-semibold text-white text-sm">
                     {new Date(plan.end_date).toLocaleDateString('pt-BR')}
                   </div>
                 </div>
@@ -108,22 +108,22 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
             )}
             {plan.goal && (
               <div className="flex items-start gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary-foreground/20 dark:bg-primary/10 flex items-center justify-center">
-                  <Target className="w-4 h-4 text-primary-foreground dark:text-primary" />
+                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                  <Target className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <div className="text-xs text-primary-foreground/70 dark:text-muted-foreground font-medium">Objetivo</div>
-                  <div className="font-semibold text-primary-foreground dark:text-foreground text-sm capitalize">{plan.goal.replace('_', ' ')}</div>
+                  <div className="text-xs text-white/70 font-medium">Objetivo</div>
+                  <div className="font-semibold text-white text-sm capitalize">{plan.goal.replace('_', ' ')}</div>
                 </div>
               </div>
             )}
             <div className="flex items-start gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary-foreground/20 dark:bg-primary/10 flex items-center justify-center">
-                <TrendingUp className="w-4 h-4 text-primary-foreground dark:text-primary" />
+              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-white" />
               </div>
               <div>
-                <div className="text-xs text-primary-foreground/70 dark:text-muted-foreground font-medium">Status</div>
-                <div className="font-semibold text-primary-foreground dark:text-primary text-sm capitalize">{plan.status}</div>
+                <div className="text-xs text-white/70 font-medium">Status</div>
+                <div className="font-semibold text-white text-sm capitalize">{plan.status}</div>
               </div>
             </div>
           </div>
