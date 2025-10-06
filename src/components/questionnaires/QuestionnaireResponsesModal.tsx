@@ -51,13 +51,27 @@ export function QuestionnaireResponsesModal({
   }, [searchTerm, responses]);
 
   const calculateScore = (answers: Record<string, any>, questions: any[]): number => {
+    console.log('=== CALCULATE SCORE DEBUG ===');
+    console.log('Questions received:', questions);
+    console.log('Answers received:', answers);
+    
     let totalScore = 0;
     let maxPossibleScore = 0;
 
     questions.forEach(question => {
-      if (!question.scorable) return;
+      console.log('\n--- Question:', question.id);
+      console.log('Scorable:', question.scorable);
+      console.log('Question type:', question.question_type);
+      console.log('Option scores:', question.option_scores);
+      
+      if (!question.scorable) {
+        console.log('Skipping - not scorable');
+        return;
+      }
 
       const answer = answers?.[question.id];
+      console.log('Answer:', answer);
+      
       const weight = question.weight || 1;
       let questionScore = 0;
       let maxQuestionScore = 0;
@@ -66,28 +80,38 @@ export function QuestionnaireResponsesModal({
       if (question.option_scores && Object.keys(question.option_scores).length > 0) {
         const scores = Object.values(question.option_scores) as number[];
         maxQuestionScore = Math.max(...scores);
+        console.log('Max score from options:', maxQuestionScore);
       } else if (question.question_type === 'scale') {
         maxQuestionScore = 10;
+        console.log('Scale question - max score: 10');
       }
 
       // Calcular score da resposta
       if (['single_select', 'single_choice', 'radio'].includes(question.question_type) && answer) {
         questionScore = question.option_scores?.[answer] || 0;
+        console.log('Single choice score:', questionScore);
       } 
       else if (['multi_select', 'multiple_choice', 'checkbox'].includes(question.question_type) && Array.isArray(answer)) {
         const scores = answer.map((opt: string) => question.option_scores?.[opt] || 0);
         questionScore = scores.length > 0 ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length : 0;
+        console.log('Multi choice score:', questionScore);
       }
       else if (question.question_type === 'scale') {
         questionScore = answer; // Scale já é 1-10
         maxQuestionScore = 10;
+        console.log('Scale score:', questionScore);
       }
 
+      console.log('Weight:', weight, 'Question score:', questionScore, 'Max:', maxQuestionScore);
       totalScore += questionScore * weight;
       maxPossibleScore += maxQuestionScore * weight;
+      console.log('Running totals - score:', totalScore, 'max:', maxPossibleScore);
     });
 
-    return maxPossibleScore > 0 ? Math.round((totalScore / maxPossibleScore) * 100) : 0;
+    const finalScore = maxPossibleScore > 0 ? Math.round((totalScore / maxPossibleScore) * 100) : 0;
+    console.log('\n=== FINAL SCORE:', finalScore, '% ===');
+    console.log('Total score:', totalScore, 'Max possible:', maxPossibleScore);
+    return finalScore;
   };
 
   const fetchResponses = async () => {
