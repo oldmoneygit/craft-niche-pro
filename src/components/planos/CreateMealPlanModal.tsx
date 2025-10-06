@@ -84,29 +84,40 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
         notes: editingPlan.notes || ''
       });
 
-      // Configurar refeições selecionadas
+      // Configurar refeições selecionadas e identificar personalizadas
       if (editingPlan.meals) {
-        const mealKeys = editingPlan.meals.map((meal: any) => {
-          const defaultMeal = DEFAULT_MEALS.find(m => m.name === meal.name);
-          return defaultMeal?.key || '';
-        }).filter(Boolean);
-        setSelectedMeals(mealKeys);
-
-        // Configurar alimentos por refeição
-        const foodsByMeal: Record<string, any[]> = {
-          breakfast: [],
-          morning_snack: [],
-          lunch: [],
-          afternoon_snack: [],
-          dinner: [],
-          supper: [],
-        };
+        const mealKeys: string[] = [];
+        const loadedCustomMeals: Array<{ key: string; name: string; time: string; icon: string }> = [];
 
         editingPlan.meals.forEach((meal: any) => {
-          const matchedMeal = allMeals.find(m => m.name === meal.name);
-          const mealKey = matchedMeal?.key;
+          const defaultMeal = DEFAULT_MEALS.find(m => m.name === meal.name);
           
-          if (mealKey && meal.items) {
+          if (defaultMeal) {
+            // É uma refeição padrão
+            mealKeys.push(defaultMeal.key);
+          } else {
+            // É uma refeição personalizada - precisa ser recriada
+            const customKey = `custom_${meal.name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
+            mealKeys.push(customKey);
+            loadedCustomMeals.push({
+              key: customKey,
+              name: meal.name,
+              time: meal.time || '12:00',
+              icon: '🍽️' // Ícone padrão para refeições carregadas
+            });
+          }
+        });
+
+        setSelectedMeals(mealKeys);
+        setCustomMeals(loadedCustomMeals);
+
+        // Configurar alimentos por refeição
+        const foodsByMeal: Record<string, any[]> = {};
+
+        editingPlan.meals.forEach((meal: any, index: number) => {
+          const mealKey = mealKeys[index];
+          
+          if (meal.items && meal.items.length > 0) {
             foodsByMeal[mealKey] = meal.items.map((item: any) => ({
               food: item.food,
               measure: item.measure,
