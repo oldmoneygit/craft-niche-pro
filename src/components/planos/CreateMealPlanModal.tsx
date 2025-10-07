@@ -426,20 +426,20 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-gray-900/95 backdrop-blur-xl border border-gray-700 shadow-2xl">
         <DialogHeader>
           <div className="flex items-center justify-between mb-4">
-            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2 text-white">
               <span className="text-3xl">🍽️</span>
               {editPlanId ? 'Editar Plano Alimentar' : 'Criar Novo Plano Alimentar'}
             </DialogTitle>
-            <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full">
+            <span className="text-sm font-semibold text-emerald-400 bg-emerald-500/20 px-3 py-1.5 rounded-full">
               Etapa {step}/4
             </span>
           </div>
           
           {/* Progress bar */}
-          <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
             <div 
               className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 transition-all duration-500"
               style={{ width: `${(step / 4) * 100}%` }}
@@ -452,12 +452,12 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
           {step === 1 && (
             <div className="space-y-4">
               <div>
-                <Label htmlFor="client" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Cliente *</Label>
+                <Label htmlFor="client" className="text-sm font-semibold text-white">Cliente *</Label>
                 <Select value={formData.clientId} onValueChange={value => setFormData(prev => ({ ...prev, clientId: value }))}>
-                  <SelectTrigger className="w-full bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 mt-1.5">
+                  <SelectTrigger className="w-full bg-gray-800/60 backdrop-blur-xl border border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 mt-1.5">
                     <SelectValue placeholder="Selecione um cliente..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl backdrop-blur-xl z-50">
+                  <SelectContent className="bg-gray-900 border border-gray-700 rounded-xl shadow-xl backdrop-blur-xl z-50">
                     {clients?.map((client) => (
                       <SelectItem 
                         key={client.id} 
@@ -472,46 +472,46 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
               </div>
 
               <div>
-                <Label htmlFor="name" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nome do Plano *</Label>
+                <Label htmlFor="name" className="text-sm font-semibold text-white">Nome do Plano *</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Ex: Plano Emagrecimento"
-                  className="mt-1.5 bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="mt-1.5 bg-gray-800/60 backdrop-blur-xl border border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="startDate" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Data de Início *</Label>
+                  <Label htmlFor="startDate" className="text-sm font-semibold text-white">Data de Início *</Label>
                   <Input
                     id="startDate"
                     type="date"
                     value={formData.startDate}
                     onChange={e => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                    className="mt-1.5 bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="mt-1.5 bg-gray-800/60 backdrop-blur-xl border border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="endDate" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Data de Término</Label>
+                  <Label htmlFor="endDate" className="text-sm font-semibold text-white">Data de Término</Label>
                   <Input
                     id="endDate"
                     type="date"
                     value={formData.endDate}
                     onChange={e => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                    className="mt-1.5 bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="mt-1.5 bg-gray-800/60 backdrop-blur-xl border border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   />
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="goal" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Objetivo</Label>
+                <Label htmlFor="goal" className="text-sm font-semibold text-white">Objetivo</Label>
                 <Select value={formData.goal} onValueChange={value => setFormData(prev => ({ ...prev, goal: value }))}>
-                  <SelectTrigger className="w-full bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 mt-1.5">
+                  <SelectTrigger className="w-full bg-gray-800/60 backdrop-blur-xl border border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 mt-1.5">
                     <SelectValue placeholder="Selecione o objetivo..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl backdrop-blur-xl z-50">
+                  <SelectContent className="bg-gray-900 border border-gray-700 rounded-xl shadow-xl backdrop-blur-xl z-50">
                     <SelectItem value="emagrecimento" className="hover:bg-emerald-500/10 focus:bg-emerald-500/10 cursor-pointer py-3 px-4 rounded-lg transition-colors duration-200">Emagrecimento</SelectItem>
                     <SelectItem value="ganho_massa" className="hover:bg-emerald-500/10 focus:bg-emerald-500/10 cursor-pointer py-3 px-4 rounded-lg transition-colors duration-200">Ganho de Massa</SelectItem>
                     <SelectItem value="manutencao" className="hover:bg-emerald-500/10 focus:bg-emerald-500/10 cursor-pointer py-3 px-4 rounded-lg transition-colors duration-200">Manutenção</SelectItem>
@@ -521,14 +521,14 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
               </div>
 
               <div>
-                <Label htmlFor="notes" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Observações</Label>
+                <Label htmlFor="notes" className="text-sm font-semibold text-white">Observações</Label>
                 <Textarea
                   id="notes"
                   value={formData.notes}
                   onChange={e => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                   placeholder="Observações gerais sobre o plano..."
                   rows={3}
-                  className="mt-1.5 bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="mt-1.5 bg-gray-800/60 backdrop-blur-xl border border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 />
               </div>
             </div>
@@ -538,10 +538,10 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
           {step === 2 && (
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                <h3 className="text-lg font-bold text-white mb-4">
                   Defina as metas nutricionais diárias
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                <p className="text-sm text-gray-400 mb-6">
                   Estas informações são opcionais, mas ajudam a acompanhar melhor o progresso do cliente.
                 </p>
               </div>
@@ -554,7 +554,7 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
                     value={formData.targetKcal}
                     onChange={e => setFormData(prev => ({ ...prev, targetKcal: e.target.value }))}
                     placeholder="Ex: 1800"
-                    className="mt-1.5 bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="mt-1.5 bg-gray-800/60 backdrop-blur-xl border border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   />
                 </div>
                 <div>
@@ -565,7 +565,7 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
                     value={formData.targetProtein}
                     onChange={e => setFormData(prev => ({ ...prev, targetProtein: e.target.value }))}
                     placeholder="Ex: 135"
-                    className="mt-1.5 bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="mt-1.5 bg-gray-800/60 backdrop-blur-xl border border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   />
                 </div>
                 <div>
@@ -576,7 +576,7 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
                     value={formData.targetCarbs}
                     onChange={e => setFormData(prev => ({ ...prev, targetCarbs: e.target.value }))}
                     placeholder="Ex: 180"
-                    className="mt-1.5 bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="mt-1.5 bg-gray-800/60 backdrop-blur-xl border border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   />
                 </div>
                 <div>
@@ -587,7 +587,7 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
                     value={formData.targetFats}
                     onChange={e => setFormData(prev => ({ ...prev, targetFats: e.target.value }))}
                     placeholder="Ex: 60"
-                    className="mt-1.5 bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="mt-1.5 bg-gray-800/60 backdrop-blur-xl border border-gray-600 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   />
                 </div>
               </div>
@@ -601,7 +601,7 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
                   Selecione as refeições do plano
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                <p className="text-sm text-gray-400 mb-6">
                   Escolha quais refeições farão parte do plano alimentar do cliente.
                 </p>
               </div>
@@ -840,13 +840,13 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
           )}
 
           {/* Navegação */}
-          <div className="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex justify-between items-center pt-6 border-t border-gray-700">
             <div>
               {step > 1 && (
                 <Button
                   variant="outline"
                   onClick={prevStep}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-semibold transition-all duration-300 border-0"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl font-semibold transition-all duration-300 border-0"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   Voltar
@@ -858,7 +858,7 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
               <Button
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="px-5 py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-semibold transition-all duration-300 border-0"
+                className="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl font-semibold transition-all duration-300 border-0"
               >
                 Cancelar
               </Button>
