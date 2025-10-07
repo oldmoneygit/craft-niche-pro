@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Plus, ClipboardList, Clock, CheckCircle2, TrendingUp, Sun, Moon } from 'lucide-react';
+import { useState } from 'react';
+import { Plus, ClipboardList, Clock, CheckCircle2, TrendingUp } from 'lucide-react';
 import { useRecordatorios, RecordatorioMeal } from '@/hooks/useRecordatorios';
 import { RecordatorioCard } from '@/components/recordatorio/RecordatorioCard';
 import { useClientsData } from '@/hooks/useClientsData';
@@ -11,12 +11,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import './Questionarios.css';
+import { StatCard } from '@/components/shared/StatCard';
 
 type FilterType = 'all' | 'pending' | 'analyzed' | 'r24h' | 'r3d';
 
 export default function Recordatorios() {
-  const [isDark, setIsDark] = useState(false);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -33,23 +32,6 @@ export default function Recordatorios() {
 
   const { recordatorios, isLoading, createRecordatorio, deleteRecordatorio } = useRecordatorios();
   const { clients } = useClientsData();
-
-  // Theme detection
-  useEffect(() => {
-    const checkTheme = () => {
-      const theme = document.documentElement.getAttribute('data-theme') || 
-                    document.body.getAttribute('data-theme') ||
-                    (document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-      setIsDark(theme === 'dark');
-    };
-
-    checkTheme();
-    const observer = new MutationObserver(checkTheme);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
-    observer.observe(document.body, { attributes: true, attributeFilter: ['data-theme', 'class'] });
-
-    return () => observer.disconnect();
-  }, []);
 
   // Filter recordatorios
   const filteredRecordatorios = recordatorios.filter(rec => {
@@ -68,12 +50,6 @@ export default function Recordatorios() {
   const avgCalories = recordatorios
     .filter(r => r.total_calories)
     .reduce((sum, r) => sum + (r.total_calories || 0), 0) / (analyzedCount || 1);
-
-  const toggleTheme = () => {
-    const newTheme = isDark ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', newTheme);
-    document.body.setAttribute('data-theme', newTheme);
-  };
 
   const addMeal = () => {
     setMeals([...meals, { 
@@ -159,106 +135,92 @@ export default function Recordatorios() {
   };
 
   return (
-    <div className="questionnaires-page">
-      <div className="container">
+    <div className="min-h-screen p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-black">
+      <div className="max-w-7xl mx-auto">
         {/* HEADER */}
-        <div className="header">
-          <div className="header-content">
-            <h1>Recordatórios Alimentares</h1>
-            <p>Gerencie registros alimentares dos seus pacientes</p>
+        <div className="flex justify-between items-start mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Recordatórios Alimentares
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Gerencie registros alimentares dos seus pacientes
+            </p>
           </div>
-          <div className="header-actions">
-            <button className="btn btn-primary" onClick={handleCreateNew}>
-              <Plus size={20} />
-              Novo Recordatório
-            </button>
-            <button className="theme-toggle" onClick={toggleTheme}>
-              <Sun className="sun-icon" size={20} />
-              <Moon className="moon-icon" size={20} />
-            </button>
-          </div>
+          <Button
+            onClick={handleCreateNew}
+            className="flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 dark:hover:bg-emerald-600 text-white rounded-xl font-semibold shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/40 transition-all duration-300"
+          >
+            <Plus className="w-5 h-5" />
+            Novo Recordatório
+          </Button>
         </div>
 
         {/* STATS */}
-        <div className="stats">
-          <div className="stat-card total">
-            <div className="stat-icon">
-              <ClipboardList size={24} />
-            </div>
-            <div className="stat-value">{totalRecordatorios}</div>
-            <div className="stat-label">Total de Recordatórios</div>
-          </div>
-
-          <div className="stat-card warning">
-            <div className="stat-icon">
-              <Clock size={24} />
-            </div>
-            <div className="stat-value">{pendingCount}</div>
-            <div className="stat-label">Aguardando Análise</div>
-          </div>
-
-          <div className="stat-card success">
-            <div className="stat-icon">
-              <CheckCircle2 size={24} />
-            </div>
-            <div className="stat-value">{analyzedCount}</div>
-            <div className="stat-label">Analisados</div>
-          </div>
-
-          <div className="stat-card info">
-            <div className="stat-icon">
-              <TrendingUp size={24} />
-            </div>
-            <div className="stat-value">{Math.round(avgCalories)}</div>
-            <div className="stat-label">Média Calórica (kcal/dia)</div>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <StatCard
+            label="Total de Recordatórios"
+            value={totalRecordatorios}
+            icon={<ClipboardList size={24} />}
+            variant="primary"
+          />
+          <StatCard
+            label="Aguardando Análise"
+            value={pendingCount}
+            icon={<Clock size={24} />}
+            variant="warning"
+          />
+          <StatCard
+            label="Analisados"
+            value={analyzedCount}
+            icon={<CheckCircle2 size={24} />}
+            variant="success"
+          />
+          <StatCard
+            label="Média Calórica (kcal/dia)"
+            value={Math.round(avgCalories)}
+            icon={<TrendingUp size={24} />}
+            variant="purple"
+          />
         </div>
 
         {/* FILTROS */}
-        <div className="filters">
-          <button 
-            className={`filter-btn ${activeFilter === 'all' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('all')}
-          >
-            Todos
-          </button>
-          <button 
-            className={`filter-btn ${activeFilter === 'pending' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('pending')}
-          >
-            Pendentes
-          </button>
-          <button 
-            className={`filter-btn ${activeFilter === 'analyzed' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('analyzed')}
-          >
-            Analisados
-          </button>
-          <button 
-            className={`filter-btn ${activeFilter === 'r24h' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('r24h')}
-          >
-            R24h
-          </button>
-          <button 
-            className={`filter-btn ${activeFilter === 'r3d' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('r3d')}
-          >
-            R3D
-          </button>
+        <div className="flex flex-wrap gap-3 mb-8">
+          {[
+            { value: 'all', label: 'Todos' },
+            { value: 'pending', label: 'Pendentes' },
+            { value: 'analyzed', label: 'Analisados' },
+            { value: 'r24h', label: 'R24h' },
+            { value: 'r3d', label: 'R3D' }
+          ].map(filter => (
+            <Button
+              key={filter.value}
+              variant={activeFilter === filter.value ? 'default' : 'outline'}
+              onClick={() => setActiveFilter(filter.value as FilterType)}
+              className="rounded-xl"
+            >
+              {filter.label}
+            </Button>
+          ))}
         </div>
 
         {/* GRID */}
         {isLoading ? (
-          <div className="loading-state">Carregando...</div>
+          <div className="text-center py-12 text-gray-600 dark:text-gray-400">
+            Carregando...
+          </div>
         ) : filteredRecordatorios.length === 0 ? (
-          <div className="empty-state">
-            <ClipboardList size={48} />
-            <h3>Nenhum recordatório encontrado</h3>
-            <p>Crie seu primeiro recordatório alimentar</p>
+          <div className="text-center py-12">
+            <ClipboardList size={48} className="mx-auto mb-4 text-gray-400" />
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              Nenhum recordatório encontrado
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              Crie seu primeiro recordatório alimentar
+            </p>
           </div>
         ) : (
-          <div className="questionnaires-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredRecordatorios.map(recordatorio => (
               <RecordatorioCard
                 key={recordatorio.id}
@@ -324,7 +286,7 @@ export default function Recordatorios() {
               <Label>Refeições Registradas</Label>
               <div className="space-y-3">
                 {meals.map((meal, index) => (
-                  <div key={index} className="p-4 border rounded-lg space-y-3">
+                  <div key={index} className="p-4 border rounded-lg space-y-3 bg-gray-50 dark:bg-gray-900">
                     <div className="flex justify-between items-center">
                       <span className="font-semibold">Refeição {index + 1}</span>
                       <Button
@@ -415,19 +377,19 @@ export default function Recordatorios() {
             <div className="space-y-6">
               {/* INFO HEADER */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="p-4 border rounded-lg text-center">
+                <div className="p-4 border rounded-lg text-center bg-gray-50 dark:bg-gray-900">
                   <div className="text-sm text-muted-foreground mb-1">Tipo</div>
                   <div className="text-xl font-bold">
                     {selectedRecordatorio.type === 'r24h' ? 'R24h' : 'R3D'}
                   </div>
                 </div>
-                <div className="p-4 border rounded-lg text-center">
+                <div className="p-4 border rounded-lg text-center bg-gray-50 dark:bg-gray-900">
                   <div className="text-sm text-muted-foreground mb-1">Data</div>
                   <div className="text-xl font-bold">
                     {format(new Date(selectedRecordatorio.record_date), 'dd/MM/yyyy')}
                   </div>
                 </div>
-                <div className="p-4 border rounded-lg text-center">
+                <div className="p-4 border rounded-lg text-center bg-gray-50 dark:bg-gray-900">
                   <div className="text-sm text-muted-foreground mb-1">Status</div>
                   <div className="text-xl font-bold">
                     {selectedRecordatorio.status === 'analyzed' ? '✅ Analisado' : '⏳ Pendente'}
@@ -440,7 +402,7 @@ export default function Recordatorios() {
                 <h3 className="text-lg font-semibold mb-4">Refeições Registradas</h3>
                 <div className="space-y-3">
                   {selectedRecordatorio.meals?.map((meal, index) => (
-                    <div key={index} className="p-4 border rounded-lg">
+                    <div key={index} className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-900">
                       <div className="flex justify-between items-center mb-2">
                         <h4 className="font-semibold">{mealTypeLabels[meal.meal_type]}</h4>
                         <span className="text-sm text-muted-foreground">{meal.time}</span>
@@ -456,22 +418,22 @@ export default function Recordatorios() {
                 <div>
                   <h3 className="text-lg font-semibold mb-4">Análise Nutricional</h3>
                   <div className="grid grid-cols-4 gap-4 mb-4">
-                    <div className="p-4 border rounded-lg text-center">
+                    <div className="p-4 border rounded-lg text-center bg-gray-50 dark:bg-gray-900">
                       <div className="text-sm text-muted-foreground mb-1">Calorias</div>
                       <div className="text-2xl font-bold">{selectedRecordatorio.total_calories}</div>
                       <div className="text-xs text-muted-foreground">kcal</div>
                     </div>
-                    <div className="p-4 border rounded-lg text-center">
+                    <div className="p-4 border rounded-lg text-center bg-gray-50 dark:bg-gray-900">
                       <div className="text-sm text-muted-foreground mb-1">Proteínas</div>
                       <div className="text-2xl font-bold">{selectedRecordatorio.total_protein?.toFixed(1)}</div>
                       <div className="text-xs text-muted-foreground">gramas</div>
                     </div>
-                    <div className="p-4 border rounded-lg text-center">
+                    <div className="p-4 border rounded-lg text-center bg-gray-50 dark:bg-gray-900">
                       <div className="text-sm text-muted-foreground mb-1">Carboidratos</div>
                       <div className="text-2xl font-bold">{selectedRecordatorio.total_carbs?.toFixed(1)}</div>
                       <div className="text-xs text-muted-foreground">gramas</div>
                     </div>
-                    <div className="p-4 border rounded-lg text-center">
+                    <div className="p-4 border rounded-lg text-center bg-gray-50 dark:bg-gray-900">
                       <div className="text-sm text-muted-foreground mb-1">Gorduras</div>
                       <div className="text-2xl font-bold">{selectedRecordatorio.total_fat?.toFixed(1)}</div>
                       <div className="text-xs text-muted-foreground">gramas</div>
@@ -479,7 +441,7 @@ export default function Recordatorios() {
                   </div>
 
                   {selectedRecordatorio.analysis_notes && (
-                    <div className="p-4 border rounded-lg">
+                    <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-900">
                       <h4 className="font-semibold mb-2">Observações da Análise</h4>
                       <p className="text-sm">{selectedRecordatorio.analysis_notes}</p>
                     </div>
