@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Search, List, Plus, User, Clock, Edit, Trash2 } from 'lucide-react';
-import { RecordatorioCard } from '@/components/recordatorio/RecordatorioCard';
 
 export default function Recordatorio() {
   const [activeTab, setActiveTab] = useState<'list' | 'new'>('list');
@@ -126,7 +125,37 @@ export default function Recordatorio() {
             {/* Lista */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {recordatorios.map((record, index) => (
-                <RecordatorioCard key={index} {...record} />
+                <div key={index} style={{
+                  background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  transition: 'all 0.3s ease',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}>
+                  {/* Content from RecordatorioCard - inline para evitar conflito */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', gap: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: record.avatarColor, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: '18px' }}>
+                        {record.clientInitials}
+                      </div>
+                      <div>
+                        <h3 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+                          {record.clientName}
+                        </h3>
+                        <p style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
+                          {record.clientPlan}
+                        </p>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', fontSize: '13px', fontWeight: 600 }}>
+                      {record.date}
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           </>

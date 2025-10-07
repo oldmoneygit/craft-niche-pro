@@ -1484,6 +1484,119 @@ export type Database = {
           },
         ]
       }
+      recordatorio_meals: {
+        Row: {
+          calories: number | null
+          carbs: number | null
+          created_at: string | null
+          fat: number | null
+          foods: string
+          id: string
+          meal_type: string
+          order_index: number | null
+          protein: number | null
+          recordatorio_id: string | null
+          time: string | null
+        }
+        Insert: {
+          calories?: number | null
+          carbs?: number | null
+          created_at?: string | null
+          fat?: number | null
+          foods: string
+          id?: string
+          meal_type: string
+          order_index?: number | null
+          protein?: number | null
+          recordatorio_id?: string | null
+          time?: string | null
+        }
+        Update: {
+          calories?: number | null
+          carbs?: number | null
+          created_at?: string | null
+          fat?: number | null
+          foods?: string
+          id?: string
+          meal_type?: string
+          order_index?: number | null
+          protein?: number | null
+          recordatorio_id?: string | null
+          time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recordatorio_meals_recordatorio_id_fkey"
+            columns: ["recordatorio_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recordatorios: {
+        Row: {
+          analysis_notes: string | null
+          analyzed_at: string | null
+          analyzed_by: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          patient_id: string
+          patient_name: string
+          record_date: string
+          status: string
+          tenant_id: string
+          total_calories: number | null
+          total_carbs: number | null
+          total_fat: number | null
+          total_fiber: number | null
+          total_protein: number | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          analysis_notes?: string | null
+          analyzed_at?: string | null
+          analyzed_by?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          patient_id: string
+          patient_name: string
+          record_date: string
+          status?: string
+          tenant_id: string
+          total_calories?: number | null
+          total_carbs?: number | null
+          total_fat?: number | null
+          total_fiber?: number | null
+          total_protein?: number | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          analysis_notes?: string | null
+          analyzed_at?: string | null
+          analyzed_by?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          patient_name?: string
+          record_date?: string
+          status?: string
+          tenant_id?: string
+          total_calories?: number | null
+          total_carbs?: number | null
+          total_fat?: number | null
+          total_fiber?: number | null
+          total_protein?: number | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       reference_measures: {
         Row: {
           created_at: string | null

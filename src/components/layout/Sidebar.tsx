@@ -135,7 +135,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { to: '/planos', icon: DocumentIcon, label: 'Planos Alimentares' },
       { to: '/questionarios', icon: ClipboardIcon, label: 'Questionários' },
-      { to: '/recordatorio', icon: BookIcon, label: 'Recordatório' },
+      { to: '/recordatorios', icon: BookIcon, label: 'Recordatórios' },
       { to: '/feedbacks', icon: StarIcon, label: 'Feedbacks Semanais' },
       { to: '/servicos', icon: BriefcaseIcon, label: 'Serviços' },
     ]
