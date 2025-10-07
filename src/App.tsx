@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryProvider } from '@/components/providers/QueryProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { TwentyFirstToolbar } from '@21st-extension/toolbar-react';
 import { ReactPlugin } from '@21st-extension/react';
@@ -23,16 +23,6 @@ import Financeiro from './pages/Financeiro';
 import { Configuracoes } from './pages/Configuracoes';
 import PublicQuestionnaireResponse from './pages/public/PublicQuestionnaireResponse';
 
-// Create a client for React Query
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60 * 1000, // 1 minute
-      refetchOnWindowFocus: false,
-    },
-  },
-});
-
 function App() {
   return (
     <>
@@ -41,7 +31,7 @@ function App() {
           plugins: [ReactPlugin]
         }}
       />
-      <QueryClientProvider client={queryClient}>
+      <QueryProvider>
         <BrowserRouter>
         <Routes>
           {/* Rota pública para resposta de questionário */}
@@ -72,7 +62,7 @@ function App() {
         </Routes>
         </BrowserRouter>
         <Toaster />
-      </QueryClientProvider>
+      </QueryProvider>
     </>
   );
 }

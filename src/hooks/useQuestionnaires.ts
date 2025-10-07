@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from './useTenantId';
 import { toast } from 'sonner';
+import { CacheMetrics } from '@/lib/cacheMetrics';
+import { CacheStorage } from '@/lib/cacheStorage';
 
 export interface Question {
   id?: string;
@@ -39,65 +41,57 @@ export function useQuestionnaires() {
   const { data: questionnaires, isLoading } = useQuery({
     queryKey: ['questionnaires', tenantId],
     queryFn: async () => {
+      const startTime = Date.now();
       if (!tenantId) return [];
 
+      // Query otimizada com JOIN para evitar N+1
       const { data, error } = await supabase
         .from('questionnaires')
         .select(`
-          *,
-          response_count:questionnaire_responses(count)
+          id,
+          tenant_id,
+          title,
+          category,
+          description,
+          estimated_time,
+          is_active,
+          question_count,
+          created_at,
+          updated_at,
+          questionnaire_responses(
+            id,
+            status
+          )
         `)
         .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        CacheMetrics.trackQueryTime('questionnaires-list', startTime, error.message);
+        throw error;
+      }
 
-      // Buscar perguntas e calcular taxa de conclusão para cada questionário
-      const questionnairesWithStats = await Promise.all(
-        data.map(async (q) => {
-          // Buscar perguntas do questionário
-          const { data: questions } = await supabase
-            .from('questionnaire_questions')
-            .select('*')
-            .eq('questionnaire_id', q.id)
-            .order('order_index', { ascending: true });
+      CacheMetrics.trackQueryTime('questionnaires-list', startTime);
 
-          // Buscar respostas para calcular taxa de conclusão
-          const { data: responses } = await supabase
-            .from('questionnaire_responses')
-            .select('status')
-            .eq('questionnaire_id', q.id);
-
-          const total = responses?.length || 0;
-          const completed = responses?.filter(r => r.status === 'completed').length || 0;
-          const completion_rate = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-          // Mapear perguntas para o formato correto
-          const mappedQuestions = (questions || []).map(q => ({
-            id: q.id,
-            question: q.question_text,
-            type: q.question_type,
-            options: q.options || [],
-            required: q.is_required,
-            section: q.section,
-            order_index: q.order_index,
-            scorable: q.scorable || false,
-            weight: q.weight || 1,
-          optionScores: q.option_scores || {}
-        }));
+      // Calcular stats na aplicação (mais eficiente que múltiplas queries)
+      return data.map(q => {
+        const responses = q.questionnaire_responses || [];
+        const total = responses.length;
+        const completed = responses.filter(r => r.status === 'completed').length;
+        const completion_rate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
         return {
-            ...q,
-            questions: mappedQuestions,
-            question_count: mappedQuestions.length,
-            response_count: completed,
-            completion_rate,
-          };
-        })
-      );
-
-      return questionnairesWithStats;
+          ...q,
+          response_count: completed,
+          completion_rate,
+          // Remover dados desnecessários para a lista
+          questionnaire_responses: undefined,
+        };
+      });
     },
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    cacheTime: 30 * 60 * 1000, // 30 minutos
+    refetchOnWindowFocus: false,
     enabled: !!tenantId,
   });
 
