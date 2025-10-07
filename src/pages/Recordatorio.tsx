@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, List, Plus, User, Clock, Edit, Trash2 } from 'lucide-react';
+import { Search, List, Plus, User, Clock, Edit, Trash2, Eye, ArrowLeft, Utensils } from 'lucide-react';
 import { useRecordatorio, Recordatorio as RecordatorioType } from '@/hooks/useRecordatorio';
 import { useClientsData } from '@/hooks/useClientsData';
 import { format } from 'date-fns';
@@ -13,7 +13,7 @@ interface MealInput {
 }
 
 export default function Recordatorio() {
-  const [activeTab, setActiveTab] = useState<'list' | 'new'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'new' | 'view'>('list');
   const [isDark, setIsDark] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [periodFilter, setPeriodFilter] = useState('all');
@@ -31,7 +31,10 @@ export default function Recordatorio() {
     order_index: 0
   }]);
   
-  const { recordatorios, loading, createRecordatorio, deleteRecordatorio } = useRecordatorio();
+  // View state
+  const [viewingRecordatorio, setViewingRecordatorio] = useState<RecordatorioType | null>(null);
+  
+  const { recordatorios, loading, createRecordatorio, deleteRecordatorio, getRecordatorioById } = useRecordatorio();
   const { clients } = useClientsData();
 
   useEffect(() => {
@@ -134,6 +137,14 @@ export default function Recordatorio() {
       setActiveTab('list');
     } catch (error) {
       console.error('Erro ao salvar:', error);
+    }
+  };
+
+  const handleViewRecordatorio = async (id: string) => {
+    const recordatorio = await getRecordatorioById(id);
+    if (recordatorio) {
+      setViewingRecordatorio(recordatorio);
+      setActiveTab('view');
     }
   };
 
@@ -311,7 +322,27 @@ export default function Recordatorio() {
                           {formatRecordDate(record.record_date)}
                         </div>
                         <button 
+                          onClick={() => handleViewRecordatorio(record.id)}
+                          title="Visualizar"
+                          style={{ 
+                            width: '36px', 
+                            height: '36px', 
+                            borderRadius: '8px', 
+                            border: 'none', 
+                            background: 'rgba(16, 185, 129, 0.1)', 
+                            color: '#10b981', 
+                            cursor: 'pointer', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          <Eye style={{ width: '18px', height: '18px' }} />
+                        </button>
+                        <button 
                           onClick={() => handleDeleteRecordatorio(record.id, record.patient_name)}
+                          title="Excluir"
                           style={{ 
                             width: '36px', 
                             height: '36px', 
@@ -519,6 +550,281 @@ export default function Recordatorio() {
                 style={{ padding: '12px 24px', borderRadius: '12px', border: 'none', background: loading ? '#6b7280' : '#10b981', color: 'white', fontWeight: 600, fontSize: '14px', cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: loading ? 0.6 : 1 }}
               >
                 {loading ? 'Salvando...' : 'Salvar Recordatório'}
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Tab: Visualizar */}
+        {activeTab === 'view' && viewingRecordatorio && (
+          <>
+            {/* Header com botão voltar */}
+            <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <button
+                onClick={() => setActiveTab('list')}
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)',
+                  color: isDark ? '#ffffff' : '#111827',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <ArrowLeft style={{ width: '20px', height: '20px' }} />
+              </button>
+              <div>
+                <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '4px' }}>
+                  Recordatório de {viewingRecordatorio.patient_name}
+                </h2>
+                <p style={{ fontSize: '14px', opacity: 0.7 }}>
+                  {viewingRecordatorio.type === 'r24h' ? 'Recordatório 24 horas' : 'Recordatório 3 dias'} • {formatRecordDate(viewingRecordatorio.record_date)}
+                </p>
+              </div>
+            </div>
+
+            {/* Info Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+              <div style={{
+                background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)',
+                backdropFilter: 'blur(10px)',
+                border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+                borderRadius: '16px',
+                padding: '20px',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '8px' }}>
+                  Status
+                </div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: viewingRecordatorio.status === 'analyzed' ? '#10b981' : '#f59e0b' }}>
+                  {viewingRecordatorio.status === 'analyzed' ? '✅ Analisado' : '⏳ Pendente'}
+                </div>
+              </div>
+
+              <div style={{
+                background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)',
+                backdropFilter: 'blur(10px)',
+                border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+                borderRadius: '16px',
+                padding: '20px',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '8px' }}>
+                  Refeições
+                </div>
+                <div style={{ fontSize: '24px', fontWeight: 700 }}>
+                  {viewingRecordatorio.meals?.length || 0}
+                </div>
+              </div>
+
+              {viewingRecordatorio.total_calories && (
+                <div style={{
+                  background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)',
+                  backdropFilter: 'blur(10px)',
+                  border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+                  borderRadius: '16px',
+                  padding: '20px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '8px' }}>
+                    Calorias Totais
+                  </div>
+                  <div style={{ fontSize: '24px', fontWeight: 700, color: '#3b82f6' }}>
+                    {viewingRecordatorio.total_calories} kcal
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Macros (se analisado) */}
+            {viewingRecordatorio.status === 'analyzed' && viewingRecordatorio.total_protein && (
+              <div style={{
+                background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)',
+                backdropFilter: 'blur(10px)',
+                border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+                borderRadius: '16px',
+                padding: '24px',
+                marginBottom: '24px'
+              }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px' }}>
+                  Análise Nutricional
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
+                  <div>
+                    <div style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '4px' }}>
+                      Proteínas
+                    </div>
+                    <div style={{ fontSize: '20px', fontWeight: 700, color: '#ef4444' }}>
+                      {viewingRecordatorio.total_protein?.toFixed(1)}g
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '4px' }}>
+                      Carboidratos
+                    </div>
+                    <div style={{ fontSize: '20px', fontWeight: 700, color: '#3b82f6' }}>
+                      {viewingRecordatorio.total_carbs?.toFixed(1)}g
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '4px' }}>
+                      Gorduras
+                    </div>
+                    <div style={{ fontSize: '20px', fontWeight: 700, color: '#f59e0b' }}>
+                      {viewingRecordatorio.total_fat?.toFixed(1)}g
+                    </div>
+                  </div>
+                  {viewingRecordatorio.total_fiber && (
+                    <div>
+                      <div style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '4px' }}>
+                        Fibras
+                      </div>
+                      <div style={{ fontSize: '20px', fontWeight: 700, color: '#10b981' }}>
+                        {viewingRecordatorio.total_fiber?.toFixed(1)}g
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Refeições */}
+            <div style={{
+              background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(10px)',
+              border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+              borderRadius: '16px',
+              padding: '32px',
+              marginBottom: '24px'
+            }}>
+              <h3 style={{ 
+                fontSize: '18px', 
+                fontWeight: 700, 
+                marginBottom: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Utensils style={{ width: '18px', height: '18px', color: '#10b981' }} />
+                </div>
+                Refeições Registradas
+              </h3>
+
+              {viewingRecordatorio.meals && viewingRecordatorio.meals.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {viewingRecordatorio.meals.map((meal, index) => (
+                    <div key={meal.id || index} style={{
+                      background: isDark ? 'rgba(20, 20, 20, 0.9)' : '#ffffff',
+                      border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+                      borderRadius: '12px',
+                      padding: '20px'
+                    }}>
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        marginBottom: '12px'
+                      }}>
+                        <div style={{ fontSize: '16px', fontWeight: 700 }}>
+                          {getMealTypeEmoji(meal.meal_type)} {getMealTypeLabel(meal.meal_type)}
+                        </div>
+                        {meal.time && (
+                          <div style={{ 
+                            padding: '4px 12px', 
+                            borderRadius: '6px', 
+                            background: 'rgba(59, 130, 246, 0.1)', 
+                            color: '#3b82f6', 
+                            fontSize: '13px',
+                            fontWeight: 600
+                          }}>
+                            {meal.time}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div style={{ 
+                        fontSize: '14px', 
+                        color: isDark ? '#d1d5db' : '#374151',
+                        lineHeight: '1.6',
+                        whiteSpace: 'pre-line'
+                      }}>
+                        {meal.foods}
+                      </div>
+
+                      {/* Nutrição da refeição (se analisada) */}
+                      {meal.calories && (
+                        <div style={{ 
+                          marginTop: '12px',
+                          paddingTop: '12px',
+                          borderTop: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+                          display: 'flex',
+                          gap: '16px',
+                          flexWrap: 'wrap',
+                          fontSize: '13px',
+                          color: isDark ? '#a3a3a3' : '#6b7280'
+                        }}>
+                          <span><strong>{meal.calories}</strong> kcal</span>
+                          {meal.protein && <span>P: <strong>{meal.protein.toFixed(1)}</strong>g</span>}
+                          {meal.carbs && <span>C: <strong>{meal.carbs.toFixed(1)}</strong>g</span>}
+                          {meal.fat && <span>G: <strong>{meal.fat.toFixed(1)}</strong>g</span>}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '40px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
+                  Nenhuma refeição registrada
+                </div>
+              )}
+            </div>
+
+            {/* Observações */}
+            {viewingRecordatorio.notes && (
+              <div style={{
+                background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)',
+                backdropFilter: 'blur(10px)',
+                border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+                borderRadius: '16px',
+                padding: '24px',
+                marginBottom: '24px'
+              }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '12px' }}>
+                  Observações
+                </h3>
+                <p style={{ 
+                  fontSize: '14px', 
+                  color: isDark ? '#d1d5db' : '#374151',
+                  lineHeight: '1.6',
+                  whiteSpace: 'pre-line'
+                }}>
+                  {viewingRecordatorio.notes}
+                </p>
+              </div>
+            )}
+
+            {/* Ações */}
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button 
+                onClick={() => setActiveTab('list')}
+                style={{ 
+                  padding: '12px 24px', 
+                  borderRadius: '12px', 
+                  border: 'none', 
+                  background: '#10b981', 
+                  color: 'white', 
+                  fontWeight: 600, 
+                  fontSize: '14px', 
+                  cursor: 'pointer' 
+                }}
+              >
+                Voltar para Lista
               </button>
             </div>
           </>
