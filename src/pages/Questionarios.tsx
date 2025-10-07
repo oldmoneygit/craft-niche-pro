@@ -12,6 +12,7 @@ import { QuestionnaireShareModal } from '@/components/questionnaires/Questionnai
 import { QuestionnaireResponsesModal } from '@/components/questionnaires/QuestionnaireResponsesModal';
 import { useQuestionnaires, type Questionnaire } from '@/hooks/useQuestionnaires';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +32,27 @@ export default function Questionarios() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [responsesModalOpen, setResponsesModalOpen] = useState(false);
-  const [selectedQuestionnaire, setSelectedQuestionnaire] = useState<Questionnaire | null>(null);
+  type FormattedQuestion = {
+    id: string;
+    question: string;
+    question_text: string;
+    type: string;
+    options: string[];
+    required: boolean;
+    is_required: boolean;
+    scorable: boolean;
+    weight: number;
+    optionScores: Record<string, number>;
+    option_scores: Record<string, number>;
+  };
+
+  type QuestionnaireWithStats = Questionnaire & {
+    response_count: number;
+    completion_rate: number;
+    questions?: FormattedQuestion[];
+  };
+
+  const [selectedQuestionnaire, setSelectedQuestionnaire] = useState<QuestionnaireWithStats | null>(null);
   const [selectedForSend, setSelectedForSend] = useState<{ id: string; title: string } | null>(null);
   const [selectedForShare, setSelectedForShare] = useState<{ id: string; title: string } | null>(null);
   const [selectedForResponses, setSelectedForResponses] = useState<{ id: string; title: string; questions: any[] } | null>(null);
@@ -62,9 +83,41 @@ export default function Questionarios() {
       : 0,
   };
 
-  const handleView = (questionnaire: any) => {
-    setSelectedQuestionnaire(questionnaire);
-    setViewModalOpen(true);
+  const handleView = async (questionnaire: QuestionnaireWithStats) => {
+    try {
+      const { data, error } = await supabase
+        .from('questionnaire_questions')
+        .select('id, question_text, question_type, options, is_required, order_index, scorable, weight, option_scores')
+        .eq('questionnaire_id', questionnaire.id)
+        .order('order_index', { ascending: true });
+
+      if (error) {
+        throw error;
+      }
+
+      const formattedQuestions: FormattedQuestion[] = (data || []).map((question) => ({
+        id: question.id,
+        question: question.question_text,
+        question_text: question.question_text,
+        type: question.question_type,
+        options: Array.isArray(question.options) ? question.options : [],
+        required: question.is_required,
+        is_required: question.is_required,
+        scorable: question.scorable ?? false,
+        weight: question.weight ?? 1,
+        optionScores: question.option_scores || {},
+        option_scores: question.option_scores || {},
+      }));
+
+      setSelectedQuestionnaire({
+        ...questionnaire,
+        questions: formattedQuestions,
+      });
+      setViewModalOpen(true);
+    } catch (err) {
+      console.error('Erro ao carregar perguntas do questionário:', err);
+      toast.error('Não foi possível carregar as perguntas do questionário.');
+    }
   };
 
   const handleEdit = (questionnaire: any) => {
