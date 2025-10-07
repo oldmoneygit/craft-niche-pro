@@ -153,6 +153,79 @@ export function useRecordatorio() {
     }
   };
 
+  // Atualizar recordatório
+  const updateRecordatorio = async (id: string, data: {
+    patient_name?: string;
+    type?: 'r24h' | 'r3d';
+    record_date?: string;
+    notes?: string;
+    status?: 'pending' | 'analyzed';
+    meals?: Omit<RecordatorioMeal, 'id' | 'recordatorio_id'>[];
+  }) => {
+    try {
+      // Atualizar recordatório
+      const { error: recError } = await supabase
+        .from('recordatorios')
+        .update({
+          patient_name: data.patient_name,
+          type: data.type,
+          record_date: data.record_date,
+          notes: data.notes,
+          status: data.status
+        })
+        .eq('id', id);
+      
+      if (recError) throw recError;
+      
+      // Se meals foram fornecidas, atualizar
+      if (data.meals) {
+        // Deletar meals antigas
+        const { error: deleteMealsError } = await supabase
+          .from('recordatorio_meals')
+          .delete()
+          .eq('recordatorio_id', id);
+        
+        if (deleteMealsError) throw deleteMealsError;
+        
+        // Inserir novas meals
+        if (data.meals.length > 0) {
+          const mealsToInsert = data.meals.map((meal, index) => ({
+            recordatorio_id: id,
+            meal_type: meal.meal_type,
+            time: meal.time,
+            foods: meal.foods,
+            order_index: index,
+            calories: meal.calories,
+            protein: meal.protein,
+            carbs: meal.carbs,
+            fat: meal.fat
+          }));
+          
+          const { error: mealsError } = await supabase
+            .from('recordatorio_meals')
+            .insert(mealsToInsert);
+          
+          if (mealsError) throw mealsError;
+        }
+      }
+      
+      toast({
+        title: 'Sucesso!',
+        description: 'Recordatório atualizado com sucesso'
+      });
+      
+      await fetchRecordatorios();
+    } catch (error) {
+      console.error('Erro ao atualizar recordatório:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar o recordatório',
+        variant: 'destructive'
+      });
+      throw error;
+    }
+  };
+
   // Deletar recordatório
   const deleteRecordatorio = async (id: string) => {
     try {
@@ -225,6 +298,7 @@ export function useRecordatorio() {
     loading,
     fetchRecordatorios,
     createRecordatorio,
+    updateRecordatorio,
     deleteRecordatorio,
     getRecordatorioById
   };

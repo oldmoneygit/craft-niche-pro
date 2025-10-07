@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, List, Plus, User, Clock, Edit, Trash2, Eye, ArrowLeft, Utensils } from 'lucide-react';
+import { Search, List, Plus, User, Clock, Edit, Trash2, Eye, ArrowLeft, Utensils, Edit2 } from 'lucide-react';
 import { useRecordatorio, Recordatorio as RecordatorioType } from '@/hooks/useRecordatorio';
 import { useClientsData } from '@/hooks/useClientsData';
 import { format } from 'date-fns';
@@ -13,7 +13,7 @@ interface MealInput {
 }
 
 export default function Recordatorio() {
-  const [activeTab, setActiveTab] = useState<'list' | 'new' | 'view'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'new' | 'view' | 'edit'>('list');
   const [isDark, setIsDark] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [periodFilter, setPeriodFilter] = useState('all');
@@ -34,7 +34,11 @@ export default function Recordatorio() {
   // View state
   const [viewingRecordatorio, setViewingRecordatorio] = useState<RecordatorioType | null>(null);
   
-  const { recordatorios, loading, createRecordatorio, deleteRecordatorio, getRecordatorioById } = useRecordatorio();
+  // Delete dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [recordatorioToDelete, setRecordatorioToDelete] = useState<string | null>(null);
+  
+  const { recordatorios, loading, createRecordatorio, updateRecordatorio, deleteRecordatorio, getRecordatorioById } = useRecordatorio();
   const { clients } = useClientsData();
 
   useEffect(() => {
@@ -148,9 +152,39 @@ export default function Recordatorio() {
     }
   };
 
-  const handleDeleteRecordatorio = async (id: string, name: string) => {
-    if (window.confirm(`Deseja realmente excluir o recordatório de ${name}?`)) {
-      await deleteRecordatorio(id);
+  const handleEditRecordatorio = async (id: string) => {
+    const recordatorio = await getRecordatorioById(id);
+    if (recordatorio) {
+      setViewingRecordatorio(recordatorio);
+      // Preparar formulário com dados do recordatório
+      setRecordDate(recordatorio.record_date);
+      setNotes(recordatorio.notes || '');
+      if (recordatorio.meals && recordatorio.meals.length > 0) {
+        setMeals(recordatorio.meals.map((meal, index) => ({
+          meal_type: meal.meal_type,
+          time: meal.time || '',
+          foods: meal.foods,
+          order_index: index
+        })));
+      }
+      setActiveTab('edit');
+    }
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setRecordatorioToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (recordatorioToDelete) {
+      await deleteRecordatorio(recordatorioToDelete);
+      setDeleteDialogOpen(false);
+      setRecordatorioToDelete(null);
+      if (viewingRecordatorio?.id === recordatorioToDelete) {
+        setViewingRecordatorio(null);
+        setActiveTab('list');
+      }
     }
   };
 
@@ -341,7 +375,26 @@ export default function Recordatorio() {
                           <Eye style={{ width: '18px', height: '18px' }} />
                         </button>
                         <button 
-                          onClick={() => handleDeleteRecordatorio(record.id, record.patient_name)}
+                          onClick={() => handleEditRecordatorio(record.id)}
+                          title="Editar"
+                          style={{ 
+                            width: '36px', 
+                            height: '36px', 
+                            borderRadius: '8px', 
+                            border: 'none', 
+                            background: 'rgba(59, 130, 246, 0.1)', 
+                            color: '#3b82f6', 
+                            cursor: 'pointer', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          <Edit2 style={{ width: '18px', height: '18px' }} />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteClick(record.id)}
                           title="Excluir"
                           style={{ 
                             width: '36px', 
@@ -812,6 +865,44 @@ export default function Recordatorio() {
             {/* Ações */}
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
               <button 
+                onClick={() => handleEditRecordatorio(viewingRecordatorio.id)}
+                style={{ 
+                  padding: '12px 24px', 
+                  borderRadius: '12px', 
+                  border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', 
+                  background: 'rgba(59, 130, 246, 0.1)', 
+                  color: '#3b82f6', 
+                  fontWeight: 600, 
+                  fontSize: '14px', 
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                <Edit2 style={{ width: '16px', height: '16px' }} />
+                Editar
+              </button>
+              <button 
+                onClick={() => handleDeleteClick(viewingRecordatorio.id)}
+                style={{ 
+                  padding: '12px 24px', 
+                  borderRadius: '12px', 
+                  border: 'none', 
+                  background: 'rgba(239, 68, 68, 0.1)', 
+                  color: '#ef4444', 
+                  fontWeight: 600, 
+                  fontSize: '14px', 
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                <Trash2 style={{ width: '16px', height: '16px' }} />
+                Excluir
+              </button>
+              <button 
                 onClick={() => setActiveTab('list')}
                 style={{ 
                   padding: '12px 24px', 
@@ -828,6 +919,249 @@ export default function Recordatorio() {
               </button>
             </div>
           </>
+        )}
+
+        {/* Tab: Edit */}
+        {activeTab === 'edit' && viewingRecordatorio && (
+          <>
+            <div style={{ marginBottom: '24px' }}>
+              <button 
+                onClick={() => setActiveTab('view')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: 'transparent',
+                  color: isDark ? '#ffffff' : '#111827',
+                  fontWeight: 600,
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
+                <ArrowLeft style={{ width: '18px', height: '18px' }} />
+                Voltar
+              </button>
+            </div>
+
+            {/* Informações do Paciente */}
+            <div style={{ background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <User style={{ width: '18px', height: '18px', color: '#10b981' }} />
+                </div>
+                Informações do Paciente
+              </h2>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
+                    Paciente
+                  </label>
+                  <input 
+                    type="text"
+                    value={viewingRecordatorio.patient_name}
+                    disabled
+                    style={{ ...inputStyle, opacity: 0.7 }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
+                    Data do Recordatório *
+                  </label>
+                  <input 
+                    type="date" 
+                    value={recordDate}
+                    onChange={(e) => setRecordDate(e.target.value)}
+                    style={inputStyle}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginTop: '16px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
+                  Observações
+                </label>
+                <textarea 
+                  placeholder="Observações gerais sobre o recordatório..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }}
+                />
+              </div>
+            </div>
+
+            {/* Refeições */}
+            <div style={{ background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Clock style={{ width: '18px', height: '18px', color: '#10b981' }} />
+                  </div>
+                  Refeições
+                </h2>
+                <button 
+                  onClick={handleAddMeal}
+                  style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', fontWeight: 600, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                >
+                  <Plus style={{ width: '16px', height: '16px' }} />
+                  Adicionar Refeição
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {meals.map((meal, index) => (
+                  <div key={index} style={{ background: isDark ? 'rgba(20, 20, 20, 0.9)' : '#ffffff', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '12px', padding: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <span style={{ fontSize: '16px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>
+                        Refeição {index + 1}
+                      </span>
+                      {meals.length > 1 && (
+                        <button 
+                          onClick={() => handleRemoveMeal(index)}
+                          style={{ width: '28px', height: '28px', borderRadius: '6px', border: 'none', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
+                          <Trash2 style={{ width: '14px', height: '14px' }} />
+                        </button>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '6px' }}>
+                          Tipo de Refeição
+                        </label>
+                        <select 
+                          value={meal.meal_type}
+                          onChange={(e) => handleUpdateMeal(index, 'meal_type', e.target.value)}
+                          style={inputStyle}
+                        >
+                          <option value="breakfast">Café da Manhã</option>
+                          <option value="morning_snack">Lanche da Manhã</option>
+                          <option value="lunch">Almoço</option>
+                          <option value="afternoon_snack">Lanche da Tarde</option>
+                          <option value="dinner">Jantar</option>
+                          <option value="supper">Ceia</option>
+                          <option value="other">Outro</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '6px' }}>
+                          Horário
+                        </label>
+                        <input 
+                          type="time"
+                          value={meal.time}
+                          onChange={(e) => handleUpdateMeal(index, 'time', e.target.value)}
+                          style={inputStyle}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: '12px' }}>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '6px' }}>
+                        Alimentos Consumidos *
+                      </label>
+                      <textarea 
+                        placeholder="Descreva os alimentos consumidos nesta refeição..."
+                        value={meal.foods}
+                        onChange={(e) => handleUpdateMeal(index, 'foods', e.target.value)}
+                        style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Botões de Ação */}
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button 
+                onClick={() => setActiveTab('view')}
+                style={{ padding: '14px 28px', borderRadius: '12px', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', background: 'transparent', color: isDark ? '#ffffff' : '#111827', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={async () => {
+                  await updateRecordatorio(viewingRecordatorio.id, {
+                    record_date: recordDate,
+                    notes,
+                    meals: meals.filter(m => m.foods.trim() !== '')
+                  });
+                  setActiveTab('view');
+                }}
+                style={{ padding: '14px 28px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}
+              >
+                Salvar Alterações
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Modal de Confirmação de Exclusão */}
+        {deleteDialogOpen && (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 50
+          }}>
+            <div style={{
+              background: isDark ? 'rgba(38, 38, 38, 0.95)' : 'white',
+              borderRadius: '16px',
+              padding: '32px',
+              maxWidth: '500px',
+              width: '90%',
+              border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)'
+            }}>
+              <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>
+                Confirmar Exclusão
+              </h3>
+              <p style={{ fontSize: '14px', color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '24px' }}>
+                Tem certeza que deseja excluir este recordatório? Esta ação não pode ser desfeita.
+              </p>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <button
+                  onClick={() => setDeleteDialogOpen(false)}
+                  style={{
+                    padding: '12px 24px',
+                    borderRadius: '12px',
+                    border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+                    background: 'transparent',
+                    color: isDark ? '#ffffff' : '#111827',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  style={{
+                    padding: '12px 24px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: '#ef4444',
+                    color: 'white',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Excluir
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
