@@ -77,27 +77,42 @@ export default function Recordatorios() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log('🟢 [handleSubmit] Iniciando submit do formulário');
+    console.log('🟢 [handleSubmit] patientId:', patientId);
+    console.log('🟢 [handleSubmit] meals:', meals);
+
     if (!patientId) {
+      console.log('❌ [handleSubmit] Paciente não selecionado');
       toast({ title: 'Erro', description: 'Selecione um paciente', variant: 'destructive' });
       return;
     }
 
     if (meals.length === 0) {
+      console.log('❌ [handleSubmit] Nenhuma refeição adicionada');
       toast({ title: 'Erro', description: 'Adicione pelo menos uma refeição', variant: 'destructive' });
       return;
     }
 
     const selectedClient = clients.find(c => c.id === patientId);
-    if (!selectedClient) return;
+    if (!selectedClient) {
+      console.log('❌ [handleSubmit] Cliente não encontrado');
+      return;
+    }
 
-    await createRecordatorio.mutateAsync({
-      patient_id: patientId,
-      patient_name: selectedClient.name,
-      type,
-      record_date: recordDate,
-      notes,
-      meals
-    });
+    console.log('🟢 [handleSubmit] Chamando createRecordatorio...');
+    try {
+      await createRecordatorio.mutateAsync({
+        patient_id: patientId,
+        patient_name: selectedClient.name,
+        type,
+        record_date: recordDate,
+        notes,
+        meals
+      });
+      console.log('✅ [handleSubmit] Recordatório criado com sucesso!');
+    } catch (error) {
+      console.error('❌ [handleSubmit] Erro ao criar recordatório:', error);
+    }
 
     // Reset form
     setPatientId('');

@@ -75,9 +75,16 @@ export const useRecordatorios = () => {
       notes?: string;
       meals: Omit<RecordatorioMeal, 'id'>[];
     }) => {
-      if (!tenantId) throw new Error('Tenant ID não encontrado');
+      console.log('🔵 [createRecordatorio] Iniciando criação com dados:', data);
+      console.log('🔵 [createRecordatorio] tenantId:', tenantId);
+      
+      if (!tenantId) {
+        console.error('❌ [createRecordatorio] Tenant ID não encontrado!');
+        throw new Error('Tenant ID não encontrado');
+      }
 
       // Criar recordatório
+      console.log('🔵 [createRecordatorio] Inserindo no banco...');
       const { data: recordatorio, error: recError } = await supabase
         .from('recordatorios')
         .insert({
@@ -92,9 +99,15 @@ export const useRecordatorios = () => {
         .select()
         .single();
 
-      if (recError) throw recError;
+      if (recError) {
+        console.error('❌ [createRecordatorio] Erro ao criar recordatório:', recError);
+        throw recError;
+      }
+      
+      console.log('✅ [createRecordatorio] Recordatório criado:', recordatorio);
 
       // Criar refeições
+      console.log('🔵 [createRecordatorio] Criando refeições...', data.meals.length);
       if (data.meals.length > 0) {
         const mealsToInsert = data.meals.map((meal, index) => ({
           recordatorio_id: recordatorio.id,
@@ -104,13 +117,19 @@ export const useRecordatorios = () => {
           order_index: index
         }));
 
+        console.log('🔵 [createRecordatorio] Inserindo refeições:', mealsToInsert);
         const { error: mealsError } = await supabase
           .from('recordatorio_meals')
           .insert(mealsToInsert);
 
-        if (mealsError) throw mealsError;
+        if (mealsError) {
+          console.error('❌ [createRecordatorio] Erro ao criar refeições:', mealsError);
+          throw mealsError;
+        }
+        console.log('✅ [createRecordatorio] Refeições criadas com sucesso!');
       }
 
+      console.log('✅ [createRecordatorio] Processo completo!');
       return recordatorio;
     },
     onSuccess: () => {
