@@ -1,0 +1,36 @@
+# KorLab Nutri - Regras do Projeto
+
+## Stack Técnica
+- React + TypeScript + Vite
+- Supabase (PostgreSQL + Auth + Storage)
+- TailwindCSS + shadcn/ui
+- Recharts para gráficos
+- Zustand para estado global
+
+## Estrutura do Projeto
+- `/src/components` - Componentes React
+- `/src/pages` - Páginas/rotas
+- `/src/hooks` - Custom hooks
+- `/src/lib` - Utilitários e configs
+- `/src/types` - TypeScript types
+- `/docs` - Documentação (SCHEMA.md é importante!)
+
+## Convenções de Código
+- Sempre usar TypeScript
+- Componentes em PascalCase
+- Hooks começam com 'use'
+- Sempre verificar SCHEMA.md antes de mexer no banco
+- RLS está habilitado em todas as tabelas
+
+## Prioridades
+1. Segurança (RLS, validações)
+2. Performance (queries otimizadas)
+3. UX (feedback, loading states)
+4. Manutenibilidade (código limpo)
+
+## Ao fazer mudanças no banco:
+1. Verificar docs/SCHEMA.md e atualizar esse documento se for necessário para manter toda a documentação atualizada
+2. Criar migration
+3. Atualizar types em src/types/database.ts
+4. Atualizar componentes afetados
+5. Testar com dados reais
