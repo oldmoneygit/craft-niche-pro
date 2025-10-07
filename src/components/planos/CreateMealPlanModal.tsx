@@ -615,11 +615,16 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
               
               {/* Refeições Padrão */}
               <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Refeições Padrão</h4>
+                <h4 className="text-sm font-semibold text-white">Refeições Padrão</h4>
                 {DEFAULT_MEALS.map(meal => (
                   <div 
                     key={meal.key} 
-                    className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-500 transition-colors cursor-pointer"
+                    className="flex items-center gap-4 p-4 rounded-xl border border-gray-700 hover:border-emerald-500 transition-colors cursor-pointer"
+                    style={{
+                      background: 'rgba(38, 38, 38, 0.6)',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)'
+                    }}
                     onClick={() => toggleMeal(meal.key)}
                   >
                     <Checkbox
@@ -628,11 +633,11 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
                       className="w-5 h-5 rounded border-gray-300 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                     />
                     <div className="flex-1">
-                      <div className="font-semibold text-gray-900 dark:text-white flex items-center gap-3">
+                      <div className="font-semibold text-white flex items-center gap-3">
                         <span className="text-2xl">{meal.icon}</span>
                         {meal.name}
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      <div className="text-sm text-gray-400 mt-1">
                         Horário sugerido: {meal.time}
                       </div>
                     </div>
@@ -643,11 +648,16 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
               {/* Refeições Personalizadas */}
               {customMeals.length > 0 && (
                 <div className="space-y-3 mt-6">
-                  <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Refeições Personalizadas</h4>
+                  <h4 className="text-sm font-semibold text-white">Refeições Personalizadas</h4>
                   {customMeals.map(meal => (
                     <div 
                       key={meal.key} 
-                      className="flex items-center gap-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-700 hover:border-purple-500 transition-colors"
+                      className="flex items-center gap-4 p-4 rounded-xl border border-purple-700 hover:border-purple-500 transition-colors"
+                      style={{
+                        background: 'rgba(38, 38, 38, 0.6)',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)'
+                      }}
                     >
                       <Checkbox
                         checked={selectedMeals.includes(meal.key)}
@@ -688,12 +698,19 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
                   Adicionar Refeição Personalizada
                 </Button>
               ) : (
-                <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-xl space-y-3">
-                  <h4 className="text-sm font-semibold text-purple-900 dark:text-purple-200">Nova Refeição Personalizada</h4>
+                <div 
+                  className="mt-4 p-4 border border-purple-700 rounded-xl space-y-3"
+                  style={{
+                    background: 'rgba(38, 38, 38, 0.6)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)'
+                  }}
+                >
+                  <h4 className="text-sm font-semibold text-purple-200">Nova Refeição Personalizada</h4>
                   
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <Label className="text-xs text-gray-700 dark:text-gray-300">Nome *</Label>
+                      <Label className="text-xs text-gray-300">Nome *</Label>
                       <Input
                         value={newCustomMeal.name}
                         onChange={e => setNewCustomMeal(prev => ({ ...prev, name: e.target.value }))}
@@ -702,7 +719,7 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
                       />
                     </div>
                     <div>
-                      <Label className="text-xs text-gray-700 dark:text-gray-300">Horário *</Label>
+                      <Label className="text-xs text-gray-300">Horário *</Label>
                       <Input
                         type="time"
                         value={newCustomMeal.time}
@@ -761,14 +778,21 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
           {/* Etapa 4: Adicionar Alimentos */}
           {step === 4 && (
             <div className="space-y-5">
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">
+              <div 
+                className="border border-blue-800 rounded-xl p-4 mb-6"
+                style={{
+                  background: 'rgba(38, 38, 38, 0.6)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)'
+                }}
+              >
                 <div className="flex items-start gap-3">
                   <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
                   <div>
-                    <p className="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-1">
+                    <p className="text-sm font-semibold text-blue-200 mb-1">
                       Adicione alimentos às refeições
                     </p>
-                    <p className="text-xs text-blue-700 dark:text-blue-300">
+                    <p className="text-xs text-blue-300">
                       Os valores nutricionais serão calculados automaticamente conforme você adiciona alimentos.
                     </p>
                   </div>
@@ -803,8 +827,15 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
               </div>
 
               {/* Totais Calculados */}
-              <div className="mt-6 p-6 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl">
-                <h4 className="text-lg font-bold text-emerald-900 dark:text-emerald-100 mb-4 flex items-center gap-2">
+              <div 
+                className="mt-6 p-6 border border-emerald-800 rounded-xl"
+                style={{
+                  background: 'rgba(38, 38, 38, 0.6)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)'
+                }}
+              >
+                <h4 className="text-lg font-bold text-emerald-100 mb-4 flex items-center gap-2">
                   <Calculator className="w-5 h-5" />
                   Totais Nutricionais Calculados
                 </h4>
