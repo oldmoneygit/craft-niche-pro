@@ -1,9 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { Search, List, Plus, User, Clock, Edit, Trash2 } from 'lucide-react';
+import { useRecordatorio, Recordatorio as RecordatorioType } from '@/hooks/useRecordatorio';
+import { useClientsData } from '@/hooks/useClientsData';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+
+interface MealInput {
+  meal_type: string;
+  time: string;
+  foods: string;
+  order_index: number;
+}
 
 export default function Recordatorio() {
   const [activeTab, setActiveTab] = useState<'list' | 'new'>('list');
   const [isDark, setIsDark] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [periodFilter, setPeriodFilter] = useState('all');
+  
+  // Form state
+  const [selectedPatientId, setSelectedPatientId] = useState('');
+  const [recordDate, setRecordDate] = useState(new Date().toISOString().split('T')[0]);
+  const [weight, setWeight] = useState('');
+  const [hydration, setHydration] = useState('');
+  const [notes, setNotes] = useState('');
+  const [meals, setMeals] = useState<MealInput[]>([{
+    meal_type: 'breakfast',
+    time: '07:00',
+    foods: '',
+    order_index: 0
+  }]);
+  
+  const { recordatorios, loading, createRecordatorio, deleteRecordatorio } = useRecordatorio();
+  const { clients } = useClientsData();
 
   useEffect(() => {
     const checkTheme = () => {
@@ -22,30 +51,131 @@ export default function Recordatorio() {
     return () => observer.disconnect();
   }, []);
 
-  const recordatorios = [
-    {
-      clientName: 'Ana Carolina Lima',
-      clientInitials: 'AC',
-      clientPlan: 'Plano: Acompanhamento Mensal',
-      date: '15/09/2025',
-      meals: 5,
-      calories: '1.847 kcal',
-      protein: '98g',
-      water: '2.1 L',
-      avatarColor: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-    },
-    {
-      clientName: 'Marcão da Massa',
-      clientInitials: 'MM',
-      clientPlan: 'Plano: Acompanhamento Trimestral',
-      date: '14/09/2025',
-      meals: 6,
-      calories: '2.934 kcal',
-      protein: '187g',
-      water: '3.5 L',
-      avatarColor: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
+  // Filtrar recordatórios
+  const filteredRecordatorios = recordatorios.filter(rec => {
+    // Filtro de busca
+    if (searchQuery && !rec.patient_name.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
     }
-  ];
+    
+    // Filtro de período
+    if (periodFilter !== 'all') {
+      const recDate = new Date(rec.record_date);
+      const now = new Date();
+      const diffDays = Math.floor((now.getTime() - recDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (periodFilter === 'week' && diffDays > 7) return false;
+      if (periodFilter === 'month' && diffDays > 30) return false;
+      if (periodFilter === '3months' && diffDays > 90) return false;
+    }
+    
+    return true;
+  });
+
+  // Handlers
+  const handleAddMeal = () => {
+    setMeals([...meals, {
+      meal_type: 'lunch',
+      time: '12:00',
+      foods: '',
+      order_index: meals.length
+    }]);
+  };
+
+  const handleRemoveMeal = (index: number) => {
+    setMeals(meals.filter((_, i) => i !== index));
+  };
+
+  const handleUpdateMeal = (index: number, field: keyof MealInput, value: string) => {
+    const newMeals = [...meals];
+    newMeals[index] = { ...newMeals[index], [field]: value };
+    setMeals(newMeals);
+  };
+
+  const handleSaveRecordatorio = async () => {
+    if (!selectedPatientId) {
+      alert('Por favor, selecione um paciente');
+      return;
+    }
+
+    const selectedClient = clients.find(c => c.id === selectedPatientId);
+    if (!selectedClient) return;
+
+    const validMeals = meals.filter(m => m.foods.trim() !== '');
+    if (validMeals.length === 0) {
+      alert('Adicione pelo menos uma refeição com alimentos');
+      return;
+    }
+
+    try {
+      await createRecordatorio({
+        patient_id: selectedPatientId,
+        patient_name: selectedClient.name,
+        type: 'r24h', // Sempre R24h por padrão
+        record_date: recordDate,
+        notes,
+        meals: validMeals
+      });
+
+      // Reset form
+      setSelectedPatientId('');
+      setRecordDate(new Date().toISOString().split('T')[0]);
+      setWeight('');
+      setHydration('');
+      setNotes('');
+      setMeals([{
+        meal_type: 'breakfast',
+        time: '07:00',
+        foods: '',
+        order_index: 0
+      }]);
+      
+      // Voltar para lista
+      setActiveTab('list');
+    } catch (error) {
+      console.error('Erro ao salvar:', error);
+    }
+  };
+
+  const handleDeleteRecordatorio = async (id: string, name: string) => {
+    if (window.confirm(`Deseja realmente excluir o recordatório de ${name}?`)) {
+      await deleteRecordatorio(id);
+    }
+  };
+
+  const formatRecordDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), 'dd/MM/yyyy');
+    } catch {
+      return dateString;
+    }
+  };
+
+  const getMealTypeEmoji = (type: string) => {
+    const emojis: Record<string, string> = {
+      breakfast: '☀️',
+      morning_snack: '🥤',
+      lunch: '🍽️',
+      afternoon_snack: '🍎',
+      dinner: '🌙',
+      supper: '🌃',
+      other: '🍴'
+    };
+    return emojis[type] || '🍴';
+  };
+
+  const getMealTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      breakfast: 'Café da Manhã',
+      morning_snack: 'Lanche da Manhã',
+      lunch: 'Almoço',
+      afternoon_snack: 'Lanche da Tarde',
+      dinner: 'Jantar',
+      supper: 'Ceia',
+      other: 'Outro'
+    };
+    return labels[type] || 'Refeição';
+  };
 
   const tabStyle = (isActive: boolean): React.CSSProperties => ({
     flex: 1,
@@ -112,52 +242,110 @@ export default function Recordatorio() {
                   type="text"
                   placeholder="Buscar por cliente..."
                   style={{ ...inputStyle, paddingLeft: '44px' }}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <select style={inputStyle}>
-                <option>Todos os períodos</option>
-                <option>Última semana</option>
-                <option>Último mês</option>
-                <option>Últimos 3 meses</option>
+              <select 
+                style={inputStyle}
+                value={periodFilter}
+                onChange={(e) => setPeriodFilter(e.target.value)}
+              >
+                <option value="all">Todos os períodos</option>
+                <option value="week">Última semana</option>
+                <option value="month">Último mês</option>
+                <option value="3months">Últimos 3 meses</option>
               </select>
             </div>
 
             {/* Lista */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {recordatorios.map((record, index) => (
-                <div key={index} style={{
-                  background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                  border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
-                  borderRadius: '16px',
-                  padding: '24px',
-                  transition: 'all 0.3s ease',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}>
-                  {/* Content from RecordatorioCard - inline para evitar conflito */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', gap: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: record.avatarColor, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: '18px' }}>
-                        {record.clientInitials}
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
+                Carregando recordatórios...
+              </div>
+            ) : filteredRecordatorios.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
+                Nenhum recordatório encontrado
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {filteredRecordatorios.map((record) => (
+                  <div key={record.id} style={{
+                    background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                    border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
+                    borderRadius: '16px',
+                    padding: '24px',
+                    transition: 'all 0.3s ease',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', gap: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ 
+                          width: '48px', 
+                          height: '48px', 
+                          borderRadius: '50%', 
+                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          color: 'white', 
+                          fontWeight: 700, 
+                          fontSize: '18px' 
+                        }}>
+                          {record.patient_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <h3 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+                            {record.patient_name}
+                          </h3>
+                          <p style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
+                            {record.type === 'r24h' ? 'R24h - Recordatório 24 horas' : 'R3D - Recordatório 3 dias'}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
-                          {record.clientName}
-                        </h3>
-                        <p style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
-                          {record.clientPlan}
-                        </p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ padding: '8px 16px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', fontSize: '13px', fontWeight: 600 }}>
+                          {formatRecordDate(record.record_date)}
+                        </div>
+                        <button 
+                          onClick={() => handleDeleteRecordatorio(record.id, record.patient_name)}
+                          style={{ 
+                            width: '36px', 
+                            height: '36px', 
+                            borderRadius: '8px', 
+                            border: 'none', 
+                            background: 'rgba(239, 68, 68, 0.1)', 
+                            color: '#ef4444', 
+                            cursor: 'pointer', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          <Trash2 style={{ width: '18px', height: '18px' }} />
+                        </button>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', fontSize: '13px', fontWeight: 600 }}>
-                      {record.date}
+                    
+                    {/* Métricas */}
+                    <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '13px' }}>
+                      <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>
+                        <strong>{record.meals_count || 0}</strong> refeições registradas
+                      </span>
+                      {record.total_calories && (
+                        <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>
+                          <strong>{record.total_calories}</strong> kcal
+                        </span>
+                      )}
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </>
         )}
 
@@ -176,35 +364,59 @@ export default function Recordatorio() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
-                    Selecionar Paciente
+                    Selecionar Paciente *
                   </label>
-                  <select style={inputStyle}>
-                    <option>Escolha um paciente...</option>
-                    <option>Ana Carolina Lima</option>
-                    <option>Marcão da Massa</option>
-                    <option>Pamela Nascimento de Lima</option>
+                  <select 
+                    style={inputStyle}
+                    value={selectedPatientId}
+                    onChange={(e) => setSelectedPatientId(e.target.value)}
+                  >
+                    <option value="">Escolha um paciente...</option>
+                    {clients.map(client => (
+                      <option key={client.id} value={client.id}>{client.name}</option>
+                    ))}
                   </select>
                 </div>
 
                 <div>
                   <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
-                    Data do Recordatório
+                    Data do Recordatório *
                   </label>
-                  <input type="date" defaultValue="2025-10-05" style={inputStyle} />
+                  <input 
+                    type="date" 
+                    value={recordDate}
+                    onChange={(e) => setRecordDate(e.target.value)}
+                    max={new Date().toISOString().split('T')[0]}
+                    style={inputStyle} 
+                  />
                 </div>
 
                 <div>
                   <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
                     Peso Atual (kg)
                   </label>
-                  <input type="number" placeholder="Ex: 72.5" step="0.1" style={inputStyle} />
+                  <input 
+                    type="number" 
+                    placeholder="Ex: 72.5" 
+                    step="0.1" 
+                    value={weight}
+                    onChange={(e) => setWeight(e.target.value)}
+                    style={inputStyle} 
+                  />
                 </div>
 
                 <div>
                   <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
                     Hidratação (litros)
                   </label>
-                  <input type="number" placeholder="Ex: 2.5" step="0.1" style={inputStyle} />
+                  <input 
+                    type="number" 
+                    placeholder="Ex: 2.5" 
+                    step="0.1"
+                    value={hydration}
+                    onChange={(e) => setHydration(e.target.value)}
+                    style={inputStyle} 
+                  />
                 </div>
               </div>
             </div>
@@ -218,42 +430,58 @@ export default function Recordatorio() {
                 Refeições do Dia
               </h2>
 
-              {/* Café da Manhã */}
-              <div style={{ background: isDark ? 'rgba(20, 20, 20, 0.9)' : '#ffffff', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <div>
-                    <div style={{ fontSize: '16px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>
-                      ☀️ Café da Manhã
+              {meals.map((meal, index) => (
+                <div key={index} style={{ background: isDark ? 'rgba(20, 20, 20, 0.9)' : '#ffffff', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                    <div>
+                      <div style={{ fontSize: '16px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>
+                        {getMealTypeEmoji(meal.meal_type)} {getMealTypeLabel(meal.meal_type)}
+                      </div>
+                      <input 
+                        type="time" 
+                        value={meal.time}
+                        onChange={(e) => handleUpdateMeal(index, 'time', e.target.value)}
+                        style={{ ...inputStyle, width: '120px', marginTop: '8px' }} 
+                      />
                     </div>
-                    <input type="time" defaultValue="07:00" style={{ ...inputStyle, width: '120px', marginTop: '8px' }} />
+                    <button 
+                      onClick={() => handleRemoveMeal(index)}
+                      style={{ width: '32px', height: '32px', borderRadius: '8px', border: 'none', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >
+                      <Trash2 style={{ width: '18px', height: '18px' }} />
+                    </button>
                   </div>
-                  <button style={{ width: '32px', height: '32px', borderRadius: '8px', border: 'none', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Trash2 style={{ width: '18px', height: '18px' }} />
-                  </button>
+
+                  <div style={{ marginBottom: '12px' }}>
+                    <select 
+                      style={inputStyle}
+                      value={meal.meal_type}
+                      onChange={(e) => handleUpdateMeal(index, 'meal_type', e.target.value)}
+                    >
+                      <option value="breakfast">Café da Manhã</option>
+                      <option value="morning_snack">Lanche da Manhã</option>
+                      <option value="lunch">Almoço</option>
+                      <option value="afternoon_snack">Lanche da Tarde</option>
+                      <option value="dinner">Jantar</option>
+                      <option value="supper">Ceia</option>
+                      <option value="other">Outro</option>
+                    </select>
+                  </div>
+
+                  <textarea
+                    placeholder="Liste os alimentos consumidos, com quantidades (ex: Pão integral 2 fatias, Queijo branco 30g, Café com leite 200ml)"
+                    value={meal.foods}
+                    onChange={(e) => handleUpdateMeal(index, 'foods', e.target.value)}
+                    rows={3}
+                    style={{ ...inputStyle, resize: 'vertical', minHeight: '80px' }}
+                  />
                 </div>
+              ))}
 
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '12px', alignItems: 'center', marginBottom: '16px' }}>
-                  <input type="text" placeholder="Alimento (ex: Pão integral)" style={inputStyle} />
-                  <input type="number" placeholder="Qtd" style={inputStyle} />
-                  <select style={inputStyle}>
-                    <option>Unidade</option>
-                    <option>g</option>
-                    <option>ml</option>
-                    <option>colher</option>
-                    <option>xícara</option>
-                  </select>
-                  <button style={{ width: '28px', height: '28px', borderRadius: '6px', border: 'none', background: 'transparent', color: isDark ? '#a3a3a3' : '#6b7280', cursor: 'pointer' }}>
-                    <Trash2 style={{ width: '16px', height: '16px' }} />
-                  </button>
-                </div>
-
-                <button style={{ padding: '8px 16px', borderRadius: '8px', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', background: 'transparent', color: isDark ? '#a3a3a3' : '#6b7280', fontWeight: 600, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Plus style={{ width: '16px', height: '16px' }} />
-                  Adicionar Alimento
-                </button>
-              </div>
-
-              <button style={{ width: '100%', padding: '12px', borderRadius: '12px', border: isDark ? '2px dashed rgba(64, 64, 64, 0.3)' : '2px dashed rgba(229, 231, 235, 0.8)', background: 'transparent', color: isDark ? '#a3a3a3' : '#6b7280', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <button 
+                onClick={handleAddMeal}
+                style={{ width: '100%', padding: '12px', borderRadius: '12px', border: isDark ? '2px dashed rgba(64, 64, 64, 0.3)' : '2px dashed rgba(229, 231, 235, 0.8)', background: 'transparent', color: isDark ? '#a3a3a3' : '#6b7280', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              >
                 <Plus style={{ width: '20px', height: '20px' }} />
                 Adicionar Nova Refeição
               </button>
@@ -271,17 +499,26 @@ export default function Recordatorio() {
               <textarea
                 placeholder="Adicione observações sobre sintomas, comportamento alimentar, contexto emocional, etc..."
                 rows={5}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
                 style={{ ...inputStyle, resize: 'vertical', minHeight: '100px' }}
               />
             </div>
 
             {/* Ações */}
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <button style={{ padding: '12px 24px', borderRadius: '12px', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', background: 'transparent', color: isDark ? '#a3a3a3' : '#6b7280', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>
+              <button 
+                onClick={() => setActiveTab('list')}
+                style={{ padding: '12px 24px', borderRadius: '12px', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', background: 'transparent', color: isDark ? '#a3a3a3' : '#6b7280', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}
+              >
                 Cancelar
               </button>
-              <button style={{ padding: '12px 24px', borderRadius: '12px', border: 'none', background: '#10b981', color: 'white', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                Salvar Recordatório
+              <button 
+                onClick={handleSaveRecordatorio}
+                disabled={loading}
+                style={{ padding: '12px 24px', borderRadius: '12px', border: 'none', background: loading ? '#6b7280' : '#10b981', color: 'white', fontWeight: 600, fontSize: '14px', cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: loading ? 0.6 : 1 }}
+              >
+                {loading ? 'Salvando...' : 'Salvar Recordatório'}
               </button>
             </div>
           </>

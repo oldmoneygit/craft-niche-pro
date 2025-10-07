@@ -12,7 +12,6 @@ import PlanosAlimentares from './pages/PlanosAlimentares';
 import Questionarios from './pages/Questionarios';
 import QuestionariosBuilder from './pages/QuestionariosBuilder';
 import Recordatorio from './pages/Recordatorio';
-import Recordatorios from './pages/Recordatorios';
 import { FeedbacksSemanais } from './pages/FeedbacksSemanais';
 import Servicos from './pages/Servicos';
 import { Mensagens } from './pages/Mensagens';
@@ -58,7 +57,6 @@ function App() {
             <Route path="/questionarios/novo" element={<QuestionariosBuilder />} />
             <Route path="/questionarios/:id/editar" element={<QuestionariosBuilder />} />
             <Route path="/recordatorio" element={<Recordatorio />} />
-            <Route path="/recordatorios" element={<Recordatorios />} />
             <Route path="/feedbacks" element={<FeedbacksSemanais />} />
             <Route path="/servicos" element={<Servicos />} />
             <Route path="/mensagens" element={<Mensagens />} />
