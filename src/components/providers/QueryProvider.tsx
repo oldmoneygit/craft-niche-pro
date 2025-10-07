@@ -8,7 +8,7 @@ const createQueryClient = () => {
       queries: {
         // Configurações padrão otimizadas
         staleTime: 5 * 60 * 1000, // 5 minutos
-        cacheTime: 30 * 60 * 1000, // 30 minutos
+        gcTime: 30 * 60 * 1000, // 30 minutos (renomeado de cacheTime)
         refetchOnWindowFocus: false,
         refetchOnMount: true,
         refetchOnReconnect: true,
@@ -25,33 +25,6 @@ const createQueryClient = () => {
       mutations: {
         retry: 1,
         retryDelay: 1000,
-      },
-    },
-    // Configurações de cache global
-    queryCache: {
-      // Log de queries para debugging
-      onSuccess: (data, query) => {
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`✅ Query success: ${query.queryKey.join('-')}`);
-        }
-      },
-      onError: (error, query) => {
-        if (process.env.NODE_ENV === 'development') {
-          console.error(`❌ Query error: ${query.queryKey.join('-')}`, error);
-        }
-      },
-    },
-    mutationCache: {
-      // Log de mutations para debugging
-      onSuccess: (data, variables, context, mutation) => {
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`✅ Mutation success: ${mutation.options.mutationKey?.join('-') || 'unknown'}`);
-        }
-      },
-      onError: (error, variables, context, mutation) => {
-        if (process.env.NODE_ENV === 'development') {
-          console.error(`❌ Mutation error: ${mutation.options.mutationKey?.join('-') || 'unknown'}`, error);
-        }
       },
     },
   });
@@ -113,53 +86,6 @@ export const CacheUtils = {
     queryClient.invalidateQueries({ queryKey: ['appointments', tenantId] });
   },
 
-  // Prefetch questionários populares
-  prefetchPopularQuestionnaires: async (tenantId: string) => {
-    try {
-      // Buscar questionários mais acessados
-      const { data } = await queryClient.fetchQuery({
-        queryKey: ['questionnaires-list', tenantId],
-        queryFn: async () => {
-          // Implementar lógica de prefetch baseada em popularidade
-          return [];
-        },
-        staleTime: 5 * 60 * 1000,
-      });
-
-      // Prefetch detalhes dos questionários populares
-      if (data && data.length > 0) {
-        const popularIds = data.slice(0, 5).map((q: any) => q.id);
-        
-        await Promise.all(
-          popularIds.map((id: string) =>
-            queryClient.prefetchQuery({
-              queryKey: ['questionnaire-details', id],
-              queryFn: async () => {
-                // Implementar fetch de detalhes
-                return null;
-              },
-              staleTime: 10 * 60 * 1000,
-            })
-          )
-        );
-      }
-    } catch (error) {
-      console.warn('Prefetch failed:', error);
-    }
-  },
-
-  // Limpar cache de dados antigos
-  clearOldCache: () => {
-    // Remove queries que não foram usadas há mais de 1 hora
-    queryClient.removeQueries({
-      predicate: (query) => {
-        const lastUpdated = query.state.dataUpdatedAt;
-        const oneHourAgo = Date.now() - 60 * 60 * 1000;
-        return lastUpdated < oneHourAgo;
-      },
-    });
-  },
-
   // Obter estatísticas do cache
   getCacheStats: () => {
     const cache = queryClient.getQueryCache();
@@ -169,29 +95,7 @@ export const CacheUtils = {
       totalQueries: queries.length,
       activeQueries: queries.filter(q => q.state.status === 'pending').length,
       staleQueries: queries.filter(q => q.state.isStale).length,
-      cacheSize: JSON.stringify(cache).length,
+      cacheSize: queries.length, // Simplificado
     };
   },
 };
-
-// Configurar limpeza automática de cache
-if (typeof window !== 'undefined') {
-  // Limpar cache antigo a cada 30 minutos
-  setInterval(() => {
-    CacheUtils.clearOldCache();
-  }, 30 * 60 * 1000);
-
-  // Limpar cache quando a página for fechada
-  window.addEventListener('beforeunload', () => {
-    // Salvar estado importante antes de fechar
-    const importantQueries = queryClient.getQueryCache()
-      .getAll()
-      .filter(q => {
-        const key = q.queryKey.join('-');
-        return key.includes('user-preferences') || key.includes('app-settings');
-      });
-
-    // Implementar salvamento se necessário
-    console.log('Saving important queries before unload:', importantQueries.length);
-  });
-}
