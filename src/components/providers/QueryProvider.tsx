@@ -1,6 +1,5 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 // Configurações otimizadas do React Query para KorLab Nutri
 const createQueryClient = () => {
@@ -71,20 +70,29 @@ export function QueryProvider({ children }: QueryProviderProps) {
       {children}
       {/* React Query DevTools apenas em desenvolvimento */}
       {process.env.NODE_ENV === 'development' && (
-        <ReactQueryDevtools 
-          initialIsOpen={false}
-          position="bottom-right"
-          toggleButtonProps={{
-            style: {
-              marginLeft: '5px',
-              transform: 'none',
-            },
-          }}
-        />
+        <React.Suspense fallback={null}>
+          <LazyReactQueryDevtools 
+            initialIsOpen={false}
+            position="bottom-right"
+            toggleButtonProps={{
+              style: {
+                marginLeft: '5px',
+                transform: 'none',
+              },
+            }}
+          />
+        </React.Suspense>
       )}
     </QueryClientProvider>
   );
 }
+
+// Lazy load DevTools para evitar problemas em produção
+const LazyReactQueryDevtools = React.lazy(() =>
+  import('@tanstack/react-query-devtools').then((d) => ({
+    default: d.ReactQueryDevtools,
+  }))
+);
 
 // Hook para acessar o QueryClient em qualquer lugar
 export { useQueryClient } from '@tanstack/react-query';
