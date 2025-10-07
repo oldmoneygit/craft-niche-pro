@@ -1,0 +1,217 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\PC\\Desktop\\KORLAB\\craft-niche-pro\\tests\\visual\\config\\playwright.config.cjs",
+    "rootDir": "C:/Users/PC/Desktop/KORLAB/craft-niche-pro/tests/visual/specs",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": "C:\\Users\\PC\\Desktop\\KORLAB\\craft-niche-pro\\tests\\visual\\config\\global-setup.cjs",
+    "globalTeardown": "C:\\Users\\PC\\Desktop\\KORLAB\\craft-niche-pro\\tests\\visual\\config\\global-teardown.cjs",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "../reports/visual"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "../reports/visual/results.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "../reports/visual/results.xml"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "C:/Users/PC/Desktop/KORLAB/craft-niche-pro/tests/visual/reports/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium-desktop",
+        "name": "chromium-desktop",
+        "testDir": "C:/Users/PC/Desktop/KORLAB/craft-niche-pro/tests/visual/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/PC/Desktop/KORLAB/craft-niche-pro/tests/visual/reports/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "firefox-desktop",
+        "name": "firefox-desktop",
+        "testDir": "C:/Users/PC/Desktop/KORLAB/craft-niche-pro/tests/visual/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/PC/Desktop/KORLAB/craft-niche-pro/tests/visual/reports/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "webkit-desktop",
+        "name": "webkit-desktop",
+        "testDir": "C:/Users/PC/Desktop/KORLAB/craft-niche-pro/tests/visual/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/PC/Desktop/KORLAB/craft-niche-pro/tests/visual/reports/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium-tablet",
+        "name": "chromium-tablet",
+        "testDir": "C:/Users/PC/Desktop/KORLAB/craft-niche-pro/tests/visual/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/PC/Desktop/KORLAB/craft-niche-pro/tests/visual/reports/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium-mobile",
+        "name": "chromium-mobile",
+        "testDir": "C:/Users/PC/Desktop/KORLAB/craft-niche-pro/tests/visual/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.0",
+    "workers": 16,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:8080",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "visual.spec.cjs",
+      "file": "visual.spec.cjs",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Testes Visuais - KorLab Nutri",
+          "file": "visual.spec.cjs",
+          "line": 37,
+          "column": 6,
+          "specs": [
+            {
+              "title": "deve fazer login e verificar tela inicial",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 11952,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "🙈 Ocultando elementos dinâmicos...\n"
+                        },
+                        {
+                          "text": "✅ Elementos dinâmicos ocultados\n"
+                        },
+                        {
+                          "text": "🔐 Testando login...\n"
+                        },
+                        {
+                          "text": "📍 URL atual: http://localhost:8080/login\n"
+                        },
+                        {
+                          "text": "⚠️ Erro no login: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[type=\"email\"], input[name=\"email\"], input[name=\"username\"]') to be visible\u001b[22m\n\n"
+                        },
+                        {
+                          "text": "ℹ️ Continuando com testes sem autenticação...\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-07T04:20:59.977Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8e7d348d2bbae87254cd-46f6f1209933b36838ff",
+              "file": "visual.spec.cjs",
+              "line": 48,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-10-07T04:20:55.412Z",
+    "duration": 16637.676,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

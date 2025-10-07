@@ -1,0 +1,18 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="16.637676">
+<testsuite name="visual.spec.cjs" timestamp="2025-10-07T04:20:59.276Z" hostname="chromium-desktop" tests="1" failures="0" skipped="0" time="11.952" errors="0">
+<testcase name="Testes Visuais - KorLab Nutri › deve fazer login e verificar tela inicial" classname="visual.spec.cjs" time="11.952">
+<system-out>
+<![CDATA[🙈 Ocultando elementos dinâmicos...
+✅ Elementos dinâmicos ocultados
+🔐 Testando login...
+📍 URL atual: http://localhost:8080/login
+⚠️ Erro no login: page.waitForSelector: Timeout 10000ms exceeded.
+Call log:
+[2m  - waiting for locator('input[type="email"], input[name="email"], input[name="username"]') to be visible[22m
+
+ℹ️ Continuando com testes sem autenticação...
+]]>
+</system-out>
+</testcase>
+</testsuite>
+</testsuites>
