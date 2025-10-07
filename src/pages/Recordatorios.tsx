@@ -33,8 +33,12 @@ export default function Recordatorios() {
   const { recordatorios, isLoading, createRecordatorio, deleteRecordatorio } = useRecordatorios();
   const { clients } = useClientsData();
 
+  // Safe defaults to prevent undefined errors
+  const safeRecordatorios = recordatorios || [];
+  const safeClients = clients || [];
+
   // Filter recordatorios
-  const filteredRecordatorios = recordatorios.filter(rec => {
+  const filteredRecordatorios = safeRecordatorios.filter(rec => {
     if (activeFilter === 'all') return true;
     if (activeFilter === 'pending') return rec.status === 'pending';
     if (activeFilter === 'analyzed') return rec.status === 'analyzed';
@@ -44,10 +48,10 @@ export default function Recordatorios() {
   });
 
   // Calculate stats
-  const totalRecordatorios = recordatorios.length;
-  const pendingCount = recordatorios.filter(r => r.status === 'pending').length;
-  const analyzedCount = recordatorios.filter(r => r.status === 'analyzed').length;
-  const avgCalories = recordatorios
+  const totalRecordatorios = safeRecordatorios.length;
+  const pendingCount = safeRecordatorios.filter(r => r.status === 'pending').length;
+  const analyzedCount = safeRecordatorios.filter(r => r.status === 'analyzed').length;
+  const avgCalories = safeRecordatorios
     .filter(r => r.total_calories)
     .reduce((sum, r) => sum + (r.total_calories || 0), 0) / (analyzedCount || 1);
 
@@ -93,7 +97,7 @@ export default function Recordatorios() {
       return;
     }
 
-    const selectedClient = clients.find(c => c.id === patientId);
+    const selectedClient = safeClients.find(c => c.id === patientId);
     if (!selectedClient) {
       console.log('❌ [handleSubmit] Cliente não encontrado');
       return;
@@ -137,7 +141,7 @@ export default function Recordatorios() {
     await deleteRecordatorio.mutateAsync(id);
   };
 
-  const selectedRecordatorio = recordatorios.find(r => r.id === selectedRecordatorioId);
+  const selectedRecordatorio = safeRecordatorios.find(r => r.id === selectedRecordatorioId);
 
   const mealTypeLabels: Record<string, string> = {
     breakfast: 'Café da Manhã',
@@ -264,7 +268,7 @@ export default function Recordatorios() {
                   <SelectValue placeholder="Selecione um paciente" />
                 </SelectTrigger>
                 <SelectContent>
-                  {clients.map(client => (
+                  {safeClients.map(client => (
                     <SelectItem key={client.id} value={client.id}>
                       {client.name}
                     </SelectItem>
