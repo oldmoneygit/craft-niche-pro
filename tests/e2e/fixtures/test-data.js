@@ -169,6 +169,101 @@ module.exports = {
     },
   },
 
+  // Dados de mensagens para testes
+  messages: {
+    validMessage: {
+      text: 'Olá! Como posso ajudá-lo hoje?',
+      type: 'text',
+    },
+    validTemplate: {
+      name: 'Lembrete de Consulta',
+      category: 'appointments',
+      content: 'Olá {client_name}! Lembramos que você tem uma consulta agendada para {appointment_date} às {appointment_time}.',
+      variables: ['client_name', 'appointment_date', 'appointment_time'],
+    },
+  },
+
+  // Dados de serviços para testes
+  services: {
+    validService: {
+      name: 'Plano Nutricional Completo',
+      description: 'Plano alimentar personalizado com acompanhamento',
+      price: 200.00,
+      duration_days: 30,
+      category: 'nutrition',
+      type: 'subscription',
+    },
+    validSubscription: {
+      start_date: '2024-01-15',
+      notes: 'Assinatura criada via teste E2E',
+    },
+  },
+
+  // Dados de financeiro para testes
+  finance: {
+    validRevenue: {
+      description: 'Consulta nutricional - João Silva',
+      amount: 150.00,
+      category: 'consultation',
+      payment_method: 'pix',
+      date: '2024-01-15',
+      notes: 'Pagamento via PIX',
+    },
+    validExpense: {
+      description: 'Compra de suplementos',
+      amount: 80.00,
+      category: 'supplies',
+      payment_method: 'credit_card',
+      date: '2024-01-15',
+      notes: 'Suplementos para cliente',
+    },
+  },
+
+  // Dados de recordatórios alimentares para testes
+  foodRecords: {
+    validMeal: {
+      name: 'Café da Manhã',
+      time: '08:00',
+      foods: [
+        { name: 'Pão integral', quantity: '2 fatias', calories: 140 },
+        { name: 'Ovos', quantity: '2 unidades', calories: 140 },
+        { name: 'Café', quantity: '1 xícara', calories: 5 },
+      ],
+    },
+  },
+
+  // Dados de lembretes para testes
+  reminders: {
+    validReminder: {
+      title: 'Lembrete de Hidratação',
+      description: 'Lembrar cliente de beber água',
+      type: 'water_intake',
+      frequency: 'daily',
+      time: '09:00',
+    },
+  },
+
+  // Dados de feedbacks para testes
+  feedbacks: {
+    validFeedback: {
+      rating: 5,
+      comment: 'Excelente atendimento!',
+      category: 'service_quality',
+      date: '2024-01-15',
+    },
+  },
+
+  // Dados de configurações para testes
+  settings: {
+    validProfile: {
+      name: 'Dr. Nutricionista',
+      email: 'nutricionista@example.com',
+      phone: '11999999999',
+      specialty: 'Nutrição Clínica',
+      crm: 'CRN123456',
+    },
+  },
+
   // URLs e seletores para testes
   selectors: {
     // Autenticação
@@ -193,7 +288,64 @@ module.exports = {
     questionnaireList: '[data-testid="questionnaire-list"]',
     addQuestionButton: '[data-testid="add-question-button"]',
     
+    // Agendamentos
+    appointmentForm: 'form[data-testid="appointment-form"]',
+    appointmentList: '[data-testid="appointment-list"]',
+    addAppointmentButton: '[data-testid="add-appointment-button"]',
+    calendarView: '[data-testid="calendar-view"]',
+    
+    // Leads
+    leadForm: 'form[data-testid="lead-form"]',
+    leadList: '[data-testid="lead-list"]',
+    addLeadButton: '[data-testid="add-lead-button"]',
+    convertLeadButton: '[data-testid="convert-lead-button"]',
+    
+    // Planos Alimentares
+    mealPlanForm: 'form[data-testid="meal-plan-form"]',
+    mealPlanList: '[data-testid="meal-plan-list"]',
+    addMealPlanButton: '[data-testid="add-meal-plan-button"]',
+    addMealButton: '[data-testid="add-meal-button"]',
+    
     // Mensagens
+    messageForm: 'form[data-testid="message-form"]',
+    messageList: '[data-testid="message-list"]',
+    sendMessageButton: '[data-testid="send-message-button"]',
+    templateForm: 'form[data-testid="template-form"]',
+    
+    // Serviços
+    serviceForm: 'form[data-testid="service-form"]',
+    serviceList: '[data-testid="service-list"]',
+    addServiceButton: '[data-testid="add-service-button"]',
+    subscriptionForm: 'form[data-testid="subscription-form"]',
+    
+    // Financeiro
+    revenueForm: 'form[data-testid="revenue-form"]',
+    expenseForm: 'form[data-testid="expense-form"]',
+    addRevenueButton: '[data-testid="add-revenue-button"]',
+    addExpenseButton: '[data-testid="add-expense-button"]',
+    financialDashboard: '[data-testid="financial-dashboard"]',
+    
+    // Recordatórios
+    foodRecordForm: 'form[data-testid="food-record-form"]',
+    foodRecordList: '[data-testid="food-record-list"]',
+    addMealButton: '[data-testid="add-meal-button"]',
+    
+    // Lembretes
+    reminderForm: 'form[data-testid="reminder-form"]',
+    reminderList: '[data-testid="reminder-list"]',
+    addReminderButton: '[data-testid="add-reminder-button"]',
+    
+    // Feedbacks
+    feedbackForm: 'form[data-testid="feedback-form"]',
+    feedbackList: '[data-testid="feedback-list"]',
+    submitFeedbackButton: '[data-testid="submit-feedback-button"]',
+    
+    // Configurações
+    settingsForm: 'form[data-testid="settings-form"]',
+    profileForm: 'form[data-testid="profile-form"]',
+    saveSettingsButton: '[data-testid="save-settings-button"]',
+    
+    // Mensagens gerais
     successMessage: '[data-testid="success-message"]',
     errorMessage: '[data-testid="error-message"]',
     loadingSpinner: '[data-testid="loading-spinner"]',

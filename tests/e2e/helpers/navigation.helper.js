@@ -105,7 +105,6 @@ class NavigationHelper {
     console.log('⏳ Aguardando carregamento da página...');
     
     try {
-      await this.page.waitForLoadState('networkidle');
       await this.page.waitForFunction(() => document.readyState === 'complete');
       
       console.log('✅ Página carregada completamente');
@@ -231,6 +230,70 @@ class NavigationHelper {
       console.error(`❌ Timeout aguardando API ${urlPattern}:`, error.message);
       throw error;
     }
+  }
+
+  /**
+   * Aguarda toast aparecer
+   */
+  async waitForToast(message, type = 'success') {
+    console.log(`🍞 Aguardando toast: ${message} (${type})`);
+    
+    try {
+      await this.page.waitForSelector(`[data-testid="toast-${type}"]`, {
+        timeout: this.config.app.timeouts.element,
+      });
+      
+      console.log(`✅ Toast ${type} encontrado`);
+      return true;
+    } catch (error) {
+      console.error(`❌ Toast ${type} não encontrado:`, error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Aguarda texto específico aparecer
+   */
+  async waitForText(text, selector = 'body') {
+    console.log(`📝 Aguardando texto: ${text}`);
+    
+    try {
+      await this.page.waitForSelector(selector, {
+        timeout: this.config.app.timeouts.element,
+      });
+      
+      await this.page.waitForFunction(
+        (text, selector) => {
+          const element = document.querySelector(selector);
+          return element && element.textContent.includes(text);
+        },
+        text,
+        selector,
+        { timeout: this.config.app.timeouts.element }
+      );
+      
+      console.log(`✅ Texto "${text}" encontrado`);
+      return true;
+    } catch (error) {
+      console.error(`❌ Texto "${text}" não encontrado:`, error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Verifica URL atual
+   */
+  async expectUrl(expectedPath) {
+    const currentUrl = this.page.url();
+    const baseUrl = this.baseURL;
+    const expectedUrl = expectedPath.startsWith('http') ? expectedPath : `${baseUrl}${expectedPath}`;
+    
+    if (!currentUrl.includes(expectedPath)) {
+      throw new Error(`URL esperada: ${expectedUrl}, URL atual: ${currentUrl}`);
+    }
+    
+    console.log(`✅ URL verificada: ${currentUrl}`);
+    return true;
   }
 }
 
