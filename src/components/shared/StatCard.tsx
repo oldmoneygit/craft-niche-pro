@@ -57,12 +57,12 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, variant 
     <div
       style={{
         background: isDark 
-          ? 'rgba(255, 255, 255, 0.1)' 
+          ? 'rgba(38, 38, 38, 0.95)' 
           : 'rgba(255, 255, 255, 0.9)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         border: isDark 
-          ? '1px solid rgba(255, 255, 255, 0.2)' 
+          ? '1px solid rgba(64, 64, 64, 0.3)' 
           : '1px solid rgba(229, 231, 235, 0.8)',
         borderRadius: '16px',
         padding: '24px',
@@ -74,7 +74,7 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, variant 
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-4px)';
         e.currentTarget.style.boxShadow = isDark 
-          ? '0 8px 24px rgba(255, 255, 255, 0.1)' 
+          ? '0 8px 24px rgba(0, 0, 0, 0.4)' 
           : '0 8px 24px rgba(0, 0, 0, 0.1)';
         const border = e.currentTarget.querySelector('.stat-border') as HTMLElement;
         if (border) border.style.width = '4px';

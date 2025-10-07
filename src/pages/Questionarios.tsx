@@ -171,7 +171,12 @@ export default function Questionarios() {
   };
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-black">
+    <div 
+      className="min-h-screen p-6"
+      style={{
+        background: 'var(--bg-body)'
+      }}
+    >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
