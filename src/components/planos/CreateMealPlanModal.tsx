@@ -426,7 +426,14 @@ export function CreateMealPlanModal({ open, onOpenChange, editPlanId }: CreateMe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-gray-900/95 backdrop-blur-xl border border-gray-700 shadow-2xl">
+      <DialogContent 
+        className="max-w-3xl max-h-[90vh] overflow-y-auto border border-gray-700 shadow-2xl"
+        style={{
+          background: 'rgba(38, 38, 38, 0.95)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)'
+        }}
+      >
         <DialogHeader>
           <div className="flex items-center justify-between mb-4">
             <DialogTitle className="text-2xl font-bold flex items-center gap-2 text-white">
