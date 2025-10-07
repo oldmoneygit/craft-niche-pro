@@ -32,7 +32,7 @@ export function DashboardStatCard({
     <div
       className="relative overflow-hidden rounded-[20px] p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
       style={{
-        background: 'var(--bg-card)',
+        background: 'var(--bg-sidebar)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         border: '1px solid var(--border)',

@@ -28,10 +28,12 @@ export function StatCard({ variant, label, value, change, icon: Icon }: StatCard
     <div
       className="group relative overflow-hidden rounded-xl p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
       style={{
-        backgroundColor: 'var(--hub-bg-secondary)',
+        backgroundColor: 'var(--bg-sidebar)',
         borderWidth: '1px',
         borderStyle: 'solid',
-        borderColor: 'var(--hub-border-primary)',
+        borderColor: 'var(--border)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
       }}
     >
       <div

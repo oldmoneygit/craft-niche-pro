@@ -21,7 +21,7 @@ export function StatCardClientes({ title, value, icon: Icon, variant }: StatCard
     <div 
       className="p-6 rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg flex items-center justify-between"
       style={{
-        background: 'var(--bg-card)',
+        background: 'var(--bg-sidebar)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         borderColor: 'var(--border)',

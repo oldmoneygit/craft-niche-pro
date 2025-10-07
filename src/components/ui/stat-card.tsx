@@ -46,12 +46,31 @@ export function StatCard({
   const variantClasses = getVariantClasses();
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border-2 border-gray-100">
+    <div 
+      className="rounded-2xl p-6 shadow-sm border-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+      style={{
+        background: 'var(--bg-sidebar)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        borderColor: 'var(--border)',
+        boxShadow: '0 4px 16px var(--shadow)'
+      }}
+    >
       <div className={`w-12 h-12 ${variantClasses.iconBg} rounded-xl flex items-center justify-center mb-4`}>
         <Icon className={`w-6 h-6 ${variantClasses.iconColor}`} />
       </div>
-      <div className="text-4xl font-bold text-gray-900 mb-1">{value}</div>
-      <div className="text-sm text-gray-600 font-medium">{label}</div>
+      <div 
+        className="text-4xl font-bold mb-1"
+        style={{ color: 'var(--text-primary)' }}
+      >
+        {value}
+      </div>
+      <div 
+        className="text-sm font-medium"
+        style={{ color: 'var(--text-secondary)' }}
+      >
+        {label}
+      </div>
     </div>
   );
 }
