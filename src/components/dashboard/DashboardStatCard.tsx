@@ -20,10 +20,10 @@ export function DashboardStatCard({
   onClick
 }: DashboardStatCardProps) {
   const variantColors = {
-    today: '#3b82f6',
-    month: '#10b981',
-    pending: '#f59e0b',
-    inactive: '#ef4444'
+    today: 'var(--secondary)',
+    month: 'var(--primary)',
+    pending: 'var(--warning)',
+    inactive: 'var(--destructive)'
   };
 
   const accentColor = variantColors[variant];
@@ -91,11 +91,11 @@ export function DashboardStatCard({
         <div
           className="text-[13px] font-semibold flex items-center gap-1"
           style={{
-            color: trend === 'positive' ? '#10b981' :
-                   trend === 'negative' ? '#ef4444' :
+            color: trend === 'positive' ? 'var(--primary)' :
+                   trend === 'negative' ? 'var(--destructive)' :
                    variant === 'today' ? accentColor :
                    variant === 'pending' ? accentColor :
-                   '#ffffff'
+                   'var(--bg-white)'
           }}
         >
           {trend === 'positive' && (

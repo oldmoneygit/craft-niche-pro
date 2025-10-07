@@ -10,7 +10,7 @@ interface PlatformFiltersProps {
 }
 
 const VERTICALS = [
-  { value: 'nutrition' as VerticalType, label: 'Nutrição', color: '#10b981', icon: Apple },
+  { value: 'nutrition' as VerticalType, label: 'Nutrição', color: 'var(--primary)', icon: Apple },
   { value: 'fitness' as VerticalType, label: 'Fitness', color: '#f97316', icon: Dumbbell },
   { value: 'wellness' as VerticalType, label: 'Wellness', color: '#06b6d4', icon: Heart },
   { value: 'mental' as VerticalType, label: 'Mental', color: '#a855f7', icon: Brain }
@@ -61,9 +61,9 @@ export function PlatformFilters({
         size="sm"
         onClick={() => onStatusChange(selectedStatus === 'active' ? null : 'active')}
         style={{
-          borderColor: selectedStatus === 'active' ? '#10b981' : undefined,
-          backgroundColor: selectedStatus === 'active' ? '#10b98120' : undefined,
-          color: selectedStatus === 'active' ? '#10b981' : undefined
+          borderColor: selectedStatus === 'active' ? 'var(--primary)' : undefined,
+          backgroundColor: selectedStatus === 'active' ? 'var(--primary)20' : undefined,
+          color: selectedStatus === 'active' ? 'var(--primary)' : undefined
         }}
       >
         <CheckCircle className="w-4 h-4 mr-2" />
@@ -75,9 +75,9 @@ export function PlatformFilters({
         size="sm"
         onClick={() => onStatusChange(selectedStatus === 'maintenance' ? null : 'maintenance')}
         style={{
-          borderColor: selectedStatus === 'maintenance' ? '#f59e0b' : undefined,
-          backgroundColor: selectedStatus === 'maintenance' ? '#f59e0b20' : undefined,
-          color: selectedStatus === 'maintenance' ? '#f59e0b' : undefined
+          borderColor: selectedStatus === 'maintenance' ? 'var(--warning)' : undefined,
+          backgroundColor: selectedStatus === 'maintenance' ? 'var(--warning)20' : undefined,
+          color: selectedStatus === 'maintenance' ? 'var(--warning)' : undefined
         }}
       >
         <AlertCircle className="w-4 h-4 mr-2" />

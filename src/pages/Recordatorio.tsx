@@ -227,8 +227,8 @@ export default function Recordatorio() {
     padding: '12px 24px',
     borderRadius: '8px',
     border: 'none',
-    background: isActive ? '#10b981' : 'transparent',
-    color: isActive ? 'white' : (isDark ? '#a3a3a3' : '#6b7280'),
+    background: isActive ? 'var(--primary)' : 'transparent',
+    color: isActive ? 'white' : (isDark ? 'var(--text-tertiary)' : 'var(--text-secondary)'),
     fontWeight: 600,
     fontSize: '14px',
     cursor: 'pointer',
@@ -244,9 +244,9 @@ export default function Recordatorio() {
     padding: '12px 16px',
     borderRadius: '12px',
     border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
-    background: isDark ? 'rgba(20, 20, 20, 0.9)' : '#ffffff',
+    background: isDark ? 'rgba(20, 20, 20, 0.9)' : 'var(--bg-white)',
     backdropFilter: 'blur(10px)',
-    color: isDark ? '#ffffff' : '#111827',
+    color: 'var(--text-primary)',
     fontSize: '14px',
     transition: 'all 0.3s ease'
   };
@@ -282,7 +282,7 @@ export default function Recordatorio() {
             {/* Filters */}
             <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
               <div style={{ flex: 1, minWidth: '300px', position: 'relative' }}>
-                <Search style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', width: '20px', height: '20px', color: isDark ? '#a3a3a3' : '#6b7280' }} />
+                <Search style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', width: '20px', height: '20px', color: 'var(--text-secondary)' }} />
                 <input
                   type="text"
                   placeholder="Buscar por cliente..."
@@ -305,11 +305,11 @@ export default function Recordatorio() {
 
             {/* Lista */}
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '40px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
+              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
                 Carregando recordatórios...
               </div>
             ) : filteredRecordatorios.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
+              <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
                 Nenhum recordatório encontrado
               </div>
             ) : (
@@ -332,7 +332,7 @@ export default function Recordatorio() {
                           width: '48px', 
                           height: '48px', 
                           borderRadius: '50%', 
-                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+                          background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)', 
                           display: 'flex', 
                           alignItems: 'center', 
                           justifyContent: 'center', 
@@ -343,16 +343,16 @@ export default function Recordatorio() {
                           {record.patient_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <h3 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+                          <h3 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '4px' }}>
                             {record.patient_name}
                           </h3>
-                          <p style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
+                          <p style={{ fontSize: '13px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)' }}>
                             {record.type === 'r24h' ? 'R24h - Recordatório 24 horas' : 'R3D - Recordatório 3 dias'}
                           </p>
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ padding: '8px 16px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', fontSize: '13px', fontWeight: 600 }}>
+                        <div style={{ padding: '8px 16px', borderRadius: '8px', background: 'rgba(37, 99, 235, 0.1)', color: 'var(--secondary)', fontSize: '13px', fontWeight: 600 }}>
                           {formatRecordDate(record.record_date)}
                         </div>
                         <button 
@@ -363,8 +363,8 @@ export default function Recordatorio() {
                             height: '36px', 
                             borderRadius: '8px', 
                             border: 'none', 
-                            background: 'rgba(16, 185, 129, 0.1)', 
-                            color: '#10b981', 
+                            background: 'var(--primary-alpha)', 
+                            color: 'var(--primary)', 
                             cursor: 'pointer', 
                             display: 'flex', 
                             alignItems: 'center', 
@@ -382,8 +382,8 @@ export default function Recordatorio() {
                             height: '36px', 
                             borderRadius: '8px', 
                             border: 'none', 
-                            background: 'rgba(59, 130, 246, 0.1)', 
-                            color: '#3b82f6', 
+                            background: 'var(--secondary-alpha)', 
+                            color: 'var(--secondary)', 
                             cursor: 'pointer', 
                             display: 'flex', 
                             alignItems: 'center', 
@@ -401,8 +401,8 @@ export default function Recordatorio() {
                             height: '36px', 
                             borderRadius: '8px', 
                             border: 'none', 
-                            background: 'rgba(239, 68, 68, 0.1)', 
-                            color: '#ef4444', 
+                            background: 'var(--error-alpha)', 
+                            color: 'var(--destructive)', 
                             cursor: 'pointer', 
                             display: 'flex', 
                             alignItems: 'center', 
@@ -417,11 +417,11 @@ export default function Recordatorio() {
                     
                     {/* Métricas */}
                     <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '13px' }}>
-                      <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>
+                      <span style={{ color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)' }}>
                         <strong>{record.meals_count || 0}</strong> refeições registradas
                       </span>
                       {record.total_calories && (
-                        <span style={{ color: isDark ? '#a3a3a3' : '#6b7280' }}>
+                        <span style={{ color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)' }}>
                           <strong>{record.total_calories}</strong> kcal
                         </span>
                       )}
@@ -438,16 +438,16 @@ export default function Recordatorio() {
           <>
             {/* Informações do Paciente */}
             <div style={{ background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <User style={{ width: '18px', height: '18px', color: '#10b981' }} />
+              <h2 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--primary-alpha)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <User style={{ width: '18px', height: '18px', color: 'var(--primary)' }} />
                 </div>
                 Informações do Paciente
               </h2>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
                     Selecionar Paciente *
                   </label>
                   <select 
@@ -463,7 +463,7 @@ export default function Recordatorio() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
                     Data do Recordatório *
                   </label>
                   <input 
@@ -476,7 +476,7 @@ export default function Recordatorio() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
                     Peso Atual (kg)
                   </label>
                   <input 
@@ -490,7 +490,7 @@ export default function Recordatorio() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
                     Hidratação (litros)
                   </label>
                   <input 
@@ -507,18 +507,18 @@ export default function Recordatorio() {
 
             {/* Refeições */}
             <div style={{ background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Clock style={{ width: '18px', height: '18px', color: '#10b981' }} />
+              <h2 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--primary-alpha)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Clock style={{ width: '18px', height: '18px', color: 'var(--primary)' }} />
                 </div>
                 Refeições do Dia
               </h2>
 
               {meals.map((meal, index) => (
-                <div key={index} style={{ background: isDark ? 'rgba(20, 20, 20, 0.9)' : '#ffffff', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
+                <div key={index} style={{ background: isDark ? 'rgba(20, 20, 20, 0.9)' : 'var(--bg-white)', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <div>
-                      <div style={{ fontSize: '16px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>
+                      <div style={{ fontSize: '16px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827' }}>
                         {getMealTypeEmoji(meal.meal_type)} {getMealTypeLabel(meal.meal_type)}
                       </div>
                       <input 
@@ -530,7 +530,7 @@ export default function Recordatorio() {
                     </div>
                     <button 
                       onClick={() => handleRemoveMeal(index)}
-                      style={{ width: '32px', height: '32px', borderRadius: '8px', border: 'none', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      style={{ width: '32px', height: '32px', borderRadius: '8px', border: 'none', background: 'var(--error-alpha)', color: 'var(--destructive)', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
                       <Trash2 style={{ width: '18px', height: '18px' }} />
                     </button>
@@ -564,7 +564,7 @@ export default function Recordatorio() {
 
               <button 
                 onClick={handleAddMeal}
-                style={{ width: '100%', padding: '12px', borderRadius: '12px', border: isDark ? '2px dashed rgba(64, 64, 64, 0.3)' : '2px dashed rgba(229, 231, 235, 0.8)', background: 'transparent', color: isDark ? '#a3a3a3' : '#6b7280', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                style={{ width: '100%', padding: '12px', borderRadius: '12px', border: isDark ? '2px dashed rgba(64, 64, 64, 0.3)' : '2px dashed rgba(229, 231, 235, 0.8)', background: 'transparent', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
               >
                 <Plus style={{ width: '20px', height: '20px' }} />
                 Adicionar Nova Refeição
@@ -573,9 +573,9 @@ export default function Recordatorio() {
 
             {/* Observações */}
             <div style={{ background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Edit style={{ width: '18px', height: '18px', color: '#10b981' }} />
+              <h2 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--primary-alpha)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Edit style={{ width: '18px', height: '18px', color: 'var(--primary)' }} />
                 </div>
                 Observações e Notas
               </h2>
@@ -593,14 +593,14 @@ export default function Recordatorio() {
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
               <button 
                 onClick={() => setActiveTab('list')}
-                style={{ padding: '12px 24px', borderRadius: '12px', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', background: 'transparent', color: isDark ? '#a3a3a3' : '#6b7280', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}
+                style={{ padding: '12px 24px', borderRadius: '12px', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', background: 'transparent', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}
               >
                 Cancelar
               </button>
               <button 
                 onClick={handleSaveRecordatorio}
                 disabled={loading}
-                style={{ padding: '12px 24px', borderRadius: '12px', border: 'none', background: loading ? '#6b7280' : '#10b981', color: 'white', fontWeight: 600, fontSize: '14px', cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: loading ? 0.6 : 1 }}
+                style={{ padding: '12px 24px', borderRadius: '12px', border: 'none', background: loading ? 'var(--text-secondary)' : 'var(--primary)', color: 'white', fontWeight: 600, fontSize: '14px', cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: loading ? 0.6 : 1 }}
               >
                 {loading ? 'Salvando...' : 'Salvar Recordatório'}
               </button>
@@ -621,7 +621,7 @@ export default function Recordatorio() {
                   borderRadius: '10px',
                   border: 'none',
                   background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)',
-                  color: isDark ? '#ffffff' : '#111827',
+                  color: 'var(--text-primary)',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -651,10 +651,10 @@ export default function Recordatorio() {
                 padding: '20px',
                 textAlign: 'center'
               }}>
-                <div style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '8px' }}>
+                <div style={{ fontSize: '13px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', marginBottom: '8px' }}>
                   Status
                 </div>
-                <div style={{ fontSize: '18px', fontWeight: 700, color: viewingRecordatorio.status === 'analyzed' ? '#10b981' : '#f59e0b' }}>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: viewingRecordatorio.status === 'analyzed' ? 'var(--primary)' : 'var(--warning)' }}>
                   {viewingRecordatorio.status === 'analyzed' ? '✅ Analisado' : '⏳ Pendente'}
                 </div>
               </div>
@@ -667,7 +667,7 @@ export default function Recordatorio() {
                 padding: '20px',
                 textAlign: 'center'
               }}>
-                <div style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '8px' }}>
+                <div style={{ fontSize: '13px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', marginBottom: '8px' }}>
                   Refeições
                 </div>
                 <div style={{ fontSize: '24px', fontWeight: 700 }}>
@@ -684,10 +684,10 @@ export default function Recordatorio() {
                   padding: '20px',
                   textAlign: 'center'
                 }}>
-                  <div style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '8px' }}>
+                  <div style={{ fontSize: '13px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', marginBottom: '8px' }}>
                     Calorias Totais
                   </div>
-                  <div style={{ fontSize: '24px', fontWeight: 700, color: '#3b82f6' }}>
+                  <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--secondary)' }}>
                     {viewingRecordatorio.total_calories} kcal
                   </div>
                 </div>
@@ -709,35 +709,35 @@ export default function Recordatorio() {
                 </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
                   <div>
-                    <div style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '4px' }}>
+                    <div style={{ fontSize: '13px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', marginBottom: '4px' }}>
                       Proteínas
                     </div>
-                    <div style={{ fontSize: '20px', fontWeight: 700, color: '#ef4444' }}>
+                    <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--destructive)' }}>
                       {viewingRecordatorio.total_protein?.toFixed(1)}g
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '4px' }}>
+                    <div style={{ fontSize: '13px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', marginBottom: '4px' }}>
                       Carboidratos
                     </div>
-                    <div style={{ fontSize: '20px', fontWeight: 700, color: '#3b82f6' }}>
+                    <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--secondary)' }}>
                       {viewingRecordatorio.total_carbs?.toFixed(1)}g
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '4px' }}>
+                    <div style={{ fontSize: '13px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', marginBottom: '4px' }}>
                       Gorduras
                     </div>
-                    <div style={{ fontSize: '20px', fontWeight: 700, color: '#f59e0b' }}>
+                    <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--warning)' }}>
                       {viewingRecordatorio.total_fat?.toFixed(1)}g
                     </div>
                   </div>
                   {viewingRecordatorio.total_fiber && (
                     <div>
-                      <div style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '4px' }}>
+                      <div style={{ fontSize: '13px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', marginBottom: '4px' }}>
                         Fibras
                       </div>
-                      <div style={{ fontSize: '20px', fontWeight: 700, color: '#10b981' }}>
+                      <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--primary)' }}>
                         {viewingRecordatorio.total_fiber?.toFixed(1)}g
                       </div>
                     </div>
@@ -763,8 +763,8 @@ export default function Recordatorio() {
                 alignItems: 'center',
                 gap: '10px'
               }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Utensils style={{ width: '18px', height: '18px', color: '#10b981' }} />
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--primary-alpha)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Utensils style={{ width: '18px', height: '18px', color: 'var(--primary)' }} />
                 </div>
                 Refeições Registradas
               </h3>
@@ -773,7 +773,7 @@ export default function Recordatorio() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {viewingRecordatorio.meals.map((meal, index) => (
                     <div key={meal.id || index} style={{
-                      background: isDark ? 'rgba(20, 20, 20, 0.9)' : '#ffffff',
+                      background: isDark ? 'rgba(20, 20, 20, 0.9)' : 'var(--bg-white)',
                       border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
                       borderRadius: '12px',
                       padding: '20px'
@@ -791,8 +791,8 @@ export default function Recordatorio() {
                           <div style={{ 
                             padding: '4px 12px', 
                             borderRadius: '6px', 
-                            background: 'rgba(59, 130, 246, 0.1)', 
-                            color: '#3b82f6', 
+                            background: 'var(--secondary-alpha)', 
+                            color: 'var(--secondary)', 
                             fontSize: '13px',
                             fontWeight: 600
                           }}>
@@ -820,7 +820,7 @@ export default function Recordatorio() {
                           gap: '16px',
                           flexWrap: 'wrap',
                           fontSize: '13px',
-                          color: isDark ? '#a3a3a3' : '#6b7280'
+                          color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)'
                         }}>
                           <span><strong>{meal.calories}</strong> kcal</span>
                           {meal.protein && <span>P: <strong>{meal.protein.toFixed(1)}</strong>g</span>}
@@ -832,7 +832,7 @@ export default function Recordatorio() {
                   ))}
                 </div>
               ) : (
-                <div style={{ textAlign: 'center', padding: '40px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
+                <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
                   Nenhuma refeição registrada
                 </div>
               )}
@@ -870,8 +870,8 @@ export default function Recordatorio() {
                   padding: '12px 24px', 
                   borderRadius: '12px', 
                   border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', 
-                  background: 'rgba(59, 130, 246, 0.1)', 
-                  color: '#3b82f6', 
+                  background: 'var(--secondary-alpha)', 
+                  color: 'var(--secondary)', 
                   fontWeight: 600, 
                   fontSize: '14px', 
                   cursor: 'pointer',
@@ -889,8 +889,8 @@ export default function Recordatorio() {
                   padding: '12px 24px', 
                   borderRadius: '12px', 
                   border: 'none', 
-                  background: 'rgba(239, 68, 68, 0.1)', 
-                  color: '#ef4444', 
+                  background: 'var(--error-alpha)', 
+                  color: 'var(--destructive)', 
                   fontWeight: 600, 
                   fontSize: '14px', 
                   cursor: 'pointer',
@@ -908,7 +908,7 @@ export default function Recordatorio() {
                   padding: '12px 24px', 
                   borderRadius: '12px', 
                   border: 'none', 
-                  background: '#10b981', 
+                  background: 'var(--primary)', 
                   color: 'white', 
                   fontWeight: 600, 
                   fontSize: '14px', 
@@ -935,7 +935,7 @@ export default function Recordatorio() {
                   borderRadius: '8px',
                   border: 'none',
                   background: 'transparent',
-                  color: isDark ? '#ffffff' : '#111827',
+                  color: 'var(--text-primary)',
                   fontWeight: 600,
                   fontSize: '14px',
                   cursor: 'pointer'
@@ -948,16 +948,16 @@ export default function Recordatorio() {
 
             {/* Informações do Paciente */}
             <div style={{ background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <User style={{ width: '18px', height: '18px', color: '#10b981' }} />
+              <h2 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--primary-alpha)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <User style={{ width: '18px', height: '18px', color: 'var(--primary)' }} />
                 </div>
                 Informações do Paciente
               </h2>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
                     Paciente
                   </label>
                   <input 
@@ -969,7 +969,7 @@ export default function Recordatorio() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
                     Data do Recordatório *
                   </label>
                   <input 
@@ -982,7 +982,7 @@ export default function Recordatorio() {
               </div>
 
               <div style={{ marginTop: '16px' }}>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
                   Observações
                 </label>
                 <textarea 
@@ -997,15 +997,15 @@ export default function Recordatorio() {
             {/* Refeições */}
             <div style={{ background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '16px', padding: '32px', marginBottom: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <h2 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Clock style={{ width: '18px', height: '18px', color: '#10b981' }} />
+                <h2 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--primary-alpha)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Clock style={{ width: '18px', height: '18px', color: 'var(--primary)' }} />
                   </div>
                   Refeições
                 </h2>
                 <button 
                   onClick={handleAddMeal}
-                  style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', fontWeight: 600, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                  style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)', color: 'white', fontWeight: 600, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
                   <Plus style={{ width: '16px', height: '16px' }} />
                   Adicionar Refeição
@@ -1014,15 +1014,15 @@ export default function Recordatorio() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {meals.map((meal, index) => (
-                  <div key={index} style={{ background: isDark ? 'rgba(20, 20, 20, 0.9)' : '#ffffff', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '12px', padding: '20px' }}>
+                  <div key={index} style={{ background: isDark ? 'rgba(20, 20, 20, 0.9)' : 'var(--bg-white)', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '12px', padding: '20px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                      <span style={{ fontSize: '16px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>
+                      <span style={{ fontSize: '16px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827' }}>
                         Refeição {index + 1}
                       </span>
                       {meals.length > 1 && (
                         <button 
                           onClick={() => handleRemoveMeal(index)}
-                          style={{ width: '28px', height: '28px', borderRadius: '6px', border: 'none', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          style={{ width: '28px', height: '28px', borderRadius: '6px', border: 'none', background: 'var(--error-alpha)', color: 'var(--destructive)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         >
                           <Trash2 style={{ width: '14px', height: '14px' }} />
                         </button>
@@ -1031,7 +1031,7 @@ export default function Recordatorio() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
                       <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '6px' }}>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '6px' }}>
                           Tipo de Refeição
                         </label>
                         <select 
@@ -1050,7 +1050,7 @@ export default function Recordatorio() {
                       </div>
 
                       <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '6px' }}>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '6px' }}>
                           Horário
                         </label>
                         <input 
@@ -1063,7 +1063,7 @@ export default function Recordatorio() {
                     </div>
 
                     <div style={{ marginTop: '12px' }}>
-                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '6px' }}>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '6px' }}>
                         Alimentos Consumidos *
                       </label>
                       <textarea 
@@ -1082,7 +1082,7 @@ export default function Recordatorio() {
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
               <button 
                 onClick={() => setActiveTab('view')}
-                style={{ padding: '14px 28px', borderRadius: '12px', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', background: 'transparent', color: isDark ? '#ffffff' : '#111827', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}
+                style={{ padding: '14px 28px', borderRadius: '12px', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', background: 'transparent', color: isDark ? 'var(--bg-white)' : '#111827', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}
               >
                 Cancelar
               </button>
@@ -1095,7 +1095,7 @@ export default function Recordatorio() {
                   });
                   setActiveTab('view');
                 }}
-                style={{ padding: '14px 28px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}
+                style={{ padding: '14px 28px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)', color: 'white', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}
               >
                 Salvar Alterações
               </button>
@@ -1125,7 +1125,7 @@ export default function Recordatorio() {
               <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>
                 Confirmar Exclusão
               </h3>
-              <p style={{ fontSize: '14px', color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '24px' }}>
+              <p style={{ fontSize: '14px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', marginBottom: '24px' }}>
                 Tem certeza que deseja excluir este recordatório? Esta ação não pode ser desfeita.
               </p>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
@@ -1136,7 +1136,7 @@ export default function Recordatorio() {
                     borderRadius: '12px',
                     border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
                     background: 'transparent',
-                    color: isDark ? '#ffffff' : '#111827',
+                    color: 'var(--text-primary)',
                     fontWeight: 600,
                     fontSize: '14px',
                     cursor: 'pointer'
@@ -1150,7 +1150,7 @@ export default function Recordatorio() {
                     padding: '12px 24px',
                     borderRadius: '12px',
                     border: 'none',
-                    background: '#ef4444',
+                    background: 'var(--destructive)',
                     color: 'white',
                     fontWeight: 600,
                     fontSize: '14px',

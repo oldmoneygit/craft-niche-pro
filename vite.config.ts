@@ -13,6 +13,10 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@tests": path.resolve(__dirname, "./tests"),
+      "@config": path.resolve(__dirname, "./config"),
+      "@scripts": path.resolve(__dirname, "./scripts"),
+      "@docs": path.resolve(__dirname, "./docs"),
     },
   },
   optimizeDeps: {

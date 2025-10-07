@@ -25,18 +25,18 @@ export default function Financeiro() {
   }, []);
 
   const transactions = [
-    { client: 'Ana Carolina Lima', initials: 'AC', service: 'Consulta Nutricional', date: '05/10/2025', value: 'R$ 297,00', method: 'PIX', status: 'paid', color: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' },
-    { client: 'Marcão da Massa', initials: 'MM', service: 'Plano Trimestral', date: '03/10/2025', value: 'R$ 797,00', method: 'Crédito', status: 'paid', color: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' },
-    { client: 'Pamela Nascimento', initials: 'PN', service: 'Consulta Nutricional', date: '28/09/2025', value: 'R$ 297,00', method: 'PIX', status: 'pending', color: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' },
+    { client: 'Ana Carolina Lima', initials: 'AC', service: 'Consulta Nutricional', date: '05/10/2025', value: 'R$ 297,00', method: 'PIX', status: 'paid', color: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)' },
+    { client: 'Marcão da Massa', initials: 'MM', service: 'Plano Trimestral', date: '03/10/2025', value: 'R$ 797,00', method: 'Crédito', status: 'paid', color: 'linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%)' },
+    { client: 'Pamela Nascimento', initials: 'PN', service: 'Consulta Nutricional', date: '28/09/2025', value: 'R$ 297,00', method: 'PIX', status: 'pending', color: 'linear-gradient(135deg, var(--warning) 0%, #d97706 100%)' },
     { client: 'João Ricardo', initials: 'JR', service: 'Avaliação Antropométrica', date: '25/09/2025', value: 'R$ 150,00', method: 'Débito', status: 'paid', color: 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)' },
     { client: 'Maria Silva', initials: 'MS', service: 'Consulta Nutricional', date: '20/09/2025', value: 'R$ 297,00', method: 'Dinheiro', status: 'paid', color: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' },
     { client: 'Carlos Barros', initials: 'CB', service: 'Retorno Nutricional', date: '15/09/2025', value: 'R$ 150,00', method: 'PIX', status: 'overdue', color: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)' }
   ];
 
   const statusConfig = {
-    paid: { label: 'Pago', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
-    pending: { label: 'Pendente', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
-    overdue: { label: 'Atrasado', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' }
+    paid: { label: 'Pago', color: 'var(--primary)', bg: 'var(--primary-alpha)' },
+    pending: { label: 'Pendente', color: 'var(--warning)', bg: 'rgba(245, 158, 11, 0.1)' },
+    overdue: { label: 'Atrasado', color: 'var(--destructive)', bg: 'var(--error-alpha)' }
   };
 
   const selectStyle: React.CSSProperties = {
@@ -45,7 +45,7 @@ export default function Financeiro() {
     border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
     background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)',
     backdropFilter: 'blur(10px)',
-    color: isDark ? '#ffffff' : '#111827',
+    color: isDark ? 'var(--bg-white)' : '#111827',
     fontWeight: 600,
     fontSize: '14px',
     cursor: 'pointer'
@@ -65,15 +65,15 @@ export default function Financeiro() {
             </p>
           </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <button style={{ padding: '12px 20px', borderRadius: '12px', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)', color: isDark ? '#ffffff' : '#111827', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button style={{ padding: '12px 20px', borderRadius: '12px', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)', color: isDark ? 'var(--bg-white)' : '#111827', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Upload style={{ width: '20px', height: '20px' }} />
               Importar Excel
             </button>
-            <button style={{ padding: '12px 20px', borderRadius: '12px', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)', color: isDark ? '#ffffff' : '#111827', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button style={{ padding: '12px 20px', borderRadius: '12px', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)', color: isDark ? 'var(--bg-white)' : '#111827', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Download style={{ width: '20px', height: '20px' }} />
               Exportar Excel
             </button>
-            <button style={{ padding: '12px 20px', borderRadius: '12px', border: 'none', background: '#10b981', color: 'white', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button style={{ padding: '12px 20px', borderRadius: '12px', border: 'none', background: 'var(--primary)', color: 'white', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Plus style={{ width: '20px', height: '20px' }} />
               Nova Transação
             </button>
@@ -122,10 +122,10 @@ export default function Financeiro() {
         {/* Transactions */}
         <div style={{ background: isDark ? 'rgba(38, 38, 38, 0.6)' : 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(10px)', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '16px', padding: '28px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827' }}>
               Transações Recentes
             </h2>
-            <button style={{ padding: '12px 20px', borderRadius: '12px', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', background: isDark ? 'rgba(20, 20, 20, 0.9)' : '#ffffff', color: isDark ? '#ffffff' : '#111827', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button style={{ padding: '12px 20px', borderRadius: '12px', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', background: isDark ? 'rgba(20, 20, 20, 0.9)' : 'var(--bg-white)', color: isDark ? 'var(--bg-white)' : '#111827', fontWeight: 600, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Filter style={{ width: '18px', height: '18px' }} />
               Filtros
             </button>
@@ -135,7 +135,7 @@ export default function Financeiro() {
             <thead>
               <tr style={{ borderBottom: isDark ? '2px solid rgba(64, 64, 64, 0.3)' : '2px solid rgba(229, 231, 235, 0.8)' }}>
                 {['Cliente', 'Serviço', 'Data', 'Valor', 'Forma', 'Status', ''].map((header) => (
-                  <th key={header} style={{ padding: '12px', textAlign: 'left', fontSize: '11px', fontWeight: 700, color: isDark ? '#a3a3a3' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <th key={header} style={{ padding: '12px', textAlign: 'left', fontSize: '11px', fontWeight: 700, color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     {header}
                   </th>
                 ))}
@@ -147,7 +147,7 @@ export default function Financeiro() {
                   onMouseEnter={(e) => e.currentTarget.style.background = isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)'}
                   onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                 >
-                  <td style={{ padding: '16px 12px', fontSize: '14px', color: isDark ? '#ffffff' : '#111827' }}>
+                  <td style={{ padding: '16px 12px', fontSize: '14px', color: isDark ? 'var(--bg-white)' : '#111827' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: transaction.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: '12px' }}>
                         {transaction.initials}
@@ -155,11 +155,11 @@ export default function Financeiro() {
                       {transaction.client}
                     </div>
                   </td>
-                  <td style={{ padding: '16px 12px', fontSize: '14px', color: isDark ? '#ffffff' : '#111827' }}>{transaction.service}</td>
-                  <td style={{ padding: '16px 12px', fontSize: '14px', color: isDark ? '#ffffff' : '#111827' }}>{transaction.date}</td>
-                  <td style={{ padding: '16px 12px', fontSize: '14px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>{transaction.value}</td>
+                  <td style={{ padding: '16px 12px', fontSize: '14px', color: isDark ? 'var(--bg-white)' : '#111827' }}>{transaction.service}</td>
+                  <td style={{ padding: '16px 12px', fontSize: '14px', color: isDark ? 'var(--bg-white)' : '#111827' }}>{transaction.date}</td>
+                  <td style={{ padding: '16px 12px', fontSize: '14px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827' }}>{transaction.value}</td>
                   <td style={{ padding: '16px 12px' }}>
-                    <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
+                    <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, background: 'var(--secondary-alpha)', color: 'var(--secondary)' }}>
                       {transaction.method}
                     </span>
                   </td>
@@ -169,7 +169,7 @@ export default function Financeiro() {
                     </span>
                   </td>
                   <td style={{ padding: '16px 12px' }}>
-                    <button style={{ width: '32px', height: '32px', borderRadius: '8px', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', background: 'transparent', color: isDark ? '#a3a3a3' : '#6b7280', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <button style={{ width: '32px', height: '32px', borderRadius: '8px', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', background: 'transparent', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <MoreVertical style={{ width: '16px', height: '16px' }} />
                     </button>
                   </td>

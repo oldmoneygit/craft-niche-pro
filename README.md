@@ -1,30 +1,76 @@
-# Welcome to your Lovable project
+# 🥗 KorLab Nutri
 
-## Project info
+Dashboard administrativa completa para nutricionistas.
 
-**URL**: https://lovable.dev/projects/4336999a-0c65-4077-a4dd-af35e2981d79
+## 📚 Documentação
 
-## 📚 Documentação de Desenvolvimento
+- 📖 [Estrutura do Projeto](./docs/ESTRUTURA-PROJETO.md)
+- 🗄️ [Schema do Banco](./docs/SCHEMA.md)
+- 🎨 [Design System](./docs/DESIGN-SYSTEM.md)
+- 🧪 [Guia de Testes](./tests/README.md)
+- 📚 [Documentação Completa](./docs/README.md)
 
-### Arquivos Essenciais
+## 🚀 Quick Start
 
-- **[SCHEMA.md](docs/SCHEMA.md)** - Documentação completa do banco de dados Supabase
-- **[database.types.ts](src/types/database.types.ts)** - Types TypeScript gerados do schema
-- **[PROMPT-TEMPLATE.md](docs/PROMPT-TEMPLATE.md)** - Template padronizado para implementações
-- **[WORKFLOW-GUIDE.md](docs/WORKFLOW-GUIDE.md)** - Guia completo de desenvolvimento sem erros
+```bash
+# Instalar dependências
+npm install
 
-### Workflow de Desenvolvimento
+# Configurar ambiente
+cp .env.example .env
+# Edite .env com suas credenciais
+
+# Rodar desenvolvimento
+npm run dev
+
+# Rodar testes
+npm run test:all
+```
+
+## 📁 Estrutura
+
+```
+korlab-nutri/
+├── 📁 docs/              # Documentação completa
+├── 📁 src/               # Código fonte
+├── 📁 tests/             # Testes (E2E, Visual, Acessibilidade)
+├── 📁 config/            # Configurações
+├── 📁 scripts/           # Scripts utilitários
+├── 📁 public/            # Assets públicos
+└── 📁 supabase/          # Banco de dados e migrations
+```
+
+Veja [ESTRUTURA-PROJETO.md](./docs/ESTRUTURA-PROJETO.md) para detalhes.
+
+## 🧪 Testes
+
+```bash
+npm run test:e2e         # Testes E2E
+npm run test:visual      # Testes visuais
+npm run test:accessibility # Testes de acessibilidade
+npm run test:all         # Todos os testes
+```
+
+Veja [TESTING.md](./tests/README.md) para mais detalhes.
+
+## 🎨 Design System
+
+O projeto segue um design system documentado com paleta de cores validada WCAG AA.
+
+Veja [DESIGN-SYSTEM.md](./docs/DESIGN-SYSTEM.md).
+
+## 🗄️ Banco de Dados
 
 **REGRA DE OURO:** Sempre consulte `docs/SCHEMA.md` antes de implementar features de banco de dados.
 
-#### Passo a Passo
+### Workflow de Desenvolvimento
 
 1. Consulte `docs/SCHEMA.md` para validar nomes de colunas, foreign keys e ENUMs
 2. Use `docs/PROMPT-TEMPLATE.md` para estruturar a implementação
 3. Siga `docs/WORKFLOW-GUIDE.md` para processo completo
 4. Valide tipos com `src/types/database.types.ts`
 
-#### Para IAs (Claude/Lovable/Bolt)
+### Para IAs (Claude/Lovable/Bolt)
 
 Quando implementar features relacionadas ao banco:
 
@@ -32,19 +78,6 @@ Quando implementar features relacionadas ao banco:
 IMPORTANTE: Consulte docs/SCHEMA.md antes de gerar código.
 Valide todos os nomes de colunas, foreign keys e ENUMs contra o schema.
 ```
-
-### Evitando Erros Comuns
-
-❌ **Não faça:**
-- Adivinhar nomes de colunas
-- Usar valores de ENUM não documentados
-- Implementar sem consultar SCHEMA.md
-
-✅ **Faça:**
-- Sempre consulte SCHEMA.md primeiro
-- Valide nomes exatos de colunas
-- Confirme valores de ENUM permitidos
-- Teste queries no SQL Editor do Supabase antes de implementar
 
 ## How can I edit this code?
 

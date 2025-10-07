@@ -50,7 +50,7 @@ export function MealPlanDetailModal({ planId, open, onOpenChange }: MealPlanDeta
       <DialogContent 
         className="max-w-4xl max-h-[90vh] overflow-y-auto border-border/50"
         style={{
-          backgroundColor: 'var(--modal-bg, #fafafa)'
+          backgroundColor: 'var(--modal-bg, var(--text-primary-light))'
         }}
       >
         <DialogHeader className="border-b border-border pb-4">

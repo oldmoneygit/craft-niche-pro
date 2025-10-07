@@ -15,13 +15,13 @@ interface ServiceCardProps {
 
 const variantConfig = {
   mensal: {
-    color: '#3b82f6',
-    colorDark: '#2563eb',
+    color: 'var(--secondary)',
+    colorDark: 'var(--secondary-dark)',
     label: 'Mensal'
   },
   trimestral: {
-    color: '#10b981',
-    colorDark: '#059669',
+    color: 'var(--primary)',
+    colorDark: 'var(--primary-dark)',
     label: 'Trimestral'
   },
   semestral: {
@@ -112,16 +112,16 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         <span style={{ padding: '6px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 700, background: config.color, color: 'white', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
           {config.label}
         </span>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: 600, background: isActive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)', color: isActive ? '#10b981' : '#6b7280' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: 600, background: isActive ? 'var(--primary-alpha)' : 'rgba(107, 114, 128, 0.1)', color: isActive ? 'var(--primary)' : 'var(--text-secondary)' }}>
           <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor' }} />
           {isActive ? 'Ativo' : 'Inativo'}
         </span>
       </div>
 
-      <h3 style={{ fontSize: '22px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
+      <h3 style={{ fontSize: '22px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
         {title}
       </h3>
-      <p style={{ fontSize: '14px', color: isDark ? '#a3a3a3' : '#6b7280', lineHeight: 1.6, marginBottom: '20px' }}>
+      <p style={{ fontSize: '14px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '20px' }}>
         {description}
       </p>
 
@@ -133,8 +133,8 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         ].map(({ icon: Icon, label, value }) => (
           <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px' }}>
             <Icon style={{ width: '20px', height: '20px', color: config.color }} />
-            <span style={{ color: isDark ? '#a3a3a3' : '#6b7280', fontWeight: 500 }}>{label}</span>
-            <span style={{ color: isDark ? '#ffffff' : '#111827', fontWeight: 600, marginLeft: 'auto' }}>{value}</span>
+            <span style={{ color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', fontWeight: 500 }}>{label}</span>
+            <span style={{ color: isDark ? 'var(--bg-white)' : '#111827', fontWeight: 600, marginLeft: 'auto' }}>{value}</span>
           </div>
         ))}
       </div>
@@ -173,7 +173,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
               borderRadius: '10px',
               border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
               background: 'transparent',
-              color: isDark ? '#a3a3a3' : '#6b7280',
+              color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)',
               fontWeight: 600,
               fontSize: '13px',
               cursor: 'pointer',
@@ -190,7 +190,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
+              e.currentTarget.style.color = isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)';
               e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
             }}
           >

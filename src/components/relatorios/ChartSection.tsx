@@ -16,10 +16,10 @@ interface ChartSectionProps {
 }
 
 const variantColors = {
-  blue: '#3b82f6',
-  green: '#10b981',
+  blue: 'var(--secondary)',
+  green: 'var(--primary)',
   purple: '#a855f7',
-  red: '#ef4444'
+  red: 'var(--destructive)'
 };
 
 export const ChartSection: React.FC<ChartSectionProps> = ({ title, icon, totalValue, data, variant }) => {
@@ -62,7 +62,7 @@ export const ChartSection: React.FC<ChartSectionProps> = ({ title, icon, totalVa
               {icon}
             </div>
           </div>
-          <h2 style={{ fontSize: '16px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827' }}>
             {title}
           </h2>
         </div>
@@ -73,13 +73,13 @@ export const ChartSection: React.FC<ChartSectionProps> = ({ title, icon, totalVa
 
       <div>
         <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr auto', gap: '20px', padding: '12px 16px', borderBottom: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', marginBottom: '8px' }}>
-          <div style={{ fontSize: '11px', fontWeight: 700, color: isDark ? 'rgba(255, 255, 255, 0.5)' : '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             Período
           </div>
-          <div style={{ fontSize: '11px', fontWeight: 700, color: isDark ? 'rgba(255, 255, 255, 0.5)' : '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             Progresso
           </div>
-          <div style={{ fontSize: '11px', fontWeight: 700, color: isDark ? 'rgba(255, 255, 255, 0.5)' : '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             Valor
           </div>
         </div>
@@ -110,10 +110,10 @@ export const ChartSection: React.FC<ChartSectionProps> = ({ title, icon, totalVa
               <div style={{ height: '100%', background: color, borderRadius: '4px', width: `${row.percentage}%`, transition: 'width 0.6s ease' }} />
             </div>
             <div style={{ textAlign: 'right', minWidth: '80px' }}>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827' }}>
                 {row.value}
               </div>
-              <div style={{ fontSize: '11px', color: isDark ? 'rgba(255, 255, 255, 0.5)' : '#9ca3af', marginTop: '2px' }}>
+              <div style={{ fontSize: '11px', color: isDark ? 'rgba(255, 255, 255, 0.5)' : 'var(--text-tertiary)', marginTop: '2px' }}>
                 {row.subtitle}
               </div>
             </div>

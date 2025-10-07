@@ -65,9 +65,9 @@ Nutricionista [Seu Nome]`);
     padding: '14px 16px',
     borderRadius: '12px',
     border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
-    background: isDark ? 'rgba(20, 20, 20, 0.9)' : '#ffffff',
+    background: isDark ? 'rgba(20, 20, 20, 0.9)' : 'var(--bg-white)',
     backdropFilter: 'blur(10px)',
-    color: isDark ? '#ffffff' : '#111827',
+    color: isDark ? 'var(--bg-white)' : '#111827',
     fontSize: '14px',
     transition: 'all 0.3s ease',
     resize: 'vertical',
@@ -110,7 +110,7 @@ Nutricionista [Seu Nome]`);
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>
+          <h2 style={{ fontSize: '24px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827' }}>
             Enviar Feedback Semanal
           </h2>
           <button
@@ -121,7 +121,7 @@ Nutricionista [Seu Nome]`);
               borderRadius: '10px',
               border: 'none',
               background: 'transparent',
-              color: isDark ? '#a3a3a3' : '#6b7280',
+              color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
               display: 'flex',
@@ -129,12 +129,12 @@ Nutricionista [Seu Nome]`);
               justifyContent: 'center'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-              e.currentTarget.style.color = '#ef4444';
+              e.currentTarget.style.background = 'var(--error-alpha)';
+              e.currentTarget.style.color = 'var(--destructive)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
+              e.currentTarget.style.color = isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)';
             }}
           >
             <X style={{ width: '24px', height: '24px' }} />
@@ -143,38 +143,38 @@ Nutricionista [Seu Nome]`);
 
         <div
           style={{
-            background: 'rgba(16, 185, 129, 0.1)',
+            background: 'var(--primary-alpha)',
             border: '1px solid rgba(16, 185, 129, 0.3)',
             borderRadius: '12px',
             padding: '16px',
             marginBottom: '20px'
           }}
         >
-          <div style={{ fontSize: '16px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+          <div style={{ fontSize: '16px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '4px' }}>
             {clientName}
           </div>
-          <div style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
+          <div style={{ fontSize: '13px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)' }}>
             {clientPhone}
           </div>
         </div>
 
         <div
           style={{
-            background: 'rgba(59, 130, 246, 0.1)',
-            borderLeft: '3px solid #3b82f6',
+            background: 'var(--secondary-alpha)',
+            borderLeft: '3px solid var(--secondary)',
             padding: '16px',
             borderRadius: '8px',
             marginBottom: '20px'
           }}
         >
-          <p style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280', lineHeight: 1.6 }}>
+          <p style={{ fontSize: '13px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', lineHeight: 1.6 }}>
             <Lightbulb style={{ width: '16px', height: '16px', display: 'inline', marginRight: '6px' }} />
-            <strong style={{ color: isDark ? '#ffffff' : '#111827' }}>Dica:</strong> Personalize a mensagem com informações sobre a evolução do paciente, conquistas da semana e orientações específicas.
+            <strong style={{ color: isDark ? 'var(--bg-white)' : '#111827' }}>Dica:</strong> Personalize a mensagem com informações sobre a evolução do paciente, conquistas da semana e orientações específicas.
           </p>
         </div>
 
         <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
             Mensagem do Feedback
           </label>
           <textarea
@@ -182,8 +182,8 @@ Nutricionista [Seu Nome]`);
             onChange={(e) => setMessage(e.target.value)}
             style={inputStyle}
             onFocus={(e) => {
-              e.currentTarget.style.borderColor = '#10b981';
-              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+              e.currentTarget.style.borderColor = 'var(--primary)';
+              e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-alpha)';
             }}
             onBlur={(e) => {
               e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
@@ -201,7 +201,7 @@ Nutricionista [Seu Nome]`);
               borderRadius: '12px',
               border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
               background: 'transparent',
-              color: isDark ? '#a3a3a3' : '#6b7280',
+              color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)',
               fontWeight: 600,
               fontSize: '14px',
               cursor: 'pointer',
@@ -217,7 +217,7 @@ Nutricionista [Seu Nome]`);
               padding: '12px 24px',
               borderRadius: '12px',
               border: 'none',
-              background: '#10b981',
+              background: 'var(--primary)',
               color: 'white',
               fontWeight: 600,
               fontSize: '14px',
@@ -229,12 +229,12 @@ Nutricionista [Seu Nome]`);
               gap: '8px'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#059669';
+              e.currentTarget.style.background = 'var(--primary-dark)';
               e.currentTarget.style.transform = 'translateY(-2px)';
               e.currentTarget.style.boxShadow = '0 8px 16px rgba(16, 185, 129, 0.3)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#10b981';
+              e.currentTarget.style.background = 'var(--primary)';
               e.currentTarget.style.transform = 'translateY(0)';
               e.currentTarget.style.boxShadow = 'none';
             }}

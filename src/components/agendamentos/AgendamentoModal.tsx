@@ -255,10 +255,10 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
 
   const inputStyle: React.CSSProperties = {
     padding: '12px 16px',
-    border: isDark ? '1px solid #404040' : '1px solid #e5e5e5',
+    border: isDark ? '1px solid var(--border-dark)' : '1px solid var(--border)',
     borderRadius: '10px',
-    background: isDark ? '#171717' : '#ffffff',
-    color: isDark ? '#fafafa' : '#171717',
+    background: isDark ? 'var(--text-primary)' : 'var(--bg-white)',
+    color: isDark ? 'var(--text-primary-light)' : 'var(--text-primary)',
     fontSize: '14px',
     fontFamily: 'inherit',
     width: '100%'
@@ -267,7 +267,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
   const labelStyle: React.CSSProperties = {
     fontSize: '13px',
     fontWeight: 600,
-    color: isDark ? '#fafafa' : '#171717',
+    color: isDark ? 'var(--text-primary-light)' : 'var(--text-primary)',
     marginBottom: '8px',
     display: 'block'
   };
@@ -304,8 +304,8 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           border: isDark 
-            ? '1px solid #404040' 
-            : '1px solid #e5e5e5',
+            ? '1px solid var(--border-dark)' 
+            : '1px solid var(--border)',
           borderRadius: '24px',
           maxWidth: '900px',
           width: '100%',
@@ -322,8 +322,8 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
             style={{
               padding: '24px',
               borderBottom: isDark 
-                ? '1px solid #404040' 
-                : '1px solid #e5e5e5',
+                ? '1px solid var(--border-dark)' 
+                : '1px solid var(--border)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center'
@@ -334,7 +334,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                 style={{
                   fontSize: '24px',
                   fontWeight: 700,
-                  color: isDark ? '#fafafa' : '#171717',
+                  color: isDark ? 'var(--text-primary-light)' : 'var(--text-primary)',
                   marginBottom: '4px'
                 }}
               >
@@ -343,7 +343,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               {(preselectedClientName || leadData) && (
                 <p style={{ 
                   fontSize: '14px', 
-                  color: isDark ? '#a3a3a3' : '#737373'
+                  color: isDark ? 'var(--text-muted-light)' : 'var(--text-muted)'
                 }}>
                   Cliente: <strong>{preselectedClientName || leadData?.name}</strong>
                   {isCreatingClient && ' (processando...)'}
@@ -357,8 +357,8 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                 width: '40px',
                 height: '40px',
                 borderRadius: '12px',
-                background: '#ef4444',
-                border: '1px solid #ef4444',
+                background: 'var(--destructive)',
+                border: '1px solid var(--destructive)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -370,8 +370,8 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                 e.currentTarget.style.borderColor = '#dc2626';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#ef4444';
-                e.currentTarget.style.borderColor = '#ef4444';
+                e.currentTarget.style.background = 'var(--destructive)';
+                e.currentTarget.style.borderColor = 'var(--destructive)';
               }}
             >
               <X style={{ 
@@ -415,8 +415,8 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                     className="w-auto p-0" 
                     align="start"
                     style={{
-                      background: isDark ? '#171717' : '#ffffff',
-                      border: isDark ? '1px solid #404040' : '1px solid #e5e5e5',
+                      background: isDark ? 'var(--text-primary)' : 'var(--bg-white)',
+                      border: isDark ? '1px solid var(--border-dark)' : '1px solid var(--border)',
                       borderRadius: '12px',
                       boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
                       zIndex: 9999
@@ -530,8 +530,8 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
             style={{
               padding: '24px',
               borderTop: isDark 
-                ? '1px solid #404040' 
-                : '1px solid #e5e5e5',
+                ? '1px solid var(--border-dark)' 
+                : '1px solid var(--border)',
               display: 'flex',
               justifyContent: 'flex-end',
               gap: '12px'
@@ -544,12 +544,12 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
                 padding: '12px 24px',
                 background: 'transparent',
                 border: isDark 
-                  ? '1px solid #404040' 
-                  : '1px solid #e5e5e5',
+                  ? '1px solid var(--border-dark)' 
+                  : '1px solid var(--border)',
                 borderRadius: '12px',
                 fontSize: '14px',
                 fontWeight: 600,
-                color: isDark ? '#d4d4d4' : '#404040',
+                color: isDark ? '#d4d4d4' : 'var(--border-dark)',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease'
               }}
@@ -567,7 +567,7 @@ export const AgendamentoModal: React.FC<AgendamentoModalProps> = ({
               disabled={saveAppointment.isPending || isCreatingClient || !clientId}
               style={{
                 padding: '12px 32px',
-                background: (saveAppointment.isPending || isCreatingClient) ? '#737373' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                background: (saveAppointment.isPending || isCreatingClient) ? 'var(--text-muted)' : 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
                 border: 'none',
                 borderRadius: '12px',
                 fontSize: '14px',

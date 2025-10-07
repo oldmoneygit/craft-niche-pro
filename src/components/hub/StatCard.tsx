@@ -15,10 +15,10 @@ interface StatCardProps {
 }
 
 const variantColors = {
-  revenue: { color: '#10b981', light: 'rgba(16, 185, 129, 0.1)' },
-  clients: { color: '#3b82f6', light: 'rgba(59, 130, 246, 0.1)' },
-  modules: { color: '#f59e0b', light: 'rgba(245, 158, 11, 0.1)' },
-  growth: { color: '#8b5cf6', light: 'rgba(139, 92, 246, 0.1)' },
+  revenue: { color: 'var(--primary)', light: 'var(--primary-alpha)' },
+  clients: { color: 'var(--secondary)', light: 'var(--secondary-alpha)' },
+  modules: { color: 'var(--warning)', light: 'rgba(245, 158, 11, 0.1)' },
+  growth: { color: 'var(--accent)', light: 'rgba(139, 92, 246, 0.1)' },
 };
 
 export function StatCard({ variant, label, value, change, icon: Icon }: StatCardProps) {

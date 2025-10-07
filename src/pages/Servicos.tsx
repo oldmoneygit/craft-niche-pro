@@ -73,7 +73,7 @@ export default function Servicos() {
               padding: '12px 24px',
               borderRadius: '12px',
               border: 'none',
-              background: '#10b981',
+              background: 'var(--primary)',
               color: 'white',
               fontWeight: 600,
               fontSize: '14px',
@@ -84,12 +84,12 @@ export default function Servicos() {
               gap: '8px'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#059669';
+              e.currentTarget.style.background = 'var(--primary-dark)';
               e.currentTarget.style.transform = 'translateY(-2px)';
               e.currentTarget.style.boxShadow = '0 8px 16px rgba(16, 185, 129, 0.3)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#10b981';
+              e.currentTarget.style.background = 'var(--primary)';
               e.currentTarget.style.transform = 'translateY(0)';
               e.currentTarget.style.boxShadow = 'none';
             }}

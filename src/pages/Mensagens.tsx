@@ -17,14 +17,14 @@ export function Mensagens() {
       value: '0',
       icon: MessageCircle,
       variant: 'messages',
-      color: '#8b5cf6'
+      color: 'var(--accent)'
     },
     {
       label: 'Conversas Ativas',
       value: '2',
       icon: MessageSquare,
       variant: 'conversations',
-      color: '#10b981'
+      color: 'var(--primary)'
     },
     {
       label: 'Templates',
@@ -38,7 +38,7 @@ export function Mensagens() {
       value: '< 2min',
       icon: Clock,
       variant: 'response-time',
-      color: '#f59e0b'
+      color: 'var(--warning)'
     }
   ];
 

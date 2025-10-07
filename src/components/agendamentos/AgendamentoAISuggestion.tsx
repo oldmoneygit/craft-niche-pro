@@ -7,7 +7,7 @@ export const AgendamentoAISuggestion: React.FC = () => {
       style={{
         margin: '24px',
         padding: '16px 20px',
-        background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%)',
+        background: 'linear-gradient(135deg, var(--primary-alpha) 0%, rgba(5, 150, 105, 0.05) 100%)',
         border: '1px solid rgba(16, 185, 129, 0.2)',
         borderRadius: '12px',
         display: 'flex',
@@ -20,7 +20,7 @@ export const AgendamentoAISuggestion: React.FC = () => {
           width: '36px',
           height: '36px',
           borderRadius: '8px',
-          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+          background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -34,7 +34,7 @@ export const AgendamentoAISuggestion: React.FC = () => {
           style={{
             fontSize: '13px',
             fontWeight: 600,
-            color: '#10b981',
+            color: 'var(--primary)',
             marginBottom: '4px'
           }}
         >
@@ -51,7 +51,7 @@ export const AgendamentoAISuggestion: React.FC = () => {
           <a
             href="#appointments"
             style={{
-              color: '#10b981',
+              color: 'var(--primary)',
               fontWeight: 600,
               textDecoration: 'none'
             }}

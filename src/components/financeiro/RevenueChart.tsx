@@ -40,14 +40,14 @@ export const RevenueChart: React.FC = () => {
     <div style={{ background: isDark ? 'rgba(20, 20, 20, 0.9)' : '#1e293b', backdropFilter: 'blur(10px)', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '16px', padding: '28px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <TrendingUp style={{ width: '18px', height: '18px', color: '#10b981' }} />
+          <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'var(--primary-alpha-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <TrendingUp style={{ width: '18px', height: '18px', color: 'var(--primary)' }} />
           </div>
-          <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#ffffff' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--bg-white)' }}>
             Receita nos Últimos 6 Meses
           </h2>
         </div>
-        <div style={{ fontSize: '20px', fontWeight: 700, color: '#10b981' }}>
+        <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--primary)' }}>
           R$ 18.470
         </div>
       </div>
@@ -68,9 +68,9 @@ export const RevenueChart: React.FC = () => {
               {data.month}
             </div>
             <div style={{ position: 'relative', height: '8px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '4px', overflow: 'hidden' }}>
-              <div style={{ height: '100%', background: '#10b981', borderRadius: '4px', width: `${data.percentage}%`, transition: 'width 0.6s ease' }} />
+              <div style={{ height: '100%', background: 'var(--primary)', borderRadius: '4px', width: `${data.percentage}%`, transition: 'width 0.6s ease' }} />
             </div>
-            <div style={{ fontSize: '14px', fontWeight: 700, color: '#ffffff', textAlign: 'right', minWidth: '100px' }}>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--bg-white)', textAlign: 'right', minWidth: '100px' }}>
               R$ {data.value.toLocaleString('pt-BR')}
             </div>
           </div>

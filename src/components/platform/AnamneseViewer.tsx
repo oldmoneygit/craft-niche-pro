@@ -64,11 +64,11 @@ export const AnamneseViewer = ({ anamnese, clientName, onClose }: AnamneseViewer
   };
 
   const getIMCClassification = (imc: number) => {
-    if (imc < 18.5) return { label: 'Abaixo do peso', color: '#3b82f6' };
-    if (imc < 25) return { label: 'Peso normal', color: '#10b981' };
-    if (imc < 30) return { label: 'Sobrepeso', color: '#f59e0b' };
+    if (imc < 18.5) return { label: 'Abaixo do peso', color: 'var(--secondary)' };
+    if (imc < 25) return { label: 'Peso normal', color: 'var(--primary)' };
+    if (imc < 30) return { label: 'Sobrepeso', color: 'var(--warning)' };
     if (imc < 35) return { label: 'Obesidade Grau I', color: '#f97316' };
-    if (imc < 40) return { label: 'Obesidade Grau II', color: '#ef4444' };
+    if (imc < 40) return { label: 'Obesidade Grau II', color: 'var(--destructive)' };
     return { label: 'Obesidade Grau III', color: '#dc2626' };
   };
 
@@ -254,7 +254,7 @@ const DataCard = ({ label, value, badge, badgeColor }: { label: string; value: s
         className="inline-block mt-2 px-2 py-1 rounded text-xs font-semibold"
         style={{ 
           backgroundColor: badgeColor ? `${badgeColor}20` : '#f3f4f6',
-          color: badgeColor || '#6b7280'
+          color: badgeColor || 'var(--text-secondary)'
         }}
       >
         {badge}

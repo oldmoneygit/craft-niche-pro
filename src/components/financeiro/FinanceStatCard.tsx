@@ -11,23 +11,23 @@ interface FinanceStatCardProps {
 const typeConfig = {
   received: {
     icon: CheckCircle,
-    color: '#10b981',
-    colorDark: '#059669'
+    color: 'var(--primary)',
+    colorDark: 'var(--primary-dark)'
   },
   pending: {
     icon: Clock,
-    color: '#f59e0b',
+    color: 'var(--warning)',
     colorDark: '#d97706'
   },
   overdue: {
     icon: AlertTriangle,
-    color: '#ef4444',
+    color: 'var(--destructive)',
     colorDark: '#dc2626'
   },
   average: {
     icon: DollarSign,
-    color: '#3b82f6',
-    colorDark: '#2563eb'
+    color: 'var(--secondary)',
+    colorDark: 'var(--secondary-dark)'
   },
   rate: {
     icon: TrendingUp,

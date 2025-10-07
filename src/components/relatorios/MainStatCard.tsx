@@ -10,12 +10,12 @@ interface MainStatCardProps {
 
 const variantStyles = {
   blue: {
-    colorStart: '#3b82f6',
-    colorEnd: '#2563eb'
+    colorStart: 'var(--secondary)',
+    colorEnd: 'var(--secondary-dark)'
   },
   green: {
-    colorStart: '#10b981',
-    colorEnd: '#059669'
+    colorStart: 'var(--primary)',
+    colorEnd: 'var(--primary-dark)'
   },
   purple: {
     colorStart: '#a855f7',

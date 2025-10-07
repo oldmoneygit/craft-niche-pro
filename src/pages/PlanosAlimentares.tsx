@@ -94,8 +94,8 @@ export default function PlanosAlimentares() {
     padding: '12px 24px',
     borderRadius: '8px',
     border: 'none',
-    background: isActive ? '#10b981' : 'transparent',
-    color: isActive ? 'white' : (isDark ? '#a3a3a3' : '#6b7280'),
+    background: isActive ? 'var(--primary)' : 'transparent',
+    color: isActive ? 'white' : (isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)'),
     fontWeight: 600,
     fontSize: '14px',
     cursor: 'pointer',
@@ -111,9 +111,9 @@ export default function PlanosAlimentares() {
     padding: '12px 16px',
     borderRadius: '12px',
     border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
-    background: isDark ? 'rgba(20, 20, 20, 0.9)' : '#ffffff',
+    background: isDark ? 'rgba(20, 20, 20, 0.9)' : 'var(--bg-white)',
     backdropFilter: 'blur(10px)',
-    color: isDark ? '#ffffff' : '#111827',
+    color: isDark ? 'var(--bg-white)' : '#111827',
     fontSize: '14px',
     transition: 'all 0.3s ease'
   };
@@ -170,7 +170,7 @@ export default function PlanosAlimentares() {
               alignItems: 'center',
               gap: '8px',
               padding: '12px 24px',
-              background: '#10b981',
+              background: 'var(--primary)',
               color: 'white',
               borderRadius: '12px',
               fontWeight: 600,
@@ -181,12 +181,12 @@ export default function PlanosAlimentares() {
               boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#059669';
+              e.currentTarget.style.background = 'var(--primary-dark)';
               e.currentTarget.style.transform = 'translateY(-2px)';
               e.currentTarget.style.boxShadow = '0 8px 20px rgba(16, 185, 129, 0.4)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#10b981';
+              e.currentTarget.style.background = 'var(--primary)';
               e.currentTarget.style.transform = 'translateY(0)';
               e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
             }}
@@ -206,7 +206,7 @@ export default function PlanosAlimentares() {
         {/* Filters */}
         <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: '300px', position: 'relative' }}>
-            <Search style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', width: '20px', height: '20px', color: isDark ? '#a3a3a3' : '#6b7280' }} />
+            <Search style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', width: '20px', height: '20px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)' }} />
             <input
               type="text"
               placeholder="Buscar por cliente ou plano..."

@@ -1,0 +1,138 @@
+{
+  "timestamp": "2025-10-07T10:32:29.317Z",
+  "violations": [
+    {
+      "desc": "Texto terciário em branco",
+      "text": "#9ca3af",
+      "bg": "#ffffff",
+      "contrast": "2.54",
+      "level": "FALHA",
+      "status": "❌"
+    },
+    {
+      "desc": "Verde primário em branco",
+      "text": "#10b981",
+      "bg": "#ffffff",
+      "contrast": "2.54",
+      "level": "FALHA",
+      "status": "❌"
+    },
+    {
+      "desc": "Texto branco em botão verde",
+      "text": "#ffffff",
+      "bg": "#10b981",
+      "contrast": "2.54",
+      "level": "FALHA",
+      "status": "❌"
+    },
+    {
+      "desc": "Texto branco em botão aviso",
+      "text": "#ffffff",
+      "bg": "#f59e0b",
+      "contrast": "2.15",
+      "level": "FALHA",
+      "status": "❌"
+    }
+  ],
+  "warnings": [
+    {
+      "desc": "Azul secundário em branco",
+      "text": "#3b82f6",
+      "bg": "#ffffff",
+      "contrast": "3.68",
+      "level": "AA Large",
+      "status": "⚠️"
+    },
+    {
+      "desc": "Texto branco em botão azul",
+      "text": "#ffffff",
+      "bg": "#3b82f6",
+      "contrast": "3.68",
+      "level": "AA Large",
+      "status": "⚠️"
+    },
+    {
+      "desc": "Texto branco em botão erro",
+      "text": "#ffffff",
+      "bg": "#ef4444",
+      "contrast": "3.76",
+      "level": "AA Large",
+      "status": "⚠️"
+    }
+  ],
+  "approved": [
+    {
+      "desc": "Texto secundário em branco",
+      "text": "#6b7280",
+      "bg": "#ffffff",
+      "contrast": "4.83",
+      "level": "AA",
+      "status": "✅"
+    },
+    {
+      "desc": "Texto muted em branco",
+      "text": "#737373",
+      "bg": "#ffffff",
+      "contrast": "4.74",
+      "level": "AA",
+      "status": "✅"
+    },
+    {
+      "desc": "Texto claro em escuro",
+      "text": "#fafafa",
+      "bg": "#1a1a1a",
+      "contrast": "16.67",
+      "level": "AAA",
+      "status": "✅"
+    },
+    {
+      "desc": "Texto muted light em escuro",
+      "text": "#a3a3a3",
+      "bg": "#1a1a1a",
+      "contrast": "6.90",
+      "level": "AA",
+      "status": "✅"
+    },
+    {
+      "desc": "Texto secundário em card claro",
+      "text": "#6b7280",
+      "bg": "#f8f9fa",
+      "contrast": "4.59",
+      "level": "AA",
+      "status": "✅"
+    },
+    {
+      "desc": "Texto claro em card escuro",
+      "text": "#fafafa",
+      "bg": "#2a2a2a",
+      "contrast": "13.75",
+      "level": "AAA",
+      "status": "✅"
+    }
+  ],
+  "hardcodedColors": [
+    "#10b981",
+    "#059669",
+    "#34d399",
+    "#3b82f6",
+    "#8b5cf6",
+    "#171717",
+    "#fafafa",
+    "#6b7280",
+    "#9ca3af",
+    "#737373",
+    "#a3a3a3",
+    "#ffffff",
+    "#1a1a1a",
+    "#f59e0b",
+    "#ef4444",
+    "#e5e5e5",
+    "#404040"
+  ],
+  "summary": {
+    "totalViolations": 4,
+    "totalWarnings": 3,
+    "totalApproved": 6,
+    "totalHardcoded": 17
+  }
+}

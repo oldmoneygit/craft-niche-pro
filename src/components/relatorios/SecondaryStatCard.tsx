@@ -10,12 +10,12 @@ interface SecondaryStatCardProps {
 
 const variantConfig = {
   green: {
-    iconBg: 'rgba(16, 185, 129, 0.15)',
-    iconColor: '#10b981'
+    iconBg: 'var(--primary-alpha-dark)',
+    iconColor: 'var(--primary)'
   },
   blue: {
     iconBg: 'rgba(59, 130, 246, 0.15)',
-    iconColor: '#3b82f6'
+    iconColor: 'var(--secondary)'
   }
 };
 
@@ -68,16 +68,16 @@ export const SecondaryStatCard: React.FC<SecondaryStatCardProps> = ({ title, val
             {icon}
           </div>
         </div>
-        <h3 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827' }}>
           {title}
         </h3>
       </div>
 
-      <div style={{ fontSize: '36px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '6px' }}>
+      <div style={{ fontSize: '36px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '6px' }}>
         {value}
       </div>
 
-      <div style={{ fontSize: '13px', color: isDark ? 'rgba(255, 255, 255, 0.7)' : '#6b7280' }}>
+      <div style={{ fontSize: '13px', color: isDark ? 'rgba(255, 255, 255, 0.7)' : 'var(--text-secondary)' }}>
         {subtitle}
       </div>
     </div>

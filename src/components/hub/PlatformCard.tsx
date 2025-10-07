@@ -17,7 +17,7 @@ interface PlatformCardProps {
 
 const verticalConfig = {
   nutrition: {
-    color: '#10b981',
+    color: 'var(--primary)',
     darkBgStart: '#18181b', darkBgEnd: '#1a3d2e', darkBorder: '#2d5a45',
     lightBgStart: '#f0fdf4', lightBgEnd: '#dcfce7', lightBorder: '#bbf7d0',
   },
@@ -58,7 +58,7 @@ export function PlatformCard({ vertical, title, subtitle, badge, metrics }: Plat
 
       <div className="relative z-10 flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-xl font-bold mb-1" style={{ color: '#ffffff' }}>{title}</h3>
+          <h3 className="text-xl font-bold mb-1" style={{ color: 'var(--bg-white)' }}>{title}</h3>
           <p className="text-sm font-medium" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>{subtitle}</p>
         </div>
         <span
@@ -77,7 +77,7 @@ export function PlatformCard({ vertical, title, subtitle, badge, metrics }: Plat
             style={{ borderColor: config.color }}
           >
             <p className="text-xs font-medium mb-1" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>{metric.label}</p>
-            <p className="text-2xl font-bold" style={{ color: '#ffffff' }}>{metric.value}</p>
+            <p className="text-2xl font-bold" style={{ color: 'var(--bg-white)' }}>{metric.value}</p>
           </div>
         ))}
       </div>

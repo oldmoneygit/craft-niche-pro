@@ -9,10 +9,10 @@ interface StatCardProps {
 
 export function StatCardClientes({ title, value, icon: Icon, variant }: StatCardProps) {
   const variantColors = {
-    total: '#3b82f6',    // azul
-    new: '#10b981',      // verde
-    active: '#f59e0b',   // laranja
-    inactive: '#ef4444'  // vermelho
+    total: 'var(--secondary)',    // azul
+    new: 'var(--primary)',      // verde
+    active: 'var(--warning)',   // laranja
+    inactive: 'var(--destructive)'  // vermelho
   };
 
   const color = variantColors[variant];
