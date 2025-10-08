@@ -9,22 +9,22 @@ interface StatCardProps {
 
 const variantStyles = {
   primary: {
-    accentColor: 'var(--secondary)',
+    accentColor: '#3b82f6',
     iconBgLight: 'rgba(219, 234, 254, 1)',
     iconBgDark: 'rgba(59, 130, 246, 0.15)'
   },
   success: {
-    accentColor: 'var(--primary)',
+    accentColor: '#10b981',
     iconBgLight: 'rgba(209, 250, 229, 1)',
-    iconBgDark: 'var(--primary-alpha-dark)'
+    iconBgDark: 'rgba(16, 185, 129, 0.15)'
   },
   warning: {
-    accentColor: 'var(--warning)',
+    accentColor: '#f59e0b',
     iconBgLight: 'rgba(254, 243, 199, 1)',
-    iconBgDark: 'var(--warning-alpha)'
+    iconBgDark: 'rgba(245, 158, 11, 0.15)'
   },
   purple: {
-    accentColor: 'var(--accent)',
+    accentColor: '#8b5cf6',
     iconBgLight: 'rgba(237, 233, 254, 1)',
     iconBgDark: 'rgba(139, 92, 246, 0.15)'
   }
@@ -120,7 +120,7 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, variant 
         style={{
           fontSize: '36px',
           fontWeight: 700,
-          color: isDark ? 'var(--bg-white)' : '#111827',
+          color: isDark ? '#ffffff' : '#111827',
           marginBottom: '4px'
         }}
       >
@@ -130,7 +130,7 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, variant 
       <div
         style={{
           fontSize: '14px',
-          color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)',
+          color: isDark ? '#a3a3a3' : '#6b7280',
           fontWeight: 500
         }}
       >

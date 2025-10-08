@@ -142,10 +142,10 @@ export function Agendamentos() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'realizado': return 'var(--primary)';
-      case 'confirmado': return 'var(--secondary)';
-      case 'cancelado': return 'var(--destructive)';
-      default: return 'var(--warning)';
+      case 'realizado': return '#10b981';
+      case 'confirmado': return '#3b82f6';
+      case 'cancelado': return '#ef4444';
+      default: return '#f59e0b';
     }
   };
 
@@ -213,15 +213,15 @@ export function Agendamentos() {
           {/* Mini Stats */}
           <div className="calendar-mini-stats">
             <div className="mini-stat">
-              <span className="mini-stat-value" style={{ color: 'var(--warning)' }}>{stats.today}</span>
+              <span className="mini-stat-value" style={{ color: '#f59e0b' }}>{stats.today}</span>
               <span className="mini-stat-label">Hoje</span>
             </div>
             <div className="mini-stat">
-              <span className="mini-stat-value" style={{ color: 'var(--secondary)' }}>{stats.confirmed}</span>
+              <span className="mini-stat-value" style={{ color: '#3b82f6' }}>{stats.confirmed}</span>
               <span className="mini-stat-label">Confirm.</span>
             </div>
             <div className="mini-stat">
-              <span className="mini-stat-value" style={{ color: 'var(--primary)' }}>{stats.completed}</span>
+              <span className="mini-stat-value" style={{ color: '#10b981' }}>{stats.completed}</span>
               <span className="mini-stat-label">Realiz.</span>
             </div>
           </div>
@@ -328,13 +328,13 @@ export function Agendamentos() {
               <span className="summary-card-label">Total do Mês</span>
             </div>
             <div className="summary-card">
-              <span className="summary-card-value" style={{ color: 'var(--secondary)' }}>
+              <span className="summary-card-value" style={{ color: '#3b82f6' }}>
                 {appointments?.filter(a => a.status === 'confirmado').length || 0}
               </span>
               <span className="summary-card-label">Confirmados</span>
             </div>
             <div className="summary-card">
-              <span className="summary-card-value" style={{ color: 'var(--warning)' }}>
+              <span className="summary-card-value" style={{ color: '#f59e0b' }}>
                 {appointments?.filter(a => a.status === 'agendado').length || 0}
               </span>
               <span className="summary-card-label">Pendentes</span>

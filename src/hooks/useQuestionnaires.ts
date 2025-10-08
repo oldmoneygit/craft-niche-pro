@@ -90,7 +90,7 @@ export function useQuestionnaires() {
       });
     },
     staleTime: 5 * 60 * 1000, // 5 minutos
-    gcTime: 30 * 60 * 1000, // 30 minutos (renomeado de cacheTime)
+    cacheTime: 30 * 60 * 1000, // 30 minutos
     refetchOnWindowFocus: false,
     enabled: !!tenantId,
   });

@@ -10,19 +10,19 @@ interface AgendamentosStatCardProps {
 
 const variantStyles = {
   total: {
-    accentColor: 'var(--secondary)',
-    accentLight: 'var(--secondary-alpha)'
+    accentColor: '#3b82f6',
+    accentLight: 'rgba(59, 130, 246, 0.1)'
   },
   today: {
-    accentColor: 'var(--warning)',
+    accentColor: '#f59e0b',
     accentLight: 'rgba(245, 158, 11, 0.1)'
   },
   confirmed: {
-    accentColor: 'var(--primary)',
-    accentLight: 'var(--primary-alpha)'
+    accentColor: '#10b981',
+    accentLight: 'rgba(16, 185, 129, 0.1)'
   },
   completed: {
-    accentColor: 'var(--accent)',
+    accentColor: '#8b5cf6',
     accentLight: 'rgba(139, 92, 246, 0.1)'
   }
 };

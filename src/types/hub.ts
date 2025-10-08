@@ -29,7 +29,7 @@ export interface VerticalConfig {
 }
 
 export const VERTICAL_COLORS: Record<VerticalType, string> = {
-  nutrition: 'var(--primary)',
+  nutrition: '#10b981',
   fitness: '#f97316',
   wellness: '#06b6d4',
   mental: '#a855f7'
@@ -44,7 +44,7 @@ export interface VerticalStyleConfig {
 
 export const VERTICAL_STYLES: Record<VerticalType, VerticalStyleConfig> = {
   nutrition: {
-    color: 'var(--primary)',
+    color: '#10b981',
     bgStart: '#18181b',
     bgEnd: '#1a2e1e',
     borderColor: '#22543d'

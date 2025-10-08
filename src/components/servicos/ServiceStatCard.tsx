@@ -9,15 +9,15 @@ interface ServiceStatCardProps {
 
 const variantConfig = {
   total: {
-    accent: 'var(--secondary)',
-    accentLight: 'var(--secondary-alpha)'
+    accent: '#3b82f6',
+    accentLight: 'rgba(59, 130, 246, 0.1)'
   },
   active: {
-    accent: 'var(--primary)',
-    accentLight: 'var(--primary-alpha)'
+    accent: '#10b981',
+    accentLight: 'rgba(16, 185, 129, 0.1)'
   },
   revenue: {
-    accent: 'var(--warning)',
+    accent: '#f59e0b',
     accentLight: 'rgba(245, 158, 11, 0.1)'
   }
 };
@@ -83,7 +83,7 @@ export const ServiceStatCard: React.FC<ServiceStatCardProps> = ({ label, value, 
       />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-        <div style={{ fontSize: '13px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <div style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
           {label}
         </div>
         <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: config.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -93,7 +93,7 @@ export const ServiceStatCard: React.FC<ServiceStatCardProps> = ({ label, value, 
         </div>
       </div>
 
-      <div style={{ fontSize: '36px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827' }}>
+      <div style={{ fontSize: '36px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>
         {value}
       </div>
     </div>

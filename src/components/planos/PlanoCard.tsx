@@ -29,24 +29,24 @@ interface PlanoCardProps {
 const statusConfig = {
   ativo: {
     label: 'ATIVO',
-    bgColor: 'var(--primary)',
-    bgColorDark: 'var(--primary-dark)',
-    borderColor: 'var(--primary)',
-    avatarBg: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)'
+    bgColor: '#10b981',
+    bgColorDark: '#059669',
+    borderColor: '#10b981',
+    avatarBg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
   },
   pendente: {
     label: 'PENDENTE',
-    bgColor: 'var(--warning)',
+    bgColor: '#f59e0b',
     bgColorDark: '#d97706',
-    borderColor: 'var(--warning)',
-    avatarBg: 'linear-gradient(135deg, var(--warning) 0%, #d97706 100%)'
+    borderColor: '#f59e0b',
+    avatarBg: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
   },
   concluido: {
     label: 'CONCLUÍDO',
-    bgColor: 'var(--text-secondary)',
+    bgColor: '#6b7280',
     bgColorDark: '#4b5563',
-    borderColor: 'var(--text-secondary)',
-    avatarBg: 'linear-gradient(135deg, var(--text-secondary) 0%, #4b5563 100%)'
+    borderColor: '#6b7280',
+    avatarBg: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)'
   }
 };
 
@@ -139,10 +139,10 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
             {clientInitials}
           </div>
           <div>
-            <h3 style={{ fontSize: '19px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '2px' }}>
+            <h3 style={{ fontSize: '19px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '2px' }}>
               {clientName}
             </h3>
-            <p style={{ fontSize: '13px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)' }}>
+            <p style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
               Objetivo: {objective}
             </p>
           </div>
@@ -203,7 +203,7 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
                     borderRadius: '8px',
                     border: 'none',
                     background: status === s ? `${statusConfig[s].bgColor}20` : 'transparent',
-                    color: status === s ? statusConfig[s].bgColor : (isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)'),
+                    color: status === s ? statusConfig[s].bgColor : (isDark ? '#a3a3a3' : '#6b7280'),
                     fontWeight: status === s ? 700 : 600,
                     fontSize: '12px',
                     cursor: 'pointer',
@@ -233,7 +233,7 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
       </div>
 
       <div style={{ marginBottom: '18px' }}>
-        <div style={{ fontSize: '17px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '14px' }}>
+        <div style={{ fontSize: '17px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '14px' }}>
           {planTitle}
         </div>
         <div style={{ display: 'grid', gap: '8px' }}>
@@ -244,8 +244,8 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
           ].map(({ icon: Icon, label, value, color }) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
               <Icon style={{ width: '18px', height: '18px', color: color, flexShrink: 0 }} />
-              <span style={{ color: isDark ? 'var(--text-tertiary)' : 'var(--text-secondary)', fontWeight: 500 }}>{label}</span>
-              <span style={{ fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827', marginLeft: 'auto' }}>{value}</span>
+              <span style={{ color: isDark ? '#9ca3af' : '#6b7280', fontWeight: 500 }}>{label}</span>
+              <span style={{ fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginLeft: 'auto' }}>{value}</span>
             </div>
           ))}
         </div>
@@ -261,16 +261,16 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
         borderRadius: '14px' 
       }}>
         {[
-          { value: calories, label: 'CALORIAS', color: 'var(--warning)' },
-          { value: protein, label: 'PROTEÍNAS', color: 'var(--secondary)' },
-          { value: fat, label: 'GORDURAS', color: 'var(--destructive)' },
-          { value: carbs, label: 'CARBOIDRATOS', color: 'var(--primary)' }
+          { value: calories, label: 'CALORIAS', color: '#f59e0b' },
+          { value: protein, label: 'PROTEÍNAS', color: '#3b82f6' },
+          { value: fat, label: 'GORDURAS', color: '#ef4444' },
+          { value: carbs, label: 'CARBOIDRATOS', color: '#10b981' }
         ].map(({ value, label, color }) => (
           <div key={label} style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '20px', fontWeight: 700, color: color, marginBottom: '4px', lineHeight: 1 }}>
               {value}
             </div>
-            <div style={{ fontSize: '9px', color: isDark ? 'var(--text-tertiary)' : 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+            <div style={{ fontSize: '9px', color: isDark ? '#9ca3af' : '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
               {label}
             </div>
           </div>
@@ -284,12 +284,12 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
           padding: '14px 16px',
           background: isDark ? 'rgba(16, 185, 129, 0.08)' : 'rgba(16, 185, 129, 0.06)',
           borderRadius: '12px',
-          borderLeft: '3px solid var(--primary)'
+          borderLeft: '3px solid #10b981'
         }}>
           <div style={{ 
             fontSize: '11px', 
             fontWeight: 700, 
-            color: 'var(--primary)', 
+            color: '#10b981', 
             textTransform: 'uppercase', 
             letterSpacing: '0.8px',
             marginBottom: '10px'
@@ -303,26 +303,26 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
           }}>
             {targetCalories && (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: isDark ? 'var(--text-tertiary)' : 'var(--text-secondary)', fontWeight: 500 }}>Calorias:</span>
-                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--warning)' }}>{targetCalories} kcal</span>
+                <span style={{ fontSize: '12px', color: isDark ? '#9ca3af' : '#6b7280', fontWeight: 500 }}>Calorias:</span>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#f59e0b' }}>{targetCalories} kcal</span>
               </div>
             )}
             {targetProtein && (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: isDark ? 'var(--text-tertiary)' : 'var(--text-secondary)', fontWeight: 500 }}>Proteínas:</span>
-                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--secondary)' }}>{targetProtein}g</span>
+                <span style={{ fontSize: '12px', color: isDark ? '#9ca3af' : '#6b7280', fontWeight: 500 }}>Proteínas:</span>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#3b82f6' }}>{targetProtein}g</span>
               </div>
             )}
             {targetCarbs && (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: isDark ? 'var(--text-tertiary)' : 'var(--text-secondary)', fontWeight: 500 }}>Carboidratos:</span>
-                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--primary)' }}>{targetCarbs}g</span>
+                <span style={{ fontSize: '12px', color: isDark ? '#9ca3af' : '#6b7280', fontWeight: 500 }}>Carboidratos:</span>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#10b981' }}>{targetCarbs}g</span>
               </div>
             )}
             {targetFats && (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: isDark ? 'var(--text-tertiary)' : 'var(--text-secondary)', fontWeight: 500 }}>Gorduras:</span>
-                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--destructive)' }}>{targetFats}g</span>
+                <span style={{ fontSize: '12px', color: isDark ? '#9ca3af' : '#6b7280', fontWeight: 500 }}>Gorduras:</span>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#ef4444' }}>{targetFats}g</span>
               </div>
             )}
           </div>
@@ -343,7 +343,7 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
               borderRadius: '10px',
               border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.6)',
               background: 'transparent',
-              color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)',
+              color: isDark ? '#a3a3a3' : '#6b7280',
               fontWeight: 600,
               fontSize: '13px',
               cursor: 'pointer',
@@ -361,7 +361,7 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)';
+              e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
               e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.6)';
               e.currentTarget.style.transform = 'translateY(0)';
             }}
@@ -378,7 +378,7 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
               borderRadius: '10px',
               border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.6)',
               background: 'transparent',
-              color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)',
+              color: isDark ? '#a3a3a3' : '#6b7280',
               fontWeight: 600,
               fontSize: '13px',
               cursor: 'pointer',
@@ -389,14 +389,14 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
               gap: '6px'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = isDark ? 'var(--secondary)15' : 'var(--secondary)10';
-              e.currentTarget.style.color = 'var(--secondary)';
-              e.currentTarget.style.borderColor = 'var(--secondary)';
+              e.currentTarget.style.background = isDark ? '#3b82f615' : '#3b82f610';
+              e.currentTarget.style.color = '#3b82f6';
+              e.currentTarget.style.borderColor = '#3b82f6';
               e.currentTarget.style.transform = 'translateY(-2px)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)';
+              e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
               e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.6)';
               e.currentTarget.style.transform = 'translateY(0)';
             }}
@@ -413,7 +413,7 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
               borderRadius: '10px',
               border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.6)',
               background: 'transparent',
-              color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)',
+              color: isDark ? '#a3a3a3' : '#6b7280',
               fontWeight: 600,
               fontSize: '13px',
               cursor: 'pointer',
@@ -424,14 +424,14 @@ export const PlanoCard: React.FC<PlanoCardProps> = ({
               gap: '6px'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = isDark ? 'var(--destructive)15' : 'var(--destructive)10';
-              e.currentTarget.style.color = 'var(--destructive)';
-              e.currentTarget.style.borderColor = 'var(--destructive)';
+              e.currentTarget.style.background = isDark ? '#ef444415' : '#ef444410';
+              e.currentTarget.style.color = '#ef4444';
+              e.currentTarget.style.borderColor = '#ef4444';
               e.currentTarget.style.transform = 'translateY(-2px)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)';
+              e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
               e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.6)';
               e.currentTarget.style.transform = 'translateY(0)';
             }}

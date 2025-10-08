@@ -17,13 +17,13 @@ interface LembreteCardProps {
 const typeConfig = {
   consulta: {
     icon: Calendar,
-    color: 'var(--secondary)',
-    colorLight: 'var(--secondary-alpha)'
+    color: '#3b82f6',
+    colorLight: 'rgba(59, 130, 246, 0.1)'
   },
   confirmacao: {
     icon: CheckCircle,
-    color: 'var(--primary)',
-    colorLight: 'var(--primary-alpha)'
+    color: '#10b981',
+    colorLight: 'rgba(16, 185, 129, 0.1)'
   },
   feedback: {
     icon: MessageSquare,
@@ -32,7 +32,7 @@ const typeConfig = {
   },
   retorno: {
     icon: Clock,
-    color: 'var(--warning)',
+    color: '#f59e0b',
     colorLight: 'rgba(245, 158, 11, 0.1)'
   },
   aniversario: {
@@ -125,10 +125,10 @@ export const LembreteCard: React.FC<LembreteCardProps> = ({
             <Icon style={{ width: '24px', height: '24px', color: config.color }} />
           </div>
           <div>
-            <h3 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '4px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '4px' }}>
               {title}
             </h3>
-            <p style={{ fontSize: '13px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)' }}>
+            <p style={{ fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
               {subtitle}
             </p>
           </div>
@@ -162,22 +162,22 @@ export const LembreteCard: React.FC<LembreteCardProps> = ({
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', padding: '12px 16px', background: `${config.color}0D`, borderRadius: '10px', borderLeft: `3px solid ${config.color}` }}>
         <Clock style={{ width: '20px', height: '20px', color: config.color }} />
-        <span style={{ fontSize: '14px', color: isDark ? 'var(--bg-white)' : '#111827', fontWeight: 600 }}>
+        <span style={{ fontSize: '14px', color: isDark ? '#ffffff' : '#111827', fontWeight: 600 }}>
           {timing}
         </span>
       </div>
 
       <div style={{ marginBottom: '20px' }}>
-        <div style={{ fontSize: '13px', fontWeight: 600, color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <div style={{ fontSize: '13px', fontWeight: 600, color: isDark ? '#a3a3a3' : '#6b7280', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
           Mensagem Atual
         </div>
-        <div style={{ background: isDark ? 'rgba(20, 20, 20, 0.9)' : 'var(--bg-white)', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '12px', padding: '16px', fontSize: '14px', lineHeight: 1.6, color: isDark ? 'var(--bg-white)' : '#111827', minHeight: '100px', maxHeight: '150px', overflowY: 'auto', whiteSpace: 'pre-line' }}>
+        <div style={{ background: isDark ? 'rgba(20, 20, 20, 0.9)' : '#ffffff', border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)', borderRadius: '12px', padding: '16px', fontSize: '14px', lineHeight: 1.6, color: isDark ? '#ffffff' : '#111827', minHeight: '100px', maxHeight: '150px', overflowY: 'auto', whiteSpace: 'pre-line' }}>
           {message}
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
           {variables.map((variable) => (
-            <span key={variable} style={{ padding: '4px 10px', background: 'var(--primary-alpha)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '6px', fontSize: '11px', fontWeight: 600, color: 'var(--primary)', fontFamily: 'monospace' }}>
+            <span key={variable} style={{ padding: '4px 10px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '6px', fontSize: '11px', fontWeight: 600, color: '#10b981', fontFamily: 'monospace' }}>
               {variable}
             </span>
           ))}
@@ -193,7 +193,7 @@ export const LembreteCard: React.FC<LembreteCardProps> = ({
             borderRadius: '10px',
             border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
             background: 'transparent',
-            color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)',
+            color: isDark ? '#a3a3a3' : '#6b7280',
             fontWeight: 600,
             fontSize: '13px',
             cursor: 'pointer',
@@ -210,7 +210,7 @@ export const LembreteCard: React.FC<LembreteCardProps> = ({
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)';
+            e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
             e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
           }}
         >

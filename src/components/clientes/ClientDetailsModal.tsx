@@ -207,7 +207,7 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
           <div 
             className="p-8 relative"
             style={{
-              background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
             }}
           >
             <div className="flex items-center gap-5">
@@ -259,8 +259,8 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                 onClick={() => setActiveTab(tab.id)}
                 className="px-5 py-4 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap"
                 style={{
-                  color: activeTab === tab.id ? 'var(--primary)' : 'var(--text-muted)',
-                  borderColor: activeTab === tab.id ? 'var(--primary)' : 'transparent'
+                  color: activeTab === tab.id ? '#10b981' : 'var(--text-muted)',
+                  borderColor: activeTab === tab.id ? '#10b981' : 'transparent'
                 }}
               >
                 {tab.label}
@@ -276,7 +276,7 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                   <button
                     onClick={() => setShowEditModal(true)}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-white transition-all hover:scale-105"
-                    style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)' }}
+                    style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
                   >
                     <Edit size={16} />
                     Editar Informações
@@ -327,7 +327,7 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                         style={{
                           background: 'var(--bg-card)',
                           backdropFilter: 'blur(20px)',
-                          borderColor: isActive ? 'var(--primary)' : 'var(--border)'
+                          borderColor: isActive ? '#10b981' : 'var(--border)'
                         }}
                       >
                         <div className="flex justify-between items-start mb-3">
@@ -342,8 +342,8 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                           <span 
                             className="px-3 py-1 rounded-lg text-xs font-semibold"
                             style={{
-                              background: isActive ? 'var(--primary-alpha)' : 'var(--error-alpha)',
-                              color: isActive ? 'var(--primary)' : 'var(--destructive)'
+                              background: isActive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                              color: isActive ? '#10b981' : '#ef4444'
                             }}
                           >
                             {isActive ? `${daysLeft} dias restantes` : 'Expirado'}
@@ -364,7 +364,7 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                     <button
                       onClick={() => navigate('/servicos')}
                       className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:scale-105 inline-flex items-center gap-2"
-                      style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)' }}
+                      style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
                     >
                       <Plus size={18} />
                       Contratar Serviço
@@ -388,7 +388,7 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                       style={{
                         background: 'var(--bg-card)',
                         backdropFilter: 'blur(20px)',
-                        borderColor: plan.is_active ? 'var(--primary)' : 'var(--border)'
+                        borderColor: plan.is_active ? '#10b981' : 'var(--border)'
                       }}
                       onClick={() => navigate(`/planos/${plan.id}`)}
                     >
@@ -402,7 +402,7 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                         {plan.is_active && (
                           <span 
                             className="px-3 py-1 rounded-lg text-xs font-semibold"
-                            style={{ background: 'var(--primary-alpha)', color: 'var(--primary)' }}
+                            style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}
                           >
                             Ativo
                           </span>
@@ -436,7 +436,7 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                     <button
                       onClick={() => navigate(`/planos?clientId=${client.id}`)}
                       className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:scale-105"
-                      style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)' }}
+                      style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
                     >
                       Criar Plano
                     </button>
@@ -451,7 +451,7 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                   <button
                     onClick={() => setShowAppointmentModal(true)}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-white transition-all hover:scale-105"
-                    style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)' }}
+                    style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
                   >
                     <Plus size={16} />
                     Criar Consulta
@@ -465,10 +465,10 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                   ) : appointments && appointments.length > 0 ? (
                     appointments.map(apt => {
                       const statusColors: Record<string, { bg: string; text: string }> = {
-                        'agendado': { bg: 'var(--secondary-alpha)', text: 'var(--secondary)' },
-                        'confirmado': { bg: 'var(--primary-alpha)', text: 'var(--primary)' },
-                        'realizado': { bg: 'rgba(163, 163, 163, 0.1)', text: 'var(--text-muted)' },
-                        'cancelado': { bg: 'var(--error-alpha)', text: 'var(--destructive)' }
+                        'agendado': { bg: 'rgba(59, 130, 246, 0.1)', text: '#3b82f6' },
+                        'confirmado': { bg: 'rgba(16, 185, 129, 0.1)', text: '#10b981' },
+                        'realizado': { bg: 'rgba(163, 163, 163, 0.1)', text: '#737373' },
+                        'cancelado': { bg: 'rgba(239, 68, 68, 0.1)', text: '#ef4444' }
                       };
                       
                       return (
@@ -533,7 +533,7 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                       <button
                         onClick={() => navigate(`/agendamentos?action=new&clientId=${client.id}`)}
                         className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:scale-105"
-                        style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)' }}
+                        style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
                       >
                         Agendar Consulta
                       </button>
@@ -595,7 +595,7 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                               <button
                                 onClick={() => setViewingAnamnese(anamnese)}
                                 className="flex-1 px-4 py-2 rounded-lg font-semibold text-white transition-all hover:scale-105"
-                                style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)' }}
+                                style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
                               >
                                 <Eye className="w-4 h-4 inline mr-2" />
                                 Ver Relatório
@@ -632,7 +632,7 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                         <button
                           onClick={() => setEditingAnamnese(true)}
                           className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:scale-105"
-                          style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)' }}
+                          style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
                         >
                           Criar Primeira Anamnese
                         </button>
@@ -649,7 +649,7 @@ export function ClientDetailsModal({ client, onClose }: ClientDetailsModalProps)
                   <button
                     onClick={() => setShowQuestionnaireModal(true)}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-white transition-all hover:scale-105"
-                    style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)' }}
+                    style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
                   >
                     <Plus size={16} />
                     Enviar Questionário

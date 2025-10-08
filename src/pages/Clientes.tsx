@@ -241,8 +241,8 @@ export function Clientes() {
         <div 
           className="p-6 rounded-2xl border flex items-center gap-3 mb-6"
           style={{ 
-            background: 'var(--error-alpha)', 
-            borderColor: 'var(--destructive)'
+            background: 'rgba(239, 68, 68, 0.1)', 
+            borderColor: '#ef4444'
           }}
         >
           <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0" />
@@ -286,7 +286,7 @@ export function Clientes() {
               onClick={() => setIsCreateModalOpen(true)}
               className="px-6 py-3 rounded-xl font-semibold text-white transition-all hover:scale-105"
               style={{
-                background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)'
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
               }}
             >
               Adicionar Cliente

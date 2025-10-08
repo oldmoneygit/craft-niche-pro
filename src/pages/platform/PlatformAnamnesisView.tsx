@@ -149,7 +149,7 @@ export default function PlatformAnamnesisView() {
       .print\\:hidden { display: none !important; }
       
       .print-header {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
         color: white !important;
         padding: 24px !important;
         border-radius: 12px !important;
@@ -161,7 +161,7 @@ export default function PlatformAnamnesisView() {
       .print-card {
         background: white !important;
         border: 2px solid #e5e7eb !important;
-        border-left: 6px solid var(--primary) !important;
+        border-left: 6px solid #10b981 !important;
         border-radius: 8px !important;
         padding: 20px !important;
         margin-bottom: 20px !important;
@@ -171,18 +171,18 @@ export default function PlatformAnamnesisView() {
       }
       
       .print-section-title {
-        color: var(--primary-dark) !important;
+        color: #059669 !important;
         font-size: 18px !important;
         font-weight: 700 !important;
         margin-bottom: 16px !important;
         padding-bottom: 8px !important;
-        border-bottom: 3px solid var(--primary) !important;
+        border-bottom: 3px solid #10b981 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
       
       .print-label {
-        color: var(--text-secondary) !important;
+        color: #6b7280 !important;
         font-size: 11px !important;
         font-weight: 600 !important;
         text-transform: uppercase !important;
@@ -197,7 +197,7 @@ export default function PlatformAnamnesisView() {
       }
       
       .print-imc-box {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
         color: white !important;
         padding: 16px !important;
         border-radius: 8px !important;
@@ -225,7 +225,7 @@ export default function PlatformAnamnesisView() {
       
       .print-main-goal {
         background: #fef3c7 !important;
-        border-left: 6px solid var(--warning) !important;
+        border-left: 6px solid #f59e0b !important;
         padding: 16px !important;
         border-radius: 8px !important;
         -webkit-print-color-adjust: exact !important;
@@ -256,7 +256,7 @@ export default function PlatformAnamnesisView() {
       
       .print-divider {
         height: 3px !important;
-        background: linear-gradient(90deg, var(--primary) 0%, transparent 100%) !important;
+        background: linear-gradient(90deg, #10b981 0%, transparent 100%) !important;
         margin: 20px 0 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
@@ -267,7 +267,7 @@ export default function PlatformAnamnesisView() {
         padding-top: 16px !important;
         border-top: 2px solid #e5e7eb !important;
         text-align: center !important;
-        color: var(--text-secondary) !important;
+        color: #6b7280 !important;
         font-size: 11px !important;
       }
     }

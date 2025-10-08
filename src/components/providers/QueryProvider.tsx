@@ -44,7 +44,16 @@ export function QueryProvider({ children }: QueryProviderProps) {
       {/* React Query DevTools apenas em desenvolvimento */}
       {process.env.NODE_ENV === 'development' && (
         <React.Suspense fallback={null}>
-          <LazyReactQueryDevtools initialIsOpen={false} />
+          <LazyReactQueryDevtools 
+            initialIsOpen={false}
+            position="bottom-right"
+            toggleButtonProps={{
+              style: {
+                marginLeft: '5px',
+                transform: 'none',
+              },
+            }}
+          />
         </React.Suspense>
       )}
     </QueryClientProvider>
@@ -85,8 +94,8 @@ export const CacheUtils = {
     return {
       totalQueries: queries.length,
       activeQueries: queries.filter(q => q.state.status === 'pending').length,
-      staleQueries: queries.filter(q => q.state.fetchStatus === 'idle' && q.state.status === 'success').length,
-      cacheSize: queries.length,
+      staleQueries: queries.filter(q => q.state.isStale).length,
+      cacheSize: queries.length, // Simplificado
     };
   },
 };

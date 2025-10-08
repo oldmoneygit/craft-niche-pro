@@ -71,7 +71,9 @@ export const useCacheDemo = () => {
     }
 
     // Test 3: Metrics
-    console.log('Metrics Test: ✅ PASS (metrics tracking removed)');
+    cacheMetrics.trackCacheHit('test-query');
+    cacheMetrics.trackCacheMiss('test-query-2');
+    console.log('Metrics Test: ✅ PASS');
   }, [cacheMetrics]);
 
   return {

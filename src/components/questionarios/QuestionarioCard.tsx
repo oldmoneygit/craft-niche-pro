@@ -18,22 +18,22 @@ interface QuestionarioCardProps {
 const categoryConfig = {
   anamnese: {
     label: 'Anamnese',
-    color: 'var(--secondary)',
-    bg: 'var(--secondary-alpha)'
+    color: '#3b82f6',
+    bg: 'rgba(59, 130, 246, 0.1)'
   },
   habitos: {
     label: 'Hábitos',
-    color: 'var(--primary)',
-    bg: 'var(--primary-alpha)'
+    color: '#10b981',
+    bg: 'rgba(16, 185, 129, 0.1)'
   },
   recordatorio: {
     label: 'Recordatório',
-    color: 'var(--warning)',
+    color: '#f59e0b',
     bg: 'rgba(245, 158, 11, 0.1)'
   },
   satisfacao: {
     label: 'Satisfação',
-    color: 'var(--accent)',
+    color: '#8b5cf6',
     bg: 'rgba(139, 92, 246, 0.1)'
   }
 };
@@ -146,8 +146,8 @@ export const QuestionarioCard: React.FC<QuestionarioCardProps> = ({
             borderRadius: '12px',
             fontSize: '12px',
             fontWeight: 600,
-            background: isActive ? 'var(--primary-alpha)' : 'rgba(107, 114, 128, 0.1)',
-            color: isActive ? 'var(--primary)' : 'var(--text-secondary)'
+            background: isActive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)',
+            color: isActive ? '#10b981' : '#6b7280'
           }}
         >
           <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor' }} />
@@ -155,10 +155,10 @@ export const QuestionarioCard: React.FC<QuestionarioCardProps> = ({
         </span>
       </div>
 
-      <h3 style={{ fontSize: '20px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
+      <h3 style={{ fontSize: '20px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
         {title}
       </h3>
-      <p style={{ fontSize: '14px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '20px' }}>
+      <p style={{ fontSize: '14px', color: isDark ? '#a3a3a3' : '#6b7280', lineHeight: 1.6, marginBottom: '20px' }}>
         {description}
       </p>
 
@@ -169,9 +169,9 @@ export const QuestionarioCard: React.FC<QuestionarioCardProps> = ({
           { icon: FileText, value: responses, label: 'respostas' },
           { icon: TrendingUp, value: completion !== null ? `${completion}%` : '-', label: 'conclusão' }
         ].map((item, idx) => (
-          <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)' }}>
+          <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: isDark ? '#a3a3a3' : '#6b7280' }}>
             <item.icon style={{ width: '18px', height: '18px', color: config.color }} />
-            <span style={{ fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827' }}>{item.value}</span> {item.label}
+            <span style={{ fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>{item.value}</span> {item.label}
           </div>
         ))}
       </div>
@@ -191,7 +191,7 @@ export const QuestionarioCard: React.FC<QuestionarioCardProps> = ({
               borderRadius: '10px',
               border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
               background: 'transparent',
-              color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)',
+              color: isDark ? '#a3a3a3' : '#6b7280',
               fontWeight: 600,
               fontSize: '13px',
               cursor: 'pointer',
@@ -208,7 +208,7 @@ export const QuestionarioCard: React.FC<QuestionarioCardProps> = ({
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)';
+              e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
               e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
             }}
           >

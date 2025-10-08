@@ -46,7 +46,7 @@ export function DashboardDetailsModal({ isOpen, onClose, title, type, data }: Da
                 width: '48px',
                 height: '48px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%)',
+                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -72,8 +72,8 @@ export function DashboardDetailsModal({ isOpen, onClose, title, type, data }: Da
                 borderRadius: '12px',
                 fontSize: '11px',
                 fontWeight: 600,
-                background: appointment.status === 'confirmado' ? 'var(--secondary-alpha)' : 'rgba(245, 158, 11, 0.1)',
-                color: appointment.status === 'confirmado' ? 'var(--secondary)' : 'var(--warning)'
+                background: appointment.status === 'confirmado' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                color: appointment.status === 'confirmado' ? '#3b82f6' : '#f59e0b'
               }}
             >
               {appointment.status}
@@ -101,7 +101,7 @@ export function DashboardDetailsModal({ isOpen, onClose, title, type, data }: Da
                 width: '48px',
                 height: '48px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -147,7 +147,7 @@ export function DashboardDetailsModal({ isOpen, onClose, title, type, data }: Da
                 width: '48px',
                 height: '48px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, var(--warning) 0%, #d97706 100%)',
+                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -190,7 +190,7 @@ export function DashboardDetailsModal({ isOpen, onClose, title, type, data }: Da
                 width: '48px',
                 height: '48px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, var(--destructive) 0%, #dc2626 100%)',
+                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

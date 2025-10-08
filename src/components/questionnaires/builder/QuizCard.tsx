@@ -43,7 +43,7 @@ export function QuizCard({ question, index }: QuizCardProps) {
           style={{
             width: '28px',
             height: '28px',
-            background: 'var(--primary)',
+            background: '#10b981',
             color: 'white',
             borderRadius: '50%',
             display: 'flex',
@@ -74,9 +74,9 @@ export function QuizCard({ question, index }: QuizCardProps) {
                   textAlign: 'left',
                   padding: '16px',
                   borderRadius: '12px',
-                  border: isSelected ? '2px solid var(--primary)' : '2px solid #e5e7eb',
-                  background: isSelected ? 'var(--primary-alpha)' : 'white',
-                  color: isSelected ? 'var(--primary)' : '#374151',
+                  border: isSelected ? '2px solid #10b981' : '2px solid #e5e7eb',
+                  background: isSelected ? 'rgba(16, 185, 129, 0.1)' : 'white',
+                  color: isSelected ? '#10b981' : '#374151',
                   fontWeight: isSelected ? '600' : '500',
                   fontSize: '15px',
                   cursor: 'pointer',
@@ -85,7 +85,7 @@ export function QuizCard({ question, index }: QuizCardProps) {
                 }}
                 onMouseEnter={(e) => {
                   if (!isSelected) {
-                    e.currentTarget.style.borderColor = 'var(--primary)';
+                    e.currentTarget.style.borderColor = '#10b981';
                     e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)';
                   }
                 }}
@@ -122,7 +122,7 @@ export function QuizCard({ question, index }: QuizCardProps) {
                   transition: 'all 0.2s ease'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--primary)';
+                  e.currentTarget.style.borderColor = '#10b981';
                   e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)';
                 }}
                 onMouseLeave={(e) => {
@@ -144,7 +144,7 @@ export function QuizCard({ question, index }: QuizCardProps) {
                     width: '20px',
                     height: '20px',
                     marginRight: '12px',
-                    accentColor: 'var(--primary)',
+                    accentColor: '#10b981',
                     cursor: 'pointer'
                   }}
                 />
@@ -173,8 +173,8 @@ export function QuizCard({ question, index }: QuizCardProps) {
             outline: 'none'
           }}
           onFocus={(e) => {
-            e.currentTarget.style.borderColor = 'var(--primary)';
-            e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-alpha)';
+            e.currentTarget.style.borderColor = '#10b981';
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
           }}
           onBlur={(e) => {
             e.currentTarget.style.borderColor = '#e5e7eb';
@@ -201,8 +201,8 @@ export function QuizCard({ question, index }: QuizCardProps) {
             lineHeight: '1.5'
           }}
           onFocus={(e) => {
-            e.currentTarget.style.borderColor = 'var(--primary)';
-            e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-alpha)';
+            e.currentTarget.style.borderColor = '#10b981';
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
           }}
           onBlur={(e) => {
             e.currentTarget.style.borderColor = '#e5e7eb';
@@ -227,8 +227,8 @@ export function QuizCard({ question, index }: QuizCardProps) {
             outline: 'none'
           }}
           onFocus={(e) => {
-            e.currentTarget.style.borderColor = 'var(--primary)';
-            e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-alpha)';
+            e.currentTarget.style.borderColor = '#10b981';
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
           }}
           onBlur={(e) => {
             e.currentTarget.style.borderColor = '#e5e7eb';
@@ -251,9 +251,9 @@ export function QuizCard({ question, index }: QuizCardProps) {
                     flex: 1,
                     padding: '20px 0',
                     borderRadius: '12px',
-                    border: isSelected ? '2px solid var(--primary)' : '2px solid #e5e7eb',
-                    background: isSelected ? 'var(--primary-alpha)' : 'white',
-                    color: isSelected ? 'var(--primary)' : '#374151',
+                    border: isSelected ? '2px solid #10b981' : '2px solid #e5e7eb',
+                    background: isSelected ? 'rgba(16, 185, 129, 0.1)' : 'white',
+                    color: isSelected ? '#10b981' : '#374151',
                     fontSize: '18px',
                     fontWeight: '700',
                     cursor: 'pointer',
@@ -261,7 +261,7 @@ export function QuizCard({ question, index }: QuizCardProps) {
                   }}
                   onMouseEnter={(e) => {
                     if (!isSelected) {
-                      e.currentTarget.style.borderColor = 'var(--primary)';
+                      e.currentTarget.style.borderColor = '#10b981';
                       e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)';
                     }
                   }}
@@ -277,7 +277,7 @@ export function QuizCard({ question, index }: QuizCardProps) {
               );
             })}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: 'var(--text-tertiary)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: '#9ca3af' }}>
             <span>Discordo totalmente</span>
             <span>Concordo totalmente</span>
           </div>

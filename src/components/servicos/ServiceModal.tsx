@@ -33,9 +33,9 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose }) =
     padding: '12px 16px',
     borderRadius: '12px',
     border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
-    background: isDark ? 'rgba(20, 20, 20, 0.9)' : 'var(--bg-white)',
+    background: isDark ? 'rgba(20, 20, 20, 0.9)' : '#ffffff',
     backdropFilter: 'blur(10px)',
-    color: isDark ? 'var(--bg-white)' : '#111827',
+    color: isDark ? '#ffffff' : '#111827',
     fontSize: '14px',
     transition: 'all 0.3s ease'
   };
@@ -74,7 +74,7 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose }) =
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827' }}>
+          <h2 style={{ fontSize: '24px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>
             Novo Serviço
           </h2>
           <button
@@ -85,7 +85,7 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose }) =
               borderRadius: '10px',
               border: 'none',
               background: 'transparent',
-              color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)',
+              color: isDark ? '#a3a3a3' : '#6b7280',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
               display: 'flex',
@@ -93,12 +93,12 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose }) =
               justifyContent: 'center'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--error-alpha)';
-              e.currentTarget.style.color = 'var(--destructive)';
+              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+              e.currentTarget.style.color = '#ef4444';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)';
+              e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
             }}
           >
             <X style={{ width: '24px', height: '24px' }} />
@@ -107,7 +107,7 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose }) =
 
         <form onSubmit={(e) => { e.preventDefault(); alert('Serviço criado!'); onClose(); }}>
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
               Nome do Serviço
             </label>
             <input
@@ -115,8 +115,8 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose }) =
               placeholder="Ex: Acompanhamento Mensal"
               style={inputStyle}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = 'var(--primary)';
-                e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-alpha)';
+                e.currentTarget.style.borderColor = '#10b981';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
@@ -126,15 +126,15 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose }) =
           </div>
 
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
               Descrição
             </label>
             <textarea
               placeholder="Descreva o que está incluído neste serviço..."
               style={{ ...inputStyle, resize: 'vertical', minHeight: '100px' }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = 'var(--primary)';
-                e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-alpha)';
+                e.currentTarget.style.borderColor = '#10b981';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
@@ -145,7 +145,7 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose }) =
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
                 Duração
               </label>
               <select style={inputStyle}>
@@ -157,7 +157,7 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose }) =
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
                 Modalidade
               </label>
               <select style={inputStyle}>
@@ -171,13 +171,13 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose }) =
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
                 Número de Consultas
               </label>
               <input type="number" placeholder="Ex: 4" style={inputStyle} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
                 Valor (R$)
               </label>
               <input type="text" placeholder="Ex: 297,00" style={inputStyle} />
@@ -194,7 +194,7 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose }) =
                 borderRadius: '12px',
                 border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
                 background: 'transparent',
-                color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)',
+                color: isDark ? '#a3a3a3' : '#6b7280',
                 fontWeight: 600,
                 fontSize: '14px',
                 cursor: 'pointer',
@@ -210,7 +210,7 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose }) =
                 padding: '12px 24px',
                 borderRadius: '12px',
                 border: 'none',
-                background: 'var(--primary)',
+                background: '#10b981',
                 color: 'white',
                 fontWeight: 600,
                 fontSize: '14px',
@@ -218,12 +218,12 @@ export const ServiceModal: React.FC<ServiceModalProps> = ({ isOpen, onClose }) =
                 transition: 'all 0.3s ease'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--primary-dark)';
+                e.currentTarget.style.background = '#059669';
                 e.currentTarget.style.transform = 'translateY(-2px)';
                 e.currentTarget.style.boxShadow = '0 8px 16px rgba(16, 185, 129, 0.3)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'var(--primary)';
+                e.currentTarget.style.background = '#10b981';
                 e.currentTarget.style.transform = 'translateY(0)';
                 e.currentTarget.style.boxShadow = 'none';
               }}

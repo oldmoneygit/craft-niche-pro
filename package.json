@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
-    "lint": "eslint . --config=config/eslint.config.js",
+    "lint": "eslint .",
     "preview": "vite preview",
     "test:e2e": "jest --config=tests/e2e/jest.config.cjs",
     "test:e2e:auth": "jest --config=tests/e2e/jest.config.cjs tests/e2e/specs/auth.spec.js",

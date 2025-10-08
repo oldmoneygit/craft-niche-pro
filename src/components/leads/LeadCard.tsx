@@ -101,7 +101,7 @@ export function LeadCard({ lead, onContact, onSchedule, onDelete }: LeadCardProp
               className="btn btn-reject"
               title="Excluir lead"
             >
-              <X className="w-4 h-4" color="var(--destructive)" strokeWidth={2.5} />
+              <X className="w-4 h-4" color="#ef4444" strokeWidth={2.5} />
             </button>
           </>
         )}
@@ -120,7 +120,7 @@ export function LeadCard({ lead, onContact, onSchedule, onDelete }: LeadCardProp
               className="btn btn-reject"
               title="Excluir lead"
             >
-              <X className="w-4 h-4" color="var(--destructive)" strokeWidth={2.5} />
+              <X className="w-4 h-4" color="#ef4444" strokeWidth={2.5} />
             </button>
           </>
         )}
@@ -131,7 +131,7 @@ export function LeadCard({ lead, onContact, onSchedule, onDelete }: LeadCardProp
             className="btn btn-reject"
             title="Excluir lead"
           >
-            <X className="w-4 h-4" color="var(--destructive)" strokeWidth={2.5} />
+            <X className="w-4 h-4" color="#ef4444" strokeWidth={2.5} />
           </button>
         )}
       </div>

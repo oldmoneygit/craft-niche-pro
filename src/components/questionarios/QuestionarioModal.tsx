@@ -29,9 +29,9 @@ export const QuestionarioModal: React.FC<QuestionarioModalProps> = ({ isOpen, on
     padding: '12px 16px',
     borderRadius: '12px',
     border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
-    background: isDark ? 'rgba(20, 20, 20, 0.9)' : 'var(--bg-white)',
+    background: isDark ? 'rgba(20, 20, 20, 0.9)' : '#ffffff',
     backdropFilter: 'blur(10px)',
-    color: isDark ? 'var(--bg-white)' : '#111827',
+    color: isDark ? '#ffffff' : '#111827',
     fontSize: '14px',
     transition: 'all 0.3s ease'
   };
@@ -70,7 +70,7 @@ export const QuestionarioModal: React.FC<QuestionarioModalProps> = ({ isOpen, on
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: 700, color: isDark ? 'var(--bg-white)' : '#111827' }}>
+          <h2 style={{ fontSize: '24px', fontWeight: 700, color: isDark ? '#ffffff' : '#111827' }}>
             Novo Questionário
           </h2>
           <button
@@ -81,7 +81,7 @@ export const QuestionarioModal: React.FC<QuestionarioModalProps> = ({ isOpen, on
               borderRadius: '10px',
               border: 'none',
               background: 'transparent',
-              color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)',
+              color: isDark ? '#a3a3a3' : '#6b7280',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
               display: 'flex',
@@ -89,12 +89,12 @@ export const QuestionarioModal: React.FC<QuestionarioModalProps> = ({ isOpen, on
               justifyContent: 'center'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--error-alpha)';
-              e.currentTarget.style.color = 'var(--destructive)';
+              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+              e.currentTarget.style.color = '#ef4444';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)';
+              e.currentTarget.style.color = isDark ? '#a3a3a3' : '#6b7280';
             }}
           >
             <X style={{ width: '24px', height: '24px' }} />
@@ -103,7 +103,7 @@ export const QuestionarioModal: React.FC<QuestionarioModalProps> = ({ isOpen, on
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
               Título do Questionário
             </label>
             <input
@@ -113,8 +113,8 @@ export const QuestionarioModal: React.FC<QuestionarioModalProps> = ({ isOpen, on
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               style={inputStyle}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = 'var(--primary)';
-                e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-alpha)';
+                e.currentTarget.style.borderColor = '#10b981';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
@@ -124,7 +124,7 @@ export const QuestionarioModal: React.FC<QuestionarioModalProps> = ({ isOpen, on
           </div>
 
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
               Categoria
             </label>
             <select
@@ -132,8 +132,8 @@ export const QuestionarioModal: React.FC<QuestionarioModalProps> = ({ isOpen, on
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               style={inputStyle}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = 'var(--primary)';
-                e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-alpha)';
+                e.currentTarget.style.borderColor = '#10b981';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
@@ -149,7 +149,7 @@ export const QuestionarioModal: React.FC<QuestionarioModalProps> = ({ isOpen, on
           </div>
 
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
               Descrição
             </label>
             <textarea
@@ -162,8 +162,8 @@ export const QuestionarioModal: React.FC<QuestionarioModalProps> = ({ isOpen, on
                 minHeight: '100px'
               }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = 'var(--primary)';
-                e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-alpha)';
+                e.currentTarget.style.borderColor = '#10b981';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
@@ -173,7 +173,7 @@ export const QuestionarioModal: React.FC<QuestionarioModalProps> = ({ isOpen, on
           </div>
 
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? 'var(--bg-white)' : '#111827', marginBottom: '8px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: isDark ? '#ffffff' : '#111827', marginBottom: '8px' }}>
               Tempo Estimado (minutos)
             </label>
             <input
@@ -183,8 +183,8 @@ export const QuestionarioModal: React.FC<QuestionarioModalProps> = ({ isOpen, on
               onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
               style={inputStyle}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = 'var(--primary)';
-                e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-alpha)';
+                e.currentTarget.style.borderColor = '#10b981';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = isDark ? 'rgba(64, 64, 64, 0.3)' : 'rgba(229, 231, 235, 0.8)';
@@ -203,7 +203,7 @@ export const QuestionarioModal: React.FC<QuestionarioModalProps> = ({ isOpen, on
                 borderRadius: '12px',
                 border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',
                 background: 'transparent',
-                color: isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)',
+                color: isDark ? '#a3a3a3' : '#6b7280',
                 fontWeight: 600,
                 fontSize: '14px',
                 cursor: 'pointer',
@@ -211,7 +211,7 @@ export const QuestionarioModal: React.FC<QuestionarioModalProps> = ({ isOpen, on
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = isDark ? 'rgba(32, 32, 32, 0.8)' : 'rgba(255, 255, 255, 0.95)';
-                e.currentTarget.style.borderColor = isDark ? 'var(--text-muted-light)' : 'var(--text-secondary)';
+                e.currentTarget.style.borderColor = isDark ? '#a3a3a3' : '#6b7280';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = 'transparent';
@@ -227,7 +227,7 @@ export const QuestionarioModal: React.FC<QuestionarioModalProps> = ({ isOpen, on
                 padding: '12px 24px',
                 borderRadius: '12px',
                 border: 'none',
-                background: 'var(--primary)',
+                background: '#10b981',
                 color: 'white',
                 fontWeight: 600,
                 fontSize: '14px',
@@ -235,12 +235,12 @@ export const QuestionarioModal: React.FC<QuestionarioModalProps> = ({ isOpen, on
                 transition: 'all 0.3s ease'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--primary-dark)';
+                e.currentTarget.style.background = '#059669';
                 e.currentTarget.style.transform = 'translateY(-2px)';
                 e.currentTarget.style.boxShadow = '0 8px 16px rgba(16, 185, 129, 0.3)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'var(--primary)';
+                e.currentTarget.style.background = '#10b981';
                 e.currentTarget.style.transform = 'translateY(0)';
                 e.currentTarget.style.boxShadow = 'none';
               }}

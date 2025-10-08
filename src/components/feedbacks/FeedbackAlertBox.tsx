@@ -10,7 +10,7 @@ export const FeedbackAlertBox: React.FC<FeedbackAlertBoxProps> = ({ pendingCount
   return (
     <div
       style={{
-        background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
+        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
         borderRadius: '16px',
         padding: '24px 32px',
         marginBottom: '32px',
@@ -37,7 +37,7 @@ export const FeedbackAlertBox: React.FC<FeedbackAlertBoxProps> = ({ pendingCount
           borderRadius: '12px',
           border: 'none',
           background: 'white',
-          color: 'var(--primary)',
+          color: '#10b981',
           fontWeight: 600,
           fontSize: '14px',
           cursor: 'pointer',

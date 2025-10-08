@@ -5,10 +5,10 @@ export const AgendamentoForm: React.FC = () => {
 
   const inputStyle: React.CSSProperties = {
     padding: '12px 16px',
-    border: isDark ? '1px solid var(--border-dark)' : '1px solid var(--border)',
+    border: isDark ? '1px solid #404040' : '1px solid #e5e5e5',
     borderRadius: '10px',
-    background: isDark ? 'var(--text-primary)' : 'var(--bg-white)',
-    color: isDark ? 'var(--text-primary-light)' : 'var(--text-primary)',
+    background: isDark ? '#171717' : '#ffffff',
+    color: isDark ? '#fafafa' : '#171717',
     fontSize: '14px',
     fontFamily: 'inherit',
     width: '100%'
@@ -17,7 +17,7 @@ export const AgendamentoForm: React.FC = () => {
   const labelStyle: React.CSSProperties = {
     fontSize: '13px',
     fontWeight: 600,
-    color: isDark ? 'var(--text-primary-light)' : 'var(--text-primary)',
+    color: isDark ? '#fafafa' : '#171717',
     marginBottom: '8px',
     display: 'block'
   };

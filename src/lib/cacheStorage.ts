@@ -175,3 +175,6 @@ export class CacheStorage {
     }
   }
 }
+
+// Export para compatibilidade com código existente
+export const CacheStorage = CacheStorage;

@@ -487,8 +487,8 @@ export const ClientDetailsModal = ({ client, onClose, onUpdate }: ClientDetailsM
                                 text={`${planNutrition.kcal.toFixed(0)}`}
                                 styles={buildStyles({
                                   textSize: '16px',
-                                  pathColor: 'var(--primary)',
-                                  textColor: 'var(--primary)',
+                                  pathColor: '#10b981',
+                                  textColor: '#10b981',
                                   trailColor: '#d1fae5'
                                 })}
                               />

@@ -61,7 +61,7 @@ export function MobilePreview({
           {/* Header Verde */}
           <div 
             style={{
-              background: 'var(--primary)',
+              background: '#10b981',
               color: 'white',
               padding: '20px',
               textAlign: 'center'
@@ -122,7 +122,7 @@ export function MobilePreview({
                   textAlign: 'center',
                   paddingTop: '60px',
                   paddingBottom: '60px',
-                  color: 'var(--text-tertiary)'
+                  color: '#9ca3af'
                 }}
               >
                 <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
@@ -154,7 +154,7 @@ export function MobilePreview({
                 borderRadius: '12px',
                 border: 'none',
                 background: currentQuestionIndex === 0 ? '#f3f4f6' : '#f3f4f6',
-                color: 'var(--text-secondary)',
+                color: '#6b7280',
                 fontSize: '15px',
                 fontWeight: '600',
                 cursor: currentQuestionIndex === 0 ? 'not-allowed' : 'pointer',
@@ -182,7 +182,7 @@ export function MobilePreview({
                 padding: '14px',
                 borderRadius: '12px',
                 border: 'none',
-                background: currentQuestionIndex === questions.length - 1 ? 'var(--primary)' : 'var(--primary)',
+                background: currentQuestionIndex === questions.length - 1 ? '#10b981' : '#10b981',
                 color: 'white',
                 fontSize: '15px',
                 fontWeight: '600',
@@ -192,12 +192,12 @@ export function MobilePreview({
               }}
               onMouseEnter={(e) => {
                 if (currentQuestionIndex !== questions.length - 1) {
-                  e.currentTarget.style.background = 'var(--primary-dark)';
+                  e.currentTarget.style.background = '#059669';
                 }
               }}
               onMouseLeave={(e) => {
                 if (currentQuestionIndex !== questions.length - 1) {
-                  e.currentTarget.style.background = 'var(--primary)';
+                  e.currentTarget.style.background = '#10b981';
                 }
               }}
             >

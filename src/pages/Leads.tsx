@@ -174,8 +174,8 @@ export function Leads() {
         <div 
           className="p-6 rounded-2xl border flex items-center gap-3"
           style={{
-            background: 'var(--error-alpha)',
-            borderColor: 'var(--destructive)'
+            background: 'rgba(239, 68, 68, 0.1)',
+            borderColor: '#ef4444'
           }}
         >
           <AlertCircle className="w-5 h-5 text-red-500" />

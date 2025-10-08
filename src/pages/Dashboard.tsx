@@ -183,7 +183,7 @@ export function Dashboard() {
         <div className="dashboard-header">
           <div className="header-left">
             <h1>Bem-vindo de volta! 👋</h1>
-            <p style={{ color: 'var(--destructive)' }}>Erro ao carregar dados: {error.message}</p>
+            <p style={{ color: '#ef4444' }}>Erro ao carregar dados: {error.message}</p>
           </div>
         </div>
       </div>

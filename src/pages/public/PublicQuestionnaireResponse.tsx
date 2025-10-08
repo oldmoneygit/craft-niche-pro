@@ -356,7 +356,7 @@ export default function PublicQuestionnaireResponse() {
   // STEP 1: Info
   if (currentStep === 'info') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-0 sm:p-4" style={{ background: 'linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center p-0 sm:p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
         {/* Container responsivo - com frame no desktop, sem frame no mobile */}
         <div 
           className="w-full h-screen sm:h-auto sm:max-w-[420px] sm:shadow-2xl"
@@ -378,7 +378,7 @@ export default function PublicQuestionnaireResponse() {
             {/* Header Verde */}
             <div 
               style={{
-                background: 'var(--primary)',
+                background: '#10b981',
                 color: 'white',
                 padding: '20px',
                 textAlign: 'center'
@@ -456,7 +456,7 @@ export default function PublicQuestionnaireResponse() {
                       marginBottom: '8px'
                     }}
                   >
-                    <User className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+                    <User className="w-4 h-4" style={{ color: '#10b981' }} />
                     Nome completo *
                   </label>
                   <input
@@ -476,8 +476,8 @@ export default function PublicQuestionnaireResponse() {
                       outline: 'none'
                     }}
                     onFocus={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--primary)';
-                      e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-alpha)';
+                      e.currentTarget.style.borderColor = '#10b981';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
                     }}
                     onBlur={(e) => {
                       e.currentTarget.style.borderColor = '#e5e7eb';
@@ -500,7 +500,7 @@ export default function PublicQuestionnaireResponse() {
                       marginBottom: '8px'
                     }}
                   >
-                    <Phone className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+                    <Phone className="w-4 h-4" style={{ color: '#10b981' }} />
                     Telefone *
                   </label>
                   <input
@@ -532,8 +532,8 @@ export default function PublicQuestionnaireResponse() {
                       outline: 'none'
                     }}
                     onFocus={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--primary)';
-                      e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-alpha)';
+                      e.currentTarget.style.borderColor = '#10b981';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
                     }}
                     onBlur={(e) => {
                       e.currentTarget.style.borderColor = '#e5e7eb';
@@ -556,7 +556,7 @@ export default function PublicQuestionnaireResponse() {
                       marginBottom: '8px'
                     }}
                   >
-                    <Mail className="w-4 h-4" style={{ color: 'var(--primary)' }} />
+                    <Mail className="w-4 h-4" style={{ color: '#10b981' }} />
                     E-mail (opcional)
                   </label>
                   <input
@@ -576,8 +576,8 @@ export default function PublicQuestionnaireResponse() {
                       outline: 'none'
                     }}
                     onFocus={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--primary)';
-                      e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-alpha)';
+                      e.currentTarget.style.borderColor = '#10b981';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
                     }}
                     onBlur={(e) => {
                       e.currentTarget.style.borderColor = '#e5e7eb';
@@ -631,7 +631,7 @@ export default function PublicQuestionnaireResponse() {
                   padding: '14px',
                   borderRadius: '12px',
                   border: 'none',
-                  background: 'var(--primary)',
+                  background: '#10b981',
                   color: 'white',
                   fontSize: '15px',
                   fontWeight: '600',
@@ -639,10 +639,10 @@ export default function PublicQuestionnaireResponse() {
                   transition: 'all 0.2s ease'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'var(--primary-dark)';
+                  e.currentTarget.style.background = '#059669';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'var(--primary)';
+                  e.currentTarget.style.background = '#10b981';
                 }}
               >
                 Iniciar Questionário
@@ -679,7 +679,7 @@ export default function PublicQuestionnaireResponse() {
     const progress = ((currentQuestionIndex + 1) / questionnaire.questions.length) * 100;
 
     return (
-      <div className="min-h-screen flex items-center justify-center p-0 sm:p-4" style={{ background: 'linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center p-0 sm:p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
         {/* Container responsivo - com frame no desktop, sem frame no mobile */}
         <div 
           className="w-full h-screen sm:h-auto sm:max-w-[420px] sm:shadow-2xl"
@@ -701,7 +701,7 @@ export default function PublicQuestionnaireResponse() {
             {/* Header Verde */}
             <div 
               style={{
-                background: 'var(--primary)',
+                background: '#10b981',
                 color: 'white',
                 padding: '20px',
                 textAlign: 'center'
@@ -788,7 +788,7 @@ export default function PublicQuestionnaireResponse() {
                     style={{
                       width: '28px',
                       height: '28px',
-                      background: 'var(--primary)',
+                      background: '#10b981',
                       color: 'white',
                       borderRadius: '50%',
                       display: 'flex',
@@ -804,7 +804,7 @@ export default function PublicQuestionnaireResponse() {
                   </span>
                   <span>
                     {currentQuestion.question}
-                    {currentQuestion.required && <span style={{ color: 'var(--destructive)', marginLeft: '4px' }}>*</span>}
+                    {currentQuestion.required && <span style={{ color: '#ef4444', marginLeft: '4px' }}>*</span>}
                   </span>
                 </div>
 
@@ -827,8 +827,8 @@ export default function PublicQuestionnaireResponse() {
                         outline: 'none'
                       }}
                       onFocus={(e) => {
-                        e.currentTarget.style.borderColor = 'var(--primary)';
-                        e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-alpha)';
+                        e.currentTarget.style.borderColor = '#10b981';
+                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
                       }}
                       onBlur={(e) => {
                         e.currentTarget.style.borderColor = '#e5e7eb';
@@ -857,8 +857,8 @@ export default function PublicQuestionnaireResponse() {
                         lineHeight: '1.5'
                       }}
                       onFocus={(e) => {
-                        e.currentTarget.style.borderColor = 'var(--primary)';
-                        e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-alpha)';
+                        e.currentTarget.style.borderColor = '#10b981';
+                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
                       }}
                       onBlur={(e) => {
                         e.currentTarget.style.borderColor = '#e5e7eb';
@@ -885,8 +885,8 @@ export default function PublicQuestionnaireResponse() {
                         outline: 'none'
                       }}
                       onFocus={(e) => {
-                        e.currentTarget.style.borderColor = 'var(--primary)';
-                        e.currentTarget.style.boxShadow = '0 0 0 3px var(--primary-alpha)';
+                        e.currentTarget.style.borderColor = '#10b981';
+                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
                       }}
                       onBlur={(e) => {
                         e.currentTarget.style.borderColor = '#e5e7eb';
@@ -911,9 +911,9 @@ export default function PublicQuestionnaireResponse() {
                                 aspectRatio: '1',
                                 padding: '12px 0',
                                 borderRadius: '12px',
-                                border: isSelected ? '2px solid var(--primary)' : '2px solid #e5e7eb',
-                                background: isSelected ? 'var(--primary-alpha)' : 'white',
-                                color: isSelected ? 'var(--primary)' : '#374151',
+                                border: isSelected ? '2px solid #10b981' : '2px solid #e5e7eb',
+                                background: isSelected ? 'rgba(16, 185, 129, 0.1)' : 'white',
+                                color: isSelected ? '#10b981' : '#374151',
                                 fontSize: '18px',
                                 fontWeight: '700',
                                 cursor: 'pointer',
@@ -921,7 +921,7 @@ export default function PublicQuestionnaireResponse() {
                               }}
                               onMouseEnter={(e) => {
                                 if (!isSelected) {
-                                  e.currentTarget.style.borderColor = 'var(--primary)';
+                                  e.currentTarget.style.borderColor = '#10b981';
                                   e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)';
                                 }
                               }}
@@ -937,7 +937,7 @@ export default function PublicQuestionnaireResponse() {
                           );
                         })}
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: 'var(--text-tertiary)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: '#9ca3af' }}>
                         <span>😞 Muito ruim</span>
                         <span>😊 Excelente</span>
                       </div>
@@ -961,9 +961,9 @@ export default function PublicQuestionnaireResponse() {
                               textAlign: 'left',
                               padding: '16px',
                               borderRadius: '12px',
-                              border: isSelected ? '2px solid var(--primary)' : '2px solid #e5e7eb',
-                              background: isSelected ? 'var(--primary-alpha)' : 'white',
-                              color: isSelected ? 'var(--primary)' : '#374151',
+                              border: isSelected ? '2px solid #10b981' : '2px solid #e5e7eb',
+                              background: isSelected ? 'rgba(16, 185, 129, 0.1)' : 'white',
+                              color: isSelected ? '#10b981' : '#374151',
                               fontWeight: isSelected ? '600' : '500',
                               fontSize: '15px',
                               cursor: 'pointer',
@@ -972,7 +972,7 @@ export default function PublicQuestionnaireResponse() {
                             }}
                             onMouseEnter={(e) => {
                               if (!isSelected) {
-                                e.currentTarget.style.borderColor = 'var(--primary)';
+                                e.currentTarget.style.borderColor = '#10b981';
                                 e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)';
                               }
                             }}
@@ -1012,7 +1012,7 @@ export default function PublicQuestionnaireResponse() {
                               transition: 'all 0.2s ease'
                             }}
                             onMouseEnter={(e) => {
-                              e.currentTarget.style.borderColor = 'var(--primary)';
+                              e.currentTarget.style.borderColor = '#10b981';
                               e.currentTarget.style.background = 'rgba(16, 185, 129, 0.05)';
                             }}
                             onMouseLeave={(e) => {
@@ -1036,7 +1036,7 @@ export default function PublicQuestionnaireResponse() {
                                 width: '20px',
                                 height: '20px',
                                 marginRight: '12px',
-                                accentColor: 'var(--primary)',
+                                accentColor: '#10b981',
                                 cursor: 'pointer'
                               }}
                             />
@@ -1071,7 +1071,7 @@ export default function PublicQuestionnaireResponse() {
                   borderRadius: '12px',
                   border: 'none',
                   background: currentQuestionIndex === 0 ? '#f3f4f6' : '#f3f4f6',
-                  color: 'var(--text-secondary)',
+                  color: '#6b7280',
                   fontSize: '15px',
                   fontWeight: '600',
                   cursor: currentQuestionIndex === 0 ? 'not-allowed' : 'pointer',
@@ -1099,7 +1099,7 @@ export default function PublicQuestionnaireResponse() {
                   padding: '14px',
                   borderRadius: '12px',
                   border: 'none',
-                  background: !canGoNext() ? 'var(--primary)' : 'var(--primary)',
+                  background: !canGoNext() ? '#10b981' : '#10b981',
                   color: 'white',
                   fontSize: '15px',
                   fontWeight: '600',
@@ -1109,12 +1109,12 @@ export default function PublicQuestionnaireResponse() {
                 }}
                 onMouseEnter={(e) => {
                   if (canGoNext()) {
-                    e.currentTarget.style.background = 'var(--primary-dark)';
+                    e.currentTarget.style.background = '#059669';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (canGoNext()) {
-                    e.currentTarget.style.background = 'var(--primary)';
+                    e.currentTarget.style.background = '#10b981';
                   }
                 }}
               >
@@ -1129,7 +1129,7 @@ export default function PublicQuestionnaireResponse() {
 
   // STEP 3: Review
   return (
-    <div className="min-h-screen flex items-center justify-center p-0 sm:p-4" style={{ background: 'linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%)' }}>
+    <div className="min-h-screen flex items-center justify-center p-0 sm:p-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
       {/* Container responsivo - com frame no desktop, sem frame no mobile */}
       <div 
         className="w-full h-screen sm:h-auto sm:max-w-[420px] sm:shadow-2xl"
@@ -1151,7 +1151,7 @@ export default function PublicQuestionnaireResponse() {
           {/* Header Verde */}
           <div 
             style={{
-              background: 'var(--primary)',
+              background: '#10b981',
               color: 'white',
               padding: '20px',
               textAlign: 'center'
@@ -1243,7 +1243,7 @@ export default function PublicQuestionnaireResponse() {
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = '#f0fdf4';
-                      e.currentTarget.style.borderColor = 'var(--primary)';
+                      e.currentTarget.style.borderColor = '#10b981';
                       e.currentTarget.style.transform = 'translateX(4px)';
                     }}
                     onMouseLeave={(e) => {
@@ -1263,7 +1263,7 @@ export default function PublicQuestionnaireResponse() {
                         style={{
                           width: '24px',
                           height: '24px',
-                          background: 'var(--primary)',
+                          background: '#10b981',
                           color: 'white',
                           borderRadius: '50%',
                           display: 'flex',
@@ -1296,7 +1296,7 @@ export default function PublicQuestionnaireResponse() {
                         height="16" 
                         viewBox="0 0 24 24" 
                         fill="none" 
-                        stroke="var(--primary)" 
+                        stroke="#10b981" 
                         strokeWidth="2" 
                         strokeLinecap="round" 
                         strokeLinejoin="round"
@@ -1315,7 +1315,7 @@ export default function PublicQuestionnaireResponse() {
                       <p 
                         style={{
                           fontSize: '14px',
-                          color: hasAnswer ? '#4b5563' : 'var(--text-tertiary)',
+                          color: hasAnswer ? '#4b5563' : '#9ca3af',
                           lineHeight: '1.5',
                           fontStyle: hasAnswer ? 'normal' : 'italic'
                         }}
@@ -1350,9 +1350,9 @@ export default function PublicQuestionnaireResponse() {
                 flex: 1,
                 padding: '14px',
                 borderRadius: '12px',
-                border: '2px solid var(--primary)',
+                border: '2px solid #10b981',
                 background: 'white',
-                color: 'var(--primary)',
+                color: '#10b981',
                 fontSize: '15px',
                 fontWeight: '600',
                 cursor: 'pointer',
@@ -1375,7 +1375,7 @@ export default function PublicQuestionnaireResponse() {
                 padding: '14px',
                 borderRadius: '12px',
                 border: 'none',
-                background: submitting ? 'var(--text-tertiary)' : 'var(--primary)',
+                background: submitting ? '#9ca3af' : '#10b981',
                 color: 'white',
                 fontSize: '15px',
                 fontWeight: '600',
@@ -1385,12 +1385,12 @@ export default function PublicQuestionnaireResponse() {
               }}
               onMouseEnter={(e) => {
                 if (!submitting) {
-                  e.currentTarget.style.background = 'var(--primary-dark)';
+                  e.currentTarget.style.background = '#059669';
                 }
               }}
               onMouseLeave={(e) => {
                 if (!submitting) {
-                  e.currentTarget.style.background = 'var(--primary)';
+                  e.currentTarget.style.background = '#10b981';
                 }
               }}
             >

@@ -67,7 +67,7 @@ export function EditClientModal({ client, onClose }: EditClientModalProps) {
         <div 
           className="p-8 relative"
           style={{
-            background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
           }}
         >
           <div className="text-white">
@@ -318,8 +318,8 @@ export function EditClientModal({ client, onClose }: EditClientModalProps) {
               className="flex-1 px-6 py-3 rounded-xl font-semibold text-white transition-all hover:scale-105"
               style={{
                 background: updateClient.isPending 
-                  ? 'var(--text-tertiary)' 
-                  : 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
+                  ? '#9ca3af' 
+                  : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                 cursor: updateClient.isPending ? 'not-allowed' : 'pointer'
               }}
             >
