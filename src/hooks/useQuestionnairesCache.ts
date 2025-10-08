@@ -1,4 +1,5 @@
-import { useQuery, useMutation, useQueryClient, useCallback, useEffect } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useTenantId } from './useTenantId';
 import { toast } from 'sonner';
@@ -152,7 +153,6 @@ export const useQuestionnaireTemplates = () => {
     },
     ...CACHE_CONFIGS.templates,
     initialData: () => CacheStorage.get('questionnaire-templates'),
-    onSuccess: (data) => CacheStorage.set('questionnaire-templates', data),
   });
 };
 

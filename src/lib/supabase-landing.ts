@@ -20,7 +20,7 @@ export async function trackPageView(path: string, title: string) {
       page_title: title,
       referrer: document.referrer,
       user_agent: navigator.userAgent,
-    });
+    } as any);
   } catch (error) {
     console.error('Error tracking page view:', error);
   }
@@ -95,8 +95,13 @@ export async function getBlogPost(slug: string) {
 
   if (error) throw error;
 
-  // Incrementar views
-  await supabaseLanding.rpc('increment_blog_views', { post_slug: slug });
+  // Incrementar views (ignorar erro se função não existir ainda)
+  try {
+    // @ts-ignore - RPC function may not be typed yet
+    await supabaseLanding.rpc('increment_blog_views', { post_slug: slug });
+  } catch (e) {
+    console.log('View increment skipped:', e);
+  }
 
   return data;
 }
