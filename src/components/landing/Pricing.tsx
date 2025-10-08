@@ -60,13 +60,13 @@ export default function Pricing() {
   };
 
   return (
-    <section id="pricing" className="py-20 bg-gray-50 dark:bg-gray-950">
+    <section id="pricing" className="py-20 bg-muted">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Planos que cabem no seu bolso
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300">
+          <p className="text-xl text-muted-foreground">
             Comece grátis por 14 dias. Sem cartão de crédito. Cancele quando quiser.
           </p>
         </div>
@@ -75,23 +75,23 @@ export default function Pricing() {
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative bg-white dark:bg-gray-900 rounded-2xl p-8 border-2 transition-all duration-300 ${
+              className={`relative bg-card rounded-2xl p-8 border-2 transition-all duration-300 ${
                 plan.featured
-                  ? 'border-emerald-500 shadow-2xl shadow-emerald-500/20 scale-105'
-                  : 'border-gray-200 dark:border-gray-800 hover:border-emerald-500 dark:hover:border-emerald-500 hover:shadow-xl'
+                  ? 'border-primary shadow-2xl scale-105'
+                  : 'border-border hover:border-primary hover:shadow-xl'
               }`}
             >
               {plan.badge && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-sm font-bold rounded-full">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-1.5 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground text-sm font-bold rounded-full shadow-lg">
                   {plan.badge}
                 </div>
               )}
 
               <div className="mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-2xl font-bold text-foreground mb-2">
                   {plan.name}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                <p className="text-muted-foreground text-sm">
                   {plan.description}
                 </p>
               </div>
@@ -99,19 +99,19 @@ export default function Pricing() {
               <div className="mb-6">
                 <div className="flex items-baseline gap-2">
                   {plan.price !== 'Custom' && (
-                    <span className="text-2xl font-semibold text-gray-900 dark:text-white">
+                    <span className="text-2xl font-semibold text-foreground">
                       R$
                     </span>
                   )}
-                  <span className="text-5xl font-bold bg-gradient-to-r from-emerald-500 to-emerald-600 bg-clip-text text-transparent">
+                  <span className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                     {plan.price}
                   </span>
                   {plan.period && (
-                    <span className="text-gray-600 dark:text-gray-400">{plan.period}</span>
+                    <span className="text-muted-foreground">{plan.period}</span>
                   )}
                 </div>
                 {plan.savings && (
-                  <p className="text-emerald-600 dark:text-emerald-400 text-sm font-semibold mt-2">
+                  <p className="text-primary text-sm font-semibold mt-2">
                     {plan.savings}
                   </p>
                 )}
@@ -120,10 +120,10 @@ export default function Pricing() {
               <ul className="space-y-4 mb-8">
                 {plan.features.map((feature, featureIndex) => (
                   <li key={featureIndex} className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                      <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                      <Check className="w-3 h-3 text-primary" />
                     </div>
-                    <span className="text-gray-600 dark:text-gray-400 text-sm">
+                    <span className="text-foreground text-sm">
                       {feature}
                     </span>
                   </li>
@@ -134,8 +134,8 @@ export default function Pricing() {
                 onClick={() => handlePricingClick(plan.name, plan.price === 'Custom' ? 'Falar com Vendas' : 'Começar Grátis')}
                 className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${
                   plan.featured
-                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:-translate-y-1'
-                    : 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 border-2 border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+                    ? 'bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-lg hover:shadow-xl hover:-translate-y-1'
+                    : 'bg-background border-2 border-border text-foreground hover:border-primary hover:bg-primary/5'
                 }`}
               >
                 {plan.price === 'Custom' ? 'Falar com Vendas' : 'Começar Grátis'}

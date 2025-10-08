@@ -2,10 +2,7 @@ import { ArrowRight, Sparkles } from 'lucide-react';
 
 export default function CTASection() {
   return (
-    <section className="relative py-20 overflow-hidden">
-      {/* Background with gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-emerald-600" />
-      
+    <section className="relative py-20 overflow-hidden bg-gradient-to-br from-primary to-primary/90">
       {/* Decorative elements */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 right-0 w-[30rem] h-[30rem] bg-white/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
@@ -27,7 +24,7 @@ export default function CTASection() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
             href="#pricing"
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-emerald-600 font-semibold rounded-xl hover:shadow-2xl hover:scale-105 transition-all"
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-primary font-semibold rounded-xl hover:shadow-2xl hover:scale-105 transition-all"
           >
             Começar Grátis por 14 Dias
             <ArrowRight className="w-5 h-5" />

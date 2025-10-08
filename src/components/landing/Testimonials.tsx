@@ -26,13 +26,13 @@ export default function Testimonials() {
   ];
 
   return (
-    <section className="py-20 bg-white dark:bg-gray-900">
+    <section className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             O que os nutricionistas dizem
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300">
+          <p className="text-xl text-muted-foreground">
             Junte-se a centenas de profissionais que já transformaram seus consultórios
           </p>
         </div>
@@ -41,17 +41,17 @@ export default function Testimonials() {
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
-              className="bg-gray-50 dark:bg-gray-950 p-8 rounded-2xl border border-gray-200 dark:border-gray-800 hover:border-emerald-500 dark:hover:border-emerald-500 transition-all duration-300 hover:shadow-xl"
+              className="bg-card p-8 rounded-2xl border border-border hover:border-primary transition-all duration-300 hover:shadow-xl"
             >
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/90 flex items-center justify-center text-primary-foreground font-bold text-lg shadow-lg">
                   {testimonial.avatar}
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-white">
+                  <h4 className="font-semibold text-foreground">
                     {testimonial.name}
                   </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-muted-foreground">
                     {testimonial.role}
                   </p>
                 </div>
@@ -63,7 +63,7 @@ export default function Testimonials() {
                 ))}
               </div>
 
-              <p className="text-gray-600 dark:text-gray-400 leading-relaxed italic">
+              <p className="text-muted-foreground leading-relaxed italic">
                 "{testimonial.text}"
               </p>
             </div>

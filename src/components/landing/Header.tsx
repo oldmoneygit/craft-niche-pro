@@ -22,7 +22,7 @@ export default function Header() {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg shadow-lg'
+          ? 'bg-card/95 backdrop-blur-lg shadow-lg border-b border-border'
           : 'bg-transparent'
       }`}
     >
@@ -30,13 +30,13 @@ export default function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+            <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
               <svg viewBox="0 0 32 32" className="w-7 h-7" fill="white">
                 <path d="M16 2L4 7v10c0 7.5 5 14 12 15 7-1 12-7.5 12-15V7L16 2z" opacity="0.95"/>
                 <path d="M12 16l2.5 2.5L20 13" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <span className="font-bold text-xl text-gray-900 dark:text-white">KorLab Nutri</span>
+            <span className="font-bold text-xl text-foreground">KorLab Nutri</span>
           </Link>
 
           {/* Desktop Nav */}
@@ -44,27 +44,27 @@ export default function Header() {
             <Link
               to="/"
               className={`font-medium transition-colors ${
-                isActive('/') ? 'text-emerald-600' : 'text-gray-600 dark:text-gray-300 hover:text-emerald-600'
+                isActive('/') ? 'text-primary' : 'text-muted-foreground hover:text-primary'
               }`}
             >
               Início
             </Link>
             <a
               href="/#features"
-              className="font-medium text-gray-600 dark:text-gray-300 hover:text-emerald-600 transition-colors"
+              className="font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               Funcionalidades
             </a>
             <a
               href="/#pricing"
-              className="font-medium text-gray-600 dark:text-gray-300 hover:text-emerald-600 transition-colors"
+              className="font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               Preços
             </a>
             <Link
               to="/blog"
               className={`font-medium transition-colors ${
-                location.pathname.startsWith('/blog') ? 'text-emerald-600' : 'text-gray-600 dark:text-gray-300 hover:text-emerald-600'
+                location.pathname.startsWith('/blog') ? 'text-primary' : 'text-muted-foreground hover:text-primary'
               }`}
             >
               Blog
@@ -72,7 +72,7 @@ export default function Header() {
             <Link
               to="/contato"
               className={`font-medium transition-colors ${
-                isActive('/contato') ? 'text-emerald-600' : 'text-gray-600 dark:text-gray-300 hover:text-emerald-600'
+                isActive('/contato') ? 'text-primary' : 'text-muted-foreground hover:text-primary'
               }`}
             >
               Contato
@@ -82,7 +82,7 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 text-gray-600 dark:text-gray-300"
+            className="md:hidden p-2 text-muted-foreground hover:text-primary"
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -90,38 +90,38 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 space-y-4">
+          <div className="md:hidden mt-4 pb-4 space-y-4 bg-card rounded-lg p-4 shadow-lg border border-border">
             <Link
               to="/"
-              className={`block py-2 ${isActive('/') ? 'text-emerald-600' : 'text-gray-600 dark:text-gray-300'}`}
+              className={`block py-2 ${isActive('/') ? 'text-primary font-semibold' : 'text-muted-foreground'}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Início
             </Link>
             <a
               href="/#features"
-              className="block py-2 text-gray-600 dark:text-gray-300"
+              className="block py-2 text-muted-foreground hover:text-primary"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Funcionalidades
             </a>
             <a
               href="/#pricing"
-              className="block py-2 text-gray-600 dark:text-gray-300"
+              className="block py-2 text-muted-foreground hover:text-primary"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Preços
             </a>
             <Link
               to="/blog"
-              className={`block py-2 ${location.pathname.startsWith('/blog') ? 'text-emerald-600' : 'text-gray-600 dark:text-gray-300'}`}
+              className={`block py-2 ${location.pathname.startsWith('/blog') ? 'text-primary font-semibold' : 'text-muted-foreground'}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Blog
             </Link>
             <Link
               to="/contato"
-              className={`block py-2 ${isActive('/contato') ? 'text-emerald-600' : 'text-gray-600 dark:text-gray-300'}`}
+              className={`block py-2 ${isActive('/contato') ? 'text-primary font-semibold' : 'text-muted-foreground'}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Contato

@@ -36,13 +36,13 @@ export default function FAQ() {
   ];
 
   return (
-    <section id="faq" className="py-20 bg-gray-50 dark:bg-gray-950">
+    <section id="faq" className="py-20 bg-muted">
       <div className="max-w-4xl mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Perguntas Frequentes
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300">
+          <p className="text-xl text-muted-foreground">
             Tire suas dúvidas sobre a plataforma
           </p>
         </div>
@@ -51,17 +51,17 @@ export default function FAQ() {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300 hover:shadow-lg"
+              className="bg-card rounded-xl border border-border overflow-hidden transition-all duration-300 hover:shadow-lg"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-gray-50 dark:hover:bg-gray-950 transition-colors"
+                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
               >
-                <span className="font-semibold text-gray-900 dark:text-white pr-8">
+                <span className="font-semibold text-foreground pr-8">
                   {faq.question}
                 </span>
                 <Plus
-                  className={`w-6 h-6 text-emerald-500 flex-shrink-0 transition-transform duration-300 ${
+                  className={`w-6 h-6 text-primary flex-shrink-0 transition-transform duration-300 ${
                     openIndex === index ? 'rotate-45' : ''
                   }`}
                 />
@@ -72,7 +72,7 @@ export default function FAQ() {
                   openIndex === index ? 'max-h-96' : 'max-h-0'
                 }`}
               >
-                <div className="px-6 pb-5 text-gray-600 dark:text-gray-400 leading-relaxed">
+                <div className="px-6 pb-5 text-muted-foreground leading-relaxed">
                   {faq.answer}
                 </div>
               </div>
