@@ -43,7 +43,7 @@ export const SecondaryStatCard: React.FC<SecondaryStatCardProps> = ({ title, val
   return (
     <div
       style={{
-        background: isDark ? 'rgba(20, 20, 20, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+        background: isDark ? 'rgba(38, 38, 38, 0.95)' : 'rgba(255, 255, 255, 0.9)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         border: isDark ? '1px solid rgba(64, 64, 64, 0.3)' : '1px solid rgba(229, 231, 235, 0.8)',

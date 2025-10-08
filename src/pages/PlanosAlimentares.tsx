@@ -148,77 +148,104 @@ export default function PlanosAlimentares() {
         editPlanId={editPlanId}
       />
       <MealPlanDetailModal planId={selectedPlanId} open={detailModalOpen} onOpenChange={setDetailModalOpen} />
-    <div style={{ padding: '24px', minHeight: '100vh' }}>
-      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black">
+      <div className="p-8 space-y-8">
         {/* Header */}
-        <div style={{ marginBottom: '32px' }}>
-          <h1 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '8px' }}>
-            Planos Alimentares
-          </h1>
-          <p style={{ fontSize: '15px', opacity: 0.7 }}>
-            Crie e gerencie planos alimentares para seus clientes
-          </p>
-        </div>
-
-        {/* Header Actions */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-          <div></div>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Planos Alimentares
+            </h1>
+            <p className="text-gray-400">
+              Crie e gerencie planos alimentares para seus clientes
+            </p>
+          </div>
           <button 
             onClick={() => setCreateModalOpen(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '12px 24px',
-              background: '#10b981',
-              color: 'white',
-              borderRadius: '12px',
-              fontWeight: 600,
-              fontSize: '14px',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#059669';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 8px 20px rgba(16, 185, 129, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#10b981';
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
-            }}
+            className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-green-500/50 transition-all hover:scale-105"
           >
             <Plus className="w-5 h-5" />
             Criar Novo Plano
           </button>
         </div>
 
-        {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-          <StatCard label="Total de Planos" value={stats.total} icon={<FileText className="w-6 h-6" />} variant="primary" />
-          <StatCard label="Planos Ativos" value={stats.active} icon={<CheckCircle className="w-6 h-6" />} variant="success" />
-          <StatCard label="Criados esta Semana" value={stats.thisWeek} icon={<Calendar className="w-6 h-6" />} variant="purple" />
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Total de Planos */}
+          <div className="group bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 border-2 border-gray-700 hover:border-blue-500 transition-all shadow-lg hover:shadow-blue-500/20">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                Total de Planos
+              </span>
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                <FileText className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="text-5xl font-bold text-white mb-2">
+              {stats.total || 0}
+            </div>
+            <div className="text-sm text-gray-400">
+              Todos os planos criados
+            </div>
+          </div>
+
+          {/* Planos Ativos */}
+          <div className="group bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 border-2 border-gray-700 hover:border-green-500 transition-all shadow-lg hover:shadow-green-500/20">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                Planos Ativos
+              </span>
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                <CheckCircle className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="text-5xl font-bold text-white mb-2">
+              {stats.active || 0}
+            </div>
+            <div className="text-sm text-gray-400">
+              Em uso pelos clientes
+            </div>
+          </div>
+
+          {/* Criados esta Semana */}
+          <div className="group bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 border-2 border-gray-700 hover:border-purple-500 transition-all shadow-lg hover:shadow-purple-500/20">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                Criados esta Semana
+              </span>
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                <Calendar className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="text-5xl font-bold text-white mb-2">
+              {stats.thisWeek || 0}
+            </div>
+            <div className="text-sm text-gray-400">
+              Novos nesta semana
+            </div>
+          </div>
         </div>
 
-        {/* Filters */}
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '300px', position: 'relative' }}>
-            <Search style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', width: '20px', height: '20px', color: isDark ? '#a3a3a3' : '#6b7280' }} />
+        {/* Search Bar */}
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl border-2 border-gray-700 p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
               placeholder="Buscar por cliente ou plano..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ ...inputStyle, paddingLeft: '44px' }}
+              className="w-full bg-transparent text-white placeholder-gray-500 focus:outline-none text-base pl-10"
             />
           </div>
+        </div>
+
+        {/* Filter Dropdown */}
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl border-2 border-gray-700 p-4">
           <select 
-            style={inputStyle} 
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full bg-transparent text-gray-400 focus:outline-none text-base"
           >
             <option value="all">Todos os status</option>
             <option value="ativo">Ativos</option>
@@ -229,19 +256,26 @@ export default function PlanosAlimentares() {
 
         {/* Planos Grid */}
         {!plans || plans.length === 0 ? (
-          <div className="text-center py-12 bg-card rounded-lg border">
-            <FileText className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum plano encontrado</h3>
-            <p className="text-muted-foreground mb-4">
+          <div className="flex flex-col items-center justify-center py-20 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border-2 border-dashed border-gray-700">
+            <div className="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mb-6">
+              <FileText className="w-10 h-10 text-gray-600" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-2">
+              Nenhum plano encontrado
+            </h3>
+            <p className="text-gray-400 mb-6 text-center max-w-md">
               Crie seu primeiro plano alimentar para começar.
             </p>
-            <Button onClick={() => setCreateModalOpen(true)} className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30">
-              <Plus className="w-4 h-4 mr-2" />
+            <button 
+              onClick={() => setCreateModalOpen(true)}
+              className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-green-500/50 transition-all hover:scale-105"
+            >
+              <Plus className="w-5 h-5" />
               Criar Primeiro Plano
-            </Button>
+            </button>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '24px' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {plans.map((plan: any) => {
               // Calcular totais dos nutrientes
               const realTotals = {

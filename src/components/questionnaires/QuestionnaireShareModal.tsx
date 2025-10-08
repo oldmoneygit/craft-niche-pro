@@ -50,6 +50,7 @@ export function QuestionnaireShareModal({
         .from('questionnaire_responses')
         .insert({
           questionnaire_id: questionnaireId,
+          client_id: null,
           tenant_id: tenantId,
           status: 'pending',
           public_token: publicToken,

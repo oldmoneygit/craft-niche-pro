@@ -57,7 +57,7 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, variant 
     <div
       style={{
         background: isDark 
-          ? 'rgba(38, 38, 38, 0.6)' 
+          ? 'rgba(38, 38, 38, 0.95)' 
           : 'rgba(255, 255, 255, 0.9)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',

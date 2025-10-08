@@ -39,7 +39,7 @@ export const AgendamentosStatCard: React.FC<AgendamentosStatCardProps> = ({
     <div
       className="agendamentos-stat-card"
       style={{
-        background: 'var(--bg-card)',
+        background: 'var(--bg-sidebar)',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         border: '1px solid var(--border)',
